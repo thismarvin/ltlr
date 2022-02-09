@@ -1,6 +1,10 @@
 EMCC := /usr/lib/emscripten/emcc
 EMAR := /usr/lib/emscripten/emar
 
+RAYLIB_FILES := rcore.c rshapes.c rtextures.c rtext.c rmodels.c utils.c raudio.c
+RAYLIB_SOURCES := $(patsubst %, raylib/src/%, $(RAYLIB_FILES))
+RAYLIB_OBJECTS := $(patsubst raylib/src/%.c, raylib/src/%.o, $(RAYLIB_SOURCES))
+
 GAME_HEADERS := $(shell find src -name "*.h")
 GAME_SOURCES := $(shell find src -name "*.c")
 CONTENT_SOURCES := $(shell find src/resources)
@@ -18,16 +22,13 @@ raylib:
 	git clone https://github.com/raysan5/raylib.git
 	@echo ""
 
-raylib/src/libraylib.a: raylib
-	cd raylib/src; $(EMCC) -c rcore.c -Os -Wall -DPLATFORM_WEB -DGRAPHICS_API_OPENGL_ES2
-	cd raylib/src; $(EMCC) -c rshapes.c -Os -Wall -DPLATFORM_WEB -DGRAPHICS_API_OPENGL_ES2
-	cd raylib/src; $(EMCC) -c rtextures.c -Os -Wall -DPLATFORM_WEB -DGRAPHICS_API_OPENGL_ES2
-	cd raylib/src; $(EMCC) -c rtext.c -Os -Wall -DPLATFORM_WEB -DGRAPHICS_API_OPENGL_ES2
-	cd raylib/src; $(EMCC) -c rmodels.c -Os -Wall -DPLATFORM_WEB -DGRAPHICS_API_OPENGL_ES2
-	cd raylib/src; $(EMCC) -c utils.c -Os -Wall -DPLATFORM_WEB
-	cd raylib/src; $(EMCC) -c raudio.c -Os -Wall -DPLATFORM_WEB
+$(RAYLIB_SOURCES): raylib
 
-	cd raylib/src; $(EMAR) rcs libraylib.a rcore.o rshapes.o rtextures.o rtext.o rmodels.o utils.o raudio.o
+$(RAYLIB_OBJECTS): raylib/src/%.o: raylib/src/%.c
+	$(EMCC) -Os -Wall -DPLATFORM_WEB -DGRAPHICS_API_OPENGL_ES2 -o $@ -c $<
+
+raylib/src/libraylib.a: $(RAYLIB_OBJECTS)
+	$(EMAR) rcs $@ $^
 	@echo ""
 
 src/raylib_game.o: $(GAME_HEADERS) $(GAME_SOURCES) $(CONTENT_SOURCES)
