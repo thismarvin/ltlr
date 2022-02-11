@@ -5,8 +5,8 @@ RAYLIB_FILES := rcore.c rshapes.c rtextures.c rtext.c rmodels.c utils.c raudio.c
 RAYLIB_SOURCES := $(patsubst %, raylib/src/%, $(RAYLIB_FILES))
 RAYLIB_OBJECTS := $(patsubst raylib/src/%.c, raylib/src/%.o, $(RAYLIB_SOURCES))
 
-GAME_HEADERS := $(shell find src -name "*.h")
-GAME_SOURCES := $(shell find src -name "*.c")
+GAME_HEADERS := $(shell find src -type f -name "*.h")
+GAME_SOURCES := $(shell find src -type f -name "*.c")
 CONTENT_SOURCES := $(shell find src/resources)
 
 $(VERBOSE).SILENT:
