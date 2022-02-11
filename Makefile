@@ -31,7 +31,9 @@ raylib/src/libraylib.a: $(RAYLIB_OBJECTS)
 	$(EMAR) rcs $@ $^
 	@echo ""
 
-src/raylib_game.o: $(GAME_HEADERS) $(GAME_SOURCES) $(CONTENT_SOURCES)
+src/Makefile: raylib
+
+src/raylib_game.o: src/Makefile $(GAME_HEADERS) $(GAME_SOURCES) $(CONTENT_SOURCES)
 	cd src; make clean; make
 
 build/index.html: raylib/src/libraylib.a src/minshell.html $(GAME_HEADERS) $(GAME_SOURCES) $(CONTENT_SOURCES) | build
