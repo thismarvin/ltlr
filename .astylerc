@@ -1,0 +1,16 @@
+style=allman
+indent-spaces=4
+indent-switches
+indent-labels
+indent-preproc-block
+break-blocks
+pad-oper
+pad-header
+align-pointer=type
+align-reference=type
+break-one-line-headers
+add-braces
+attach-return-type
+attach-return-type-decl
+max-code-length=100
+lineend=linux

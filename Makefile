@@ -50,7 +50,7 @@ dev: src/raylib_game.o
 
 .PHONY: format
 format:
-	astyle -n -xC100 -S -xb -j --style=allman --recursive "src/*.c,*.h"
+	astyle -n --recursive "src/*.c,*.h"
 	prettier --write --use-tabs src/minshell.html
 
 .PHONY: clean
