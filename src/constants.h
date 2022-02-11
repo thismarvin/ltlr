@@ -5,7 +5,7 @@
 
 #define VECTOR2_ZERO (Vector2){ .x = 0, .y = 0 }
 
-inline Vector2 Vector2Create(float x, float y)
+extern inline Vector2 Vector2Create(float x, float y)
 {
     return (Vector2)
     {
