@@ -57,4 +57,6 @@ format:
 clean:
 	if [ -d "raylib" ]; then rm -rf raylib; fi
 	if [ -d "build" ]; then rm -rf build; fi
+	find src -type f -name "*.o" -delete
+	find src -type f -executable -delete
 	@echo "Done"
