@@ -1,0 +1,103 @@
+# TODO(thismarvin): Add a dependency to $(CONTENT_SOURCES) somewhere...
+
+EXC := ltlr
+
+CC := gcc
+FLAGS := -std=c99 -Wall -Wextra -Wpedantic
+DEBUG_FLAGS := -g -pg -O0
+RELEASE_FLAGS := -O3
+
+INCLUDE_FLAGS := -Ideps/raylib/src
+LIBRARY_FLAGS := -lm -lpthread -ldl -Lbuild/deps/raylib/desktop -lraylib
+
+GAME_HEADERS := $(shell find src -type f -name "*.h")
+GAME_SOURCES := $(shell find src -type f -name "*.c")
+CONTENT_SOURCES := $(shell find src/resources)
+
+DEBUG_OBJECTS := $(patsubst src/%.c, build/debug/%.o, $(GAME_SOURCES))
+RELEASE_OBJECTS := $(patsubst src/%.c, build/release/%.o, $(GAME_SOURCES))
+
+$(VERBOSE).SILENT:
+
+.PHONY: all
+all: clean release
+
+deps:
+	mkdir $@
+
+build:
+	mkdir $@
+
+build/debug: | build
+	mkdir $@
+
+build/release: | build
+	mkdir $@
+
+build/deps: | build
+	mkdir $@
+
+build/deps/raylib: | build/deps
+	mkdir $@
+
+build/deps/raylib/desktop: | build/deps/raylib
+	mkdir $@
+
+bin:
+	mkdir $@
+
+bin/debug: | bin
+	mkdir $@
+
+bin/release: | bin
+	mkdir $@
+
+bin/debug/desktop: | bin/debug
+	mkdir $@
+
+bin/release/desktop: | bin/release
+	mkdir $@
+
+deps/raylib: | deps
+	cd deps; git clone https://github.com/raysan5/raylib.git
+
+deps/raylib/src: deps/raylib
+
+build/deps/raylib/desktop/libraylib.a: | deps/raylib/src build/deps/raylib/desktop
+	cd deps/raylib/src; make PLATFORM=PLATFORM_DESKTOP
+	mv deps/raylib/src/libraylib.a build/deps/raylib/desktop
+	find deps/raylib/src -name "*.o" -exec mv {} build/deps/raylib/desktop \;
+
+$(DEBUG_OBJECTS): build/debug/%.o: src/%.c deps/raylib/src $(GAME_HEADERS) $(GAME_SOURCES) | build/debug
+	$(CC) $(INCLUDE_FLAGS) $(FLAGS) $(DEBUG_FLAGS) -o $@ -c $<
+
+bin/debug/desktop/$(EXC): build/deps/raylib/desktop/libraylib.a $(DEBUG_OBJECTS) | bin/debug/desktop
+	$(CC) $(FLAGS) $(DEBUG_FLAGS) -o $@ $(DEBUG_OBJECTS) $(LIBRARY_FLAGS)
+
+$(RELEASE_OBJECTS): build/release/%.o: src/%.c deps/raylib/src $(GAME_HEADERS) $(GAME_SOURCES) | build/release
+	$(CC) $(INCLUDE_FLAGS) $(FLAGS) $(RELEASE_FLAGS) -o $@ -c $<
+
+bin/release/desktop/$(EXC): build/deps/raylib/desktop/libraylib.a $(RELEASE_OBJECTS) | bin/release/desktop
+	$(CC) $(FLAGS) $(RELEASE_FLAGS) -o $@ $(RELEASE_OBJECTS) $(LIBRARY_FLAGS)
+
+.PHONY: debug
+debug: bin/debug/desktop/$(EXC)
+	@echo Done
+
+.PHONY: dev
+dev: debug
+	cd bin/debug/desktop; ./$(EXC)
+	gprof bin/debug/desktop/$(EXC) bin/debug/desktop/gmon.out > bin/debug/desktop/profile
+
+.PHONY: release
+release: bin/release/desktop/$(EXC)
+	@echo Done
+
+.PHONY: clean
+clean:
+	if [ -d "build/deps/raylib/desktop" ]; then rm -rf build/deps/raylib/desktop; fi
+	if [ -d "build/debug" ]; then rm -rf build/debug; fi
+	if [ -d "build/release" ]; then rm -rf build/release; fi
+	if [ -d "bin/debug/desktop" ]; then rm -rf bin/debug/desktop; fi
+	if [ -d "bin/release/desktop" ]; then rm -rf bin/release/desktop; fi
+	@echo "Done"

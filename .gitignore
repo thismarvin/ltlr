@@ -1,8 +1,8 @@
 .ccls-cache
 .vscode
+bin
 build
-raylib
-src/raylib_game
+deps
 
 # Prerequisites
 *.d

@@ -1,0 +1,75 @@
+TOTAL_MEMORY := 33554432
+
+EMCC := emcc
+EMAR := emar
+FLAGS := -Wall
+INCLUDE_FLAGS := -Ideps/raylib/src
+LIBRARY_FLAGS := -Ldeps/raylib/src
+
+RAYLIB_FILES := \
+	rcore.c \
+	rshapes.c \
+	rtextures.c \
+	rtext.c \
+	rmodels.c \
+	raudio.c \
+	utils.c
+
+RAYLIB_SOURCES := $(patsubst %, deps/raylib/src/%, $(RAYLIB_FILES))
+RAYLIB_OBJECTS := $(patsubst deps/raylib/src/%.c, build/deps/raylib/web/%.o, $(RAYLIB_SOURCES))
+
+GAME_HEADERS := $(shell find src -type f -name "*.h")
+GAME_SOURCES := $(shell find src -type f -name "*.c")
+CONTENT_SOURCES := $(shell find src/resources)
+
+$(VERBOSE).SILENT:
+
+.PHONY: all
+all: clean release
+
+deps:
+	mkdir $@
+
+build/deps: | build
+	mkdir $@
+
+build/deps/raylib: | build/deps
+	mkdir $@
+
+build/deps/raylib/web: | build/deps/raylib
+	mkdir $@
+
+bin:
+	mkdir $@
+
+bin/release: | bin
+	mkdir $@
+
+bin/release/web: | bin/release
+	mkdir $@
+
+deps/raylib: | deps
+	cd deps; git clone https://github.com/raysan5/raylib.git
+
+deps/raylib/src: deps/raylib
+
+$(RAYLIB_SOURCES): deps/raylib/src
+
+$(RAYLIB_OBJECTS): build/deps/raylib/web/%.o: deps/raylib/src/%.c | build/deps/raylib/web
+	$(EMCC) $(INCLUDE_FLAGS) $(FLAGS) -DPLATFORM_WEB -DGRAPHICS_API_OPENGL_ES2 -o $@ -c $<
+
+build/deps/raylib/web/libraylib.a: deps/raylib/src $(RAYLIB_OBJECTS)
+	$(EMAR) rcs $@ $(RAYLIB_OBJECTS)
+
+bin/release/web/index.html: build/deps/raylib/web/libraylib.a src/minshell.html $(GAME_HEADERS) $(GAME_SOURCES) $(CONTENT_SOURCES) | bin/release/web
+	$(EMCC) $(INCLUDE_FLAGS) $(FLAGS) -o $@ $(GAME_SOURCES) build/deps/raylib/web/libraylib.a -s USE_GLFW=3 --shell-file src/minshell.html -s TOTAL_MEMORY=$(TOTAL_MEMORY) --preload-file src/resources -DPLATFORM_WEB
+
+.PHONY: release
+release: bin/release/web/index.html
+	@echo Done
+
+.PHONY: clean
+clean:
+	if [ -d "build/deps/raylib/web" ]; then rm -rf build/deps/raylib/web; fi
+	if [ -d "bin/release/web" ]; then rm -rf bin/release/web; fi
+	@echo "Done"
