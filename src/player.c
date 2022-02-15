@@ -1,7 +1,59 @@
 #include "constants.h"
+#include "context.h"
 #include "player.h"
 #include "polygon.h"
 #include "raymath.h"
+
+static void PlayerInput(Player* self)
+{
+    float strafe = 0;
+
+    if (IsKeyDown(KEY_LEFT))
+    {
+        strafe = -1;
+    }
+
+    if (IsKeyDown(KEY_RIGHT))
+    {
+        strafe = 1;
+    }
+
+    self->velocity.x = strafe * 500;
+
+    if (self->grounded && !self->jumping && IsKeyDown(KEY_SPACE)) {
+        self->velocity.y = -300;
+        self->jumping = 1;
+        self->grounded = 0;
+    }
+
+    if (self->jumping && !IsKeyDown(KEY_SPACE) && self->velocity.y < 0) {
+        self->velocity.y = -50;
+        self->jumping = 0;
+    }
+}
+
+static void PlayerPhysics(Player* self)
+{
+    // Semi-Implict Euler Integration
+    self->velocity.x += self->acceleration.x * CTX_DT;
+    self->velocity.y += self->acceleration.y * CTX_DT;
+
+    self->position.x += self->velocity.x * CTX_DT;
+    self->position.y += self->velocity.y * CTX_DT;
+
+    PlayerSetPos(self, self->position);
+}
+
+static void PlayerCollision(Player* self)
+{
+    // Grounded
+    if (self->position.y + self->aabb.height > GetScreenHeight()) {
+        PlayerSetPos(self, Vector2Create(self->position.x, GetScreenHeight() - self->aabb.height));
+        self->velocity.y = 0;
+        self->jumping = 0;
+        self->grounded = 1;
+    }
+}
 
 void PlayerInit(Player* self, Vector2 position)
 {
@@ -14,6 +66,9 @@ void PlayerInit(Player* self, Vector2 position)
         .height = PLAYER_HEIGHT,
     };
     self->velocity = VECTOR2_ZERO;
+    self->acceleration = Vector2Create(0, 1000);
+    self->jumping = 0;
+    self->grounded = 0;
 }
 
 void PlayerSetPos(Player* self, Vector2 position)
@@ -33,37 +88,9 @@ void PlayerTranslate(Player* self, Vector2 delta)
 
 void PlayerUpdate(Player* self)
 {
-    Vector2 direction = VECTOR2_ZERO;
-
-    if (IsKeyDown(KEY_UP))
-    {
-        direction.y = -1;
-    }
-
-    if (IsKeyDown(KEY_DOWN))
-    {
-        direction.y = 1;
-    }
-
-    if (IsKeyDown(KEY_LEFT))
-    {
-        direction.x = -1;
-    }
-
-    if (IsKeyDown(KEY_RIGHT))
-    {
-        direction.x = 1;
-    }
-
-    self->velocity = VECTOR2_ZERO;
-
-    if (direction.x != 0 || direction.y != 0)
-    {
-        self->velocity = Vector2Normalize(direction);
-        self->velocity = Vector2Scale(self->velocity, 100 * GetFrameTime());
-    }
-
-    PlayerTranslate(self, self->velocity);
+    PlayerInput(self);
+    PlayerPhysics(self);
+    PlayerCollision(self);
 }
 
 void PlayerDraw(Player* self)

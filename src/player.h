@@ -12,6 +12,9 @@ typedef struct
     Rectangle aabb;
     Vector2 position;
     Vector2 velocity;
+    Vector2 acceleration;
+    int grounded;
+    int jumping;
 } Player;
 
 void PlayerInit(Player* self, Vector2 position);
