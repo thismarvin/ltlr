@@ -73,8 +73,7 @@ int main(void)
     SceneInit(scene, 320, 180, &player);
 
 #if defined(PLATFORM_WEB)
-    // TODO(thismarvin): Might break with fixed time step?
-    emscripten_set_main_loop(UpdateDrawFrame, 60, 1);
+    emscripten_set_main_loop(UpdateDrawFrame, 0, 1);
 #else
     SetTargetFPS(60);
 
