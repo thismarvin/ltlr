@@ -18,7 +18,6 @@ format:
 
 .PHONY: clean
 clean:
-	if [ -d "deps" ]; then rm -rf deps; fi
 	if [ -d "build" ]; then rm -rf build; fi
 	if [ -d "bin" ]; then rm -rf bin; fi
 	@echo "Done"

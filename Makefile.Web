@@ -3,8 +3,8 @@ TOTAL_MEMORY := 33554432
 EMCC := emcc
 EMAR := emar
 FLAGS := -Wall
-INCLUDE_FLAGS := -Ideps/raylib/src
-LIBRARY_FLAGS := -Ldeps/raylib/src
+INCLUDE_FLAGS := -Ivendor/raylib/src
+LIBRARY_FLAGS := -Lvendor/raylib/src
 
 RAYLIB_FILES := \
 	rcore.c \
@@ -15,8 +15,8 @@ RAYLIB_FILES := \
 	raudio.c \
 	utils.c
 
-RAYLIB_SOURCES := $(patsubst %, deps/raylib/src/%, $(RAYLIB_FILES))
-RAYLIB_OBJECTS := $(patsubst deps/raylib/src/%.c, build/deps/raylib/web/%.o, $(RAYLIB_SOURCES))
+RAYLIB_SOURCES := $(patsubst %, vendor/raylib/src/%, $(RAYLIB_FILES))
+RAYLIB_OBJECTS := $(patsubst vendor/raylib/src/%.c, build/vendor/raylib/web/%.o, $(RAYLIB_SOURCES))
 
 GAME_HEADERS := $(shell find src -type f -name "*.h")
 GAME_SOURCES := $(shell find src -type f -name "*.c")
@@ -27,16 +27,13 @@ $(VERBOSE).SILENT:
 .PHONY: all
 all: clean release
 
-deps:
+build/vendor: | build
 	mkdir $@
 
-build/deps: | build
+build/vendor/raylib: | build/vendor
 	mkdir $@
 
-build/deps/raylib: | build/deps
-	mkdir $@
-
-build/deps/raylib/web: | build/deps/raylib
+build/vendor/raylib/web: | build/vendor/raylib
 	mkdir $@
 
 bin:
@@ -48,21 +45,21 @@ bin/release: | bin
 bin/release/web: | bin/release
 	mkdir $@
 
-deps/raylib: | deps
-	cd deps; git clone https://github.com/raysan5/raylib.git
+vendor/raylib: | vendor
+	git submodule update --init --recursive
 
-deps/raylib/src: deps/raylib
+vendor/raylib/src: vendor/raylib
 
-$(RAYLIB_SOURCES): deps/raylib/src
+$(RAYLIB_SOURCES): vendor/raylib/src
 
-$(RAYLIB_OBJECTS): build/deps/raylib/web/%.o: deps/raylib/src/%.c | build/deps/raylib/web
+$(RAYLIB_OBJECTS): build/vendor/raylib/web/%.o: vendor/raylib/src/%.c | build/vendor/raylib/web
 	$(EMCC) $(INCLUDE_FLAGS) $(FLAGS) -DPLATFORM_WEB -DGRAPHICS_API_OPENGL_ES2 -o $@ -c $<
 
-build/deps/raylib/web/libraylib.a: deps/raylib/src $(RAYLIB_OBJECTS)
+build/vendor/raylib/web/libraylib.a: vendor/raylib/src $(RAYLIB_OBJECTS)
 	$(EMAR) rcs $@ $(RAYLIB_OBJECTS)
 
-bin/release/web/index.html: build/deps/raylib/web/libraylib.a src/minshell.html $(GAME_HEADERS) $(GAME_SOURCES) $(CONTENT_SOURCES) | bin/release/web
-	$(EMCC) $(INCLUDE_FLAGS) $(FLAGS) -o $@ $(GAME_SOURCES) build/deps/raylib/web/libraylib.a -s USE_GLFW=3 --shell-file src/minshell.html -s TOTAL_MEMORY=$(TOTAL_MEMORY) --preload-file src/resources -DPLATFORM_WEB
+bin/release/web/index.html: build/vendor/raylib/web/libraylib.a src/minshell.html $(GAME_HEADERS) $(GAME_SOURCES) $(CONTENT_SOURCES) | bin/release/web
+	$(EMCC) $(INCLUDE_FLAGS) $(FLAGS) -o $@ $(GAME_SOURCES) build/vendor/raylib/web/libraylib.a -s USE_GLFW=3 --shell-file src/minshell.html -s TOTAL_MEMORY=$(TOTAL_MEMORY) --preload-file src/resources -DPLATFORM_WEB
 
 .PHONY: release
 release: bin/release/web/index.html
@@ -70,6 +67,6 @@ release: bin/release/web/index.html
 
 .PHONY: clean
 clean:
-	if [ -d "build/deps/raylib/web" ]; then rm -rf build/deps/raylib/web; fi
+	if [ -d "build/vendor/raylib/web" ]; then rm -rf build/vendor/raylib/web; fi
 	if [ -d "bin/release/web" ]; then rm -rf bin/release/web; fi
 	@echo "Done"
