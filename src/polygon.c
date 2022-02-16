@@ -14,4 +14,3 @@ void PolygonDestroy(Polygon* self)
     free(self->vertices);
     free(self->edges);
 }
-
