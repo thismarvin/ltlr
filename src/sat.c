@@ -43,8 +43,8 @@ static OverlapInformation CalculateOverlap(Polygon a, Polygon b)
     {
         Vector2 normal = (Vector2)
         {
-            .x = -(a.edges[i].end.y - a.edges[i].start.y),
-            .y = a.edges[i].end.x - a.edges[i].start.x
+            .x = a.edges[i].end.y - a.edges[i].start.y,
+            .y = -(a.edges[i].end.x - a.edges[i].start.x)
         };
 
         normal = Vector2Normalize(normal);
