@@ -11,8 +11,8 @@ typedef struct
 {
     Kinetic kinetic;
     Rectangle aabb;
-    int grounded;
-    int jumping;
+    bool grounded;
+    bool jumping;
 } Player;
 
 void PlayerInit(Player* self, Vector2 position);

@@ -26,13 +26,13 @@ static void PlayerInput(Player* self)
 
     if (self->grounded && !self->jumping && IsKeyDown(KEY_SPACE)) {
         self->kinetic.velocity.y = -300;
-        self->jumping = 1;
-        self->grounded = 0;
+        self->jumping = true;
+        self->grounded = false;
     }
 
     if (self->jumping && !IsKeyDown(KEY_SPACE) && self->kinetic.velocity.y < 0) {
         self->kinetic.velocity.y = -50;
-        self->jumping = 0;
+        self->jumping = false;
     }
 }
 
@@ -54,8 +54,8 @@ static void PlayerCollision(Player* self)
     if (self->kinetic.currentPosition.y + self->aabb.height > GetScreenHeight()) {
         PlayerSetPos(self, Vector2Create(self->kinetic.currentPosition.x, GetScreenHeight() - self->aabb.height));
         self->kinetic.velocity.y = 0;
-        self->jumping = 0;
-        self->grounded = 1;
+        self->jumping = false;
+        self->grounded = true;
     }
 
     // TODO(thismarvin): Support arbitrary convex polygons!
@@ -69,8 +69,8 @@ static void PlayerCollision(Player* self)
 
         if (resolution.y < 0) {
             self->kinetic.velocity.y = 0;
-            self->jumping = 0;
-            self->grounded = 1;
+            self->jumping = false;
+            self->grounded = true;
         }
     }
 
@@ -87,8 +87,8 @@ void PlayerInit(Player* self, Vector2 position)
         .width = PLAYER_WIDTH,
         .height = PLAYER_HEIGHT,
     };
-    self->grounded = 0;
-    self->jumping = 0;
+    self->grounded = false;
+    self->jumping = false;
 
     blocks[0] = (Rectangle) {
         200, 180 - 120, 64, 32
