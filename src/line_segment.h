@@ -8,4 +8,4 @@ typedef struct
     Vector2 end;
 } LineSegment;
 
-void LineSegmentInit(LineSegment* self, float x1, float y1, float x2, float y2);
+LineSegment LineSegmentCreate(float x1, float y1, float x2, float y2);

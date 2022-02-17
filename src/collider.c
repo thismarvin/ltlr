@@ -52,14 +52,10 @@ Polygon PolygonFromRectangle(Rectangle rectangle)
     Vector2 v2 = { rectangle.x + rectangle.width, rectangle.y + rectangle.height };
     Vector2 v3 = { rectangle.x + rectangle.width, rectangle.y };
 
-    LineSegment l0;
-    LineSegment l1;
-    LineSegment l2;
-    LineSegment l3;
-    LineSegmentInit(&l0, v0.x, v0.y, v1.x, v1.y);
-    LineSegmentInit(&l1, v1.x, v1.y, v2.x, v2.y);
-    LineSegmentInit(&l2, v2.x, v2.y, v3.x, v3.y);
-    LineSegmentInit(&l3, v3.x, v3.y, v0.x, v0.y);
+    LineSegment l0 = LineSegmentCreate(v0.x, v0.y, v1.x, v1.y);
+    LineSegment l1 = LineSegmentCreate(v1.x, v1.y, v2.x, v2.y);
+    LineSegment l2 = LineSegmentCreate(v2.x, v2.y, v3.x, v3.y);
+    LineSegment l3 = LineSegmentCreate(v3.x, v3.y, v0.x, v0.y);
 
     polygon.vertices[0] = v0;
     polygon.vertices[1] = v1;
