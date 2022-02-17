@@ -1,4 +1,4 @@
 clang
-%c -std=c99
+%c -std=c17
 %h
 -Ivendor/raylib/src
