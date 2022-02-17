@@ -1,5 +1,4 @@
-#ifndef CONSTANTS_H
-#define CONSTANTS_H
+#pragma once
 
 #include "raylib.h"
 
@@ -10,5 +9,3 @@ void DebugVector2(Vector2 value);
 
 #define MAX(a,b) (((a)>(b))?(a):(b))
 #define MIN(a,b) (((a)<(b))?(a):(b))
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef POLYGON_H
-#define POLYGON_H
+#pragma once
 
 #include "line_segment.h"
 #include <stddef.h>
@@ -14,5 +13,3 @@ typedef struct
 
 void PolygonInit(Polygon* self, size_t verticesLength);
 void PolygonDestroy(Polygon* self);
-
-#endif

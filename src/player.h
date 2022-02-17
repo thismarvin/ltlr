@@ -1,5 +1,4 @@
-#ifndef PLAYER_H
-#define PLAYER_H
+#pragma once
 
 #include "kinetic.h"
 #include "polygon.h"
@@ -21,5 +20,3 @@ void PlayerSetPos(Player* self, Vector2 position);
 void PlayerTranslate(Player* self, Vector2 delta);
 void PlayerUpdate(Player* self);
 void PlayerDraw(Player* self);
-
-#endif

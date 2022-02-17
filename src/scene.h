@@ -1,5 +1,4 @@
-#ifndef SCENE_H
-#define SCENE_H
+#pragma once
 
 #include "player.h"
 
@@ -22,5 +21,3 @@ typedef struct
 void SceneInit(Scene* self, int width, int height, Player* player);
 void SceneUpdate(Scene* self);
 void SceneDraw(Scene* self);
-
-#endif
