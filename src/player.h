@@ -1,6 +1,7 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
+#include "kinetic.h"
 #include "polygon.h"
 #include <raylib.h>
 
@@ -9,10 +10,8 @@
 
 typedef struct
 {
+    Kinetic kinetic;
     Rectangle aabb;
-    Vector2 position;
-    Vector2 velocity;
-    Vector2 acceleration;
     int grounded;
     int jumping;
 } Player;

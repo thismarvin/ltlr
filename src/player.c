@@ -22,38 +22,38 @@ static void PlayerInput(Player* self)
         strafe = 1;
     }
 
-    self->velocity.x = strafe * 500;
+    self->kinetic.velocity.x = strafe * 500;
 
     if (self->grounded && !self->jumping && IsKeyDown(KEY_SPACE)) {
-        self->velocity.y = -300;
+        self->kinetic.velocity.y = -300;
         self->jumping = 1;
         self->grounded = 0;
     }
 
-    if (self->jumping && !IsKeyDown(KEY_SPACE) && self->velocity.y < 0) {
-        self->velocity.y = -50;
+    if (self->jumping && !IsKeyDown(KEY_SPACE) && self->kinetic.velocity.y < 0) {
+        self->kinetic.velocity.y = -50;
         self->jumping = 0;
     }
 }
 
 static void PlayerPhysics(Player* self)
 {
-    // Semi-Implict Euler Integration
-    self->velocity.x += self->acceleration.x * CTX_DT;
-    self->velocity.y += self->acceleration.y * CTX_DT;
+    KineticIntegrate(&self->kinetic);
 
-    self->position.x += self->velocity.x * CTX_DT;
-    self->position.y += self->velocity.y * CTX_DT;
-
-    PlayerSetPos(self, self->position);
+    PlayerSetPos(self, self->kinetic.currentPosition);
 }
 
 static void PlayerCollision(Player* self)
 {
+    if (self->kinetic.currentPosition.x > 320) {
+        KineticTeleport(&self->kinetic, Vector2Create(-self->aabb.width, self->kinetic.currentPosition.y));
+        // PlayerSetPos(self, Vector2Create(-self->aabb.width, self->kinetic.currentPosition.y));
+    }
+
     // Grounded
-    if (self->position.y + self->aabb.height > GetScreenHeight()) {
-        PlayerSetPos(self, Vector2Create(self->position.x, GetScreenHeight() - self->aabb.height));
-        self->velocity.y = 0;
+    if (self->kinetic.currentPosition.y + self->aabb.height > GetScreenHeight()) {
+        PlayerSetPos(self, Vector2Create(self->kinetic.currentPosition.x, GetScreenHeight() - self->aabb.height));
+        self->kinetic.velocity.y = 0;
         self->jumping = 0;
         self->grounded = 1;
     }
@@ -68,7 +68,7 @@ static void PlayerCollision(Player* self)
         PlayerTranslate(self, resolution);
 
         if (resolution.y < 0) {
-            self->velocity.y = 0;
+            self->kinetic.velocity.y = 0;
             self->jumping = 0;
             self->grounded = 1;
         }
@@ -79,18 +79,16 @@ static void PlayerCollision(Player* self)
 
 void PlayerInit(Player* self, Vector2 position)
 {
-    self->position = position;
+    self->kinetic = KineticCreate(position, VECTOR2_ZERO, Vector2Create(0, 1000));
     self->aabb = (Rectangle)
     {
-        .x = self->position.x,
-        .y = self->position.y,
+        .x = self->kinetic.currentPosition.x,
+        .y = self->kinetic.currentPosition.y,
         .width = PLAYER_WIDTH,
         .height = PLAYER_HEIGHT,
     };
-    self->velocity = VECTOR2_ZERO;
-    self->acceleration = Vector2Create(0, 1000);
-    self->jumping = 0;
     self->grounded = 0;
+    self->jumping = 0;
 
     blocks[0] = (Rectangle) {
         200, 180 - 120, 64, 32
@@ -105,15 +103,16 @@ void PlayerInit(Player* self, Vector2 position)
 
 void PlayerSetPos(Player* self, Vector2 position)
 {
-    self->position = position;
+    // TODO(thismarvin): Should this be here...? Shouldn't Kinetic deal with this or...
+    self->kinetic.currentPosition = position;
 
-    self->aabb.x = self->position.x;
-    self->aabb.y = self->position.y;
+    self->aabb.x = self->kinetic.currentPosition.x;
+    self->aabb.y = self->kinetic.currentPosition.y;
 }
 
 void PlayerTranslate(Player* self, Vector2 delta)
 {
-    Vector2 position = Vector2Add(self->position, delta);
+    Vector2 position = Vector2Add(self->kinetic.currentPosition, delta);
 
     PlayerSetPos(self, position);
 }
@@ -127,7 +126,15 @@ void PlayerUpdate(Player* self)
 
 void PlayerDraw(Player* self)
 {
-    DrawRectangleRec(self->aabb, RED);
+    Vector2 interpolated = KineticGetRenderPosition(&self->kinetic);
+
+    Rectangle rectangle = (Rectangle) {
+        .x = interpolated.x,
+        .y = interpolated.y,
+        .width = self->aabb.width,
+        .height = self->aabb.height,
+    };
+    DrawRectangleRec(rectangle, RED);
 
     for (int i = 0; i < 4; ++i) {
         DrawRectangleLinesEx(blocks[i], 4, BLACK);
