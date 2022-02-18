@@ -15,8 +15,8 @@ RAYLIB_FILES := \
 	raudio.c \
 	utils.c
 
-RAYLIB_SOURCES := $(patsubst %, vendor/raylib/src/%, $(RAYLIB_FILES))
-RAYLIB_OBJECTS := $(patsubst vendor/raylib/src/%.c, build/vendor/raylib/web/%.o, $(RAYLIB_SOURCES))
+RAYLIB_SOURCES := $(patsubst %,vendor/raylib/src/%, $(RAYLIB_FILES))
+RAYLIB_OBJECTS := $(patsubst vendor/raylib/src/%.c,build/vendor/raylib/web/%.o, $(RAYLIB_SOURCES))
 
 GAME_HEADERS := $(shell find src -type f -name "*.h")
 GAME_SOURCES := $(shell find src -type f -name "*.c")

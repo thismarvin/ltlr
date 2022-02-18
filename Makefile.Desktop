@@ -14,8 +14,8 @@ GAME_HEADERS := $(shell find src -type f -name "*.h")
 GAME_SOURCES := $(shell find src -type f -name "*.c")
 CONTENT_SOURCES := $(shell find src/resources)
 
-DEBUG_OBJECTS := $(patsubst src/%.c, build/debug/%.o, $(GAME_SOURCES))
-RELEASE_OBJECTS := $(patsubst src/%.c, build/release/%.o, $(GAME_SOURCES))
+DEBUG_OBJECTS := $(patsubst src/%.c,build/debug/%.o, $(GAME_SOURCES))
+RELEASE_OBJECTS := $(patsubst src/%.c,build/release/%.o, $(GAME_SOURCES))
 
 $(VERBOSE).SILENT:
 
