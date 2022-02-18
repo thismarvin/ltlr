@@ -1,5 +1,5 @@
 #include "collider.h"
-#include "constants.h"
+#include "common.h"
 #include "raymath.h"
 
 Vector2 RectangleRectangleResolution(Rectangle a, Rectangle b)
