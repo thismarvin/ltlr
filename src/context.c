@@ -1,29 +1,29 @@
 #include "context.h"
 
-static double totalTime = 0.0;
-static float alpha = 0.0;
+static f64 totalTime = 0.0;
+static f32 alpha = 0.0;
 
-// float ContextGetDeltaTime()
+// f32 ContextGetDeltaTime()
 // {
 //     return CTX_DT;
 // }
 
-double ContextGetTotalTime()
+f64 ContextGetTotalTime()
 {
     return totalTime;
 }
 
-void ContextSetTotalTime(double value)
+void ContextSetTotalTime(f64 value)
 {
     totalTime = value;
 }
 
-float ContextGetAlpha()
+f32 ContextGetAlpha()
 {
     return alpha;
 }
 
-void ContextSetAlpha(float value)
+void ContextSetAlpha(f32 value)
 {
     alpha = value;
 }

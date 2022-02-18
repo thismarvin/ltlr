@@ -1,7 +1,6 @@
 #include "polygon.h"
-#include <stdlib.h>
 
-Polygon PolygonCreate(size_t totalVertices)
+Polygon PolygonCreate(usize totalVertices)
 {
     return (Polygon)
     {

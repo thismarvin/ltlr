@@ -1,5 +1,6 @@
 #pragma once
 
+#include "common.h"
 #include "player.h"
 
 // TODO(thismarvin): How do we incorporate the following:
@@ -13,11 +14,11 @@
 
 typedef struct
 {
-    int width;
-    int height;
+    i32 width;
+    i32 height;
     Player* player;
 } Scene;
 
-void SceneInit(Scene* self, int width, int height, Player* player);
+void SceneInit(Scene* self, i32 width, i32 height, Player* player);
 void SceneUpdate(Scene* self);
 void SceneDraw(Scene* self);

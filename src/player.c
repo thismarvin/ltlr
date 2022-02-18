@@ -10,7 +10,7 @@ static Rectangle blocks[4];
 
 static void PlayerInput(Player* self)
 {
-    float strafe = 0;
+    f32 strafe = 0;
 
     if (IsKeyDown(KEY_LEFT))
     {
@@ -61,7 +61,7 @@ static void PlayerCollision(Player* self)
     // TODO(thismarvin): Support arbitrary convex polygons!
     // Polygon playerPolygon = PolygonFromRectangle(self->aabb);
 
-    for (int i = 0; i < 4; ++i)
+    for (usize i = 0; i < 4; ++i)
     {
         Vector2 resolution = RectangleRectangleResolution(self->aabb, blocks[i]);
 
@@ -136,7 +136,7 @@ void PlayerDraw(Player* self)
     };
     DrawRectangleRec(rectangle, RED);
 
-    for (int i = 0; i < 4; ++i) {
+    for (usize i = 0; i < 4; ++i) {
         DrawRectangleLinesEx(blocks[i], 4, BLACK);
     }
 }

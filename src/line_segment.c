@@ -1,6 +1,6 @@
 #include "line_segment.h"
 
-LineSegment LineSegmentCreate(float x1, float y1, float x2, float y2)
+LineSegment LineSegmentCreate(f32 x1, f32 y1, f32 x2, f32 y2)
 {
     return (LineSegment)
     {

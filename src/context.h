@@ -1,10 +1,12 @@
 #pragma once
 
+#include "common.h"
+
 // Target (fixed) delta time.
 #define CTX_DT (1.0 / 60.0)
 
 // float ContextGetDeltaTime();
-double ContextGetTotalTime();
-void ContextSetTotalTime(double value);
-float ContextGetAlpha();
-void ContextSetAlpha(float value);
+f64 ContextGetTotalTime();
+void ContextSetTotalTime(f64 value);
+f32 ContextGetAlpha();
+void ContextSetAlpha(f32 value);

@@ -1,15 +1,15 @@
 #pragma once
 
+#include "common.h"
 #include "line_segment.h"
-#include <stddef.h>
 
 typedef struct
 {
     Vector2* vertices;
     LineSegment* edges;
-    size_t verticesLength;
-    size_t edgesLength;
+    usize verticesLength;
+    usize edgesLength;
 } Polygon;
 
-Polygon PolygonCreate(size_t totalVertices);
+Polygon PolygonCreate(usize totalVertices);
 void PolygonDestroy(Polygon* self);

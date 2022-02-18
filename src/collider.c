@@ -4,29 +4,29 @@
 
 Vector2 RectangleRectangleResolution(Rectangle a, Rectangle b)
 {
-    float aLeft = a.x;
-    float aRight = a.x + a.width;
-    float bLeft = b.x;
-    float bRight = b.x + b.width;
+    f32 aLeft = a.x;
+    f32 aRight = a.x + a.width;
+    f32 bLeft = b.x;
+    f32 bRight = b.x + b.width;
 
     if (bRight < aLeft || aRight < bLeft) {
         return VECTOR2_ZERO;
     }
 
-    float aTop = a.y;
-    float aBottom = a.y + a.height;
-    float bTop = b.y;
-    float bBottom = b.y + b.height;
+    f32 aTop = a.y;
+    f32 aBottom = a.y + a.height;
+    f32 bTop = b.y;
+    f32 bBottom = b.y + b.height;
 
     if (bBottom < aTop || aBottom < bTop) {
         return VECTOR2_ZERO;
     }
 
-    float xOverlap = MIN(aRight, bRight) - MAX(aLeft, bLeft);
-    float yOverlap = MIN(aBottom, bBottom) - MAX(aTop, bTop);
+    f32 xOverlap = MIN(aRight, bRight) - MAX(aLeft, bLeft);
+    f32 yOverlap = MIN(aBottom, bBottom) - MAX(aTop, bTop);
 
     Vector2 normal = xOverlap < yOverlap ? Vector2Create(1, 0) : Vector2Create(0, 1);
-    float minOverlap = MIN(xOverlap, yOverlap);
+    f32 minOverlap = MIN(xOverlap, yOverlap);
 
     Vector2 resolution = Vector2Scale(normal, minOverlap);
 

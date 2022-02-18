@@ -21,6 +21,6 @@ typedef double f64;
 
 #define VECTOR2_ZERO (Vector2) { .x = 0, .y = 0 }
 
-Vector2 Vector2Create(float x, float y);
+Vector2 Vector2Create(f32 x, f32 y);
 
 void DebugVector2(Vector2 value);

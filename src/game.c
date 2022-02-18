@@ -12,14 +12,14 @@ static void Initialize(void);
 static void Update(void);
 static void Draw(void);
 
-static const int screenWidth = 320;
-static const int screenHeight = 180;
+static const i32 screenWidth = 320;
+static const i32 screenHeight = 180;
 
-static const float target = CTX_DT;
-static const int maxFrameSkip = 25;
-static const float maxDeltaTime = maxFrameSkip * target;
-static float accumulator = 0.0;
-static double previousTime = 0.0;
+static const f32 target = CTX_DT;
+static const i32 maxFrameSkip = 25;
+static const f32 maxDeltaTime = maxFrameSkip * target;
+static f32 accumulator = 0.0;
+static f64 previousTime = 0.0;
 
 static Player player;
 static Scene scene;
@@ -28,9 +28,9 @@ static void Timestep(void)
 {
     // TODO(thismarvin): Handle resize here...
 
-    double currentTime = GetTime();
+    f64 currentTime = GetTime();
 
-    float deltaTime = currentTime - previousTime;
+    f32 deltaTime = currentTime - previousTime;
 
     // Set a maximum delta time in order to avoid a "spiral of death."
     if (deltaTime > maxDeltaTime) {

@@ -6,18 +6,18 @@
 typedef struct
 {
     Vector2 normal;
-    float overlap;
-    int valid;
+    f32 overlap;
+    i32 valid;
 } OverlapInformation;
 
 static Rectangle CalculateAABB(Vector2* vertices, size_t verticesLength)
 {
-    float xMin = vertices[0].x;
-    float xMax = xMin;
-    float yMin = vertices[0].y;
-    float yMax = yMin;
+    f32 xMin = vertices[0].x;
+    f32 xMax = xMin;
+    f32 yMin = vertices[0].y;
+    f32 yMax = yMin;
 
-    for (int i = 1; i < verticesLength; ++i)
+    for (usize i = 1; i < verticesLength; ++i)
     {
         xMin = MIN(xMin, vertices[i].x);
         xMax = MAX(xMax, vertices[i].x);
@@ -37,9 +37,9 @@ static Rectangle CalculateAABB(Vector2* vertices, size_t verticesLength)
 static OverlapInformation CalculateOverlap(Polygon a, Polygon b)
 {
     Vector2 minNormal = { 0, 0 };
-    float minOverlap = FLT_MAX;
+    f32 minOverlap = FLT_MAX;
 
-    for (int i = 0; i < a.edgesLength; ++i)
+    for (usize i = 0; i < a.edgesLength; ++i)
     {
         Vector2 normal = (Vector2)
         {
@@ -49,27 +49,27 @@ static OverlapInformation CalculateOverlap(Polygon a, Polygon b)
 
         normal = Vector2Normalize(normal);
 
-        float minProjectionA = FLT_MAX;
-        float maxProjectionA = FLT_MIN;
+        f32 minProjectionA = FLT_MAX;
+        f32 maxProjectionA = FLT_MIN;
 
-        for (int j = 0; j < a.verticesLength; ++j)
+        for (usize j = 0; j < a.verticesLength; ++j)
         {
-            float projection = Vector2DotProduct(a.vertices[j], normal);
+            f32 projection = Vector2DotProduct(a.vertices[j], normal);
             minProjectionA = MIN(minProjectionA, projection);
             maxProjectionA = MAX(maxProjectionA, projection);
         }
 
-        float minProjectionB = FLT_MAX;
-        float maxProjectionB = FLT_MIN;
+        f32 minProjectionB = FLT_MAX;
+        f32 maxProjectionB = FLT_MIN;
 
-        for (int j = 0; j < b.verticesLength; ++j)
+        for (usize j = 0; j < b.verticesLength; ++j)
         {
-            float projection = Vector2DotProduct(b.vertices[j], normal);
+            f32 projection = Vector2DotProduct(b.vertices[j], normal);
             minProjectionB = MIN(minProjectionB, projection);
             maxProjectionB = MAX(maxProjectionB, projection);
         }
 
-        float overlap = MIN(maxProjectionA, maxProjectionB) - MAX(minProjectionA, minProjectionB);
+        f32 overlap = MIN(maxProjectionA, maxProjectionB) - MAX(minProjectionA, minProjectionB);
 
         if (overlap < minOverlap)
         {
