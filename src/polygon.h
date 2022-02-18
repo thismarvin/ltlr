@@ -6,10 +6,10 @@
 typedef struct
 {
     Vector2* vertices;
-    size_t verticesLength;
     LineSegment* edges;
+    size_t verticesLength;
     size_t edgesLength;
 } Polygon;
 
-void PolygonInit(Polygon* self, size_t verticesLength);
+Polygon PolygonCreate(size_t totalVertices);
 void PolygonDestroy(Polygon* self);

@@ -43,9 +43,7 @@ Vector2 RectangleRectangleResolution(Rectangle a, Rectangle b)
 
 Polygon PolygonFromRectangle(Rectangle rectangle)
 {
-    Polygon polygon;
-
-    PolygonInit(&polygon, 4);
+    Polygon polygon = PolygonCreate(4);
 
     Vector2 v0 = { rectangle.x, rectangle.y };
     Vector2 v1 = { rectangle.x, rectangle.y + rectangle.height };

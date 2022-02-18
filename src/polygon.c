@@ -1,12 +1,15 @@
 #include "polygon.h"
 #include <stdlib.h>
 
-void PolygonInit(Polygon* self, size_t verticesLength)
+Polygon PolygonCreate(size_t totalVertices)
 {
-    self->vertices = calloc(verticesLength, sizeof(Vector2));
-    self->edges = calloc(verticesLength, sizeof(LineSegment));
-    self->verticesLength = verticesLength;
-    self->edgesLength = verticesLength;
+    return (Polygon)
+    {
+        .vertices = calloc(totalVertices, sizeof(Vector2)),
+        .edges = calloc(totalVertices, sizeof(LineSegment)),
+        .verticesLength = totalVertices,
+        .edgesLength = totalVertices,
+    };
 }
 
 void PolygonDestroy(Polygon* self)
