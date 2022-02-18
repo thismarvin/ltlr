@@ -5,11 +5,11 @@ all: clean desktop web
 
 .PHONY: desktop
 desktop:
-	make -f Makefile.Desktop release
+	$(MAKE) -f Makefile.Desktop release
 
 .PHONY: web
 web:
-	make -f Makefile.Web release
+	$(MAKE) -f Makefile.Web release
 
 .PHONY: format
 format:
