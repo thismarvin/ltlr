@@ -10,7 +10,7 @@ static Rectangle blocks[4];
 
 static void PlayerInput(Player* self)
 {
-    f32 strafe = 0;
+    i8 strafe = 0;
 
     if (IsKeyDown(KEY_LEFT))
     {

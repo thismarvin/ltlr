@@ -12,11 +12,11 @@ static void Initialize(void);
 static void Update(void);
 static void Draw(void);
 
-static const i32 screenWidth = 320;
-static const i32 screenHeight = 180;
+static const u16 screenWidth = 320;
+static const u16 screenHeight = 180;
 
 static const f32 target = CTX_DT;
-static const i32 maxFrameSkip = 25;
+static const u8 maxFrameSkip = 25;
 static const f32 maxDeltaTime = maxFrameSkip * target;
 static f32 accumulator = 0.0;
 static f64 previousTime = 0.0;

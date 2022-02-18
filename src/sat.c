@@ -7,7 +7,7 @@ typedef struct
 {
     Vector2 normal;
     f32 overlap;
-    i32 valid;
+    bool valid;
 } OverlapInformation;
 
 static Rectangle CalculateAABB(Vector2* vertices, size_t verticesLength)
@@ -83,7 +83,7 @@ static OverlapInformation CalculateOverlap(Polygon a, Polygon b)
             {
                 .normal = { 0, 0 },
                 .overlap = 0,
-                .valid = 0
+                .valid = false
             };
         }
     }
@@ -92,7 +92,7 @@ static OverlapInformation CalculateOverlap(Polygon a, Polygon b)
     {
         .normal = minNormal,
         .overlap = minOverlap,
-        .valid = 1
+        .valid = true
     };
 }
 

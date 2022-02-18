@@ -1,7 +1,7 @@
 #include "scene.h"
 #include "player.h"
 
-void SceneInit(Scene* self, i32 width, i32 height, Player* player)
+void SceneInit(Scene* self, u32 width, u32 height, Player* player)
 {
     self->width = width;
     self->height = height;

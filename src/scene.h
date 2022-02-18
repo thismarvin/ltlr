@@ -14,11 +14,11 @@
 
 typedef struct
 {
-    i32 width;
-    i32 height;
+    u32 width;
+    u32 height;
     Player* player;
 } Scene;
 
-void SceneInit(Scene* self, i32 width, i32 height, Player* player);
+void SceneInit(Scene* self, u32 width, u32 height, Player* player);
 void SceneUpdate(Scene* self);
 void SceneDraw(Scene* self);
