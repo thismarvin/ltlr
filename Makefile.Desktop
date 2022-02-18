@@ -55,10 +55,8 @@ bin/debug/desktop: | bin/debug
 bin/release/desktop: | bin/release
 	mkdir $@
 
-vendor/raylib:
+vendor/raylib/src:
 	git submodule update --init --recursive
-
-vendor/raylib/src: vendor/raylib
 
 build/vendor/raylib/desktop/libraylib.a: | vendor/raylib/src build/vendor/raylib/desktop
 	cd vendor/raylib/src; make PLATFORM=PLATFORM_DESKTOP

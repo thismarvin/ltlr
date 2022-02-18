@@ -45,10 +45,8 @@ bin/release: | bin
 bin/release/web: | bin/release
 	mkdir $@
 
-vendor/raylib: | vendor
+vendor/raylib/src:
 	git submodule update --init --recursive
-
-vendor/raylib/src: vendor/raylib
 
 $(RAYLIB_SOURCES): vendor/raylib/src
 
