@@ -63,13 +63,13 @@ build/vendor/raylib/desktop/libraylib.a: | vendor/raylib/src build/vendor/raylib
 	mv vendor/raylib/src/libraylib.a build/vendor/raylib/desktop
 	find vendor/raylib/src -name "*.o" -exec mv {} build/vendor/raylib/desktop \;
 
-$(DEBUG_OBJECTS): build/debug/%.o: src/%.c build/vendor/raylib/desktop/libraylib.a $(GAME_HEADERS) | build/debug
+$(DEBUG_OBJECTS): build/debug/%.o: src/%.c $(MAKEFILE_LIST) build/vendor/raylib/desktop/libraylib.a $(GAME_HEADERS) | build/debug
 	$(CC) $(INCLUDE_FLAGS) $(FLAGS) $(DEBUG_FLAGS) -o $@ -c $<
 
 bin/debug/desktop/$(EXC): $(DEBUG_OBJECTS) | bin/debug/desktop
 	$(CC) $(FLAGS) $(DEBUG_FLAGS) -o $@ $(DEBUG_OBJECTS) $(LIBRARY_FLAGS)
 
-$(RELEASE_OBJECTS): build/release/%.o: src/%.c build/vendor/raylib/desktop/libraylib.a $(GAME_HEADERS) | build/release
+$(RELEASE_OBJECTS): build/release/%.o: src/%.c $(MAKEFILE_LIST) build/vendor/raylib/desktop/libraylib.a $(GAME_HEADERS) | build/release
 	$(CC) $(INCLUDE_FLAGS) $(FLAGS) $(RELEASE_FLAGS) -o $@ -c $<
 
 bin/release/desktop/$(EXC): $(RELEASE_OBJECTS) | bin/release/desktop
