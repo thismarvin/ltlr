@@ -1,24 +1,25 @@
 #pragma once
 
 #include "common.h"
-#include "player.h"
+#include "components.h"
 
-// TODO(thismarvin): How do we incorporate the following:
-// - Collide-ables
-// - Enemies
-// - Sprites
-//   - Blocks
-//   - Decorations
-//   - Background
-// - Interactable Stuff (e.g. solar panels, batteries, etc.)
+#define MAX_ENTITIES 64
+
+typedef struct {
+    u64 tags[MAX_ENTITIES];
+    CPosition positions[MAX_ENTITIES];
+    CDimension dimensions[MAX_ENTITIES];
+    CColor colors[MAX_ENTITIES];
+} Components;
 
 typedef struct
 {
-    u32 width;
-    u32 height;
-    Player* player;
+    Components components;
+    usize nextEntity;
+    usize nextFreeSlot;
+    usize freeSlots[MAX_ENTITIES];
 } Scene;
 
-void SceneInit(Scene* self, u32 width, u32 height, Player* player);
+void SceneInit(Scene* self);
 void SceneUpdate(Scene* self);
 void SceneDraw(Scene* self);

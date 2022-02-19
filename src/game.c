@@ -83,7 +83,7 @@ static void Initialize(void)
 {
     PlayerInit(&player, Vector2Create(32, 32));
 
-    SceneInit(&scene, 320, 180, &player);
+    SceneInit(&scene);
 }
 
 static void Update(void)
