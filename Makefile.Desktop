@@ -3,19 +3,21 @@
 EXC := ltlr
 
 CC := gcc
-FLAGS := -std=c17 -Wall -Wextra -Wpedantic
+FLAGS := -std=c17 -Wall -Wextra -Wpedantic -DPLATFORM_DESKTOP
 DEBUG_FLAGS := -g -pg -O0
 RELEASE_FLAGS := -O3
 
 INCLUDE_FLAGS := -Ivendor/raylib/src
 LIBRARY_FLAGS := -lm -lpthread -ldl -Lbuild/vendor/raylib/desktop -lraylib
 
+LIB_RAYLIB := build/vendor/raylib/desktop/libraylib.a
+
 GAME_HEADERS := $(shell find src -type f -name "*.h")
 GAME_SOURCES := $(shell find src -type f -name "*.c")
 CONTENT_SOURCES := $(shell find src/resources)
 
-DEBUG_OBJECTS := $(patsubst src/%.c,build/debug/%.o, $(GAME_SOURCES))
-RELEASE_OBJECTS := $(patsubst src/%.c,build/release/%.o, $(GAME_SOURCES))
+DEBUG_OBJECTS := $(patsubst src/%.c,build/debug/desktop/%.o, $(GAME_SOURCES))
+RELEASE_OBJECTS := $(patsubst src/%.c,build/release/desktop/%.o, $(GAME_SOURCES))
 
 $(VERBOSE).SILENT:
 
@@ -29,6 +31,12 @@ build/debug: | build
 	mkdir $@
 
 build/release: | build
+	mkdir $@
+
+build/debug/desktop: | build/debug
+	mkdir $@
+
+build/release/desktop: | build/release
 	mkdir $@
 
 build/vendor: | build
@@ -58,18 +66,18 @@ bin/release/desktop: | bin/release
 vendor/raylib/src:
 	git submodule update --init --recursive
 
-build/vendor/raylib/desktop/libraylib.a: | vendor/raylib/src build/vendor/raylib/desktop
+$(LIB_RAYLIB): | vendor/raylib/src build/vendor/raylib/desktop
 	cd vendor/raylib/src; make PLATFORM=PLATFORM_DESKTOP
 	mv vendor/raylib/src/libraylib.a build/vendor/raylib/desktop
 	find vendor/raylib/src -name "*.o" -exec mv {} build/vendor/raylib/desktop \;
 
-$(DEBUG_OBJECTS): build/debug/%.o: src/%.c $(MAKEFILE_LIST) build/vendor/raylib/desktop/libraylib.a $(GAME_HEADERS) | build/debug
+$(DEBUG_OBJECTS): build/debug/desktop/%.o: src/%.c $(MAKEFILE_LIST) $(LIB_RAYLIB) $(GAME_HEADERS) | build/debug/desktop
 	$(CC) $(INCLUDE_FLAGS) $(FLAGS) $(DEBUG_FLAGS) -o $@ -c $<
 
 bin/debug/desktop/$(EXC): $(DEBUG_OBJECTS) | bin/debug/desktop
 	$(CC) $(FLAGS) $(DEBUG_FLAGS) -o $@ $(DEBUG_OBJECTS) $(LIBRARY_FLAGS)
 
-$(RELEASE_OBJECTS): build/release/%.o: src/%.c $(MAKEFILE_LIST) build/vendor/raylib/desktop/libraylib.a $(GAME_HEADERS) | build/release
+$(RELEASE_OBJECTS): build/release/desktop/%.o: src/%.c $(MAKEFILE_LIST) $(LIB_RAYLIB) $(GAME_HEADERS) | build/release/desktop
 	$(CC) $(INCLUDE_FLAGS) $(FLAGS) $(RELEASE_FLAGS) -o $@ -c $<
 
 bin/release/desktop/$(EXC): $(RELEASE_OBJECTS) | bin/release/desktop
@@ -91,8 +99,8 @@ release: bin/release/desktop/$(EXC)
 .PHONY: clean
 clean:
 	if [ -d "build/vendor/raylib/desktop" ]; then rm -rf build/vendor/raylib/desktop; fi
-	if [ -d "build/debug" ]; then rm -rf build/debug; fi
-	if [ -d "build/release" ]; then rm -rf build/release; fi
+	if [ -d "build/debug/desktop" ]; then rm -rf build/debug/desktop; fi
+	if [ -d "build/release/desktop" ]; then rm -rf build/release/desktop; fi
 	if [ -d "bin/debug/desktop" ]; then rm -rf bin/debug/desktop; fi
 	if [ -d "bin/release/desktop" ]; then rm -rf bin/release/desktop; fi
 	@echo "Done"
