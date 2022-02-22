@@ -1,5 +1,4 @@
 #include "common.h"
-#include <stdio.h>
 
 Vector2 Vector2Create(f32 x, f32 y)
 {
@@ -10,7 +9,22 @@ Vector2 Vector2Create(f32 x, f32 y)
     };
 }
 
-void DebugVector2(Vector2 value)
+f32 RectangleLeft(Rectangle rectangle)
 {
-    printf("(%f, %f)\n", value.x, value.y);
+    return rectangle.x;
+}
+
+f32 RectangleRight(Rectangle rectangle)
+{
+    return rectangle.x + rectangle.width;
+}
+
+f32 RectangleBottom(Rectangle rectangle)
+{
+    return rectangle.y + rectangle.height;
+}
+
+f32 RectangleTop(Rectangle rectangle)
+{
+    return rectangle.y;
 }

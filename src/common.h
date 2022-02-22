@@ -23,4 +23,7 @@ typedef double f64;
 
 Vector2 Vector2Create(f32 x, f32 y);
 
-void DebugVector2(Vector2 value);
+f32 RectangleLeft(Rectangle rectangle);
+f32 RectangleRight(Rectangle rectangle);
+f32 RectangleBottom(Rectangle rectangle);
+f32 RectangleTop(Rectangle rectangle);
