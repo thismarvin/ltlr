@@ -21,7 +21,7 @@ static const f32 maxDeltaTime = maxFrameSkip * target;
 static f32 accumulator = 0.0;
 static f64 previousTime = 0.0;
 
-static Texture2D sprites;
+static Texture2D atlas;
 
 static Player player;
 static Scene scene;
@@ -79,7 +79,7 @@ int main(void)
 
 #endif
 
-    UnloadTexture(sprites);
+    UnloadTexture(atlas);
 
     CloseAudioDevice();
     CloseWindow();
@@ -90,9 +90,9 @@ int main(void)
 static void Initialize(void)
 {
 #if defined(PLATFORM_WEB)
-    sprites = LoadTexture("./src/resources/sprites.png");
+    atlas = LoadTexture("./src/resources/sprites.png");
 #else
-    sprites = LoadTexture("./resources/sprites.png");
+    atlas = LoadTexture("./resources/sprites.png");
 #endif
 
     PlayerInit(&player, Vector2Create(32, 32));
@@ -111,7 +111,7 @@ static void Draw(void)
 
     ClearBackground(WHITE);
 
-    SceneDraw(&scene, &sprites);
+    SceneDraw(&scene, &atlas);
 
     EndDrawing();
 }
