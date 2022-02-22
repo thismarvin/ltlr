@@ -16,6 +16,7 @@ typedef struct
     CSmooth smooths[MAX_ENTITIES];
     CCollider colliders[MAX_ENTITIES];
     CBody bodies[MAX_ENTITIES];
+    CPlayer players[MAX_ENTITIES];
 } Components;
 
 typedef struct

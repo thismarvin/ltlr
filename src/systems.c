@@ -36,23 +36,47 @@ void SPlayerUpdate(Components* components, usize entity)
     REQUIRE_DEPS(tagPlayer | tagKinetic | tagBody);
 
     CKinetic* kinetic = &components->kinetics[entity];
-    CBody body = components->bodies[entity];
+    CBody* body = &components->bodies[entity];
+    CPlayer* player = &components->players[entity];
 
-    kinetic->velocity.x = 0;
+    // TODO(thismarvin): Extract some variable (e.g. speed) into their own component.
 
-    if (IsKeyDown(KEY_LEFT))
+    // Lateral Movement.
     {
-        kinetic->velocity.x = -50;
+        i8 strafe = 0;
+
+        if (IsKeyDown(KEY_LEFT))
+        {
+            strafe = -1;
+        }
+
+        if (IsKeyDown(KEY_RIGHT))
+        {
+            strafe = 1;
+        }
+
+        kinetic->velocity.x = strafe * 500;
     }
 
-    if (IsKeyDown(KEY_RIGHT))
-    {
-        kinetic->velocity.x = 50;
-    }
-
-    if (body.grounded)
+    if (body->grounded)
     {
         kinetic->velocity.y = 0;
+    }
+
+    // Variable Jump Height.
+    {
+        if (body->grounded && !player->jumping && IsKeyDown(KEY_SPACE))
+        {
+            kinetic->velocity.y = -300;
+            player->jumping = true;
+            body->grounded = false;
+        }
+
+        if (player->jumping && !IsKeyDown(KEY_SPACE) && kinetic->velocity.y < 0)
+        {
+            kinetic->velocity.y = -50;
+            player->jumping = false;
+        }
     }
 }
 
@@ -113,6 +137,14 @@ void SCollisionUpdate(Components* components, usize entityCount, usize entity)
             if (!body->grounded && resolution.y < 0)
             {
                 body->grounded = true;
+
+                // TODO(thismarvin): Hacky? Maybe, but it works!
+                if (HAS_DEPS(tagPlayer))
+                {
+                    CPlayer* player = &components->players[entity];
+
+                    player->jumping = false;
+                }
             }
         }
     }

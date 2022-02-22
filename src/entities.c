@@ -46,6 +46,10 @@ void ECreatePlayer(Scene* scene, f32 x, f32 y)
     {
         .grounded = false
     };
+    scene->components.players[entity] = (CPlayer)
+    {
+        .jumping = false
+    };
 }
 
 void ECreateBlock(Scene* scene, f32 x, f32 y, f32 width, f32 height)

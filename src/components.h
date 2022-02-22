@@ -12,6 +12,8 @@ extern const u64 tagPlayer;
 extern const u64 tagCollider;
 extern const u64 tagBody;
 
+// TODO(thismarvin): Naming components is hard...
+
 typedef struct
 {
     Vector2 value;
@@ -58,3 +60,8 @@ typedef struct
 {
     bool grounded;
 } CBody;
+
+typedef struct
+{
+    bool jumping;
+} CPlayer;
