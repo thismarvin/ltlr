@@ -55,7 +55,7 @@ void SPlayerUpdate(Components* components, usize entity)
             strafe = 1;
         }
 
-        kinetic->velocity.x = strafe * 500;
+        kinetic->velocity.x = strafe * player->moveSpeed;
     }
 
     if (body->grounded)
@@ -67,16 +67,26 @@ void SPlayerUpdate(Components* components, usize entity)
     {
         if (body->grounded && !player->jumping && IsKeyDown(KEY_SPACE))
         {
-            kinetic->velocity.y = -300;
+            kinetic->velocity.y = -player->jumpVelocity;
             player->jumping = true;
             body->grounded = false;
         }
 
         if (player->jumping && !IsKeyDown(KEY_SPACE) && kinetic->velocity.y < 0)
         {
-            kinetic->velocity.y = -50;
+            kinetic->velocity.y = MAX(kinetic->velocity.y, -player->jumpVelocity * 0.5);
             player->jumping = false;
         }
+    }
+
+    {
+        Vector2 gravityForce = Vector2Create(0, player->defaultGravity);
+
+        if (player->jumping && kinetic->velocity.y < player->jumpVelocity) {
+            gravityForce.y = player->jumpGravity;
+        }
+
+        kinetic->acceleration = gravityForce;
     }
 }
 

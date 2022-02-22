@@ -46,10 +46,25 @@ void ECreatePlayer(Scene* scene, f32 x, f32 y)
     {
         .grounded = false
     };
-    scene->components.players[entity] = (CPlayer)
+
     {
-        .jumping = false
-    };
+        f32 jumpHeight = 16 * 3 + 4;
+        f32 jumpDuration = 0.4;
+
+        f32 jumpGravity = (2 * jumpHeight) / (jumpDuration * jumpDuration);
+        f32 defaultGravity = jumpGravity * 1.5;
+
+        f32 jumpVelocity = jumpGravity * jumpDuration;
+
+        scene->components.players[entity] = (CPlayer)
+        {
+            .moveSpeed = 200,
+            .jumping = false,
+            .jumpVelocity = jumpVelocity,
+            .jumpGravity = jumpGravity,
+            .defaultGravity = defaultGravity
+        };
+    }
 }
 
 void ECreateBlock(Scene* scene, f32 x, f32 y, f32 width, f32 height)

@@ -64,4 +64,8 @@ typedef struct
 typedef struct
 {
     bool jumping;
+    f32 moveSpeed;
+    f32 jumpVelocity;
+    f32 jumpGravity;
+    f32 defaultGravity;
 } CPlayer;
