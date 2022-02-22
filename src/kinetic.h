@@ -2,7 +2,8 @@
 
 #include "raylib.h"
 
-typedef struct {
+typedef struct
+{
     Vector2 previousPosition;
     Vector2 currentPosition;
     Vector2 velocity;

@@ -24,13 +24,15 @@ static void PlayerInput(Player* self)
 
     self->kinetic.velocity.x = strafe * 500;
 
-    if (self->grounded && !self->jumping && IsKeyDown(KEY_SPACE)) {
+    if (self->grounded && !self->jumping && IsKeyDown(KEY_SPACE))
+    {
         self->kinetic.velocity.y = -300;
         self->jumping = true;
         self->grounded = false;
     }
 
-    if (self->jumping && !IsKeyDown(KEY_SPACE) && self->kinetic.velocity.y < 0) {
+    if (self->jumping && !IsKeyDown(KEY_SPACE) && self->kinetic.velocity.y < 0)
+    {
         self->kinetic.velocity.y = -50;
         self->jumping = false;
     }
@@ -45,14 +47,17 @@ static void PlayerPhysics(Player* self)
 
 static void PlayerCollision(Player* self)
 {
-    if (self->kinetic.currentPosition.x > 320) {
+    if (self->kinetic.currentPosition.x > 320)
+    {
         KineticTeleport(&self->kinetic, Vector2Create(-self->aabb.width, self->kinetic.currentPosition.y));
         // PlayerSetPos(self, Vector2Create(-self->aabb.width, self->kinetic.currentPosition.y));
     }
 
     // Grounded
-    if (self->kinetic.currentPosition.y + self->aabb.height > GetScreenHeight()) {
-        PlayerSetPos(self, Vector2Create(self->kinetic.currentPosition.x, GetScreenHeight() - self->aabb.height));
+    if (self->kinetic.currentPosition.y + self->aabb.height > GetScreenHeight())
+    {
+        PlayerSetPos(self, Vector2Create(self->kinetic.currentPosition.x,
+                                         GetScreenHeight() - self->aabb.height));
         self->kinetic.velocity.y = 0;
         self->jumping = false;
         self->grounded = true;
@@ -67,7 +72,8 @@ static void PlayerCollision(Player* self)
 
         PlayerTranslate(self, resolution);
 
-        if (resolution.y < 0) {
+        if (resolution.y < 0)
+        {
             self->kinetic.velocity.y = 0;
             self->jumping = false;
             self->grounded = true;
@@ -90,13 +96,16 @@ void PlayerInit(Player* self, Vector2 position)
     self->grounded = false;
     self->jumping = false;
 
-    blocks[0] = (Rectangle) {
+    blocks[0] = (Rectangle)
+    {
         200, 180 - 120, 64, 32
     };
-    blocks[1] = (Rectangle) {
+    blocks[1] = (Rectangle)
+    {
         200, 180 - 32 - 4, 32, 32
     };
-    blocks[2] = (Rectangle) {
+    blocks[2] = (Rectangle)
+    {
         200 + 64, 180 - 32 - 4, 32, 32
     };
 }
@@ -128,7 +137,8 @@ void PlayerDraw(Player* self)
 {
     Vector2 interpolated = KineticGetRenderPosition(&self->kinetic);
 
-    Rectangle rectangle = (Rectangle) {
+    Rectangle rectangle = (Rectangle)
+    {
         .x = interpolated.x,
         .y = interpolated.y,
         .width = self->aabb.width,
@@ -136,7 +146,8 @@ void PlayerDraw(Player* self)
     };
     DrawRectangleRec(rectangle, RED);
 
-    for (usize i = 0; i < 4; ++i) {
+    for (usize i = 0; i < 4; ++i)
+    {
         DrawRectangleLinesEx(blocks[i], 4, BLACK);
     }
 }

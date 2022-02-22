@@ -9,7 +9,8 @@ Vector2 RectangleRectangleResolution(Rectangle a, Rectangle b)
     f32 bLeft = b.x;
     f32 bRight = b.x + b.width;
 
-    if (bRight < aLeft || aRight < bLeft) {
+    if (bRight < aLeft || aRight < bLeft)
+    {
         return VECTOR2_ZERO;
     }
 
@@ -18,7 +19,8 @@ Vector2 RectangleRectangleResolution(Rectangle a, Rectangle b)
     f32 bTop = b.y;
     f32 bBottom = b.y + b.height;
 
-    if (bBottom < aTop || aBottom < bTop) {
+    if (bBottom < aTop || aBottom < bTop)
+    {
         return VECTOR2_ZERO;
     }
 
@@ -34,7 +36,8 @@ Vector2 RectangleRectangleResolution(Rectangle a, Rectangle b)
     Vector2 bPosition = Vector2Create(b.x, b.y);
     Vector2 difference = Vector2Subtract(aPosition, bPosition);
 
-    if (Vector2DotProduct(difference, resolution) < 0) {
+    if (Vector2DotProduct(difference, resolution) < 0)
+    {
         resolution = Vector2Scale(resolution, -1);
     }
 

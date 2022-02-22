@@ -5,7 +5,7 @@
 #include "scene.h"
 
 #if defined(PLATFORM_WEB)
-#include <emscripten/emscripten.h>
+    #include <emscripten/emscripten.h>
 #endif
 
 static void Initialize(void);
@@ -33,7 +33,8 @@ static void Timestep(void)
     f32 deltaTime = currentTime - previousTime;
 
     // Set a maximum delta time in order to avoid a "spiral of death."
-    if (deltaTime > maxDeltaTime) {
+    if (deltaTime > maxDeltaTime)
+    {
         deltaTime = maxDeltaTime;
     }
 
@@ -41,7 +42,8 @@ static void Timestep(void)
 
     accumulator += deltaTime;
 
-    while (accumulator >= target) {
+    while (accumulator >= target)
+    {
         Update();
 
         accumulator -= target;
