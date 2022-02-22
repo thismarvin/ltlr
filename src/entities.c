@@ -8,7 +8,7 @@ void ECreatePlayer(Scene* scene, f32 x, f32 y)
     Vector2 position = Vector2Create(x, y);
 
     scene->components.tags[entity] = tagPosition | tagDimension | tagColor | tagSprite |
-                                     tagKinetic | tagSmooth | tagCollider | tagPlayer;
+                                     tagKinetic | tagSmooth | tagCollider | tagPlayer | tagBody;
 
     scene->components.positions[entity].value = position;
     scene->components.dimensions[entity] = (CDimension)
@@ -41,6 +41,10 @@ void ECreatePlayer(Scene* scene, f32 x, f32 y)
     {
         .layer = 1,
         .mask = 1,
+    };
+    scene->components.bodies[entity] = (CBody)
+    {
+        .grounded = false
     };
 }
 

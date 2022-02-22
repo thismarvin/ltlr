@@ -15,6 +15,7 @@ typedef struct
     CKinetic kinetics[MAX_ENTITIES];
     CSmooth smooths[MAX_ENTITIES];
     CCollider colliders[MAX_ENTITIES];
+    CBody bodies[MAX_ENTITIES];
 } Components;
 
 typedef struct

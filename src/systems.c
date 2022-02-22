@@ -33,9 +33,10 @@ void SKineticUpdate(Components* components, usize entity)
 
 void SPlayerUpdate(Components* components, usize entity)
 {
-    REQUIRE_DEPS(tagPlayer | tagKinetic);
+    REQUIRE_DEPS(tagPlayer | tagKinetic | tagBody);
 
     CKinetic* kinetic = &components->kinetics[entity];
+    CBody body = components->bodies[entity];
 
     kinetic->velocity.x = 0;
 
@@ -47,6 +48,11 @@ void SPlayerUpdate(Components* components, usize entity)
     if (IsKeyDown(KEY_RIGHT))
     {
         kinetic->velocity.x = 50;
+    }
+
+    if (body.grounded)
+    {
+        kinetic->velocity.y = 0;
     }
 }
 
@@ -99,6 +105,16 @@ void SCollisionUpdate(Components* components, usize entityCount, usize entity)
 
         position->value.x = newPos.x;
         position->value.y = newPos.y;
+
+        if (HAS_DEPS(tagBody))
+        {
+            CBody* body = &components->bodies[entity];
+
+            if (!body->grounded && resolution.y < 0)
+            {
+                body->grounded = true;
+            }
+        }
     }
 }
 

@@ -10,6 +10,7 @@ extern const u64 tagKinetic;
 extern const u64 tagSmooth;
 extern const u64 tagPlayer;
 extern const u64 tagCollider;
+extern const u64 tagBody;
 
 typedef struct
 {
@@ -51,3 +52,9 @@ typedef struct
     // Layer you collide with.
     u64 mask;
 } CCollider;
+
+// TODO(thismarvin): Work on the name...
+typedef struct
+{
+    bool grounded;
+} CBody;
