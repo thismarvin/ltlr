@@ -60,26 +60,6 @@ void SceneInit(Scene* self)
 
     ECreatePlayer(self, 8, 8);
     ECreateBlock(self, 0, 180 - 32, 320, 32);
-
-    // Testing!
-    {
-        // CreateDummy(self, 32, 32);
-        // CreateDummy(self, 64, 64);
-        // CreateDummy(self, 0, 80);
-        // CreateDummy(self, 16, 120);
-        //
-        // self->components.tags[0] = tagPosition | tagDimension | tagColor;
-        // self->components.colors[0].value = BLUE;
-        //
-        // DeallocateEntity(self, 1);
-        // DeallocateEntity(self, 3);
-        //
-        // CreateDummy(self, 16, 120);
-        // CreateDummy(self, 64, 64);
-        //
-        // CreateDummy(self, 32, 32);
-        // CreateDummy(self, 32, 150);
-    }
 }
 
 usize SceneGetEntityCount(Scene* self)
@@ -107,12 +87,16 @@ void SceneDraw(Scene* self, Texture2D* atlas)
 {
     for (usize i = 0; i < self->nextEntity; ++i)
     {
-        // SDummyDraw(&self->components, i);
         SSpriteDraw(&self->components, atlas, i);
 
         if (self->debugging)
         {
             SDebugDraw(&self->components, i);
         }
+    }
+
+    if (self->debugging)
+    {
+        DrawFPS(8, 8);
     }
 }
