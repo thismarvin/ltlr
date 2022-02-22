@@ -21,6 +21,8 @@ static const f32 maxDeltaTime = maxFrameSkip * target;
 static f32 accumulator = 0.0;
 static f64 previousTime = 0.0;
 
+static Texture2D sprites;
+
 static Player player;
 static Scene scene;
 
@@ -69,11 +71,15 @@ int main(void)
 #if defined(PLATFORM_WEB)
     emscripten_set_main_loop(Timestep, 0, 1);
 #else
+
     while (!WindowShouldClose()) // Detect window close button or ESC key
     {
         Timestep();
     }
+
 #endif
+
+    UnloadTexture(sprites);
 
     CloseAudioDevice();
     CloseWindow();
@@ -83,6 +89,8 @@ int main(void)
 
 static void Initialize(void)
 {
+    sprites = LoadTexture("./resources/sprites.png");
+
     PlayerInit(&player, Vector2Create(32, 32));
 
     SceneInit(&scene);
@@ -99,7 +107,7 @@ static void Draw(void)
 
     ClearBackground(WHITE);
 
-    SceneDraw(&scene);
+    SceneDraw(&scene, &sprites);
 
     EndDrawing();
 }
