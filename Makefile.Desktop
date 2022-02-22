@@ -1,4 +1,4 @@
-# TODO(thismarvin): Add a dependency to $(CONTENT_SOURCES) somewhere...
+# TODO(thismarvin): Add a target for bin/release/desktop/resources and one for debug too!
 
 EXC := ltlr
 
@@ -14,10 +14,13 @@ LIB_RAYLIB := build/vendor/raylib/desktop/libraylib.a
 
 GAME_HEADERS := $(shell find src -type f -name "*.h")
 GAME_SOURCES := $(shell find src -type f -name "*.c")
-CONTENT_SOURCES := $(shell find src/resources)
+CONTENT_SOURCES := $(shell find src/resources -type f)
 
 DEBUG_OBJECTS := $(patsubst src/%.c,build/debug/desktop/%.o, $(GAME_SOURCES))
 RELEASE_OBJECTS := $(patsubst src/%.c,build/release/desktop/%.o, $(GAME_SOURCES))
+
+DEBUG_DESKTOP_CONTENT := $(patsubst src/resources/%,bin/debug/desktop/resources/%, $(CONTENT_SOURCES))
+RELEASE_DESKTOP_CONTENT := $(patsubst src/resources/%,bin/release/desktop/resources/%, $(CONTENT_SOURCES))
 
 $(VERBOSE).SILENT:
 
@@ -63,6 +66,12 @@ bin/debug/desktop: | bin/debug
 bin/release/desktop: | bin/release
 	mkdir $@
 
+bin/debug/desktop/resources: | bin/debug/desktop
+	mkdir $@
+
+bin/release/desktop/resources: | bin/release/desktop
+	mkdir $@
+
 vendor/raylib/src:
 	git submodule update --init --recursive
 
@@ -74,17 +83,25 @@ $(LIB_RAYLIB): | vendor/raylib/src build/vendor/raylib/desktop
 $(DEBUG_OBJECTS): build/debug/desktop/%.o: src/%.c $(MAKEFILE_LIST) $(LIB_RAYLIB) $(GAME_HEADERS) | build/debug/desktop
 	$(CC) $(INCLUDE_FLAGS) $(FLAGS) $(DEBUG_FLAGS) -o $@ -c $<
 
-bin/debug/desktop/$(EXC): $(DEBUG_OBJECTS) | bin/debug/desktop
+bin/debug/desktop/$(EXC): $(DEBUG_OBJECTS) $(CONTENT_SOURCES) | bin/debug/desktop
 	$(CC) $(FLAGS) $(DEBUG_FLAGS) -o $@ $(DEBUG_OBJECTS) $(LIBRARY_FLAGS)
+	cp -r src/resources bin/debug/desktop
+	
+$(DEBUG_DESKTOP_CONTENT): bin/debug/desktop/resources/%: src/resources/% | bin/debug/desktop/resources
+	cp $< bin/debug/desktop/resources
 
 $(RELEASE_OBJECTS): build/release/desktop/%.o: src/%.c $(MAKEFILE_LIST) $(LIB_RAYLIB) $(GAME_HEADERS) | build/release/desktop
 	$(CC) $(INCLUDE_FLAGS) $(FLAGS) $(RELEASE_FLAGS) -o $@ -c $<
 
-bin/release/desktop/$(EXC): $(RELEASE_OBJECTS) | bin/release/desktop
+bin/release/desktop/$(EXC): $(RELEASE_OBJECTS) $(CONTENT_SOURCES) | bin/release/desktop
 	$(CC) $(FLAGS) $(RELEASE_FLAGS) -o $@ $(RELEASE_OBJECTS) $(LIBRARY_FLAGS)
+	cp -r src/resources bin/release/desktop
+
+$(RELEASE_DESKTOP_CONTENT): bin/release/desktop/resources/%: src/resources/% | bin/release/desktop/resources
+	cp $< bin/release/desktop/resources
 
 .PHONY: debug
-debug: bin/debug/desktop/$(EXC)
+debug: bin/debug/desktop/$(EXC) $(DEBUG_DESKTOP_CONTENT)
 	@echo Done
 
 .PHONY: dev
@@ -93,7 +110,7 @@ dev: debug
 	gprof bin/debug/desktop/$(EXC) bin/debug/desktop/gmon.out > bin/debug/desktop/profile
 
 .PHONY: release
-release: bin/release/desktop/$(EXC)
+release: bin/release/desktop/$(EXC) $(RELEASE_DESKTOP_CONTENT)
 	@echo Done
 
 .PHONY: clean

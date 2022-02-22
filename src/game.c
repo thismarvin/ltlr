@@ -89,7 +89,11 @@ int main(void)
 
 static void Initialize(void)
 {
+#if defined(PLATFORM_WEB)
+    sprites = LoadTexture("./src/resources/sprites.png");
+#else
     sprites = LoadTexture("./resources/sprites.png");
+#endif
 
     PlayerInit(&player, Vector2Create(32, 32));
 
