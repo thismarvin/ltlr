@@ -20,7 +20,7 @@ void ECreatePlayer(Scene* scene, f32 x, f32 y)
     {
         .value = (Color)
         {
-            255, 0, 0, 255
+            255, 255, 255, 255
         }
     };
     scene->components.sprites[entity] = (CSprite)

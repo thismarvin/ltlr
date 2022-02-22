@@ -177,11 +177,10 @@ void SSpriteDraw(Components* components, Texture2D* atlas, usize entity)
 
 void SDebugDraw(Components* components, usize entity)
 {
-    REQUIRE_DEPS(tagPosition | tagDimension | tagColor);
+    REQUIRE_DEPS(tagPosition | tagDimension);
 
     CPosition position = components->positions[entity];
     CDimension dimensions = components->dimensions[entity];
-    CColor color = components->colors[entity];
 
     Rectangle bounds = (Rectangle)
     {
@@ -191,5 +190,5 @@ void SDebugDraw(Components* components, usize entity)
         .height = dimensions.height
     };
 
-    DrawRectangleLinesEx(bounds, 4, color.value);
+    DrawRectangleLinesEx(bounds, 4, RED);
 }

@@ -56,6 +56,8 @@ void SceneInit(Scene* self)
     self->nextFreeSlot = 0;
     memset(&self->freeSlots, 0, sizeof(u64));
 
+    self->debugging = false;
+
     ECreatePlayer(self, 8, 8);
     ECreateBlock(self, 0, 180 - 32, 320, 32);
 
@@ -87,6 +89,11 @@ usize SceneGetEntityCount(Scene* self)
 
 void SceneUpdate(Scene* self)
 {
+    if (IsKeyPressed(KEY_F3))
+    {
+        self->debugging = !self->debugging;
+    }
+
     for (usize i = 0; i < self->nextEntity; ++i)
     {
         SSmoothUpdate(&self->components, i);
@@ -102,6 +109,10 @@ void SceneDraw(Scene* self, Texture2D* atlas)
     {
         // SDummyDraw(&self->components, i);
         SSpriteDraw(&self->components, atlas, i);
-        SDebugDraw(&self->components, i);
+
+        if (self->debugging)
+        {
+            SDebugDraw(&self->components, i);
+        }
     }
 }

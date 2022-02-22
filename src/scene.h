@@ -25,6 +25,7 @@ typedef struct
     usize nextEntity;
     usize nextFreeSlot;
     usize freeSlots[MAX_ENTITIES];
+    bool debugging;
 } Scene;
 
 void SceneInit(Scene* self);
