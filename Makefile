@@ -1,7 +1,10 @@
 $(VERBOSE).SILENT:
 
 .PHONY: all
-all: clean desktop web
+all:
+	$(MAKE) clean
+	$(MAKE) desktop
+	$(MAKE) web
 
 .PHONY: desktop
 desktop:
