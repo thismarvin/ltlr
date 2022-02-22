@@ -13,7 +13,7 @@ web:
 
 .PHONY: format
 format:
-	astyle -n --recursive "src/*.c,*.h"
+	astyle -n --project=.astylerc --recursive "src/*.c,*.h"
 	prettier --write --use-tabs src/minshell.html
 
 .PHONY: clean
