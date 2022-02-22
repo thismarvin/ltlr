@@ -5,6 +5,7 @@
 #include "systems.h"
 
 #define REQUIRE_DEPS(dependencies) if ((components->tags[entity] & (dependencies)) != (dependencies)) return
+#define HAS_DEPS(dependencies) ((components->tags[entity] & (dependencies)) == (dependencies))
 
 void SSmoothUpdate(Components* components, usize entity)
 {
@@ -109,7 +110,7 @@ void SSpriteDraw(Components* components, Texture2D* atlas, usize entity)
     CColor color = components->colors[entity];
     CSprite sprite = components->sprites[entity];
 
-    if ((components->tags[entity] & tagSmooth) == tagSmooth)
+    if (HAS_DEPS(tagSmooth))
     {
         CSmooth smooth = components->smooths[entity];
         Vector2 interpolated = Vector2Lerp(smooth.previous, position.value, ContextGetAlpha());
