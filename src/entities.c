@@ -44,7 +44,7 @@ void ECreatePlayer(Scene* scene, f32 x, f32 y)
     };
     scene->components.bodies[entity] = (CBody)
     {
-        .grounded = false
+        .resolution = VECTOR2_ZERO
     };
 
     {

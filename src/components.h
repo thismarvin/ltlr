@@ -58,9 +58,11 @@ typedef struct
 // TODO(thismarvin): Work on the name...
 typedef struct
 {
-    bool grounded;
+    // The most recent resolution against a collider.
+    Vector2 resolution;
 } CBody;
 
+// TODO(thismarvin): Should this be in some sort of Singleton?
 typedef struct
 {
     bool jumping;

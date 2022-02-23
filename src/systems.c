@@ -39,8 +39,6 @@ void SPlayerUpdate(Components* components, usize entity)
     CBody* body = &components->bodies[entity];
     CPlayer* player = &components->players[entity];
 
-    // TODO(thismarvin): Extract some variable (e.g. speed) into their own component.
-
     // Lateral Movement.
     {
         i8 strafe = 0;
@@ -58,18 +56,21 @@ void SPlayerUpdate(Components* components, usize entity)
         kinetic->velocity.x = strafe * player->moveSpeed;
     }
 
-    if (body->grounded)
+    bool grounded = body->resolution.y < 0;
+
+    if (grounded)
     {
         kinetic->velocity.y = 0;
+        player->jumping = false;
     }
 
     // Variable Jump Height.
     {
-        if (body->grounded && !player->jumping && IsKeyDown(KEY_SPACE))
+        if (grounded && !player->jumping && IsKeyDown(KEY_SPACE))
         {
             kinetic->velocity.y = -player->jumpVelocity;
             player->jumping = true;
-            body->grounded = false;
+            grounded = false;
         }
 
         if (player->jumping && !IsKeyDown(KEY_SPACE) && kinetic->velocity.y < 0)
@@ -82,7 +83,8 @@ void SPlayerUpdate(Components* components, usize entity)
     {
         Vector2 gravityForce = Vector2Create(0, player->defaultGravity);
 
-        if (player->jumping && kinetic->velocity.y < player->jumpVelocity) {
+        if (player->jumping && kinetic->velocity.y < player->jumpVelocity)
+        {
             gravityForce.y = player->jumpGravity;
         }
 
@@ -106,6 +108,13 @@ void SCollisionUpdate(Components* components, usize entityCount, usize entity)
         .width = dimensions.width,
         .height = dimensions.height
     };
+
+    if (HAS_DEPS(tagBody))
+    {
+        CBody* body = &components->bodies[entity];
+
+        body->resolution = VECTOR2_ZERO;
+    }
 
     for (usize i = 0; i < entityCount; ++i)
     {
@@ -144,18 +153,8 @@ void SCollisionUpdate(Components* components, usize entityCount, usize entity)
         {
             CBody* body = &components->bodies[entity];
 
-            if (!body->grounded && resolution.y < 0)
-            {
-                body->grounded = true;
-
-                // TODO(thismarvin): Hacky? Maybe, but it works!
-                if (HAS_DEPS(tagPlayer))
-                {
-                    CPlayer* player = &components->players[entity];
-
-                    player->jumping = false;
-                }
-            }
+            // TODO(thismarvin): Look into this some more... is it actually working?
+            body->resolution = Vector2Add(body->resolution, resolution);
         }
     }
 }
