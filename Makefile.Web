@@ -42,6 +42,9 @@ build/release: | build
 build/release/web: | build/release
 	mkdir $@
 
+build/release/web/vendor: | build/release/web
+	mkdir $@
+
 build/vendor: | build
 	mkdir $@
 
@@ -71,7 +74,7 @@ $(RAYLIB_OBJECTS): build/vendor/raylib/web/%.o: vendor/raylib/src/%.c | build/ve
 $(LIB_RAYLIB): $(RAYLIB_OBJECTS)
 	$(EMAR) rcs $@ $(RAYLIB_OBJECTS)
 
-$(RELEASE_OBJECTS): build/release/web/%.o: src/%.c $(MAKEFILE_LIST) $(LIB_RAYLIB) $(GAME_HEADERS) | build/release/web
+$(RELEASE_OBJECTS): build/release/web/%.o: src/%.c $(MAKEFILE_LIST) $(LIB_RAYLIB) $(GAME_HEADERS) | build/release/web build/release/web/vendor
 	$(EMCC) $(INCLUDE_FLAGS) $(FLAGS) $(RELEASE_FLAGS) -o $@ -c $<
 
 bin/release/web/index.html: $(LIB_RAYLIB) $(RELEASE_OBJECTS) src/minshell.html $(CONTENT_SOURCES) | bin/release/web

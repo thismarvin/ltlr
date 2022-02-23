@@ -37,7 +37,13 @@ build/release: | build
 build/debug/desktop: | build/debug
 	mkdir $@
 
+build/debug/desktop/vendor: | build/debug/desktop
+	mkdir $@
+
 build/release/desktop: | build/release
+	mkdir $@
+
+build/release/desktop/vendor: | build/release/desktop
 	mkdir $@
 
 build/vendor: | build
@@ -70,15 +76,12 @@ bin/debug/desktop/resources: | bin/debug/desktop
 bin/release/desktop/resources: | bin/release/desktop
 	mkdir $@
 
-vendor/raylib/src:
-	git submodule update --init --recursive
-
-$(LIB_RAYLIB): | vendor/raylib/src build/vendor/raylib/desktop
+$(LIB_RAYLIB): vendor/raylib/src/Makefile | build/vendor/raylib/desktop
 	cd vendor/raylib/src; $(MAKE) PLATFORM=PLATFORM_DESKTOP
 	mv vendor/raylib/src/libraylib.a build/vendor/raylib/desktop
 	find vendor/raylib/src -name "*.o" -exec mv {} build/vendor/raylib/desktop \;
 
-$(DEBUG_OBJECTS): build/debug/desktop/%.o: src/%.c $(MAKEFILE_LIST) $(LIB_RAYLIB) $(GAME_HEADERS) | build/debug/desktop
+$(DEBUG_OBJECTS): build/debug/desktop/%.o: src/%.c $(MAKEFILE_LIST) $(LIB_RAYLIB) $(GAME_HEADERS) | build/debug/desktop build/debug/desktop/vendor
 	$(CC) $(INCLUDE_FLAGS) $(FLAGS) $(DEBUG_FLAGS) -o $@ -c $<
 
 bin/debug/desktop/$(EXC): $(DEBUG_OBJECTS) | bin/debug/desktop
@@ -87,7 +90,7 @@ bin/debug/desktop/$(EXC): $(DEBUG_OBJECTS) | bin/debug/desktop
 $(DEBUG_DESKTOP_CONTENT): bin/debug/desktop/resources/%: src/resources/% | bin/debug/desktop/resources
 	cp -r src/resources bin/debug/desktop
 
-$(RELEASE_OBJECTS): build/release/desktop/%.o: src/%.c $(MAKEFILE_LIST) $(LIB_RAYLIB) $(GAME_HEADERS) | build/release/desktop
+$(RELEASE_OBJECTS): build/release/desktop/%.o: src/%.c $(MAKEFILE_LIST) $(LIB_RAYLIB) $(GAME_HEADERS) | build/release/desktop build/release/desktop/vendor
 	$(CC) $(INCLUDE_FLAGS) $(FLAGS) $(RELEASE_FLAGS) -o $@ -c $<
 
 bin/release/desktop/$(EXC): $(RELEASE_OBJECTS) | bin/release/desktop

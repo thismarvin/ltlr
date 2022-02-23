@@ -2,7 +2,7 @@
 .vscode
 bin
 build
-deps
+src/vendor
 
 # Prerequisites
 *.d
