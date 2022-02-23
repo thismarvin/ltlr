@@ -1,5 +1,3 @@
-# TODO(thismarvin): Add a target for bin/release/desktop/resources and one for debug too!
-
 EXC := ltlr
 
 CC := gcc
@@ -83,22 +81,20 @@ $(LIB_RAYLIB): | vendor/raylib/src build/vendor/raylib/desktop
 $(DEBUG_OBJECTS): build/debug/desktop/%.o: src/%.c $(MAKEFILE_LIST) $(LIB_RAYLIB) $(GAME_HEADERS) | build/debug/desktop
 	$(CC) $(INCLUDE_FLAGS) $(FLAGS) $(DEBUG_FLAGS) -o $@ -c $<
 
-bin/debug/desktop/$(EXC): $(DEBUG_OBJECTS) $(CONTENT_SOURCES) | bin/debug/desktop
+bin/debug/desktop/$(EXC): $(DEBUG_OBJECTS) | bin/debug/desktop
 	$(CC) $(FLAGS) $(DEBUG_FLAGS) -o $@ $(DEBUG_OBJECTS) $(LIBRARY_FLAGS)
-	cp -r src/resources bin/debug/desktop
 	
 $(DEBUG_DESKTOP_CONTENT): bin/debug/desktop/resources/%: src/resources/% | bin/debug/desktop/resources
-	cp $< bin/debug/desktop/resources
+	cp -r src/resources bin/debug/desktop
 
 $(RELEASE_OBJECTS): build/release/desktop/%.o: src/%.c $(MAKEFILE_LIST) $(LIB_RAYLIB) $(GAME_HEADERS) | build/release/desktop
 	$(CC) $(INCLUDE_FLAGS) $(FLAGS) $(RELEASE_FLAGS) -o $@ -c $<
 
-bin/release/desktop/$(EXC): $(RELEASE_OBJECTS) $(CONTENT_SOURCES) | bin/release/desktop
+bin/release/desktop/$(EXC): $(RELEASE_OBJECTS) | bin/release/desktop
 	$(CC) $(FLAGS) $(RELEASE_FLAGS) -o $@ $(RELEASE_OBJECTS) $(LIBRARY_FLAGS)
-	cp -r src/resources bin/release/desktop
 
 $(RELEASE_DESKTOP_CONTENT): bin/release/desktop/resources/%: src/resources/% | bin/release/desktop/resources
-	cp $< bin/release/desktop/resources
+	cp -r src/resources bin/release/desktop
 
 .PHONY: debug
 debug: bin/debug/desktop/$(EXC) $(DEBUG_DESKTOP_CONTENT)
