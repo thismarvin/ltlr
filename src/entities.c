@@ -73,7 +73,7 @@ void ECreateBlock(Scene* scene, f32 x, f32 y, f32 width, f32 height)
 
     Vector2 position = Vector2Create(x, y);
 
-    scene->components.tags[entity] = tagPosition | tagDimension | tagColor | tagCollider;
+    scene->components.tags[entity] = tagPosition | tagDimension | tagCollider;
 
     scene->components.positions[entity].value = position;
     scene->components.dimensions[entity] = (CDimension)
@@ -81,20 +81,9 @@ void ECreateBlock(Scene* scene, f32 x, f32 y, f32 width, f32 height)
         .width = width,
         .height = height
     };
-    scene->components.colors[entity] = (CColor)
-    {
-        .value = (Color)
-        {
-            0, 0, 0, 255
-        }
-    };
     scene->components.colliders[entity] = (CCollider)
     {
         .layer = 1,
         .mask = 0,
     };
-    // scene->components.sprites[entity] = (CSprite) {
-    //     .source = (Rectangle) { 16, 0, 32, 48 },
-    //     .offset = Vector2Create(7, 13)
-    // };
 }

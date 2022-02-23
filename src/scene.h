@@ -26,6 +26,12 @@ typedef struct
     usize nextFreeSlot;
     usize freeSlots[MAX_ENTITIES];
     bool debugging;
+    u16* tilelayer;
+    usize tilelayerLength;
+    u32 tilemapWidth;
+    u32 tilemapHeight;
+    u16 tileWidth;
+    u16 tileHeight;
 } Scene;
 
 void SceneInit(Scene* self);
@@ -34,3 +40,4 @@ void SceneDeallocateEntity(Scene* self, usize entity);
 usize SceneGetEntityCount(Scene* self);
 void SceneUpdate(Scene* self);
 void SceneDraw(Scene* self, Texture2D* atlas);
+void SceneDestroy(Scene* self);

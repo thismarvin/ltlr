@@ -1,3 +1,4 @@
+#include "./vendor/cJSON.h"
 #include "entities.h"
 #include "scene.h"
 #include "systems.h"
@@ -58,8 +59,70 @@ void SceneInit(Scene* self)
 
     self->debugging = false;
 
+    // Level Loading.
+    {
+#if defined(PLATFORM_WEB)
+        char* buffer = LoadFileText("./src/resources/build/level.json");
+#else
+        char* buffer = LoadFileText("./resources/build/level.json");
+#endif
+
+        cJSON* level = cJSON_Parse(buffer);
+
+        const cJSON* widthObj = cJSON_GetObjectItem(level, "width");
+        const cJSON* heightObj = cJSON_GetObjectItem(level, "height");
+        const cJSON* tilewidthObj = cJSON_GetObjectItem(level, "tilewidth");
+        const cJSON* tileheightObj = cJSON_GetObjectItem(level, "tileheight");
+
+        self->tilemapWidth = (u32)cJSON_GetNumberValue(widthObj);
+        self->tilemapHeight = (u32)cJSON_GetNumberValue(heightObj);
+        self->tileWidth = (u16)cJSON_GetNumberValue(tilewidthObj);
+        self->tileHeight = (u16)cJSON_GetNumberValue(tileheightObj);
+
+        const cJSON* layersObj = cJSON_GetObjectItem(level, "layers");
+
+        const cJSON* spritesObj = cJSON_GetArrayItem(layersObj, 0);
+        const cJSON* dataArray = cJSON_GetObjectItem(spritesObj, "data");
+        usize dataLength = cJSON_GetArraySize(dataArray);
+
+        self->tilelayer = malloc(sizeof(u16) * dataLength);
+        self->tilelayerLength = dataLength;
+
+        for (usize i = 0; i < dataLength; ++i)
+        {
+            const cJSON* spriteObj = cJSON_GetArrayItem(dataArray, i);
+            u16 sprite = (u16)cJSON_GetNumberValue(spriteObj);
+
+            self->tilelayer[i] = sprite;
+        }
+
+        const cJSON* colliders = cJSON_GetArrayItem(layersObj, 1);
+        const cJSON* objects = cJSON_GetObjectItem(colliders, "objects");
+        usize objectsLength = cJSON_GetArraySize(objects);
+
+        for (usize i = 0; i < objectsLength; ++i)
+        {
+            const cJSON* collider = cJSON_GetArrayItem(objects, i);
+
+            const cJSON* xObj = cJSON_GetObjectItem(collider, "x");
+            const cJSON* yObj = cJSON_GetObjectItem(collider, "y");
+            const cJSON* widthObj = cJSON_GetObjectItem(collider, "width");
+            const cJSON* heightObj = cJSON_GetObjectItem(collider, "height");
+
+            float x = (float)cJSON_GetNumberValue(xObj);
+            float y = (float)cJSON_GetNumberValue(yObj);
+            float width = (float)cJSON_GetNumberValue(widthObj);
+            float height = (float)cJSON_GetNumberValue(heightObj);
+
+            ECreateBlock(self, x, y, width, height);
+        }
+
+        cJSON_Delete(level);
+        free(buffer);
+    }
+
+    // TODO(thismarvin): Put this into level.json somehow...
     ECreatePlayer(self, 8, 8);
-    ECreateBlock(self, 0, 180 - 32, 320, 32);
 }
 
 usize SceneGetEntityCount(Scene* self)
@@ -85,6 +148,33 @@ void SceneUpdate(Scene* self)
 
 void SceneDraw(Scene* self, Texture2D* atlas)
 {
+    // Draw Tilemap.
+    for (usize i = 0; i < self->tilelayerLength; ++i)
+    {
+        if (self->tilelayer[i] == 0)
+        {
+            continue;
+        }
+
+        u16 sprite = self->tilelayer[i] - 1;
+
+        Vector2 position = (Vector2)
+        {
+            .x = (i % self->tilemapWidth) * self->tileWidth,
+            .y = (i / self->tilemapWidth) * self->tileHeight
+        };
+
+        Rectangle source = (Rectangle)
+        {
+            .x = (sprite % 8) * self->tileWidth,
+            .y = (sprite / 8) * self->tileHeight,
+            .width = self->tileWidth,
+            .height = self->tileHeight
+        };
+
+        DrawTextureRec(*atlas, source, position, WHITE);
+    }
+
     for (usize i = 0; i < self->nextEntity; ++i)
     {
         SSpriteDraw(&self->components, atlas, i);
@@ -99,4 +189,9 @@ void SceneDraw(Scene* self, Texture2D* atlas)
     {
         DrawFPS(8, 8);
     }
+}
+
+void SceneDestroy(Scene* self)
+{
+    free(self->tilelayer);
 }

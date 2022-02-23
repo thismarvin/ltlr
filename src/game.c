@@ -79,6 +79,7 @@ int main(void)
 
 #endif
 
+    SceneDestroy(&scene);
     UnloadTexture(atlas);
 
     CloseAudioDevice();
