@@ -1,6 +1,5 @@
 #include "common.h"
 #include "context.h"
-#include "player.h"
 #include "raylib.h"
 #include "scene.h"
 
@@ -23,7 +22,6 @@ static f64 previousTime = 0.0;
 
 static Texture2D atlas;
 
-static Player player;
 static Scene scene;
 
 static void Timestep(void)
@@ -95,8 +93,6 @@ static void Initialize(void)
 #else
     atlas = LoadTexture("./resources/sprites.png");
 #endif
-
-    PlayerInit(&player, Vector2Create(32, 32));
 
     SceneInit(&scene);
 }
