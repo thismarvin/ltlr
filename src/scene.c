@@ -123,6 +123,9 @@ void SceneInit(Scene* self)
 
     // TODO(thismarvin): Put this into level.json somehow...
     ECreatePlayer(self, 8, 8);
+    ECreateWalker(self, 16 * self->tileWidth, 8 * self->tileWidth);
+    ECreateWalker(self, 16 * self->tileWidth, 0 * self->tileWidth);
+    ECreateWalker(self, 16 * self->tileWidth, 4 * self->tileWidth);
 }
 
 usize SceneGetEntityCount(Scene* self)
@@ -141,6 +144,7 @@ void SceneUpdate(Scene* self)
     {
         SSmoothUpdate(&self->components, i);
         SPlayerUpdate(&self->components, i);
+        SWalkerUpdate(&self->components, i);
         SKineticUpdate(&self->components, i);
         SCollisionUpdate(&self->components, self->nextEntity, i);
     }

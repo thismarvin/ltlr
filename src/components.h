@@ -11,6 +11,7 @@ extern const u64 tagSmooth;
 extern const u64 tagPlayer;
 extern const u64 tagCollider;
 extern const u64 tagBody;
+extern const u64 tagWalker;
 
 // TODO(thismarvin): Naming components is hard...
 

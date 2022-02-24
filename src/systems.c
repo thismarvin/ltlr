@@ -159,6 +159,26 @@ void SCollisionUpdate(Components* components, usize entityCount, usize entity)
     }
 }
 
+void SWalkerUpdate(Components* components, usize entity)
+{
+    REQUIRE_DEPS(tagWalker | tagKinetic | tagBody);
+
+    CKinetic* kinetic = &components->kinetics[entity];
+    CBody body = components->bodies[entity];
+
+    bool grounded = body.resolution.y < 0;
+    if (grounded)
+    {
+        kinetic->velocity.y = 0;
+    }
+
+    if (body.resolution.x != 0)
+    {
+        // Side collision
+        kinetic->velocity.x *= -1;
+    }
+}
+
 void SSpriteDraw(Components* components, Texture2D* atlas, usize entity)
 {
     REQUIRE_DEPS(tagPosition | tagColor | tagSprite);
