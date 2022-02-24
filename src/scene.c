@@ -1,6 +1,7 @@
 #include "./vendor/cJSON.h"
 #include "context.h"
 #include "entities.h"
+#include "raymath.h"
 #include "scene.h"
 #include "systems.h"
 #include <assert.h>
@@ -134,7 +135,8 @@ void SceneInit(Scene* self)
     }
 
     // TODO(thismarvin): Put this into level.json somehow...
-    ECreatePlayer(self, 8, 8);
+    self->player = ECreatePlayer(self, 8, 8);
+
     ECreateWalker(self, 16 * self->tileWidth, 8 * self->tileWidth);
     ECreateWalker(self, 16 * self->tileWidth, 0 * self->tileWidth);
     ECreateWalker(self, 16 * self->tileWidth, 4 * self->tileWidth);
@@ -164,6 +166,35 @@ void SceneUpdate(Scene* self)
 
 void SceneDraw(Scene* self, Texture2D* atlas)
 {
+    // TODO(thismarvin): This should ultimately be a System... somehow...
+    // Update Camera
+    {
+        // TODO(thismarvin): Should this exist in Context?
+        int viewportWidth = 320;
+        int viewportHeight = 180;
+
+        CDimension dimension = self->components.dimensions[self->player];
+
+        Vector2 previous = self->components.smooths[self->player].previous;
+        Vector2 current = self->components.positions[self->player].value;
+
+        Vector2 position = Vector2Lerp(previous, current, ContextGetAlpha());
+
+        position = Vector2Add(position, Vector2Create(dimension.width * 0.5, dimension.height * 0.5));
+
+        self->camera.offset.x = (-position.x + viewportWidth * 0.5) * self->camera.zoom;
+        self->camera.offset.y = (-position.y + viewportHeight * 0.5) * self->camera.zoom;
+
+        // TODO(thismarvin): This should be a property of Scene.
+        Rectangle sceneBounds = (Rectangle) { 0, 0, 320 * 2, 180 };
+
+        self->camera.offset.x = MIN(RectangleLeft(sceneBounds), self->camera.offset.x);
+        self->camera.offset.x = MAX(-(RectangleRight(sceneBounds) - viewportWidth) * self->camera.zoom, self->camera.offset.x);
+
+        self->camera.offset.y = MIN(RectangleTop(sceneBounds), self->camera.offset.y);
+        self->camera.offset.y = MAX(-(RectangleBottom(sceneBounds) - viewportHeight) * self->camera.zoom, self->camera.offset.y);
+    }
+
     BeginMode2D(self->camera);
 
     // Draw Tilemap.

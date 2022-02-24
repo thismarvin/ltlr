@@ -33,6 +33,7 @@ typedef struct
     u16 tileWidth;
     u16 tileHeight;
     Camera2D camera;
+    usize player;
 } Scene;
 
 void SceneInit(Scene* self);
