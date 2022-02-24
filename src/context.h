@@ -2,6 +2,8 @@
 
 #include "common.h"
 
+#define CTX_ZOOM 3
+
 // Target (fixed) delta time.
 #define CTX_DT (1.0 / 60.0)
 

@@ -11,8 +11,8 @@ static void Initialize(void);
 static void Update(void);
 static void Draw(void);
 
-static const u16 screenWidth = 320;
-static const u16 screenHeight = 180;
+static const u16 screenWidth = 320 * CTX_ZOOM;
+static const u16 screenHeight = 180 * CTX_ZOOM;
 
 static const f32 target = CTX_DT;
 static const u8 maxFrameSkip = 25;

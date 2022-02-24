@@ -1,4 +1,5 @@
 #include "./vendor/cJSON.h"
+#include "context.h"
 #include "entities.h"
 #include "scene.h"
 #include "systems.h"
@@ -58,6 +59,17 @@ void SceneInit(Scene* self)
     memset(&self->freeSlots, 0, sizeof(u64));
 
     self->debugging = false;
+
+    // Setup Camera.
+    {
+        Vector2 offset = { 0, 0 };
+        Vector2 target = { 0, 0 };
+
+        self->camera.offset = offset;
+        self->camera.target = target;
+        self->camera.rotation = 0;
+        self->camera.zoom = CTX_ZOOM;
+    }
 
     // Level Loading.
     {
@@ -152,6 +164,8 @@ void SceneUpdate(Scene* self)
 
 void SceneDraw(Scene* self, Texture2D* atlas)
 {
+    BeginMode2D(self->camera);
+
     // Draw Tilemap.
     for (usize i = 0; i < self->tilelayerLength; ++i)
     {
@@ -193,6 +207,8 @@ void SceneDraw(Scene* self, Texture2D* atlas)
     {
         DrawFPS(8, 8);
     }
+
+    EndMode2D();
 }
 
 void SceneDestroy(Scene* self)
