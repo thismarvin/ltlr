@@ -167,6 +167,7 @@ void SWalkerUpdate(Components* components, usize entity)
     CBody body = components->bodies[entity];
 
     bool grounded = body.resolution.y < 0;
+
     if (grounded)
     {
         kinetic->velocity.y = 0;
