@@ -40,7 +40,7 @@ void ECreatePlayer(Scene* scene, f32 x, f32 y)
     scene->components.colliders[entity] = (CCollider)
     {
         .layer = 1,
-        .mask = 1,
+        .mask = 1 << 1,
     };
     scene->components.bodies[entity] = (CBody)
     {
@@ -83,7 +83,7 @@ void ECreateBlock(Scene* scene, f32 x, f32 y, f32 width, f32 height)
     };
     scene->components.colliders[entity] = (CCollider)
     {
-        .layer = 1,
+        .layer = 1 << 1,
         .mask = 0,
     };
 }
