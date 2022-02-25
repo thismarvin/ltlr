@@ -2,6 +2,7 @@
 
 #include "common.h"
 #include "components.h"
+#include "level_segment.h"
 
 #define MAX_ENTITIES 64
 
@@ -26,14 +27,11 @@ typedef struct
     usize nextFreeSlot;
     usize freeSlots[MAX_ENTITIES];
     bool debugging;
-    u16* tilelayer;
-    usize tilelayerLength;
-    u32 tilemapWidth;
-    u32 tilemapHeight;
-    u16 tileWidth;
-    u16 tileHeight;
     Camera2D camera;
     usize player;
+    Rectangle bounds;
+    LevelSegment* segments;
+    usize segmentsLength;
 } Scene;
 
 void SceneInit(Scene* self);

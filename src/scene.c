@@ -1,4 +1,3 @@
-#include "./vendor/cJSON.h"
 #include "context.h"
 #include "entities.h"
 #include "raymath.h"
@@ -74,72 +73,49 @@ void SceneInit(Scene* self)
 
     // Level Loading.
     {
+        // TODO(thismarvin): Should we crawl the resource directory to find levels?
+
 #if defined(PLATFORM_WEB)
-        char* buffer = LoadFileText("./src/resources/build/level.json");
+        char* levels[2] = { "./src/resources/build/level_00.json", "./src/resources/build/level_01.json" };
 #else
-        char* buffer = LoadFileText("./resources/build/level.json");
+        char* levels[2] = { "./resources/build/level_00.json", "./resources/build/level_01.json" };
 #endif
 
-        cJSON* level = cJSON_Parse(buffer);
+        self->segmentsLength = 2;
+        self->segments = malloc(sizeof(LevelSegment) * self->segmentsLength);
 
-        const cJSON* widthObj = cJSON_GetObjectItem(level, "width");
-        const cJSON* heightObj = cJSON_GetObjectItem(level, "height");
-        const cJSON* tilewidthObj = cJSON_GetObjectItem(level, "tilewidth");
-        const cJSON* tileheightObj = cJSON_GetObjectItem(level, "tileheight");
-
-        self->tilemapWidth = (u32)cJSON_GetNumberValue(widthObj);
-        self->tilemapHeight = (u32)cJSON_GetNumberValue(heightObj);
-        self->tileWidth = (u16)cJSON_GetNumberValue(tilewidthObj);
-        self->tileHeight = (u16)cJSON_GetNumberValue(tileheightObj);
-
-        const cJSON* layersObj = cJSON_GetObjectItem(level, "layers");
-
-        const cJSON* spritesObj = cJSON_GetArrayItem(layersObj, 0);
-        const cJSON* dataArray = cJSON_GetObjectItem(spritesObj, "data");
-        usize dataLength = cJSON_GetArraySize(dataArray);
-
-        self->tilelayer = malloc(sizeof(u16) * dataLength);
-        self->tilelayerLength = dataLength;
-
-        for (usize i = 0; i < dataLength; ++i)
+        self->bounds = (Rectangle)
         {
-            const cJSON* spriteObj = cJSON_GetArrayItem(dataArray, i);
-            u16 sprite = (u16)cJSON_GetNumberValue(spriteObj);
+            .x = 0,
+            .y = 0,
+            .width = 0,
+            .height = 180,
+        };
 
-            self->tilelayer[i] = sprite;
-        }
+        Vector2 offset = VECTOR2_ZERO;
 
-        const cJSON* colliders = cJSON_GetArrayItem(layersObj, 1);
-        const cJSON* objects = cJSON_GetObjectItem(colliders, "objects");
-        usize objectsLength = cJSON_GetArraySize(objects);
-
-        for (usize i = 0; i < objectsLength; ++i)
+        for (usize i = 0; i < self->segmentsLength; ++i)
         {
-            const cJSON* collider = cJSON_GetArrayItem(objects, i);
+            LevelSegmentInit(&self->segments[i], levels[i]);
 
-            const cJSON* xObj = cJSON_GetObjectItem(collider, "x");
-            const cJSON* yObj = cJSON_GetObjectItem(collider, "y");
-            const cJSON* widthObj = cJSON_GetObjectItem(collider, "width");
-            const cJSON* heightObj = cJSON_GetObjectItem(collider, "height");
+            for (usize j = 0; j < self->segments[i].collidersLength; ++j)
+            {
+                Rectangle collider = self->segments[i].colliders[j];
 
-            float x = (float)cJSON_GetNumberValue(xObj);
-            float y = (float)cJSON_GetNumberValue(yObj);
-            float width = (float)cJSON_GetNumberValue(widthObj);
-            float height = (float)cJSON_GetNumberValue(heightObj);
+                ECreateBlock(self, offset.x + collider.x, offset.y + collider.y, collider.width, collider.height);
+            }
 
-            ECreateBlock(self, x, y, width, height);
+            self->bounds.width += self->segments[i].bounds.width;
+            offset.x += self->bounds.width;
         }
-
-        cJSON_Delete(level);
-        free(buffer);
     }
 
     // TODO(thismarvin): Put this into level.json somehow...
     self->player = ECreatePlayer(self, 8, 8);
 
-    ECreateWalker(self, 16 * self->tileWidth, 8 * self->tileWidth);
-    ECreateWalker(self, 16 * self->tileWidth, 0 * self->tileWidth);
-    ECreateWalker(self, 16 * self->tileWidth, 4 * self->tileWidth);
+    ECreateWalker(self, 16 * 16, 8 * 16);
+    ECreateWalker(self, 16 * 16, 0 * 16);
+    ECreateWalker(self, 16 * 16, 4 * 16);
 }
 
 usize SceneGetEntityCount(Scene* self)
@@ -185,43 +161,53 @@ void SceneDraw(Scene* self, Texture2D* atlas)
         self->camera.offset.x = (-position.x + viewportWidth * 0.5) * self->camera.zoom;
         self->camera.offset.y = (-position.y + viewportHeight * 0.5) * self->camera.zoom;
 
-        // TODO(thismarvin): This should be a property of Scene.
-        Rectangle sceneBounds = (Rectangle) { 0, 0, 320 * 2, 180 };
+        self->camera.offset.x = MIN(RectangleLeft(self->bounds), self->camera.offset.x);
+        self->camera.offset.x = MAX(-(RectangleRight(self->bounds) - viewportWidth) * self->camera.zoom,
+                                    self->camera.offset.x);
 
-        self->camera.offset.x = MIN(RectangleLeft(sceneBounds), self->camera.offset.x);
-        self->camera.offset.x = MAX(-(RectangleRight(sceneBounds) - viewportWidth) * self->camera.zoom, self->camera.offset.x);
-
-        self->camera.offset.y = MIN(RectangleTop(sceneBounds), self->camera.offset.y);
-        self->camera.offset.y = MAX(-(RectangleBottom(sceneBounds) - viewportHeight) * self->camera.zoom, self->camera.offset.y);
+        self->camera.offset.y = MIN(RectangleTop(self->bounds), self->camera.offset.y);
+        self->camera.offset.y = MAX(-(RectangleBottom(self->bounds) - viewportHeight) * self->camera.zoom,
+                                    self->camera.offset.y);
     }
 
     BeginMode2D(self->camera);
 
     // Draw Tilemap.
-    for (usize i = 0; i < self->tilelayerLength; ++i)
     {
-        if (self->tilelayer[i] == 0)
+        Vector2 offset = VECTOR2_ZERO;
+
+        for (usize i = 0; i < self->segmentsLength; ++i)
         {
-            continue;
+            for (usize j = 0; j < self->segments[i].spritesLength; ++j)
+            {
+                if (self->segments[i].sprites[j] == 0)
+                {
+                    continue;
+                }
+
+                u16 sprite = self->segments[i].sprites[j] - 1;
+
+                Vector2 position = (Vector2)
+                {
+                    .x = (j % self->segments[i].tilemapWidth) * self->segments[i].tileWidth,
+                    .y = (j / self->segments[i].tilemapWidth) * self->segments[i].tileHeight
+                };
+
+                position = Vector2Add(position, offset);
+
+                Rectangle source = (Rectangle)
+                {
+                    .x = (sprite % self->segments[i].tilesetColumns) * self->segments[i].tileWidth,
+                    .y = (sprite / self->segments[i].tilesetColumns) * self->segments[i].tileHeight,
+                    .width = self->segments[i].tileWidth,
+                    .height = self->segments[i].tileHeight
+                };
+
+                DrawTextureRec(*atlas, source, position, WHITE);
+            }
+
+            offset.x += self->segments[i].bounds.width;
         }
-
-        u16 sprite = self->tilelayer[i] - 1;
-
-        Vector2 position = (Vector2)
-        {
-            .x = (i % self->tilemapWidth) * self->tileWidth,
-            .y = (i / self->tilemapWidth) * self->tileHeight
-        };
-
-        Rectangle source = (Rectangle)
-        {
-            .x = (sprite % 8) * self->tileWidth,
-            .y = (sprite / 8) * self->tileHeight,
-            .width = self->tileWidth,
-            .height = self->tileHeight
-        };
-
-        DrawTextureRec(*atlas, source, position, WHITE);
     }
 
     for (usize i = 0; i < self->nextEntity; ++i)
@@ -234,15 +220,19 @@ void SceneDraw(Scene* self, Texture2D* atlas)
         }
     }
 
+    EndMode2D();
+
     if (self->debugging)
     {
         DrawFPS(8, 8);
     }
-
-    EndMode2D();
 }
 
 void SceneDestroy(Scene* self)
 {
-    free(self->tilelayer);
+    for (usize i = 0; i < self->segmentsLength; ++i)
+    {
+        LevelSegmentDestroy(
+            &self->segments[i]);
+    }
 }

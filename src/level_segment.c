@@ -1,32 +1,30 @@
 #include "./vendor/cJSON.h"
 #include "level_segment.h"
 
-LevelSegment LevelSegmentCreate(char* path)
+void LevelSegmentInit(LevelSegment* self, char* path)
 {
-    LevelSegment segment;
-
     char* buffer = LoadFileText(path);
 
     cJSON* parentObj = cJSON_Parse(buffer);
 
-    // Get segment boundaries.
+    // Get self->boundaries.
     {
         const cJSON* widthObj = cJSON_GetObjectItem(parentObj, "width");
         const cJSON* heightObj = cJSON_GetObjectItem(parentObj, "height");
         const cJSON* tilewidthObj = cJSON_GetObjectItem(parentObj, "tilewidth");
         const cJSON* tileheightObj = cJSON_GetObjectItem(parentObj, "tileheight");
 
-        segment.tilemapWidth = (u32)cJSON_GetNumberValue(widthObj);
-        segment.tilemapHeight = (u32)cJSON_GetNumberValue(heightObj);
-        segment.tileWidth = (u16)cJSON_GetNumberValue(tilewidthObj);
-        segment.tileHeight = (u16)cJSON_GetNumberValue(tileheightObj);
+        self->tilemapWidth = (u32)cJSON_GetNumberValue(widthObj);
+        self->tilemapHeight = (u32)cJSON_GetNumberValue(heightObj);
+        self->tileWidth = (u16)cJSON_GetNumberValue(tilewidthObj);
+        self->tileHeight = (u16)cJSON_GetNumberValue(tileheightObj);
 
-        segment.bounds = (Rectangle)
+        self->bounds = (Rectangle)
         {
             .x = 0,
             .y = 0,
-            .width = segment.tilemapWidth * segment.tileWidth,
-            .height = segment.tilemapHeight * segment.tileHeight,
+            .width = self->tilemapWidth * self->tileWidth,
+            .height = self->tilemapHeight * self->tileHeight,
         };
     }
 
@@ -39,7 +37,7 @@ LevelSegment LevelSegmentCreate(char* path)
 
         u16 columns = (u16)cJSON_GetNumberValue(columnsObj);
 
-        segment.tilesetColumns = columns;
+        self->tilesetColumns = columns;
     }
 
     const cJSON* layersArray = cJSON_GetObjectItem(parentObj, "layers");
@@ -50,8 +48,8 @@ LevelSegment LevelSegmentCreate(char* path)
         const cJSON* dataObj = cJSON_GetObjectItem(spritesObj, "data");
         usize dataLength = cJSON_GetArraySize(dataObj);
 
-        segment.sprites = malloc(sizeof(u16) * dataLength);
-        segment.spritesLength = dataLength;
+        self->sprites = malloc(sizeof(u16) * dataLength);
+        self->spritesLength = dataLength;
 
         for (usize i = 0; i < dataLength; ++i)
         {
@@ -59,7 +57,7 @@ LevelSegment LevelSegmentCreate(char* path)
 
             u16 sprite = (u16)cJSON_GetNumberValue(spriteObj);
 
-            segment.sprites[i] = sprite;
+            self->sprites[i] = sprite;
         }
     }
 
@@ -69,8 +67,8 @@ LevelSegment LevelSegmentCreate(char* path)
         const cJSON* objectsObj = cJSON_GetObjectItem(collidersObj, "objects");
         usize objectsLength = cJSON_GetArraySize(objectsObj);
 
-        segment.colliders = malloc(sizeof(Rectangle) * objectsLength);
-        segment.collidersLength = objectsLength;
+        self->colliders = malloc(sizeof(Rectangle) * objectsLength);
+        self->collidersLength = objectsLength;
 
         for (usize i = 0; i < objectsLength; ++i)
         {
@@ -86,13 +84,9 @@ LevelSegment LevelSegmentCreate(char* path)
             float width = (float)cJSON_GetNumberValue(widthObj);
             float height = (float)cJSON_GetNumberValue(heightObj);
 
-            // TODO(thismarvin): Support or ignore Polygons somehow...
-            // if (width == 0 || height == 0)
-            // {
-            //     continue;
-            // }
+            // TODO(thismarvin): Support Polygons somehow...
 
-            segment.colliders[i] = (Rectangle)
+            self->colliders[i] = (Rectangle)
             {
                 .x = x,
                 .y = y,
@@ -104,8 +98,6 @@ LevelSegment LevelSegmentCreate(char* path)
 
     cJSON_Delete(parentObj);
     free(buffer);
-
-    return segment;
 }
 
 void LevelSegmentDestroy(LevelSegment* self)

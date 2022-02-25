@@ -16,5 +16,5 @@ typedef struct
     u16 tileHeight;
 } LevelSegment;
 
-LevelSegment LevelSegmentCreate(char* path);
+void LevelSegmentInit(LevelSegment* self, char* path);
 void LevelSegmentDestroy(LevelSegment* self);
