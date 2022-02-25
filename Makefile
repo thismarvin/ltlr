@@ -29,7 +29,7 @@ src/vendor/cJSON.c: vendor/cJSON/cJSON.c | src/vendor
 	cp $< src/vendor
 
 $(LEVEL_JSON): src/resources/build/%.json: content/tiled/%.tmx | src/resources/build
-	tiled --export-map json $< $@
+	tiled --embed-tilesets --export-map json $< $@
 	prettier -w --use-tabs $@
 
 $(VENDOR):
