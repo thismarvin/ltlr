@@ -1,5 +1,9 @@
 $(VERBOSE).SILENT:
 
+TILED := tiled
+ASTYLE := astyle
+PRETTIER := prettier
+
 VENDOR := vendor/raylib/src/raylib.h vendor/cJSON/cJSON.h
 EXTERNAL := src/vendor/cJSON.h src/vendor/cJSON.c
 
@@ -29,8 +33,8 @@ src/vendor/cJSON.c: vendor/cJSON/cJSON.c | src/vendor
 	cp $< src/vendor
 
 $(LEVEL_JSON): src/resources/build/%.json: content/tiled/%.tmx | src/resources/build
-	tiled --embed-tilesets --export-map json $< $@
-	prettier -w --use-tabs $@
+	$(TILED) --embed-tilesets --export-map json $< $@
+	$(PRETTIER) -w --use-tabs $@
 
 $(VENDOR):
 	git submodule update --init --recursive
@@ -49,8 +53,8 @@ dev: $(DEPS)
 
 .PHONY: format
 format:
-	astyle -n --project=.astylerc --recursive "src/*.c,*.h"
-	prettier --write --use-tabs src/minshell.html
+	$(ASTYLE) -n --project=.astylerc --recursive "src/*.c,*.h"
+	$(PRETTIER) --write --use-tabs src/minshell.html
 
 .PHONY: clean
 clean:
