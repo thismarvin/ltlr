@@ -6,45 +6,115 @@
 #include <assert.h>
 #include <string.h>
 
-static void PushFree(Scene* self, usize value)
+static void EntityManagerPushFree(Scene* self, usize value)
 {
-    assert(self->nextFreeSlot < MAX_ENTITIES);
+    EntityManager* entityManager = &self->entityManager;
 
-    self->freeSlots[self->nextFreeSlot] = value;
-    self->nextFreeSlot += 1;
+    assert(entityManager->nextFreeSlot < MAX_ENTITIES);
+
+    entityManager->freeSlots[entityManager->nextFreeSlot] = value;
+    entityManager->nextFreeSlot += 1;
 }
 
-static usize PopFree(Scene* self)
+static usize EntityManagerPopFree(Scene* self)
 {
-    assert(self->nextFreeSlot > 0);
+    EntityManager* entityManager = &self->entityManager;
 
-    usize slot = self->freeSlots[self->nextFreeSlot - 1];
-    self->nextFreeSlot -= 1;
+    assert(entityManager->nextFreeSlot > 0);
+
+    usize slot = entityManager->freeSlots[entityManager->nextFreeSlot - 1];
+    entityManager->nextFreeSlot -= 1;
+
+    return slot;
+}
+
+static void EventManagerPushFree(Scene* self, usize value)
+{
+    EventManager* eventManager = &self->eventManager;
+
+    assert(eventManager->nextFreeSlot < MAX_EVENTS);
+
+    eventManager->freeSlots[eventManager->nextFreeSlot] = value;
+    eventManager->nextFreeSlot += 1;
+}
+
+static usize EventManagerPopFree(Scene* self)
+{
+    EventManager* eventManager = &self->eventManager;
+
+    assert(eventManager->nextFreeSlot < MAX_EVENTS);
+
+    usize slot = eventManager->freeSlots[eventManager->nextFreeSlot - 1];
+    eventManager->nextFreeSlot -= 1;
 
     return slot;
 }
 
 usize SceneAllocateEntity(Scene* self)
 {
-    if (self->nextFreeSlot == 0)
-    {
-        usize next = MIN(self->nextEntity, MAX_ENTITIES - 1);
+    EntityManager* entityManager = &self->entityManager;
 
-        self->nextEntity = self->nextEntity + 1;
-        self->nextEntity = MIN(self->nextEntity, MAX_ENTITIES);
+    if (entityManager->nextFreeSlot == 0)
+    {
+        usize next = MIN(entityManager->nextEntity, MAX_ENTITIES - 1);
+
+        entityManager->nextEntity = entityManager->nextEntity + 1;
+        entityManager->nextEntity = MIN(entityManager->nextEntity, MAX_ENTITIES);
+
+        if (entityManager->nextEntity == MAX_ENTITIES)
+        {
+            TraceLog(LOG_WARNING, "Maximum amount of entities reached.");
+        }
 
         return next;
     }
-    else
-    {
-        return PopFree(self);
-    }
+
+    return EntityManagerPopFree(self);
 }
 
 void SceneDeallocateEntity(Scene* self, usize entity)
 {
     self->components.tags[entity] = 0;
-    PushFree(self, entity);
+    EntityManagerPushFree(self, entity);
+}
+
+void SceneRaiseEvent(Scene* self, Event* event)
+{
+    if (self->eventManager.nextFreeSlot == 0)
+    {
+        usize next = MIN(self->eventManager.nextEvent, MAX_EVENTS - 1);
+
+        self->eventManager.nextEvent = self->eventManager.nextEvent + 1;
+        self->eventManager.nextEvent = MIN(self->eventManager.nextEvent, MAX_EVENTS);
+
+        memcpy(&self->eventManager.events[next], event, sizeof(Event));
+
+        if (self->eventManager.nextEvent == MAX_EVENTS)
+        {
+            TraceLog(LOG_WARNING, "Maximum amount of events reached.");
+        }
+
+        return;
+    }
+
+    usize next = EventManagerPopFree(self);
+    memcpy(&self->eventManager.events[next], event, sizeof(Event));
+}
+
+void SceneConsumeEvent(Scene* self, usize eventIndex)
+{
+    self->eventManager.events[eventIndex].tag = EVENT_NONE;
+    EventManagerPushFree(self, eventIndex);
+}
+
+usize SceneGetEntityCount(Scene* self)
+{
+    return self->entityManager.nextEntity;
+}
+
+usize SceneGetEventCount(Scene* self)
+{
+    return self->eventManager.nextEvent;
 }
 
 void SceneInit(Scene* self)
@@ -53,10 +123,12 @@ void SceneInit(Scene* self)
 
     // TODO(thismarvin): Do we need to initialize positions, dimensions, etc.?
 
-    self->nextEntity = 0;
-
-    self->nextFreeSlot = 0;
-    memset(&self->freeSlots, 0, sizeof(u64));
+    // Initialize EntityManager.
+    {
+        self->entityManager.nextEntity = 0;
+        self->entityManager.nextFreeSlot = 0;
+        memset(&self->entityManager.freeSlots, 0, sizeof(u64));
+    }
 
     self->debugging = false;
 
@@ -118,11 +190,6 @@ void SceneInit(Scene* self)
     ECreateWalker(self, 16 * 16, 4 * 16);
 }
 
-usize SceneGetEntityCount(Scene* self)
-{
-    return self->nextEntity;
-}
-
 void SceneUpdate(Scene* self)
 {
     if (IsKeyPressed(KEY_F3))
@@ -133,11 +200,11 @@ void SceneUpdate(Scene* self)
     for (usize i = 0; i < self->nextEntity; ++i)
     {
         SSmoothUpdate(&self->components, i);
-        SPlayerUpdate(&self->components, i);
+        SPlayerUpdate(self, i);
         SWalkerUpdate(&self->components, i);
         SKineticUpdate(&self->components, i);
         SCollisionUpdate(&self->components, self->nextEntity, i);
-        SVulnerableUpdate(&self->components, self->nextEntity, i);
+        SVulnerableUpdate(self, i);
     }
 }
 

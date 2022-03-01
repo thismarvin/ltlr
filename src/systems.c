@@ -6,7 +6,7 @@
 
 #define REQUIRE_DEPS(dependencies) if ((components->tags[entity] & (dependencies)) != (dependencies)) return
 #define HAS_DEPS(dependencies) ((components->tags[entity] & (dependencies)) == (dependencies))
-#define ENTITY_HAS_DEPS(_other, dependencies) ((components->tags[_other] & (dependencies)) == (dependencies))
+#define ENTITY_HAS_DEPS(other, dependencies) ((components->tags[other] & (dependencies)) == (dependencies))
 
 void SSmoothUpdate(Components* components, usize entity)
 {
@@ -32,13 +32,15 @@ void SKineticUpdate(Components* components, usize entity)
     position->value.y += kinetic->velocity.y * CTX_DT;
 }
 
-void SPlayerUpdate(Components* components, usize entity)
+void SPlayerUpdate(Scene* scene, usize entity)
 {
-    REQUIRE_DEPS(tagPlayer | tagKinetic | tagBody);
+    Components* components = &scene->components;
+    REQUIRE_DEPS(tagPlayer | tagKinetic | tagBody | tagMortal);
 
     CKinetic* kinetic = &components->kinetics[entity];
     CBody* body = &components->bodies[entity];
     CPlayer* player = &components->players[entity];
+    CMortal* mortal = &components->players[entity];
 
     // Lateral Movement.
     {
@@ -90,6 +92,33 @@ void SPlayerUpdate(Components* components, usize entity)
         }
 
         kinetic->acceleration = gravityForce;
+    }
+
+    // Consume events
+    {
+        for (usize i = 0; i < scene->events.nextEvent; ++i)
+        {
+            Event* event = &scene->events.events[i];
+
+            if (event->entity != entity)
+            {
+                continue;
+            }
+
+            switch (event->tag)
+            {
+                case EVENT_DAMAGE:
+                {
+                    EventDamageInner* damageInner = &event->damageInner;
+                    CDamage damage = components->damages[damageInner->otherEntity];
+
+                    mortal->hp -= damage.value;
+                    printf("HIT: %d\n", mortal->hp);
+                    SceneConsumeEvent(scene, i);
+                    break;
+                }
+            }
+        }
     }
 }
 
@@ -160,8 +189,9 @@ void SCollisionUpdate(Components* components, usize entityCount, usize entity)
     }
 }
 
-void SVulnerableUpdate(Components* components, usize entityCount, usize entity)
+void SVulnerableUpdate(Scene* scene, usize entity)
 {
+    Components* components = &scene->components;
     u64 collisionDeps = tagPosition | tagDimension | tagCollider;
     u64 deps = collisionDeps | tagMortal;
     REQUIRE_DEPS(deps);
@@ -179,7 +209,7 @@ void SVulnerableUpdate(Components* components, usize entityCount, usize entity)
         .height = dimensions.height
     };
 
-    for (usize i = 0; i < entityCount; ++i)
+    for (usize i = 0; i < SceneGetEntityCount(scene); ++i)
     {
         if (i == entity || !ENTITY_HAS_DEPS(i, collisionDeps))
         {
@@ -202,11 +232,13 @@ void SVulnerableUpdate(Components* components, usize entityCount, usize entity)
 
         if (collides && ENTITY_HAS_DEPS(i, tagDamage))
         {
-            CDamage damage = components->damages[i];
-            mortal->hp -= damage.value;
-            printf("HIT: %d\n", mortal->hp);
+            // CDamage damage = components->damages[i];
+            // mortal->hp -= damage.value;
+            // printf("HIT: %d\n", mortal->hp);
 
-            // TODO(austin0209): Notify <thing> that it has been hit.
+            Event event;
+            EventDamageInit(&event, entity, i);
+            SceneRaiseEvent(scene, &event);
         }
     }
 }
