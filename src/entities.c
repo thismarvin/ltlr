@@ -8,9 +8,10 @@ usize ECreatePlayer(Scene* scene, f32 x, f32 y)
     Vector2 position = Vector2Create(x, y);
 
     scene->components.tags[entity] = tagPosition | tagDimension | tagColor | tagSprite |
-                                     tagKinetic | tagSmooth | tagCollider | tagPlayer | tagBody;
+                                     tagKinetic | tagSmooth | tagCollider | tagPlayer | tagBody | tagMortal;
 
     scene->components.positions[entity].value = position;
+    scene->components.mortals[entity].hp = 10;
     scene->components.dimensions[entity] = (CDimension)
     {
         .width = 16,
@@ -99,8 +100,9 @@ usize ECreateWalker(Scene* scene, f32 x, f32 y)
     Vector2 position = Vector2Create(x, y);
 
     scene->components.tags[entity] = tagPosition | tagDimension | tagColor | tagSprite |
-                                     tagKinetic | tagSmooth | tagCollider | tagWalker | tagBody;
+                                     tagKinetic | tagSmooth | tagCollider | tagWalker | tagBody | tagDamage;
 
+    scene->components.damages[entity].value = 1;
     scene->components.positions[entity].value = position;
     scene->components.dimensions[entity] = (CDimension)
     {

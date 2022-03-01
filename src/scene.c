@@ -137,6 +137,7 @@ void SceneUpdate(Scene* self)
         SWalkerUpdate(&self->components, i);
         SKineticUpdate(&self->components, i);
         SCollisionUpdate(&self->components, self->nextEntity, i);
+        SVulnerableUpdate(&self->components, self->nextEntity, i);
     }
 }
 

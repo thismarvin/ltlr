@@ -12,6 +12,8 @@ extern const u64 tagPlayer;
 extern const u64 tagCollider;
 extern const u64 tagBody;
 extern const u64 tagWalker;
+extern const u64 tagMortal;
+extern const u64 tagDamage;
 
 // TODO(thismarvin): Naming components is hard...
 
@@ -72,3 +74,13 @@ typedef struct
     f32 jumpGravity;
     f32 defaultGravity;
 } CPlayer;
+
+typedef struct
+{
+    i16 hp;
+} CMortal;
+
+typedef struct
+{
+    i16 value;
+} CDamage;

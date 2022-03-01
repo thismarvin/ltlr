@@ -6,6 +6,7 @@
 
 #define REQUIRE_DEPS(dependencies) if ((components->tags[entity] & (dependencies)) != (dependencies)) return
 #define HAS_DEPS(dependencies) ((components->tags[entity] & (dependencies)) == (dependencies))
+#define ENTITY_HAS_DEPS(_other, dependencies) ((components->tags[_other] & (dependencies)) == (dependencies))
 
 void SSmoothUpdate(Components* components, usize entity)
 {
@@ -155,6 +156,57 @@ void SCollisionUpdate(Components* components, usize entityCount, usize entity)
 
             // TODO(thismarvin): Look into this some more... is it actually working?
             body->resolution = Vector2Add(body->resolution, resolution);
+        }
+    }
+}
+
+void SVulnerableUpdate(Components* components, usize entityCount, usize entity)
+{
+    u64 collisionDeps = tagPosition | tagDimension | tagCollider;
+    u64 deps = collisionDeps | tagMortal;
+    REQUIRE_DEPS(deps);
+
+    CPosition position = components->positions[entity];
+    CDimension dimensions = components->dimensions[entity];
+    CCollider collider = components->colliders[entity];
+    CMortal* mortal = &components->mortals[entity];
+
+    Rectangle bounds = (Rectangle)
+    {
+        .x = position.value.x,
+        .y = position.value.y,
+        .width = dimensions.width,
+        .height = dimensions.height
+    };
+
+    for (usize i = 0; i < entityCount; ++i)
+    {
+        if (i == entity || !ENTITY_HAS_DEPS(i, collisionDeps))
+        {
+            continue;
+        }
+
+        CPosition otherPosition = components->positions[i];
+        CDimension otherDimensions = components->dimensions[i];
+        CCollider otherCollider = components->colliders[i];
+
+        Rectangle otherBounds = (Rectangle)
+        {
+            .x = otherPosition.value.x,
+            .y = otherPosition.value.y,
+            .width = otherDimensions.width,
+            .height = otherDimensions.height
+        };
+
+        bool collides = CheckCollisionRecs(bounds, otherBounds);
+
+        if (collides && ENTITY_HAS_DEPS(i, tagDamage))
+        {
+            CDamage damage = components->damages[i];
+            mortal->hp -= damage.value;
+            printf("HIT: %d\n", mortal->hp);
+
+            // TODO(austin0209): Notify <thing> that it has been hit.
         }
     }
 }
