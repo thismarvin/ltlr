@@ -197,14 +197,18 @@ void SceneUpdate(Scene* self)
         self->debugging = !self->debugging;
     }
 
-    for (usize i = 0; i < self->nextEntity; ++i)
+    for (usize i = 0; i < SceneGetEntityCount(self); ++i)
     {
-        SSmoothUpdate(&self->components, i);
-        SPlayerUpdate(self, i);
-        SWalkerUpdate(&self->components, i);
-        SKineticUpdate(&self->components, i);
-        SCollisionUpdate(&self->components, self->nextEntity, i);
-        SVulnerableUpdate(self, i);
+        SSmoothUpdate(self, i);
+
+        SPlayerInputUpdate(self, i);
+
+        SKineticUpdate(self, i);
+
+        SCollisionUpdate(self, i);
+
+        SPlayerCollisionUpdate(self, i);
+        SWalkerCollisionUpdate(self, i);
     }
 }
 
@@ -278,13 +282,13 @@ void SceneDraw(Scene* self, Texture2D* atlas)
         }
     }
 
-    for (usize i = 0; i < self->nextEntity; ++i)
+    for (usize i = 0; i < SceneGetEntityCount(self); ++i)
     {
-        SSpriteDraw(&self->components, atlas, i);
+        SSpriteDraw(self, atlas, i);
 
         if (self->debugging)
         {
-            SDebugDraw(&self->components, i);
+            SDebugDraw(self, i);
         }
     }
 

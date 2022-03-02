@@ -40,12 +40,12 @@ usize ECreatePlayer(Scene* scene, f32 x, f32 y)
     };
     scene->components.colliders[entity] = (CCollider)
     {
-        .layer = 1,
-        .mask = 1 << 1,
+        .layer = (1 << 1),
+        .mask = (1 << 2) | (1 << 3),
     };
     scene->components.bodies[entity] = (CBody)
     {
-        .resolution = VECTOR2_ZERO
+        .grounded = false
     };
 
     {
@@ -86,7 +86,7 @@ usize ECreateBlock(Scene* scene, f32 x, f32 y, f32 width, f32 height)
     };
     scene->components.colliders[entity] = (CCollider)
     {
-        .layer = 1 << 1,
+        .layer = (1 << 2),
         .mask = 0,
     };
 
@@ -132,12 +132,12 @@ usize ECreateWalker(Scene* scene, f32 x, f32 y)
     };
     scene->components.colliders[entity] = (CCollider)
     {
-        .layer = 1 << 2,
-        .mask = 1 << 1 | 1 << 2,
+        .layer = (1 << 3),
+        .mask = (1 << 1) | (1 << 2) | (1 << 3),
     };
     scene->components.bodies[entity] = (CBody)
     {
-        .resolution = VECTOR2_ZERO
+        .grounded = false
     };
 
     return entity;

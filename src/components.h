@@ -52,17 +52,17 @@ typedef struct
 
 typedef struct
 {
-    // Layer you exist on.
+    // Layers you exist on.
     u64 layer;
-    // Layer you collide with.
+    // Layers you collide with.
     u64 mask;
 } CCollider;
 
+// TODO(thismarvin): Do we still need this component?
 // TODO(thismarvin): Work on the name...
 typedef struct
 {
-    // The most recent resolution against a collider.
-    Vector2 resolution;
+    bool grounded;
 } CBody;
 
 // TODO(thismarvin): Should this be in some sort of Singleton?
