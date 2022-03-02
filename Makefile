@@ -1,5 +1,6 @@
 $(VERBOSE).SILENT:
 
+ASEPRITE := aseprite
 TILED := tiled
 ASTYLE := astyle
 PRETTIER := prettier
@@ -7,10 +8,13 @@ PRETTIER := prettier
 VENDOR := vendor/raylib/src/raylib.h vendor/cJSON/cJSON.h
 EXTERNAL := src/vendor/cJSON.h src/vendor/cJSON.c
 
+IMAGE_SOURCES := $(shell find content/aseprite -type f -name "*.aseprite")
+IMAGE_PNG := $(patsubst content/aseprite/%.aseprite,src/resources/build/%.png, $(IMAGE_SOURCES))
+
 LEVEL_SOURCES := $(shell find content/tiled -type f -name "*.tmx")
 LEVEL_JSON := $(patsubst content/tiled/%.tmx,src/resources/build/%.json, $(LEVEL_SOURCES))
 
-CONTENT := $(LEVEL_JSON)
+CONTENT := $(IMAGE_PNG) $(LEVEL_JSON)
 
 DEPS := $(VENDOR) $(EXTERNAL) $(CONTENT)
 
@@ -31,6 +35,9 @@ src/vendor/cJSON.h: vendor/cJSON/cJSON.h | src/vendor
 
 src/vendor/cJSON.c: vendor/cJSON/cJSON.c | src/vendor
 	cp $< src/vendor
+
+$(IMAGE_PNG): src/resources/build/%.png: content/aseprite/%.aseprite | src/resources/build
+	$(ASEPRITE) -b $< --save-as $@
 
 $(LEVEL_JSON): src/resources/build/%.json: content/tiled/%.tmx | src/resources/build
 	$(TILED) --embed-tilesets --export-map json $< $@

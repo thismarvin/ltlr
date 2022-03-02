@@ -89,9 +89,9 @@ int main(void)
 static void Initialize(void)
 {
 #if defined(PLATFORM_WEB)
-    atlas = LoadTexture("./src/resources/sprites.png");
+    atlas = LoadTexture("./src/resources/build/atlas.png");
 #else
-    atlas = LoadTexture("./resources/sprites.png");
+    atlas = LoadTexture("./resources/build/atlas.png");
 #endif
 
     SceneInit(&scene);
