@@ -183,7 +183,7 @@ void SceneInit(Scene* self)
     }
 
     // TODO(thismarvin): Put this into level.json somehow...
-    self->player = ECreatePlayer(self, 8, 8);
+    self->player = ECreatePlayer(self, 16 * 1, 16 * - 4);
 
     ECreateWalker(self, 16 * 16, 8 * 16);
     ECreateWalker(self, 16 * 16, 0 * 16);

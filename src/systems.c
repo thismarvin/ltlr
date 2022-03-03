@@ -8,6 +8,30 @@
 #define HAS_DEPS(dependencies) ((components->tags[entity] & (dependencies)) == (dependencies))
 #define ENTITY_HAS_DEPS(other, dependencies) ((components->tags[other] & (dependencies)) == (dependencies))
 
+typedef struct
+{
+    usize entity;
+    usize otherEntity;
+    Rectangle aabb;
+    Rectangle otherAabb;
+    Vector2 resolution;
+} CollisionParams;
+
+static i8 sign(f32 value)
+{
+    if (value < 0)
+    {
+        return  -1;
+    }
+
+    if (value > 0)
+    {
+        return  1;
+    }
+
+    return 0;
+}
+
 void SSmoothUpdate(Scene* scene, usize entity)
 {
     Components* components = &scene->components;
@@ -43,21 +67,21 @@ void SCollisionUpdate(Scene* scene, usize entity)
     u64 deps = tagPosition | tagDimension | tagCollider;
     REQUIRE_DEPS(deps);
 
-    CPosition* position = &components->positions[entity];
+    CPosition position = components->positions[entity];
     CDimension dimensions = components->dimensions[entity];
     CCollider collider = components->colliders[entity];
 
-    Rectangle bounds = (Rectangle)
+    Rectangle aabb = (Rectangle)
     {
-        .x = position->value.x,
-        .y = position->value.y,
+        .x = position.value.x,
+        .y = position.value.y,
         .width = dimensions.width,
         .height = dimensions.height
     };
 
     for (usize i = 0; i < SceneGetEntityCount(scene); ++i)
     {
-        if (i == entity || (deps & components->tags[i]) != deps)
+        if (i == entity || !ENTITY_HAS_DEPS(i, tagPosition | tagDimension | tagCollider))
         {
             continue;
         }
@@ -71,7 +95,7 @@ void SCollisionUpdate(Scene* scene, usize entity)
             continue;
         }
 
-        Rectangle otherBounds = (Rectangle)
+        Rectangle otherAabb = (Rectangle)
         {
             .x = otherPosition.value.x,
             .y = otherPosition.value.y,
@@ -79,7 +103,7 @@ void SCollisionUpdate(Scene* scene, usize entity)
             .height = otherDimensions.height
         };
 
-        if (CheckCollisionRecs(bounds, otherBounds))
+        if (CheckCollisionRecs(aabb, otherAabb))
         {
             Event event;
             EventCollisionInit(&event, entity, i);
@@ -177,16 +201,117 @@ void SPlayerInputUpdate(Scene* scene, usize entity)
     }
 }
 
+static bool PlayerOnCollision(Scene* scene, CollisionParams params)
+{
+    Components* components = &scene->components;
+
+    CPlayer* player = &scene->components.players[params.entity];
+    CPosition* position = &scene->components.positions[params.entity];
+    CKinetic* kinetic = &scene->components.kinetics[params.entity];
+
+    CCollider otherCollider = scene->components.colliders[params.otherEntity];
+
+    if (ENTITY_HAS_DEPS(params.otherEntity, tagWalker))
+    {
+        // TODO(thismarvin): Damage player etc. etc.
+
+        return false;
+    }
+
+    bool resolved = false;
+
+    // TODO(thismarvin): Why does extracting the resolution not work?
+    // Vector2 resolution = ExtractResolution(params.resolution, otherCollider.layer);
+    Vector2 resolution = params.resolution;
+
+    // Resolve collision.
+    {
+        if (resolution.x < 0)
+        {
+            position->value.x = RectangleLeft(params.otherAabb) - params.aabb.width;
+            resolved = true;
+        }
+        else if (resolution.x > 0)
+        {
+            position->value.x = RectangleRight(params.otherAabb);
+            resolved = true;
+        }
+
+        if (resolution.y < 0)
+        {
+            position->value.y = RectangleTop(params.otherAabb) - params.aabb.height;
+            resolved = true;
+        }
+        else if (resolution.y > 0)
+        {
+            position->value.y = RectangleBottom(params.otherAabb);
+            resolved = true;
+        }
+    }
+
+    if ((resolution.x < 0 && kinetic->velocity.x > 0) || (resolution.x > 0
+            && kinetic->velocity.x < 0))
+    {
+        kinetic->velocity.x = 0;
+    }
+
+    if ((resolution.y < 0 && kinetic->velocity.y > 0) || (resolution.y > 0
+            && kinetic->velocity.y < 0))
+    {
+        kinetic->velocity.y = 0;
+    }
+
+    if (resolution.y < 0)
+    {
+        player->grounded = true;
+    }
+
+    return resolved;
+}
+
 void SPlayerCollisionUpdate(Scene* scene, usize entity)
 {
     Components* components = &scene->components;
 
-    REQUIRE_DEPS(tagPlayer | tagPosition | tagDimension | tagCollider | tagKinetic);
+    REQUIRE_DEPS(tagPlayer | tagSmooth | tagPosition | tagDimension | tagCollider | tagKinetic);
 
     CPlayer* player = &components->players[entity];
+    CSmooth smooth = components->smooths[entity];
     CPosition* position = &components->positions[entity];
     CDimension dimension = components->dimensions[entity];
-    CKinetic* kinetic = &components->kinetics[entity];
+
+    // General purpose player specific collision logic.
+    {
+        // Assume that the player is not grounded; prove that it is later.
+        player->grounded = false;
+
+        // Keep the player's x within the scene's bounds.
+        if (position->value.x < scene->bounds.x)
+        {
+            position->value.x = scene->bounds.x;
+        }
+        else if (position->value.x + dimension.width > RectangleRight(scene->bounds))
+        {
+            position->value.x = RectangleRight(scene->bounds) - dimension.width;
+        }
+    }
+
+    Vector2 current = position->value;
+    Vector2 previous = smooth.previous;
+    // TODO(thismarvin): Look into integer based collision.
+    // Vector2 current = Vector2Create(ceilf(position->value.x), ceilf(position->value.y));
+    // Vector2 previous = Vector2Create(ceilf(smooth.previous.x), ceilf(smooth.previous.y));
+
+    Vector2 delta = Vector2Subtract(current, previous);
+    Vector2 remainder = Vector2Create(fabsf(delta.x), fabsf(delta.y));
+
+    i8 signX = sign(delta.x);
+    i8 signY = sign(delta.y);
+
+    i8 step = 1;
+
+    Vector2 original = position->value;
+    position->value = previous;
 
     Rectangle aabb = (Rectangle)
     {
@@ -196,72 +321,168 @@ void SPlayerCollisionUpdate(Scene* scene, usize entity)
         .height = dimension.height,
     };
 
-    // Assume that the player is not grounded; prove that it is later.
-    player->grounded = false;
+    bool resolvedX = false;
+    bool resolvedY = false;
 
-    // Consume Collision event.
-    for (usize i = 0; i < SceneGetEventCount(scene); ++i)
+    // Resolve collision in the x-axis.
     {
-        Event* event = &scene->eventManager.events[i];
-
-        if (event->entity != entity || event->tag != EVENT_COLLISION)
+        while (remainder.x > 0)
         {
-            continue;
+            remainder.x -= step;
+
+            position->value.x += step * signX;
+            aabb.x = position->value.x;
+
+            for (usize i = 0; i < SceneGetEventCount(scene); ++i)
+            {
+                Event* event = &scene->eventManager.events[i];
+
+                if (event->entity != entity || event->tag != EVENT_COLLISION)
+                {
+                    continue;
+                }
+
+                const EventCollisionInner* collisionInner = &event->collisionInner;
+
+                // This should always be false, but better safe than sorry!
+                if (!ENTITY_HAS_DEPS(collisionInner->otherEntity, tagPosition | tagDimension | tagCollider))
+                {
+                    TraceLog(LOG_WARNING, "Illegal collision has occurred.");
+
+                    continue;
+                }
+
+                CPosition otherPosition = components->positions[collisionInner->otherEntity];
+                CDimension otherDimensions = components->dimensions[collisionInner->otherEntity];
+
+                Rectangle otherAabb = (Rectangle)
+                {
+                    .x = otherPosition.value.x,
+                    .y = otherPosition.value.y,
+                    .width = otherDimensions.width,
+                    .height = otherDimensions.height
+                };
+
+                if (CheckCollisionRecs(aabb, otherAabb))
+                {
+                    CollisionParams params = (CollisionParams)
+                    {
+                        .entity = entity,
+                        .otherEntity = collisionInner->otherEntity,
+                        .aabb = aabb,
+                        .otherAabb = otherAabb,
+                        .resolution = Vector2Create(-signX, 0),
+                    };
+
+                    resolvedX = PlayerOnCollision(scene, params);
+
+                    if (resolvedX)
+                    {
+                        break;
+                    }
+                }
+            }
+
+            if (resolvedX)
+            {
+                break;
+            }
         }
 
-        SceneConsumeEvent(scene, i);
-
-        const EventCollisionInner* collisionInner = &event->collisionInner;
-
-        // This should always be false, but better safe than sorry!
-        if (!ENTITY_HAS_DEPS(collisionInner->otherEntity, tagPosition | tagDimension | tagCollider))
+        if (!resolvedX)
         {
-            TraceLog(LOG_WARNING, "Illegal collision has occured.");
-
-            continue;
+            position->value.x = original.x;
         }
 
-        if (ENTITY_HAS_DEPS(collisionInner->otherEntity, tagWalker))
-        {
-            // TODO(thismarvin): Decrement health etc. etc.
+        aabb.x = position->value.x;
+    }
 
-            continue;
+    // Resolve collision in the y-axis.
+    {
+        while (remainder.y > 0)
+        {
+            remainder.y -= step;
+
+            position->value.y += step * signY;
+            aabb.y = position->value.y;
+
+            for (usize i = 0; i < SceneGetEventCount(scene); ++i)
+            {
+                Event* event = &scene->eventManager.events[i];
+
+                if (event->entity != entity || event->tag != EVENT_COLLISION)
+                {
+                    continue;
+                }
+
+                const EventCollisionInner* collisionInner = &event->collisionInner;
+
+                // This should always be false, but better safe than sorry!
+                if (!ENTITY_HAS_DEPS(collisionInner->otherEntity, tagPosition | tagDimension | tagCollider))
+                {
+                    TraceLog(LOG_WARNING, "Illegal collision has occurred.");
+
+                    continue;
+                }
+
+                CPosition otherPosition = components->positions[collisionInner->otherEntity];
+                CDimension otherDimensions = components->dimensions[collisionInner->otherEntity];
+
+                Rectangle otherAabb = (Rectangle)
+                {
+                    .x = otherPosition.value.x,
+                    .y = otherPosition.value.y,
+                    .width = otherDimensions.width,
+                    .height = otherDimensions.height
+                };
+
+                if (CheckCollisionRecs(aabb, otherAabb))
+                {
+                    CollisionParams params = (CollisionParams)
+                    {
+                        .entity = entity,
+                        .otherEntity = collisionInner->otherEntity,
+                        .aabb = aabb,
+                        .otherAabb = otherAabb,
+                        .resolution = Vector2Create(0, -signY),
+                    };
+
+                    resolvedY = PlayerOnCollision(scene, params);
+
+                    if (resolvedY)
+                    {
+                        break;
+                    }
+                }
+            }
+
+            if (resolvedY)
+            {
+                break;
+            }
         }
 
-        CPosition otherPosition = components->positions[collisionInner->otherEntity];
-        CDimension otherDimension = components->dimensions[collisionInner->otherEntity];
-        CCollider otherCollider = components->colliders[collisionInner->otherEntity];
-
-        Rectangle otherAabb = (Rectangle)
+        if (!resolvedY)
         {
-            .x = otherPosition.value.x,
-            .y = otherPosition.value.y,
-            .width = otherDimension.width,
-            .height = otherDimension.height,
-        };
-
-        Vector2 rawResolution = RectangleRectangleResolution(aabb, otherAabb);
-        Vector2 resolution = ExtractResolution(rawResolution, otherCollider.layer);
-
-        if ((resolution.x < 0 && kinetic->velocity.x > 0) || (resolution.x > 0 && kinetic->velocity.x < 0))
-        {
-            kinetic->velocity.x = 0;
+            position->value.y = original.y;
         }
 
-        if ((resolution.y < 0 && kinetic->velocity.y > 0) || (resolution.y > 0 && kinetic->velocity.y < 0))
+        aabb.y = position->value.y;
+    }
+
+    // Consume Collision events.
+    {
+        for (usize i = 0; i < SceneGetEventCount(scene); ++i)
         {
-            kinetic->velocity.y = 0;
+            Event* event = &scene->eventManager.events[i];
+
+            if (event->entity != entity || event->tag != EVENT_COLLISION)
+            {
+                continue;
+            }
+
+            SceneConsumeEvent(scene, i);
         }
-
-        if (resolution.y < 0)
-        {
-            player->grounded = true;
-        }
-
-        position->value = Vector2Add(position->value, resolution);
-
-        aabb.x += resolution.x;
-        aabb.y += resolution.y;
     }
 }
 
@@ -355,8 +576,8 @@ void SSpriteDraw(Scene* scene, Texture2D* atlas, usize entity)
     if (HAS_DEPS(tagSmooth))
     {
         CSmooth smooth = components->smooths[entity];
-        Vector2 interpolated = Vector2Lerp(smooth.previous, position.value, ContextGetAlpha());
 
+        Vector2 interpolated = Vector2Lerp(smooth.previous, position.value, ContextGetAlpha());
         Vector2 drawPosition = Vector2Add(interpolated, sprite.offset);
 
         DrawTextureRec(*atlas, sprite.source, drawPosition, color.value);

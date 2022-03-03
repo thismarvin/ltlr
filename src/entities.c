@@ -45,7 +45,7 @@ usize ECreatePlayer(Scene* scene, f32 x, f32 y)
     };
 
     {
-        f32 jumpHeight = 16 * 3 + 4;
+        f32 jumpHeight = 16 * 3 + 6;
         f32 jumpDuration = 0.4;
 
         f32 jumpGravity = (2 * jumpHeight) / (jumpDuration * jumpDuration);
