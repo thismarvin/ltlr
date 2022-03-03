@@ -8,7 +8,7 @@ usize ECreatePlayer(Scene* scene, f32 x, f32 y)
     Vector2 position = Vector2Create(x, y);
 
     scene->components.tags[entity] = tagPosition | tagDimension | tagColor | tagSprite |
-                                     tagKinetic | tagSmooth | tagCollider | tagPlayer | tagBody | tagMortal;
+                                     tagKinetic | tagSmooth | tagCollider | tagPlayer | tagMortal;
 
     scene->components.positions[entity].value = position;
     scene->components.mortals[entity].hp = 10;
@@ -40,12 +40,8 @@ usize ECreatePlayer(Scene* scene, f32 x, f32 y)
     };
     scene->components.colliders[entity] = (CCollider)
     {
-        .layer = (1 << 1),
-        .mask = (1 << 2) | (1 << 3),
-    };
-    scene->components.bodies[entity] = (CBody)
-    {
-        .grounded = false
+        .layer = layerNone,
+        .mask = layerAll,
     };
 
     {
@@ -86,8 +82,8 @@ usize ECreateBlock(Scene* scene, f32 x, f32 y, f32 width, f32 height)
     };
     scene->components.colliders[entity] = (CCollider)
     {
-        .layer = (1 << 2),
-        .mask = 0,
+        .layer = layerAll,
+        .mask = layerNone,
     };
 
     return entity;
@@ -100,7 +96,7 @@ usize ECreateWalker(Scene* scene, f32 x, f32 y)
     Vector2 position = Vector2Create(x, y);
 
     scene->components.tags[entity] = tagPosition | tagDimension | tagColor | tagSprite |
-                                     tagKinetic | tagSmooth | tagCollider | tagWalker | tagBody | tagDamage;
+                                     tagKinetic | tagSmooth | tagCollider | tagWalker | tagDamage;
 
     scene->components.damages[entity].value = 1;
     scene->components.positions[entity].value = position;
@@ -132,12 +128,8 @@ usize ECreateWalker(Scene* scene, f32 x, f32 y)
     };
     scene->components.colliders[entity] = (CCollider)
     {
-        .layer = (1 << 3),
-        .mask = (1 << 1) | (1 << 2) | (1 << 3),
-    };
-    scene->components.bodies[entity] = (CBody)
-    {
-        .grounded = false
+        .layer = layerAll,
+        .mask = layerAll,
     };
 
     return entity;

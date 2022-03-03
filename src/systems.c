@@ -36,159 +36,6 @@ void SKineticUpdate(Scene* scene, usize entity)
     position->value.y += kinetic->velocity.y * CTX_DT;
 }
 
-void SPlayerInputUpdate(Scene* scene, usize entity)
-{
-    Components* components = &scene->components;
-
-    REQUIRE_DEPS(tagPlayer | tagBody | tagKinetic);
-
-    CPlayer* player = &components->players[entity];
-    CBody* body = &components->bodies[entity];
-    CKinetic* kinetic = &components->kinetics[entity];
-
-    // Maintenance.
-    {
-        if (body->grounded)
-        {
-            kinetic->velocity.y = 0;
-            player->jumping = false;
-        }
-
-        Vector2 gravityForce = Vector2Create(0, player->defaultGravity);
-
-        if (player->jumping && kinetic->velocity.y < player->jumpVelocity)
-        {
-            gravityForce.y = player->jumpGravity;
-        }
-
-        kinetic->acceleration = gravityForce;
-    }
-
-    // Lateral Movement.
-    {
-        i8 strafe = 0;
-
-        if (IsKeyDown(KEY_LEFT))
-        {
-            strafe = -1;
-        }
-
-        if (IsKeyDown(KEY_RIGHT))
-        {
-            strafe = 1;
-        }
-
-        kinetic->velocity.x = strafe * player->moveSpeed;
-    }
-
-    // Jumping.
-    {
-        if (body->grounded && !player->jumping && IsKeyDown(KEY_SPACE))
-        {
-            body->grounded = false;
-            player->jumping = true;
-            kinetic->velocity.y = -player->jumpVelocity;
-        }
-
-        // Variable Jump Height.
-        if (player->jumping && !IsKeyDown(KEY_SPACE) && kinetic->velocity.y < 0)
-        {
-            player->jumping = false;
-            kinetic->velocity.y = MAX(kinetic->velocity.y, -player->jumpVelocity * 0.5);
-        }
-    }
-}
-
-void SPlayerCollisionUpdate(Scene* scene, usize entity)
-{
-    Components* components = &scene->components;
-
-    REQUIRE_DEPS(tagPlayer | tagPosition | tagDimension | tagCollider | tagBody | tagKinetic);
-
-    CPosition* position = &components->positions[entity];
-    CDimension dimension = components->dimensions[entity];
-    CBody* body = &components->bodies[entity];
-    CKinetic* kinetic = &components->kinetics[entity];
-
-    Rectangle aabb = (Rectangle)
-    {
-        .x = position->value.x,
-        .y = position->value.y,
-        .width = dimension.width,
-        .height = dimension.height,
-    };
-
-    // Assume that the player is not grounded; prove that it is later.
-    body->grounded = false;
-
-    // Consume Collision event.
-    for (usize i = 0; i < SceneGetEventCount(scene); ++i)
-    {
-        Event* event = &scene->eventManager.events[i];
-
-        if (event->entity != entity || event->tag != EVENT_COLLISION)
-        {
-            continue;
-        }
-
-        SceneConsumeEvent(scene, i);
-
-        const EventCollisionInner* collisionInner = &event->collisionInner;
-
-        // This should always be false, but better safe than sorry!
-        if (!ENTITY_HAS_DEPS(collisionInner->otherEntity, tagPosition | tagDimension | tagCollider))
-        {
-            continue;
-        }
-
-        CPosition otherPosition = components->positions[collisionInner->otherEntity];
-        CDimension otherDimension = components->dimensions[collisionInner->otherEntity];
-        CCollider otherCollider = components->colliders[collisionInner->otherEntity];
-
-        Rectangle otherAabb = (Rectangle)
-        {
-            .x = otherPosition.value.x,
-            .y = otherPosition.value.y,
-            .width = otherDimension.width,
-            .height = otherDimension.height,
-        };
-
-        Vector2 resolution = RectangleRectangleResolution(aabb, otherAabb);
-
-        // Collided with SOLIDS.
-        if ((otherCollider.layer & (1 << 2)) != 0)
-        {
-            position->value = Vector2Add(position->value, resolution);
-
-            aabb.x += resolution.x;
-            aabb.y += resolution.y;
-
-            if (resolution.x != 0)
-            {
-                kinetic->velocity.x = 0;
-            }
-
-            if (resolution.y != 0)
-            {
-                kinetic->velocity.y = 0;
-
-                if (resolution.y < 0)
-                {
-                    body->grounded = true;
-                }
-            }
-
-            continue;
-        }
-
-        // Collided with ENEMIES.
-        if ((otherCollider.layer & (1 << 3)) != 0)
-        {
-            continue;
-        }
-    }
-}
-
 void SCollisionUpdate(Scene* scene, usize entity)
 {
     Components* components = &scene->components;
@@ -235,64 +82,186 @@ void SCollisionUpdate(Scene* scene, usize entity)
         if (CheckCollisionRecs(bounds, otherBounds))
         {
             Event event;
-            EventCollisionInit(&event, entity, i, GetCollisionRec(bounds, otherBounds));
+            EventCollisionInit(&event, entity, i);
             SceneRaiseEvent(scene, &event);
         }
     }
 }
 
-// TODO(thismarvin): Do we still neeed this system?
-void SVulnerableUpdate(Scene* scene, usize entity)
+static Vector2 ExtractResolution(Vector2 resolution, u64 layers)
+{
+    Vector2 result = VECTOR2_ZERO;
+
+    if ((layers & layerLeft) != 0 && resolution.x < 0)
+    {
+        result.x = resolution.x;
+    }
+
+    if ((layers & layerRight) != 0 && resolution.x > 0)
+    {
+        result.x = resolution.x;
+    }
+
+    if ((layers & layerUp) != 0 && resolution.y < 0)
+    {
+        result.y = resolution.y;
+    }
+
+    if ((layers & layerDown) != 0 && resolution.y > 0)
+    {
+        result.y = resolution.y;
+    }
+
+    return result;
+}
+
+void SPlayerInputUpdate(Scene* scene, usize entity)
 {
     Components* components = &scene->components;
 
-    u64 collisionDeps = tagPosition | tagDimension | tagCollider;
-    u64 deps = collisionDeps | tagMortal;
-    REQUIRE_DEPS(deps);
+    REQUIRE_DEPS(tagPlayer | tagKinetic);
 
-    CPosition position = components->positions[entity];
-    CDimension dimensions = components->dimensions[entity];
-    CCollider collider = components->colliders[entity];
-    // CMortal* mortal = &components->mortals[entity];
+    CPlayer* player = &components->players[entity];
+    CKinetic* kinetic = &components->kinetics[entity];
 
-    Rectangle bounds = (Rectangle)
+    // Maintenance.
     {
-        .x = position.value.x,
-        .y = position.value.y,
-        .width = dimensions.width,
-        .height = dimensions.height
+        if (player->grounded)
+        {
+            kinetic->velocity.y = 0;
+            player->jumping = false;
+        }
+
+        Vector2 gravityForce = Vector2Create(0, player->defaultGravity);
+
+        if (player->jumping && kinetic->velocity.y < player->jumpVelocity)
+        {
+            gravityForce.y = player->jumpGravity;
+        }
+
+        kinetic->acceleration = gravityForce;
+    }
+
+    // Lateral Movement.
+    {
+        i8 strafe = 0;
+
+        if (IsKeyDown(KEY_LEFT))
+        {
+            strafe = -1;
+        }
+
+        if (IsKeyDown(KEY_RIGHT))
+        {
+            strafe = 1;
+        }
+
+        kinetic->velocity.x = strafe * player->moveSpeed;
+    }
+
+    // Jumping.
+    {
+        if (player->grounded && !player->jumping && IsKeyDown(KEY_SPACE))
+        {
+            player->grounded = false;
+            player->jumping = true;
+            kinetic->velocity.y = -player->jumpVelocity;
+        }
+
+        // Variable Jump Height.
+        if (player->jumping && !IsKeyDown(KEY_SPACE) && kinetic->velocity.y < 0)
+        {
+            player->jumping = false;
+            kinetic->velocity.y = MAX(kinetic->velocity.y, -player->jumpVelocity * 0.5);
+        }
+    }
+}
+
+void SPlayerCollisionUpdate(Scene* scene, usize entity)
+{
+    Components* components = &scene->components;
+
+    REQUIRE_DEPS(tagPlayer | tagPosition | tagDimension | tagCollider | tagKinetic);
+
+    CPlayer* player = &components->players[entity];
+    CPosition* position = &components->positions[entity];
+    CDimension dimension = components->dimensions[entity];
+    CKinetic* kinetic = &components->kinetics[entity];
+
+    Rectangle aabb = (Rectangle)
+    {
+        .x = position->value.x,
+        .y = position->value.y,
+        .width = dimension.width,
+        .height = dimension.height,
     };
 
-    for (usize i = 0; i < SceneGetEntityCount(scene); ++i)
+    // Assume that the player is not grounded; prove that it is later.
+    player->grounded = false;
+
+    // Consume Collision event.
+    for (usize i = 0; i < SceneGetEventCount(scene); ++i)
     {
-        if (i == entity || !ENTITY_HAS_DEPS(i, collisionDeps | tagDamage))
+        Event* event = &scene->eventManager.events[i];
+
+        if (event->entity != entity || event->tag != EVENT_COLLISION)
         {
             continue;
         }
 
-        CPosition otherPosition = components->positions[i];
-        CDimension otherDimensions = components->dimensions[i];
-        CCollider otherCollider = components->colliders[i];
+        SceneConsumeEvent(scene, i);
 
-        if ((collider.mask & otherCollider.layer) == 0)
+        const EventCollisionInner* collisionInner = &event->collisionInner;
+
+        // This should always be false, but better safe than sorry!
+        if (!ENTITY_HAS_DEPS(collisionInner->otherEntity, tagPosition | tagDimension | tagCollider))
         {
+            TraceLog(LOG_WARNING, "Illegal collision has occured.");
+
             continue;
         }
 
-        Rectangle otherBounds = (Rectangle)
+        if (ENTITY_HAS_DEPS(collisionInner->otherEntity, tagWalker))
+        {
+            // TODO(thismarvin): Decrement health etc. etc.
+
+            continue;
+        }
+
+        CPosition otherPosition = components->positions[collisionInner->otherEntity];
+        CDimension otherDimension = components->dimensions[collisionInner->otherEntity];
+        CCollider otherCollider = components->colliders[collisionInner->otherEntity];
+
+        Rectangle otherAabb = (Rectangle)
         {
             .x = otherPosition.value.x,
             .y = otherPosition.value.y,
-            .width = otherDimensions.width,
-            .height = otherDimensions.height
+            .width = otherDimension.width,
+            .height = otherDimension.height,
         };
 
-        if (CheckCollisionRecs(bounds, otherBounds))
+        Vector2 rawResolution = RectangleRectangleResolution(aabb, otherAabb);
+        Vector2 resolution = ExtractResolution(rawResolution, otherCollider.layer);
+
+        if (resolution.x != 0)
         {
-            Event event;
-            EventDamageInit(&event, entity, i);
-            SceneRaiseEvent(scene, &event);
+            kinetic->velocity.x = 0;
         }
+
+        if (resolution.y != 0)
+        {
+            kinetic->velocity.y = 0;
+
+            if (resolution.y < 0)
+            {
+                player->grounded = true;
+            }
+        }
+
+        position->value = Vector2Add(position->value, resolution);
+
+        aabb.x += resolution.x;
+        aabb.y += resolution.y;
     }
 }
 
@@ -333,6 +302,8 @@ void SWalkerCollisionUpdate(Scene* scene, usize entity)
         // This should always be false, but better safe than sorry!
         if (!ENTITY_HAS_DEPS(collisionInner->otherEntity, tagPosition | tagDimension | tagCollider))
         {
+            TraceLog(LOG_WARNING, "Illegal collision has occured.");
+
             continue;
         }
 
@@ -348,35 +319,26 @@ void SWalkerCollisionUpdate(Scene* scene, usize entity)
             .height = otherDimension.height,
         };
 
-        Vector2 resolution = RectangleRectangleResolution(aabb, otherAabb);
+        Vector2 rawResolution = RectangleRectangleResolution(aabb, otherAabb);
+        Vector2 resolution = ExtractResolution(rawResolution, otherCollider.layer);
 
-        // Collided with SOLIDS or ENEMIES..
-        if ((otherCollider.layer & ((1 << 2) | (1 << 3))) != 0)
+        position->value = Vector2Add(position->value, resolution);
+
+        aabb.x += resolution.x;
+        aabb.y += resolution.y;
+
+        // Walk side to side.
+        if (resolution.x != 0)
         {
-            position->value = Vector2Add(position->value, resolution);
-
-            aabb.x += resolution.x;
-            aabb.y += resolution.y;
-
-            // Walk side to side.
-            if (resolution.x != 0)
-            {
-                kinetic->velocity.x *= -1;
-            }
-
-            if (resolution.y != 0)
-            {
-                kinetic->velocity.y = 0;
-            }
-
-            continue;
+            kinetic->velocity.x *= -1;
         }
 
-        // Collided with PLAYER.
-        if ((otherCollider.layer & (1 << 1)) != 0)
+        if (resolution.y != 0)
         {
-            continue;
+            kinetic->velocity.y = 0;
         }
+
+        continue;
     }
 }
 

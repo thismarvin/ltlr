@@ -1,13 +1,12 @@
 #include "events.h"
 
-void EventCollisionInit(Event* self, usize entity, usize otherEntity, Rectangle overlap)
+void EventCollisionInit(Event* self, usize entity, usize otherEntity)
 {
     self->tag = EVENT_COLLISION;
     self->entity = entity;
     self->collisionInner = (EventCollisionInner)
     {
         .otherEntity = otherEntity,
-        .overlap = overlap,
     };
 }
 

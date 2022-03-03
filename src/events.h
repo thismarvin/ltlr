@@ -14,7 +14,6 @@ typedef enum
 typedef struct
 {
     usize otherEntity;
-    Rectangle overlap;
 } EventCollisionInner;
 
 typedef struct
@@ -33,5 +32,5 @@ typedef struct
     };
 } Event;
 
-void EventCollisionInit(Event* self, usize entity, usize otherEntity, Rectangle overlap);
+void EventCollisionInit(Event* self, usize entity, usize otherEntity);
 void EventDamageInit(Event* self, usize entity, usize otherEntity);

@@ -10,10 +10,16 @@ extern const u64 tagKinetic;
 extern const u64 tagSmooth;
 extern const u64 tagPlayer;
 extern const u64 tagCollider;
-extern const u64 tagBody;
 extern const u64 tagWalker;
 extern const u64 tagMortal;
 extern const u64 tagDamage;
+
+extern const u64 layerNone;
+extern const u64 layerUp;
+extern const u64 layerRight;
+extern const u64 layerDown;
+extern const u64 layerLeft;
+extern const u64 layerAll;
 
 // TODO(thismarvin): Naming components is hard...
 
@@ -58,16 +64,10 @@ typedef struct
     u64 mask;
 } CCollider;
 
-// TODO(thismarvin): Do we still need this component?
-// TODO(thismarvin): Work on the name...
-typedef struct
-{
-    bool grounded;
-} CBody;
-
 // TODO(thismarvin): Should this be in some sort of Singleton?
 typedef struct
 {
+    bool grounded;
     bool jumping;
     f32 moveSpeed;
     f32 jumpVelocity;

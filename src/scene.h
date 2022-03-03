@@ -17,7 +17,6 @@ typedef struct
     CKinetic kinetics[MAX_ENTITIES];
     CSmooth smooths[MAX_ENTITIES];
     CCollider colliders[MAX_ENTITIES];
-    CBody bodies[MAX_ENTITIES];
     CPlayer players[MAX_ENTITIES];
     CMortal mortals[MAX_ENTITIES];
     CDamage damages[MAX_ENTITIES];
