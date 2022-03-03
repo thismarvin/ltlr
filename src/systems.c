@@ -243,19 +243,19 @@ void SPlayerCollisionUpdate(Scene* scene, usize entity)
         Vector2 rawResolution = RectangleRectangleResolution(aabb, otherAabb);
         Vector2 resolution = ExtractResolution(rawResolution, otherCollider.layer);
 
-        if (resolution.x != 0)
+        if ((resolution.x < 0 && kinetic->velocity.x > 0) || (resolution.x > 0 && kinetic->velocity.x < 0))
         {
             kinetic->velocity.x = 0;
         }
 
-        if (resolution.y != 0)
+        if ((resolution.y < 0 && kinetic->velocity.y > 0) || (resolution.y > 0 && kinetic->velocity.y < 0))
         {
             kinetic->velocity.y = 0;
+        }
 
-            if (resolution.y < 0)
-            {
-                player->grounded = true;
-            }
+        if (resolution.y < 0)
+        {
+            player->grounded = true;
         }
 
         position->value = Vector2Add(position->value, resolution);
