@@ -33,11 +33,5 @@
   <object id="33" x="544" y="128" width="48" height="64"/>
   <object id="34" x="592" y="144" width="48" height="48"/>
   <object id="35" x="496" y="-48" width="144" height="80"/>
-  <object id="41" x="192" y="128" rotation="180">
-   <polygon points="0,32 0,16 48,16"/>
-  </object>
-  <object id="42" x="544" y="96">
-   <polygon points="0,16 0,32 48,32"/>
-  </object>
  </objectgroup>
 </map>
