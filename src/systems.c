@@ -211,62 +211,108 @@ static bool PlayerOnCollision(Scene* scene, CollisionParams params)
 
     CCollider otherCollider = scene->components.colliders[params.otherEntity];
 
-    if (ENTITY_HAS_DEPS(params.otherEntity, tagWalker))
+    // Collision specific logic that will not resolve the player.
     {
-        // TODO(thismarvin): Damage player etc. etc.
+        if (ENTITY_HAS_DEPS(params.otherEntity, tagWalker))
+        {
+            // TODO(thismarvin): Damage player etc. etc.
 
+            return false;
+        }
+    }
+
+    Vector2 resolution = ExtractResolution(params.resolution, otherCollider.layer);
+
+    if (resolution.x == 0 && resolution.y == 0)
+    {
         return false;
     }
 
-    bool resolved = false;
+    // Make sure that the resolution is part of the axis with the least overlap.
+    {
+        Rectangle overlap = GetCollisionRec(params.aabb, params.otherAabb);
 
-    // TODO(thismarvin): Why does extracting the resolution not work?
-    // Vector2 resolution = ExtractResolution(params.resolution, otherCollider.layer);
-    Vector2 resolution = params.resolution;
+        if (resolution.x != 0 && overlap.width > overlap.height)
+        {
+            return false;
+        }
+
+        if (resolution.y != 0 && overlap.height > overlap.width)
+        {
+            return false;
+        }
+    }
+
+    // Make sure that the resolution points in the direction of the minimum offset.
+    {
+        f32 offsetLeft = (RectangleLeft(params.otherAabb) - params.aabb.width) - RectangleLeft(params.aabb);
+        f32 offsetRight = RectangleRight(params.otherAabb) - RectangleLeft(params.aabb);
+        f32 offsetDown = RectangleBottom(params.otherAabb) - RectangleTop(params.aabb);
+        f32 offsetUp = (RectangleTop(params.otherAabb) - params.aabb.height) - RectangleTop(params.aabb);
+
+        if (resolution.x < 0 && fabsf(offsetLeft) > fabsf(offsetRight))
+        {
+            return false;
+        }
+
+        if (resolution.x > 0 && fabsf(offsetRight) > fabsf(offsetLeft))
+        {
+            return false;
+        }
+
+        if (resolution.y < 0 && fabsf(offsetUp) > fabsf(offsetDown))
+        {
+            return false;
+        }
+
+        if (resolution.y > 0 && fabsf(offsetDown) > fabsf(offsetUp))
+        {
+            return false;
+        }
+    }
 
     // Resolve collision.
     {
         if (resolution.x < 0)
         {
             position->value.x = RectangleLeft(params.otherAabb) - params.aabb.width;
-            resolved = true;
         }
         else if (resolution.x > 0)
         {
             position->value.x = RectangleRight(params.otherAabb);
-            resolved = true;
         }
 
         if (resolution.y < 0)
         {
             position->value.y = RectangleTop(params.otherAabb) - params.aabb.height;
-            resolved = true;
         }
         else if (resolution.y > 0)
         {
             position->value.y = RectangleBottom(params.otherAabb);
-            resolved = true;
         }
     }
 
-    if ((resolution.x < 0 && kinetic->velocity.x > 0) || (resolution.x > 0
-            && kinetic->velocity.x < 0))
+    // Resolution specific player logic.
     {
-        kinetic->velocity.x = 0;
+        if ((resolution.x < 0 && kinetic->velocity.x > 0) || (resolution.x > 0
+                && kinetic->velocity.x < 0))
+        {
+            kinetic->velocity.x = 0;
+        }
+
+        if ((resolution.y < 0 && kinetic->velocity.y > 0) || (resolution.y > 0
+                && kinetic->velocity.y < 0))
+        {
+            kinetic->velocity.y = 0;
+        }
+
+        if (resolution.y < 0)
+        {
+            player->grounded = true;
+        }
     }
 
-    if ((resolution.y < 0 && kinetic->velocity.y > 0) || (resolution.y > 0
-            && kinetic->velocity.y < 0))
-    {
-        kinetic->velocity.y = 0;
-    }
-
-    if (resolution.y < 0)
-    {
-        player->grounded = true;
-    }
-
-    return resolved;
+    return true;
 }
 
 void SPlayerCollisionUpdate(Scene* scene, usize entity)
