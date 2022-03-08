@@ -77,7 +77,7 @@ bin/release/desktop/resources: | bin/release/desktop
 	mkdir $@
 
 $(LIB_RAYLIB): vendor/raylib/src/Makefile | build/vendor/raylib/desktop
-	cd vendor/raylib/src; $(MAKE) PLATFORM=PLATFORM_DESKTOP
+	cd vendor/raylib/src; $(MAKE) PLATFORM=PLATFORM_DESKTOP CUSTOM_CFLAGS=-DSUPPORT_CUSTOM_FRAME_CONTROL
 	mv vendor/raylib/src/libraylib.a build/vendor/raylib/desktop
 	find vendor/raylib/src -name "*.o" -exec mv {} build/vendor/raylib/desktop \;
 

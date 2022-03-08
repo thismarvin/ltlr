@@ -66,7 +66,7 @@ bin/release/web: | bin/release
 $(RAYLIB_SOURCES): vendor/raylib/src
 
 $(RAYLIB_OBJECTS): build/vendor/raylib/web/%.o: vendor/raylib/src/%.c | build/vendor/raylib/web
-	$(EMCC) -O3 -DPLATFORM_WEB -DGRAPHICS_API_OPENGL_ES2 -o $@ -c $<
+	$(EMCC) -O3 -DPLATFORM_WEB -DGRAPHICS_API_OPENGL_ES2 -DSUPPORT_CUSTOM_FRAME_CONTROL -o $@ -c $<
 
 $(LIB_RAYLIB): $(RAYLIB_OBJECTS)
 	$(EMAR) rcs $@ $(RAYLIB_OBJECTS)

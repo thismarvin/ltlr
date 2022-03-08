@@ -44,6 +44,8 @@ static void Timestep(void)
 
     while (accumulator >= target)
     {
+        PollInputEvents();
+
         Update();
 
         accumulator -= target;
@@ -53,6 +55,8 @@ static void Timestep(void)
     ContextSetAlpha(accumulator / target);
 
     Draw();
+
+    SwapScreenBuffer();
 }
 
 int main(void)
