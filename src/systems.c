@@ -3,6 +3,7 @@
 #include "context.h"
 #include "raymath.h"
 #include "systems.h"
+#include <assert.h>
 
 #define REQUIRE_DEPS(dependencies) if ((components->tags[entity] & (dependencies)) != (dependencies)) return
 #define HAS_DEPS(dependencies) ((components->tags[entity] & (dependencies)) == (dependencies))
@@ -205,6 +206,9 @@ static bool PlayerOnCollision(Scene* scene, CollisionParams params)
 {
     Components* components = &scene->components;
 
+    assert(ENTITY_HAS_DEPS(params.entity, tagPlayer | tagPosition | tagKinetic));
+    assert(ENTITY_HAS_DEPS(params.otherEntity, tagCollider));
+
     CPlayer* player = &scene->components.players[params.entity];
     CPosition* position = &scene->components.positions[params.entity];
     CKinetic* kinetic = &scene->components.kinetics[params.entity];
@@ -315,6 +319,89 @@ static bool PlayerOnCollision(Scene* scene, CollisionParams params)
     return true;
 }
 
+// TODO(thismarvin): Is it possible to have an `OnCollision` callback as a parameter?
+bool static SimulateCollisionOnAxis(Scene* scene, usize entity, Vector2 delta, u8 step)
+{
+    // It is important that `delta` only consists of one axis, not both.
+    assert(delta.x == 0 || delta.y == 0);
+
+    Components* components = &scene->components;
+
+    assert(ENTITY_HAS_DEPS(entity, tagPosition | tagDimension));
+
+    CPosition* position = &components->positions[entity];
+    CDimension dimension = components->dimensions[entity];
+
+    Rectangle aabb = (Rectangle)
+    {
+        .x = position->value.x,
+        .y = position->value.y,
+        .width = dimension.width,
+        .height = dimension.height,
+    };
+
+    Vector2 direction = Vector2Create(sign(delta.x), sign(delta.y));
+    Vector2 remainder = Vector2Create(fabsf(delta.x), fabsf(delta.y));
+
+    while (remainder.x > 0 || remainder.y > 0)
+    {
+        remainder.x -= step * fabsf(direction.x);
+        remainder.y -= step * fabsf(direction.y);
+
+        position->value.x += step * direction.x;
+        position->value.y += step * direction.y;
+
+        aabb.x = position->value.x;
+        aabb.y = position->value.y;
+
+        for (usize i = 0; i < SceneGetEventCount(scene); ++i)
+        {
+            Event* event = &scene->eventManager.events[i];
+
+            if (event->entity != entity || event->tag != EVENT_COLLISION)
+            {
+                continue;
+            }
+
+            const EventCollisionInner* collisionInner = &event->collisionInner;
+
+            assert(ENTITY_HAS_DEPS(collisionInner->otherEntity, tagPosition | tagDimension | tagCollider));
+
+            CPosition otherPosition = components->positions[collisionInner->otherEntity];
+            CDimension otherDimensions = components->dimensions[collisionInner->otherEntity];
+
+            Rectangle otherAabb = (Rectangle)
+            {
+                .x = otherPosition.value.x,
+                .y = otherPosition.value.y,
+                .width = otherDimensions.width,
+                .height = otherDimensions.height
+            };
+
+            if (CheckCollisionRecs(aabb, otherAabb))
+            {
+                CollisionParams params = (CollisionParams)
+                {
+                    .entity = entity,
+                    .otherEntity = collisionInner->otherEntity,
+                    .aabb = aabb,
+                    .otherAabb = otherAabb,
+                    .resolution = Vector2Create(-direction.x, -direction.y),
+                };
+
+                bool resolved = PlayerOnCollision(scene, params);
+
+                if (resolved)
+                {
+                    return true;
+                }
+            }
+        }
+    }
+
+    return false;
+}
+
 void SPlayerCollisionUpdate(Scene* scene, usize entity)
 {
     Components* components = &scene->components;
@@ -342,178 +429,34 @@ void SPlayerCollisionUpdate(Scene* scene, usize entity)
         }
     }
 
+    // TODO(thismarvin): Look into integer based collision.
     Vector2 current = position->value;
     Vector2 previous = smooth.previous;
-    // TODO(thismarvin): Look into integer based collision.
-    // Vector2 current = Vector2Create(ceilf(position->value.x), ceilf(position->value.y));
-    // Vector2 previous = Vector2Create(ceilf(smooth.previous.x), ceilf(smooth.previous.y));
 
     Vector2 delta = Vector2Subtract(current, previous);
-    Vector2 remainder = Vector2Create(fabsf(delta.x), fabsf(delta.y));
-
-    i8 signX = sign(delta.x);
-    i8 signY = sign(delta.y);
-
     i8 step = 1;
 
     Vector2 original = position->value;
     position->value = previous;
 
-    Rectangle aabb = (Rectangle)
-    {
-        .x = position->value.x,
-        .y = position->value.y,
-        .width = dimension.width,
-        .height = dimension.height,
-    };
-
-    bool resolvedX = false;
-    bool resolvedY = false;
-
     // Resolve collision in the x-axis.
     {
-        while (remainder.x > 0)
-        {
-            remainder.x -= step;
+        bool resolved = SimulateCollisionOnAxis(scene, entity, Vector2Create(delta.x, 0), step);
 
-            position->value.x += step * signX;
-            aabb.x = position->value.x;
-
-            for (usize i = 0; i < SceneGetEventCount(scene); ++i)
-            {
-                Event* event = &scene->eventManager.events[i];
-
-                if (event->entity != entity || event->tag != EVENT_COLLISION)
-                {
-                    continue;
-                }
-
-                const EventCollisionInner* collisionInner = &event->collisionInner;
-
-                // This should always be false, but better safe than sorry!
-                if (!ENTITY_HAS_DEPS(collisionInner->otherEntity, tagPosition | tagDimension | tagCollider))
-                {
-                    TraceLog(LOG_WARNING, "Illegal collision has occurred.");
-
-                    continue;
-                }
-
-                CPosition otherPosition = components->positions[collisionInner->otherEntity];
-                CDimension otherDimensions = components->dimensions[collisionInner->otherEntity];
-
-                Rectangle otherAabb = (Rectangle)
-                {
-                    .x = otherPosition.value.x,
-                    .y = otherPosition.value.y,
-                    .width = otherDimensions.width,
-                    .height = otherDimensions.height
-                };
-
-                if (CheckCollisionRecs(aabb, otherAabb))
-                {
-                    CollisionParams params = (CollisionParams)
-                    {
-                        .entity = entity,
-                        .otherEntity = collisionInner->otherEntity,
-                        .aabb = aabb,
-                        .otherAabb = otherAabb,
-                        .resolution = Vector2Create(-signX, 0),
-                    };
-
-                    resolvedX = PlayerOnCollision(scene, params);
-
-                    if (resolvedX)
-                    {
-                        break;
-                    }
-                }
-            }
-
-            if (resolvedX)
-            {
-                break;
-            }
-        }
-
-        if (!resolvedX)
+        if (!resolved)
         {
             position->value.x = original.x;
         }
-
-        aabb.x = position->value.x;
     }
 
     // Resolve collision in the y-axis.
     {
-        while (remainder.y > 0)
-        {
-            remainder.y -= step;
+        bool resolved = SimulateCollisionOnAxis(scene, entity, Vector2Create(0, delta.y), step);
 
-            position->value.y += step * signY;
-            aabb.y = position->value.y;
-
-            for (usize i = 0; i < SceneGetEventCount(scene); ++i)
-            {
-                Event* event = &scene->eventManager.events[i];
-
-                if (event->entity != entity || event->tag != EVENT_COLLISION)
-                {
-                    continue;
-                }
-
-                const EventCollisionInner* collisionInner = &event->collisionInner;
-
-                // This should always be false, but better safe than sorry!
-                if (!ENTITY_HAS_DEPS(collisionInner->otherEntity, tagPosition | tagDimension | tagCollider))
-                {
-                    TraceLog(LOG_WARNING, "Illegal collision has occurred.");
-
-                    continue;
-                }
-
-                CPosition otherPosition = components->positions[collisionInner->otherEntity];
-                CDimension otherDimensions = components->dimensions[collisionInner->otherEntity];
-
-                Rectangle otherAabb = (Rectangle)
-                {
-                    .x = otherPosition.value.x,
-                    .y = otherPosition.value.y,
-                    .width = otherDimensions.width,
-                    .height = otherDimensions.height
-                };
-
-                if (CheckCollisionRecs(aabb, otherAabb))
-                {
-                    CollisionParams params = (CollisionParams)
-                    {
-                        .entity = entity,
-                        .otherEntity = collisionInner->otherEntity,
-                        .aabb = aabb,
-                        .otherAabb = otherAabb,
-                        .resolution = Vector2Create(0, -signY),
-                    };
-
-                    resolvedY = PlayerOnCollision(scene, params);
-
-                    if (resolvedY)
-                    {
-                        break;
-                    }
-                }
-            }
-
-            if (resolvedY)
-            {
-                break;
-            }
-        }
-
-        if (!resolvedY)
+        if (!resolved)
         {
             position->value.y = original.y;
         }
-
-        aabb.y = position->value.y;
     }
 
     // Consume Collision events.
@@ -566,13 +509,7 @@ void SWalkerCollisionUpdate(Scene* scene, usize entity)
 
         const EventCollisionInner* collisionInner = &event->collisionInner;
 
-        // This should always be false, but better safe than sorry!
-        if (!ENTITY_HAS_DEPS(collisionInner->otherEntity, tagPosition | tagDimension | tagCollider))
-        {
-            TraceLog(LOG_WARNING, "Illegal collision has occured.");
-
-            continue;
-        }
+        assert(ENTITY_HAS_DEPS(collisionInner->otherEntity, tagPosition | tagDimension | tagCollider));
 
         CPosition otherPosition = components->positions[collisionInner->otherEntity];
         CDimension otherDimension = components->dimensions[collisionInner->otherEntity];
