@@ -6,7 +6,6 @@
 #include <assert.h>
 
 #define REQUIRE_DEPS(dependencies) if ((components->tags[entity] & (dependencies)) != (dependencies)) return
-#define HAS_DEPS(dependencies) ((components->tags[entity] & (dependencies)) == (dependencies))
 #define ENTITY_HAS_DEPS(other, dependencies) ((components->tags[other] & (dependencies)) == (dependencies))
 
 typedef struct
@@ -556,7 +555,7 @@ void SSpriteDraw(Scene* scene, Texture2D* atlas, usize entity)
     CColor color = components->colors[entity];
     CSprite sprite = components->sprites[entity];
 
-    if (HAS_DEPS(tagSmooth))
+    if (ENTITY_HAS_DEPS(entity, tagSmooth))
     {
         CSmooth smooth = components->smooths[entity];
 
