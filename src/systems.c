@@ -201,6 +201,11 @@ void SPlayerInputUpdate(Scene* scene, usize entity)
     }
 }
 
+bool static PlayerIsVulnerable(CPlayer* player)
+{
+    return player->invulnerableTimer >= player->invulnerableDuration;
+}
+
 static bool PlayerOnCollision(Scene* scene, CollisionParams params)
 {
     Components* components = &scene->components;
@@ -216,9 +221,17 @@ static bool PlayerOnCollision(Scene* scene, CollisionParams params)
 
     // Collision specific logic that will not resolve the player.
     {
-        if (ENTITY_HAS_DEPS(params.otherEntity, tagWalker))
+        if (ENTITY_HAS_DEPS(params.entity, tagMortal) &&
+            ENTITY_HAS_DEPS(params.otherEntity, tagWalker | tagDamage))
         {
-            // TODO(thismarvin): Damage player etc. etc.
+            if (PlayerIsVulnerable(player))
+            {
+                CMortal* mortal = &scene->components.mortals[params.entity];
+                CDamage otherDamage = scene->components.damages[params.otherEntity];
+
+                mortal->hp -= otherDamage.value;
+                player->invulnerableTimer = 0;
+            }
 
             return false;
         }
@@ -417,6 +430,9 @@ void SPlayerCollisionUpdate(Scene* scene, usize entity)
         // Assume that the player is not grounded; prove that it is later.
         player->grounded = false;
 
+        // Update collision-related timers
+        player->invulnerableTimer += CTX_DT;
+
         // Keep the player's x within the scene's bounds.
         if (position->value.x < scene->bounds.x)
         {
@@ -553,6 +569,26 @@ void SSpriteDraw(Scene* scene, Texture2D* atlas, usize entity)
 
     CPosition position = components->positions[entity];
     CColor color = components->colors[entity];
+    CSprite* sprite = &components->sprites[entity];
+
+    if (ENTITY_HAS_DEPS(entity, tagPlayer))
+    {
+        // Fancy math for player flashing.
+        const CPlayer* player = &components->players[entity];
+        const u32 numFlashes = 5;
+        f32 timeSlice = player->invulnerableDuration / (numFlashes * 2.0f);
+
+        if (!PlayerIsVulnerable(player))
+        {
+            u32 numSlices = (u32)(player->invulnerableTimer / timeSlice);
+            sprite->enabled = numSlices % 2 == 1;
+        }
+        else
+        {
+            sprite->enabled = true;
+        }
+    }
+
     if (!sprite->enabled) return;
 
     if (ENTITY_HAS_DEPS(entity, tagSmooth))
@@ -560,15 +596,15 @@ void SSpriteDraw(Scene* scene, Texture2D* atlas, usize entity)
         CSmooth smooth = components->smooths[entity];
 
         Vector2 interpolated = Vector2Lerp(smooth.previous, position.value, ContextGetAlpha());
-        Vector2 drawPosition = Vector2Add(interpolated, sprite.offset);
+        Vector2 drawPosition = Vector2Add(interpolated, sprite->offset);
 
-        DrawTextureRec(*atlas, sprite.source, drawPosition, color.value);
+        DrawTextureRec(*atlas, sprite->source, drawPosition, color.value);
     }
     else
     {
-        Vector2 drawPosition = Vector2Add(position.value, sprite.offset);
+        Vector2 drawPosition = Vector2Add(position.value, sprite->offset);
 
-        DrawTextureRec(*atlas, sprite.source, drawPosition, color.value);
+        DrawTextureRec(*atlas, sprite->source, drawPosition, color.value);
     }
 }
 

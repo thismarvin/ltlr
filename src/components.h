@@ -74,6 +74,8 @@ typedef struct
     f32 jumpVelocity;
     f32 jumpGravity;
     f32 defaultGravity;
+    f32 invulnerableTimer;
+    f32 invulnerableDuration;
 } CPlayer;
 
 typedef struct

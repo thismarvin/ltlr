@@ -60,7 +60,9 @@ usize ECreatePlayer(Scene* scene, f32 x, f32 y)
             .jumping = false,
             .jumpVelocity = jumpVelocity,
             .jumpGravity = jumpGravity,
-            .defaultGravity = defaultGravity
+            .defaultGravity = defaultGravity,
+            .invulnerableTimer = 3,
+            .invulnerableDuration = 3,
         };
     }
 
