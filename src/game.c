@@ -44,12 +44,12 @@ static void Timestep(void)
 
     while (accumulator >= target)
     {
-        PollInputEvents();
-
         Update();
 
         accumulator -= target;
         ContextSetTotalTime(ContextGetTotalTime() + target);
+
+        PollInputEvents();
     }
 
     ContextSetAlpha(accumulator / target);
