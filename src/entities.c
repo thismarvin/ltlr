@@ -58,6 +58,7 @@ usize ECreatePlayer(Scene* scene, f32 x, f32 y)
         {
             .moveSpeed = 200,
             .jumping = false,
+            .dead = false,
             .jumpVelocity = jumpVelocity,
             .jumpGravity = jumpGravity,
             .defaultGravity = defaultGravity,

@@ -148,6 +148,18 @@ void SPlayerInputUpdate(Scene* scene, usize entity)
     CPlayer* player = &components->players[entity];
     CKinetic* kinetic = &components->kinetics[entity];
 
+    // TODO(austin0209): this should be somewhere else...
+    if (player->dead)
+    {
+        assert(ENTITY_HAS_DEPS(entity, tagPosition));
+        if (scene->components.positions[entity].value.y > CTX_VIEWPORT_HEIGHT * 2)
+        {
+            SceneReset(scene);
+        }
+
+        return;
+    }
+
     // Maintenance.
     {
         if (player->grounded)
@@ -231,6 +243,19 @@ static bool PlayerOnCollision(Scene* scene, CollisionParams params)
 
                 mortal->hp -= otherDamage.value;
                 player->invulnerableTimer = 0;
+
+                if (mortal->hp == 0)
+                {
+                    player->dead = true;
+                    // Remove collider component
+                    // TODO(austin0209): Modifying tags like this is unsafe for multithreaded code
+                    components->tags[params.entity] &= ~tagCollider;
+                    kinetic->velocity = (Vector2)
+                    {
+                        .x = kinetic->velocity.x < 0 ? -50 : 50,
+                        .y = -250,
+                    };
+                }
             }
 
             return false;
@@ -578,7 +603,7 @@ void SSpriteDraw(Scene* scene, Texture2D* atlas, usize entity)
         const u32 numFlashes = 5;
         f32 timeSlice = player->invulnerableDuration / (numFlashes * 2.0f);
 
-        if (!PlayerIsVulnerable(player))
+        if (!player->dead && !PlayerIsVulnerable(player))
         {
             u32 numSlices = (u32)(player->invulnerableTimer / timeSlice);
             sprite->enabled = numSlices % 2 == 1;

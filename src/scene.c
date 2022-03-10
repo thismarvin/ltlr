@@ -78,7 +78,7 @@ void SceneDeallocateEntity(Scene* self, usize entity)
     EntityManagerPushFree(self, entity);
 }
 
-void SceneRaiseEvent(Scene* self, Event* event)
+void SceneRaiseEvent(Scene* self, const Event* event)
 {
     if (self->eventManager.nextFreeSlot == 0)
     {
@@ -229,23 +229,26 @@ void SceneDraw(Scene* self, Texture2D* atlas)
     {
         CDimension dimension = self->components.dimensions[self->player];
 
-        Vector2 previous = self->components.smooths[self->player].previous;
-        Vector2 current = self->components.positions[self->player].value;
+        if (!self->components.players[self->player].dead)
+        {
+            Vector2 previous = self->components.smooths[self->player].previous;
+            Vector2 current = self->components.positions[self->player].value;
 
-        Vector2 position = Vector2Lerp(previous, current, ContextGetAlpha());
+            Vector2 position = Vector2Lerp(previous, current, ContextGetAlpha());
 
-        position = Vector2Add(position, Vector2Create(dimension.width * 0.5, dimension.height * 0.5));
+            position = Vector2Add(position, Vector2Create(dimension.width * 0.5, dimension.height * 0.5));
 
-        self->camera.offset.x = (-position.x + viewportWidth * 0.5) * self->camera.zoom;
-        self->camera.offset.y = (-position.y + viewportHeight * 0.5) * self->camera.zoom;
+            self->camera.offset.x = (-position.x + CTX_VIEWPORT_WIDTH * 0.5) * self->camera.zoom;
+            self->camera.offset.y = (-position.y + CTX_VIEWPORT_HEIGHT * 0.5) * self->camera.zoom;
 
-        self->camera.offset.x = MIN(RectangleLeft(self->bounds), self->camera.offset.x);
-        self->camera.offset.x = MAX(-(RectangleRight(self->bounds) - viewportWidth) * self->camera.zoom,
-                                    self->camera.offset.x);
+            self->camera.offset.x = MIN(RectangleLeft(self->bounds), self->camera.offset.x);
+            self->camera.offset.x = MAX(-(RectangleRight(self->bounds) - CTX_VIEWPORT_WIDTH) * self->camera.zoom,
+                                        self->camera.offset.x);
 
-        self->camera.offset.y = MIN(RectangleTop(self->bounds), self->camera.offset.y);
-        self->camera.offset.y = MAX(-(RectangleBottom(self->bounds) - viewportHeight) * self->camera.zoom,
-                                    self->camera.offset.y);
+            self->camera.offset.y = MIN(RectangleTop(self->bounds), self->camera.offset.y);
+            self->camera.offset.y = MAX(-(RectangleBottom(self->bounds) - CTX_VIEWPORT_HEIGHT) * self->camera.zoom,
+                                        self->camera.offset.y);
+        }
     }
 
     BeginMode2D(self->camera);

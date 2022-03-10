@@ -55,7 +55,7 @@ usize SceneAllocateEntity(Scene* self);
 void SceneDeallocateEntity(Scene* self, usize entity);
 usize SceneGetEntityCount(Scene* self);
 usize SceneGetEventCount(Scene* self);
-void SceneRaiseEvent(Scene* self, Event* event);
+void SceneRaiseEvent(Scene* self, const Event* event);
 void SceneConsumeEvent(Scene* self, usize eventIndex);
 void SceneUpdate(Scene* self);
 void SceneDraw(Scene* self, Texture2D* atlas);

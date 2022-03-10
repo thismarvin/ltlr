@@ -71,6 +71,7 @@ typedef struct
 {
     bool grounded;
     bool jumping;
+    bool dead;
     f32 moveSpeed;
     f32 jumpVelocity;
     f32 jumpGravity;
