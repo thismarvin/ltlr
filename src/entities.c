@@ -27,7 +27,8 @@ usize ECreatePlayer(Scene* scene, f32 x, f32 y)
     scene->components.sprites[entity] = (CSprite)
     {
         .source = (Rectangle) { 16, 0, 32, 48 },
-        .offset = Vector2Create(-7, -13)
+        .offset = Vector2Create(-7, -13),
+        .enabled = true,
     };
     scene->components.kinetics[entity] = (CKinetic)
     {
@@ -115,7 +116,8 @@ usize ECreateWalker(Scene* scene, f32 x, f32 y)
     scene->components.sprites[entity] = (CSprite)
     {
         .source = (Rectangle) { 3 * 16, 5 * 16, 16, 16 },
-        .offset = VECTOR2_ZERO
+        .offset = VECTOR2_ZERO,
+        .enabled = true,
     };
     scene->components.kinetics[entity] = (CKinetic)
     {

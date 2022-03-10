@@ -553,7 +553,7 @@ void SSpriteDraw(Scene* scene, Texture2D* atlas, usize entity)
 
     CPosition position = components->positions[entity];
     CColor color = components->colors[entity];
-    CSprite sprite = components->sprites[entity];
+    if (!sprite->enabled) return;
 
     if (ENTITY_HAS_DEPS(entity, tagSmooth))
     {
