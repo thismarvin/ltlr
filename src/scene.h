@@ -59,4 +59,5 @@ void SceneRaiseEvent(Scene* self, Event* event);
 void SceneConsumeEvent(Scene* self, usize eventIndex);
 void SceneUpdate(Scene* self);
 void SceneDraw(Scene* self, Texture2D* atlas);
+void SceneReset(Scene* self);
 void SceneDestroy(Scene* self);

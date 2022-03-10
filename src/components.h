@@ -2,6 +2,7 @@
 
 #include "common.h"
 
+extern const u64 tagNone;
 extern const u64 tagPosition;
 extern const u64 tagDimension;
 extern const u64 tagColor;

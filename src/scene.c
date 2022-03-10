@@ -127,7 +127,17 @@ void SceneInit(Scene* self)
     {
         self->entityManager.nextEntity = 0;
         self->entityManager.nextFreeSlot = 0;
-        memset(&self->entityManager.freeSlots, 0, sizeof(u64));
+    }
+
+    // Initialize EventManager
+    {
+        self->eventManager.nextEvent = 0;
+        self->eventManager.nextFreeSlot = 0;
+
+        for (usize i = 0; i < MAX_EVENTS; ++i)
+        {
+            self->eventManager.events[i].tag = EVENT_NONE;
+        }
     }
 
     self->debugging = false;
@@ -298,6 +308,12 @@ void SceneDraw(Scene* self, Texture2D* atlas)
     {
         DrawFPS(8, 8);
     }
+}
+
+void SceneReset(Scene* self)
+{
+    SceneDestroy(self);
+    SceneInit(self);
 }
 
 void SceneDestroy(Scene* self)

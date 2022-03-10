@@ -1,5 +1,6 @@
 #include "components.h"
 
+const u64 tagNone = (u64)0;
 const u64 tagPosition = (u64)1 << 0;
 const u64 tagDimension = (u64)1 << 1;
 const u64 tagColor = (u64)1 << 2;
