@@ -227,10 +227,6 @@ void SceneDraw(Scene* self, Texture2D* atlas)
     // TODO(thismarvin): This should ultimately be a System... somehow...
     // Update Camera
     {
-        // TODO(thismarvin): Should this exist in Context?
-        int viewportWidth = 320;
-        int viewportHeight = 180;
-
         CDimension dimension = self->components.dimensions[self->player];
 
         Vector2 previous = self->components.smooths[self->player].previous;
