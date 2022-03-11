@@ -8,6 +8,7 @@ void SCollisionUpdate(Scene* scene, usize entity);
 
 void SPlayerInputUpdate(Scene* scene, usize entity);
 void SPlayerCollisionUpdate(Scene* scene, usize entity);
+void SPlayerMortalUpdate(Scene* scene, usize entity);
 
 void SWalkerCollisionUpdate(Scene* scene, usize entity);
 void SWalkerUpdate(Scene* scene, usize entity);

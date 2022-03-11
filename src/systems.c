@@ -148,15 +148,8 @@ void SPlayerInputUpdate(Scene* scene, usize entity)
     CPlayer* player = &components->players[entity];
     CKinetic* kinetic = &components->kinetics[entity];
 
-    // TODO(austin0209): this should be somewhere else...
     if (player->dead)
     {
-        assert(ENTITY_HAS_DEPS(entity, tagPosition));
-        if (scene->components.positions[entity].value.y > CTX_VIEWPORT_HEIGHT * 2)
-        {
-            SceneReset(scene);
-        }
-
         return;
     }
 
@@ -234,28 +227,14 @@ static bool PlayerOnCollision(Scene* scene, CollisionParams params)
     // Collision specific logic that will not resolve the player.
     {
         if (ENTITY_HAS_DEPS(params.entity, tagMortal) &&
-            ENTITY_HAS_DEPS(params.otherEntity, tagWalker | tagDamage))
+                ENTITY_HAS_DEPS(params.otherEntity, tagWalker | tagDamage))
         {
             if (PlayerIsVulnerable(player))
             {
-                CMortal* mortal = &scene->components.mortals[params.entity];
-                CDamage otherDamage = scene->components.damages[params.otherEntity];
-
-                mortal->hp -= otherDamage.value;
+                Event event;
+                EventDamageInit(&event, params.entity, params.otherEntity);
+                SceneRaiseEvent(scene, &event);
                 player->invulnerableTimer = 0;
-
-                if (mortal->hp == 0)
-                {
-                    player->dead = true;
-                    // Remove collider component
-                    // TODO(austin0209): Modifying tags like this is unsafe for multithreaded code
-                    components->tags[params.entity] &= ~tagCollider;
-                    kinetic->velocity = (Vector2)
-                    {
-                        .x = kinetic->velocity.x < 0 ? -50 : 50,
-                        .y = -250,
-                    };
-                }
             }
 
             return false;
@@ -455,9 +434,6 @@ void SPlayerCollisionUpdate(Scene* scene, usize entity)
         // Assume that the player is not grounded; prove that it is later.
         player->grounded = false;
 
-        // Update collision-related timers
-        player->invulnerableTimer += CTX_DT;
-
         // Keep the player's x within the scene's bounds.
         if (position->value.x < scene->bounds.x)
         {
@@ -513,6 +489,92 @@ void SPlayerCollisionUpdate(Scene* scene, usize entity)
             SceneConsumeEvent(scene, i);
         }
     }
+}
+
+static void PlayerFlashingLogic(Scene* scene, usize entity)
+{
+    Components* components = &scene->components;
+
+    assert(ENTITY_HAS_DEPS(entity, tagPlayer));
+
+    CPlayer* player = &scene->components.players[entity];
+
+    player->invulnerableTimer += CTX_DT;
+
+    const u32 totalFlashes = 5;
+    f32 timeSlice = player->invulnerableDuration / (totalFlashes * 2.0f);
+
+    if (!player->dead && !PlayerIsVulnerable(player))
+    {
+        u32 passedSlices = (u32)(player->invulnerableTimer / timeSlice);
+
+        if (passedSlices % 2 == 0)
+        {
+            components->tags[entity] &= ~tagSprite;
+        }
+        else
+        {
+            components->tags[entity] |= tagSprite;
+        }
+    }
+    else
+    {
+        // This is a pre-caution to make sure the last state isn't off.
+        components->tags[entity] |= tagSprite;
+    }
+}
+void SPlayerMortalUpdate(Scene* scene, usize entity)
+{
+    Components* components = &scene->components;
+
+    REQUIRE_DEPS(tagPlayer | tagPosition | tagKinetic | tagMortal);
+
+    CPlayer* player = &scene->components.players[entity];
+    CKinetic* kinetic = &scene->components.kinetics[entity];
+    CMortal* mortal = &scene->components.mortals[entity];
+
+    if (scene->components.positions[entity].value.y > CTX_VIEWPORT_HEIGHT * 2)
+    {
+        SceneReset(scene);
+        return;
+    }
+
+    for (usize i = 0; i < SceneGetEventCount(scene); ++i)
+    {
+        Event* event = &scene->eventManager.events[i];
+
+        if (event->entity != entity || event->tag != EVENT_DAMAGE)
+        {
+            continue;
+        }
+
+        SceneConsumeEvent(scene, i);
+
+        const EventDamageInner* damageInner = &event->damageInner;
+        usize otherEntity = damageInner->otherEntity;
+
+        assert(ENTITY_HAS_DEPS(otherEntity, tagDamage));
+
+        CDamage otherDamage = scene->components.damages[otherEntity];
+
+        mortal->hp -= otherDamage.value;
+        player->invulnerableTimer = 0;
+
+        if (mortal->hp == 0)
+        {
+            player->dead = true;
+            // Remove collider component
+            // TODO(austin0209): Modifying tags like this is unsafe for multithreaded code
+            components->tags[entity] &= ~tagCollider;
+            kinetic->velocity = (Vector2)
+            {
+                .x = kinetic->velocity.x < 0 ? -50 : 50,
+                .y = -250,
+            };
+        }
+    }
+
+    PlayerFlashingLogic(scene, entity);
 }
 
 void SWalkerCollisionUpdate(Scene* scene, usize entity)
@@ -595,26 +657,6 @@ void SSpriteDraw(Scene* scene, Texture2D* atlas, usize entity)
     CPosition position = components->positions[entity];
     CColor color = components->colors[entity];
     CSprite* sprite = &components->sprites[entity];
-
-    if (ENTITY_HAS_DEPS(entity, tagPlayer))
-    {
-        // Fancy math for player flashing.
-        const CPlayer* player = &components->players[entity];
-        const u32 numFlashes = 5;
-        f32 timeSlice = player->invulnerableDuration / (numFlashes * 2.0f);
-
-        if (!player->dead && !PlayerIsVulnerable(player))
-        {
-            u32 numSlices = (u32)(player->invulnerableTimer / timeSlice);
-            sprite->enabled = numSlices % 2 == 1;
-        }
-        else
-        {
-            sprite->enabled = true;
-        }
-    }
-
-    if (!sprite->enabled) return;
 
     if (ENTITY_HAS_DEPS(entity, tagSmooth))
     {

@@ -11,7 +11,7 @@ usize ECreatePlayer(Scene* scene, f32 x, f32 y)
                                      tagKinetic | tagSmooth | tagCollider | tagPlayer | tagMortal;
 
     scene->components.positions[entity].value = position;
-    scene->components.mortals[entity].hp = 10;
+    scene->components.mortals[entity].hp = 2;
     scene->components.dimensions[entity] = (CDimension)
     {
         .width = 16,
@@ -28,7 +28,6 @@ usize ECreatePlayer(Scene* scene, f32 x, f32 y)
     {
         .source = (Rectangle) { 16, 0, 32, 48 },
         .offset = Vector2Create(-7, -13),
-        .enabled = true,
     };
     scene->components.kinetics[entity] = (CKinetic)
     {
@@ -54,6 +53,8 @@ usize ECreatePlayer(Scene* scene, f32 x, f32 y)
 
         f32 jumpVelocity = jumpGravity * jumpDuration;
 
+        f32 invulnerableDuration = 1.5f;
+
         scene->components.players[entity] = (CPlayer)
         {
             .moveSpeed = 200,
@@ -62,8 +63,8 @@ usize ECreatePlayer(Scene* scene, f32 x, f32 y)
             .jumpVelocity = jumpVelocity,
             .jumpGravity = jumpGravity,
             .defaultGravity = defaultGravity,
-            .invulnerableTimer = 3,
-            .invulnerableDuration = 3,
+            .invulnerableTimer = invulnerableDuration,
+            .invulnerableDuration = invulnerableDuration,
         };
     }
 
@@ -120,7 +121,6 @@ usize ECreateWalker(Scene* scene, f32 x, f32 y)
     {
         .source = (Rectangle) { 3 * 16, 5 * 16, 16, 16 },
         .offset = VECTOR2_ZERO,
-        .enabled = true,
     };
     scene->components.kinetics[entity] = (CKinetic)
     {

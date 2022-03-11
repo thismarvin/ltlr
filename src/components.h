@@ -44,7 +44,6 @@ typedef struct
 {
     Rectangle source;
     Vector2 offset;
-    bool enabled;
 } CSprite;
 
 typedef struct
