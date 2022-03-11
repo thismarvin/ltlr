@@ -192,7 +192,7 @@ void SceneInit(Scene* self)
 
 void SceneUpdate(Scene* self)
 {
-    if (IsKeyPressed(KEY_F3))
+    if (IsKeyPressed(KEY_EQUAL))
     {
         self->debugging = !self->debugging;
     }
