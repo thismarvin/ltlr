@@ -50,6 +50,16 @@ static usize EventManagerPopFree(Scene* self)
     return slot;
 }
 
+void SceneEnableComponent(Scene* self, usize entity, usize tag)
+{
+    self->components.tags[entity] |= tag;
+}
+
+void SceneDisableComponent(Scene* self, usize entity, usize tag)
+{
+    self->components.tags[entity] &= ~tag;
+}
+
 usize SceneAllocateEntity(Scene* self)
 {
     EntityManager* entityManager = &self->entityManager;

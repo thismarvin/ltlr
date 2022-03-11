@@ -51,6 +51,8 @@ typedef struct
 } Scene;
 
 void SceneInit(Scene* self);
+void SceneEnableComponent(Scene* self, usize entity, usize tag);
+void SceneDisableComponent(Scene* self, usize entity, usize tag);
 usize SceneAllocateEntity(Scene* self);
 void SceneDeallocateEntity(Scene* self, usize entity);
 usize SceneGetEntityCount(Scene* self);
