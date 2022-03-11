@@ -493,11 +493,11 @@ static void PlayerFlashingLogic(Scene* scene, usize entity)
 
         if (passedSlices % 2 == 0)
         {
-            scene->components.tags[entity] &= ~tagSprite;
+            SceneDisableComponent(scene, entity, tagSprite);
         }
         else
         {
-            scene->components.tags[entity] |= tagSprite;
+            SceneEnableComponent(scene, entity, tagSprite);
         }
     }
     else
@@ -545,9 +545,9 @@ void SPlayerMortalUpdate(Scene* scene, usize entity)
         if (mortal->hp == 0)
         {
             player->dead = true;
-            // Remove collider component
-            // TODO(austin0209): Modifying tags like this is unsafe for multithreaded code
-            scene->components.tags[entity] &= ~tagCollider;
+
+            SceneDisableComponent(scene, entity, tagCollider);
+
             kinetic->velocity = (Vector2)
             {
                 .x = kinetic->velocity.x < 0 ? -50 : 50,
