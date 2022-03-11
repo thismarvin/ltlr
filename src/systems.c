@@ -5,8 +5,8 @@
 #include "systems.h"
 #include <assert.h>
 
-#define REQUIRE_DEPS(dependencies) if ((components->tags[entity] & (dependencies)) != (dependencies)) return
-#define ENTITY_HAS_DEPS(other, dependencies) ((components->tags[other] & (dependencies)) == (dependencies))
+#define REQUIRE_DEPS(dependencies) if ((scene->components.tags[entity] & (dependencies)) != (dependencies)) return
+#define ENTITY_HAS_DEPS(other, dependencies) ((scene->components.tags[other] & (dependencies)) == (dependencies))
 
 typedef struct
 {
@@ -34,24 +34,20 @@ static i8 sign(f32 value)
 
 void SSmoothUpdate(Scene* scene, usize entity)
 {
-    Components* components = &scene->components;
-
     REQUIRE_DEPS(tagPosition | tagSmooth);
 
-    CPosition position = components->positions[entity];
-    CSmooth* smooth = &components->smooths[entity];
+    CPosition position = scene->components.positions[entity];
+    CSmooth* smooth = &scene->components.smooths[entity];
 
     smooth->previous = position.value;
 }
 
 void SKineticUpdate(Scene* scene, usize entity)
 {
-    Components* components = &scene->components;
-
     REQUIRE_DEPS(tagPosition | tagKinetic);
 
-    CPosition* position = &components->positions[entity];
-    CKinetic* kinetic = &components->kinetics[entity];
+    CPosition* position = &scene->components.positions[entity];
+    CKinetic* kinetic = &scene->components.kinetics[entity];
 
     kinetic->velocity.x += kinetic->acceleration.x * CTX_DT;
     kinetic->velocity.y += kinetic->acceleration.y * CTX_DT;
@@ -62,14 +58,11 @@ void SKineticUpdate(Scene* scene, usize entity)
 
 void SCollisionUpdate(Scene* scene, usize entity)
 {
-    Components* components = &scene->components;
+    REQUIRE_DEPS(tagPosition | tagDimension | tagCollider);
 
-    u64 deps = tagPosition | tagDimension | tagCollider;
-    REQUIRE_DEPS(deps);
-
-    CPosition position = components->positions[entity];
-    CDimension dimensions = components->dimensions[entity];
-    CCollider collider = components->colliders[entity];
+    CPosition position = scene->components.positions[entity];
+    CDimension dimensions = scene->components.dimensions[entity];
+    CCollider collider = scene->components.colliders[entity];
 
     Rectangle aabb = (Rectangle)
     {
@@ -86,9 +79,9 @@ void SCollisionUpdate(Scene* scene, usize entity)
             continue;
         }
 
-        CPosition otherPosition = components->positions[i];
-        CDimension otherDimensions = components->dimensions[i];
-        CCollider otherCollider = components->colliders[i];
+        CPosition otherPosition = scene->components.positions[i];
+        CDimension otherDimensions = scene->components.dimensions[i];
+        CCollider otherCollider = scene->components.colliders[i];
 
         if ((collider.mask & otherCollider.layer) == 0)
         {
@@ -141,12 +134,10 @@ static Vector2 ExtractResolution(Vector2 resolution, u64 layers)
 
 void SPlayerInputUpdate(Scene* scene, usize entity)
 {
-    Components* components = &scene->components;
-
     REQUIRE_DEPS(tagPlayer | tagKinetic);
 
-    CPlayer* player = &components->players[entity];
-    CKinetic* kinetic = &components->kinetics[entity];
+    CPlayer* player = &scene->components.players[entity];
+    CKinetic* kinetic = &scene->components.kinetics[entity];
 
     if (player->dead)
     {
@@ -213,8 +204,6 @@ static bool PlayerIsVulnerable(const CPlayer* player)
 
 static bool PlayerOnCollision(Scene* scene, CollisionParams params)
 {
-    Components* components = &scene->components;
-
     assert(ENTITY_HAS_DEPS(params.entity, tagPlayer | tagPosition | tagKinetic));
     assert(ENTITY_HAS_DEPS(params.otherEntity, tagCollider));
 
@@ -341,12 +330,10 @@ static bool SimulateCollisionOnAxis(Scene* scene, usize entity, Vector2 delta, u
     // It is important that `delta` only consists of one axis, not both.
     assert(delta.x == 0 || delta.y == 0);
 
-    Components* components = &scene->components;
-
     assert(ENTITY_HAS_DEPS(entity, tagPosition | tagDimension));
 
-    CPosition* position = &components->positions[entity];
-    CDimension dimension = components->dimensions[entity];
+    CPosition* position = &scene->components.positions[entity];
+    CDimension dimension = scene->components.dimensions[entity];
 
     Rectangle aabb = (Rectangle)
     {
@@ -383,8 +370,8 @@ static bool SimulateCollisionOnAxis(Scene* scene, usize entity, Vector2 delta, u
 
             assert(ENTITY_HAS_DEPS(collisionInner->otherEntity, tagPosition | tagDimension | tagCollider));
 
-            CPosition otherPosition = components->positions[collisionInner->otherEntity];
-            CDimension otherDimensions = components->dimensions[collisionInner->otherEntity];
+            CPosition otherPosition = scene->components.positions[collisionInner->otherEntity];
+            CDimension otherDimensions = scene->components.dimensions[collisionInner->otherEntity];
 
             Rectangle otherAabb = (Rectangle)
             {
@@ -420,14 +407,12 @@ static bool SimulateCollisionOnAxis(Scene* scene, usize entity, Vector2 delta, u
 
 void SPlayerCollisionUpdate(Scene* scene, usize entity)
 {
-    Components* components = &scene->components;
-
     REQUIRE_DEPS(tagPlayer | tagSmooth | tagPosition | tagDimension | tagCollider | tagKinetic);
 
-    CPlayer* player = &components->players[entity];
-    CSmooth smooth = components->smooths[entity];
-    CPosition* position = &components->positions[entity];
-    CDimension dimension = components->dimensions[entity];
+    CPlayer* player = &scene->components.players[entity];
+    CSmooth smooth = scene->components.smooths[entity];
+    CPosition* position = &scene->components.positions[entity];
+    CDimension dimension = scene->components.dimensions[entity];
 
     // General purpose player specific collision logic.
     {
@@ -493,8 +478,6 @@ void SPlayerCollisionUpdate(Scene* scene, usize entity)
 
 static void PlayerFlashingLogic(Scene* scene, usize entity)
 {
-    Components* components = &scene->components;
-
     assert(ENTITY_HAS_DEPS(entity, tagPlayer));
 
     CPlayer* player = &scene->components.players[entity];
@@ -510,23 +493,21 @@ static void PlayerFlashingLogic(Scene* scene, usize entity)
 
         if (passedSlices % 2 == 0)
         {
-            components->tags[entity] &= ~tagSprite;
+            scene->components.tags[entity] &= ~tagSprite;
         }
         else
         {
-            components->tags[entity] |= tagSprite;
+            scene->components.tags[entity] |= tagSprite;
         }
     }
     else
     {
         // This is a pre-caution to make sure the last state isn't off.
-        components->tags[entity] |= tagSprite;
+        scene->components.tags[entity] |= tagSprite;
     }
 }
 void SPlayerMortalUpdate(Scene* scene, usize entity)
 {
-    Components* components = &scene->components;
-
     REQUIRE_DEPS(tagPlayer | tagPosition | tagKinetic | tagMortal);
 
     CPlayer* player = &scene->components.players[entity];
@@ -536,6 +517,7 @@ void SPlayerMortalUpdate(Scene* scene, usize entity)
     if (scene->components.positions[entity].value.y > CTX_VIEWPORT_HEIGHT * 2)
     {
         SceneReset(scene);
+
         return;
     }
 
@@ -565,7 +547,7 @@ void SPlayerMortalUpdate(Scene* scene, usize entity)
             player->dead = true;
             // Remove collider component
             // TODO(austin0209): Modifying tags like this is unsafe for multithreaded code
-            components->tags[entity] &= ~tagCollider;
+            scene->components.tags[entity] &= ~tagCollider;
             kinetic->velocity = (Vector2)
             {
                 .x = kinetic->velocity.x < 0 ? -50 : 50,
@@ -579,13 +561,11 @@ void SPlayerMortalUpdate(Scene* scene, usize entity)
 
 void SWalkerCollisionUpdate(Scene* scene, usize entity)
 {
-    Components* components = &scene->components;
-
     REQUIRE_DEPS(tagWalker | tagPosition | tagDimension | tagCollider | tagKinetic);
 
-    CPosition* position = &components->positions[entity];
-    CDimension dimension = components->dimensions[entity];
-    CKinetic* kinetic = &components->kinetics[entity];
+    CPosition* position = &scene->components.positions[entity];
+    CDimension dimension = scene->components.dimensions[entity];
+    CKinetic* kinetic = &scene->components.kinetics[entity];
 
     Rectangle aabb = (Rectangle)
     {
@@ -613,9 +593,9 @@ void SWalkerCollisionUpdate(Scene* scene, usize entity)
 
         assert(ENTITY_HAS_DEPS(collisionInner->otherEntity, tagPosition | tagDimension | tagCollider));
 
-        CPosition otherPosition = components->positions[collisionInner->otherEntity];
-        CDimension otherDimension = components->dimensions[collisionInner->otherEntity];
-        CCollider otherCollider = components->colliders[collisionInner->otherEntity];
+        CPosition otherPosition = scene->components.positions[collisionInner->otherEntity];
+        CDimension otherDimension = scene->components.dimensions[collisionInner->otherEntity];
+        CCollider otherCollider = scene->components.colliders[collisionInner->otherEntity];
 
         Rectangle otherAabb = (Rectangle)
         {
@@ -650,17 +630,15 @@ void SWalkerCollisionUpdate(Scene* scene, usize entity)
 
 void SSpriteDraw(Scene* scene, Texture2D* atlas, usize entity)
 {
-    Components* components = &scene->components;
-
     REQUIRE_DEPS(tagPosition | tagColor | tagSprite);
 
-    CPosition position = components->positions[entity];
-    CColor color = components->colors[entity];
-    CSprite* sprite = &components->sprites[entity];
+    CPosition position = scene->components.positions[entity];
+    CColor color = scene->components.colors[entity];
+    CSprite* sprite = &scene->components.sprites[entity];
 
     if (ENTITY_HAS_DEPS(entity, tagSmooth))
     {
-        CSmooth smooth = components->smooths[entity];
+        CSmooth smooth = scene->components.smooths[entity];
 
         Vector2 interpolated = Vector2Lerp(smooth.previous, position.value, ContextGetAlpha());
         Vector2 drawPosition = Vector2Add(interpolated, sprite->offset);
@@ -677,12 +655,10 @@ void SSpriteDraw(Scene* scene, Texture2D* atlas, usize entity)
 
 void SDebugDraw(Scene* scene, usize entity)
 {
-    Components* components = &scene->components;
-
     REQUIRE_DEPS(tagPosition | tagDimension);
 
-    CPosition position = components->positions[entity];
-    CDimension dimensions = components->dimensions[entity];
+    CPosition position = scene->components.positions[entity];
+    CDimension dimensions = scene->components.dimensions[entity];
 
     Rectangle bounds = (Rectangle)
     {
