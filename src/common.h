@@ -16,8 +16,8 @@ typedef size_t usize;
 typedef float f32;
 typedef double f64;
 
-#define MAX(a,b) (((a)>(b))?(a):(b))
-#define MIN(a,b) (((a)<(b))?(a):(b))
+#define MAX(mA,mB) (((mA)>(mB))?(mA):(mB))
+#define MIN(mA,mB) (((mA)<(mB))?(mA):(mB))
 
 #define VECTOR2_ZERO (Vector2) { .x = 0, .y = 0 }
 

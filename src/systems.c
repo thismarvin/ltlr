@@ -5,8 +5,8 @@
 #include "systems.h"
 #include <assert.h>
 
-#define REQUIRE_DEPS(dependencies) if ((scene->components.tags[entity] & (dependencies)) != (dependencies)) return
-#define ENTITY_HAS_DEPS(other, dependencies) ((scene->components.tags[other] & (dependencies)) == (dependencies))
+#define REQUIRE_DEPS(mDependencies) if ((scene->components.tags[entity] & (mDependencies)) != (mDependencies)) return
+#define ENTITY_HAS_DEPS(mEntity, mDependencies) ((scene->components.tags[mEntity] & (mDependencies)) == (mDependencies))
 
 typedef struct
 {
