@@ -129,7 +129,7 @@ void SceneInit(Scene* self)
         self->entityManager.nextFreeSlot = 0;
     }
 
-    // Initialize EventManager
+    // Initialize EventManager.
     {
         self->eventManager.nextEvent = 0;
         self->eventManager.nextFreeSlot = 0;
@@ -242,11 +242,13 @@ void SceneDraw(Scene* self, Texture2D* atlas)
             self->camera.offset.y = (-position.y + CTX_VIEWPORT_HEIGHT * 0.5) * self->camera.zoom;
 
             self->camera.offset.x = MIN(RectangleLeft(self->bounds), self->camera.offset.x);
-            self->camera.offset.x = MAX(-(RectangleRight(self->bounds) - CTX_VIEWPORT_WIDTH) * self->camera.zoom,
+            self->camera.offset.x = MAX(-(RectangleRight(self->bounds) - CTX_VIEWPORT_WIDTH) *
+                                        self->camera.zoom,
                                         self->camera.offset.x);
 
             self->camera.offset.y = MIN(RectangleTop(self->bounds), self->camera.offset.y);
-            self->camera.offset.y = MAX(-(RectangleBottom(self->bounds) - CTX_VIEWPORT_HEIGHT) * self->camera.zoom,
+            self->camera.offset.y = MAX(-(RectangleBottom(self->bounds) - CTX_VIEWPORT_HEIGHT) *
+                                        self->camera.zoom,
                                         self->camera.offset.y);
         }
     }
@@ -311,6 +313,8 @@ void SceneDraw(Scene* self, Texture2D* atlas)
 
 void SceneReset(Scene* self)
 {
+    // TODO(austin0209): For now this is a 'hacky' reset that reloads the level every time.
+    // TODO(austin0209): Need to add a starting position player within level data.
     SceneDestroy(self);
     SceneInit(self);
 }
@@ -319,7 +323,6 @@ void SceneDestroy(Scene* self)
 {
     for (usize i = 0; i < self->segmentsLength; ++i)
     {
-        LevelSegmentDestroy(
-            &self->segments[i]);
+        LevelSegmentDestroy(&self->segments[i]);
     }
 }

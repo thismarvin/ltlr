@@ -213,7 +213,7 @@ void SPlayerInputUpdate(Scene* scene, usize entity)
     }
 }
 
-bool static PlayerIsVulnerable(CPlayer* player)
+static bool PlayerIsVulnerable(const CPlayer* player)
 {
     return player->invulnerableTimer >= player->invulnerableDuration;
 }
@@ -357,7 +357,7 @@ static bool PlayerOnCollision(Scene* scene, CollisionParams params)
 }
 
 // TODO(thismarvin): Is it possible to have an `OnCollision` callback as a parameter?
-bool static SimulateCollisionOnAxis(Scene* scene, usize entity, Vector2 delta, u8 step)
+static bool SimulateCollisionOnAxis(Scene* scene, usize entity, Vector2 delta, u8 step)
 {
     // It is important that `delta` only consists of one axis, not both.
     assert(delta.x == 0 || delta.y == 0);
