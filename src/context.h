@@ -2,7 +2,6 @@
 
 #include "common.h"
 
-#define CTX_ZOOM 3
 #define CTX_VIEWPORT_WIDTH 320
 #define CTX_VIEWPORT_HEIGHT 180
 

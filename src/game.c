@@ -1,5 +1,6 @@
 #include "common.h"
 #include "context.h"
+#include "math.h"
 #include "raylib.h"
 #include "scene.h"
 
@@ -11,13 +12,17 @@ static void Initialize(void);
 static void Update(void);
 static void Draw(void);
 
-static const u16 screenWidth = 320 * CTX_ZOOM;
-static const u16 screenHeight = 180 * CTX_ZOOM;
 static const f32 targetFrameTime = CTX_DT;
 static const u8 maxFrameSkip = 25;
 static const f32 maxDeltaTime = maxFrameSkip * targetFrameTime;
 static f32 accumulator = 0.0;
 static f64 previousTime = 0.0;
+
+// TODO(thismarvin): Expose preferences somehow...
+static bool preferIntegerScaling = false;
+
+static bool ensureResize;
+static f32 delayedResizeTimer;
 
 static Camera2D screenSpace;
 static RenderTexture2D targetTexture;
@@ -29,9 +34,44 @@ static Texture2D atlas;
 
 static Scene scene;
 
+static void CalculateZoom(void)
+{
+    f32 screenWidth = GetScreenWidth();
+    f32 screenHeight = GetScreenHeight();
+
+    // Assume we need letterboxing.
+    f32 zoom = screenWidth / CTX_VIEWPORT_WIDTH;
+
+    // Check if pillarboxing is more appropriate.
+    if (CTX_VIEWPORT_HEIGHT * zoom > screenHeight)
+    {
+        zoom = screenHeight / CTX_VIEWPORT_HEIGHT;
+    }
+
+    if (preferIntegerScaling)
+    {
+        zoom = floor(zoom);
+    }
+
+    screenSpace.zoom = zoom;
+
+    // Account for letterboxing/pillarboxing.
+    screenSpace.offset = (Vector2)
+    {
+        .x = (screenWidth - CTX_VIEWPORT_WIDTH * zoom) * 0.5,
+        .y = (screenHeight - CTX_VIEWPORT_HEIGHT * zoom) * 0.5,
+    };
+}
+
 static void Timestep(void)
 {
-    // TODO(thismarvin): Handle resize here...
+    if (IsWindowResized())
+    {
+        CalculateZoom();
+
+        ensureResize = true;
+        delayedResizeTimer = 0;
+    }
 
     f64 currentTime = GetTime();
 
@@ -62,14 +102,31 @@ static void Timestep(void)
     Draw();
 
     SwapScreenBuffer();
+
+    if (ensureResize)
+    {
+        delayedResizeTimer += deltaTime;
+
+        if (delayedResizeTimer > 1)
+        {
+            CalculateZoom();
+
+            ensureResize = false;
+            delayedResizeTimer = 0;
+        }
+    }
 }
 
 int main(void)
 {
-    InitWindow(screenWidth, screenHeight, "LTL");
+    // TODO(thismarvin): Incorporate a config file or cli options for window resolution.
+    const f32 scale = 3;
+
+    InitWindow(CTX_VIEWPORT_WIDTH * scale, CTX_VIEWPORT_HEIGHT * scale, "LTL");
     InitAudioDevice();
 
-    SetWindowState(FLAG_VSYNC_HINT);
+    SetWindowState(FLAG_VSYNC_HINT | FLAG_WINDOW_RESIZABLE);
+    SetWindowMinSize(CTX_VIEWPORT_WIDTH, CTX_VIEWPORT_HEIGHT);
 
     Initialize();
 
@@ -102,8 +159,10 @@ static void Initialize(void)
         .offset = VECTOR2_ZERO,
         .target = VECTOR2_ZERO,
         .rotation = 0,
-        .zoom = CTX_ZOOM,
+        .zoom = 1,
     };
+
+    CalculateZoom();
 
     targetTexture = LoadRenderTexture(CTX_VIEWPORT_WIDTH, CTX_VIEWPORT_HEIGHT);
 
