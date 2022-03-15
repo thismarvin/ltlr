@@ -13,10 +13,9 @@ static void Draw(void);
 
 static const u16 screenWidth = 320 * CTX_ZOOM;
 static const u16 screenHeight = 180 * CTX_ZOOM;
-
-static const f32 target = CTX_DT;
+static const f32 targetFrameTime = CTX_DT;
 static const u8 maxFrameSkip = 25;
-static const f32 maxDeltaTime = maxFrameSkip * target;
+static const f32 maxDeltaTime = maxFrameSkip * targetFrameTime;
 static f32 accumulator = 0.0;
 static f64 previousTime = 0.0;
 
@@ -42,17 +41,17 @@ static void Timestep(void)
 
     accumulator += deltaTime;
 
-    while (accumulator >= target)
+    while (accumulator >= targetFrameTime)
     {
         Update();
 
-        accumulator -= target;
-        ContextSetTotalTime(ContextGetTotalTime() + target);
+        accumulator -= targetFrameTime;
+        ContextSetTotalTime(ContextGetTotalTime() + targetFrameTime);
 
         PollInputEvents();
     }
 
-    ContextSetAlpha(accumulator / target);
+    ContextSetAlpha(accumulator / targetFrameTime);
 
     Draw();
 
