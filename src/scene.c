@@ -264,7 +264,7 @@ void SceneInit(Scene* self)
         self->camera.offset = offset;
         self->camera.target = target;
         self->camera.rotation = 0;
-        self->camera.zoom = CTX_ZOOM;
+        self->camera.zoom = 1;
     }
 
     // Level Loading.
@@ -341,6 +341,8 @@ void SceneUpdate(Scene* self)
 
 void SceneDraw(Scene* self, Texture2D* atlas)
 {
+    ClearBackground(WHITE);
+
     // TODO(thismarvin): This should ultimately be a System... somehow...
     // Update Camera
     {
@@ -419,6 +421,7 @@ void SceneDraw(Scene* self, Texture2D* atlas)
             SDebugDraw(self, i);
         }
     }
+
 
     EndMode2D();
 
