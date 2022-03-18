@@ -115,6 +115,31 @@ void MouseBindingAddButton(MouseBinding* self, MouseButton button)
     self->buttonsLength += 1;
 }
 
+AxisBinding AxisBindingCreate(char* name, usize axesCapacity, Ordering ordering, f32 target)
+{
+    return (AxisBinding)
+    {
+        .name = name,
+        .axes = calloc(axesCapacity, sizeof(GamepadAxis)),
+        .axesCapacity = axesCapacity,
+        .axesLength = 0,
+        .ordering = ordering,
+        .target = target,
+    };
+}
+
+void AxisBindingAddAxis(AxisBinding* self, GamepadAxis axis)
+{
+    if (self->axesLength == self->axesCapacity)
+    {
+        return;
+    }
+
+    self->axes[self->axesLength] = axis;
+
+    self->axesLength += 1;
+}
+
 static void KeyboardBindingUpdate(KeyboardBinding* binding)
 {
     binding->bufferTimer += CTX_DT;
@@ -298,6 +323,31 @@ static bool MouseBindingPressing(const MouseBinding* binding)
     return false;
 }
 
+static bool AxisBindingPressing(const AxisBinding* binding, usize gamepad)
+{
+    if (!IsGamepadAvailable(gamepad))
+    {
+        return false;
+    }
+
+    for (usize i = 0; i < binding->axesLength; ++i)
+    {
+        f32 value = GetGamepadAxisMovement(gamepad, binding->axes[i]);
+
+        if (binding->ordering == ORD_LESS && value < binding->target)
+        {
+            return true;
+        }
+
+        if (binding->ordering == ORD_GREATER && value > binding->target)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 InputProfile InputProfileCreate(usize bindingsCapactity)
 {
     return (InputProfile)
@@ -309,6 +359,8 @@ InputProfile InputProfileCreate(usize bindingsCapactity)
         .gamepadBindingsLength = 0,
         .mouseBindings = calloc(bindingsCapactity, sizeof(MouseBinding)),
         .mouseBindingsLength = 0,
+        .axisBindings = calloc(bindingsCapactity, sizeof(AxisBinding)),
+        .axisBindingsLength = 0,
     };
 }
 
@@ -346,6 +398,18 @@ void InputProfileAddMouseBinding(InputProfile* self, MouseBinding binding)
     self->mouseBindings[self->mouseBindingsLength] = binding;
 
     self->mouseBindingsLength += 1;
+}
+
+void InputProfileAddAxisBinding(InputProfile* self, AxisBinding binding)
+{
+    if (self->axisBindingsLength == self->bindingsCapacity)
+    {
+        return;
+    }
+
+    self->axisBindings[self->axisBindingsLength] = binding;
+
+    self->axisBindingsLength += 1;
 }
 
 InputHandler InputHandlerCreate(usize gamepad)
@@ -464,6 +528,17 @@ bool InputHandlerPressing(const InputHandler* self, char* binding)
         if (strcmp(self->profile.mouseBindings[i].name, binding) == 0)
         {
             if (MouseBindingPressing(&self->profile.mouseBindings[i]))
+            {
+                return true;
+            }
+        }
+    }
+
+    for (usize i = 0; i < self->profile.axisBindingsLength; ++i)
+    {
+        if (strcmp(self->profile.axisBindings[i].name, binding) == 0)
+        {
+            if (AxisBindingPressing(&self->profile.axisBindings[i], self->gamepad))
             {
                 return true;
             }
