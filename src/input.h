@@ -8,18 +8,39 @@ typedef struct
     KeyboardKey* keys;
     usize keysCapacity;
     usize keysLength;
+    f32 bufferDuration;
+    f32 bufferTimer;
+} KeyboardBinding;
+
+typedef struct
+{
+    char* name;
     GamepadButton* buttons;
     usize buttonsCapacity;
     usize buttonsLength;
     f32 bufferDuration;
     f32 bufferTimer;
-} ButtonBinding;
+} GamepadBinding;
 
 typedef struct
 {
-    ButtonBinding* bindings;
+    char* name;
+    MouseButton* buttons;
+    usize buttonsCapacity;
+    usize buttonsLength;
+    f32 bufferDuration;
+    f32 bufferTimer;
+} MouseBinding;
+
+typedef struct
+{
     usize bindingsCapacity;
-    usize bindingsLength;
+    KeyboardBinding* keyboardBindings;
+    usize keyboardBindingsLength;
+    GamepadBinding* gamepadBindings;
+    usize gamepadBindingsLength;
+    MouseBinding* mouseBindings;
+    usize mouseBindingsLength;
 } InputProfile;
 
 typedef struct
@@ -29,15 +50,24 @@ typedef struct
     InputProfile profile;
 } InputHandler;
 
-ButtonBinding ButtonBindingCreate(char* name, usize keysCapacity, usize buttonsCapacity);
-void ButtonBindingSetBuffer(ButtonBinding* self, f32 bufferDuration);
-void ButtonBindingAddKey(ButtonBinding* self, KeyboardKey key);
-void ButtonBindingAddButton(ButtonBinding* self, GamepadButton button);
+KeyboardBinding KeyboardBindingCreate(char* name, usize keysCapacity);
+void KeyboardBindingSetBuffer(KeyboardBinding* self, f32 bufferDuration);
+void KeyboardBindingAddKey(KeyboardBinding* self, KeyboardKey key);
 
-InputProfile InputProfileCreate(usize totalBindings);
-void InputProfileAddBinding(InputProfile* self, ButtonBinding binding);
+GamepadBinding GamepadBindingCreate(char* name, usize buttonsCapacity);
+void GamepadBindingSetBuffer(GamepadBinding* self, f32 bufferDuration);
+void GamepadBindingAddButton(GamepadBinding* self, GamepadButton button);
 
-InputHandler InputHandlerCreate(usize gamepad);
+MouseBinding MouseBindingCreate(char* name, usize buttonsCapacity);
+void MouseBindingSetBuffer(MouseBinding* self, f32 bufferDuration);
+void MouseBindingAddButton(MouseBinding* self, MouseButton button);
+
+InputProfile InputProfileCreate(usize bindingsCapacity);
+void InputProfileAddKeyboardBinding(InputProfile* self, KeyboardBinding binding);
+void InputProfileAddGamepadBinding(InputProfile* self, GamepadBinding binding);
+void InputProfileAddMouseBinding(InputProfile* self, MouseBinding binding);
+
+InputHandler InputHandlerCreate();
 void InputHandlerSetProfile(InputHandler* self, InputProfile profile);
 void InputHandlerUpdate(InputHandler* self);
 bool InputHandlerPressed(const InputHandler* self, char* binding);

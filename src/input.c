@@ -2,31 +2,46 @@
 #include "context.h"
 #include "input.h"
 
-static void ButtonBindingConsume(ButtonBinding* self);
-
-ButtonBinding ButtonBindingCreate(char* name, usize keysCapacity, usize buttonsCapacity)
+static void KeyboardBindingConsume(KeyboardBinding* binding)
 {
-    return (ButtonBinding)
+    binding->bufferTimer = binding->bufferDuration;
+}
+
+static void GamepadBindingConsume(GamepadBinding* binding, usize gamepad)
+{
+    if (!IsGamepadAvailable(gamepad))
+    {
+        return;
+    }
+
+    binding->bufferTimer = binding->bufferDuration;
+}
+
+static void MouseBindingConsume(MouseBinding* binding)
+{
+    binding->bufferTimer = binding->bufferDuration;
+}
+
+KeyboardBinding KeyboardBindingCreate(char* name, usize keysCapacity)
+{
+    return (KeyboardBinding)
     {
         .name = name,
         .keys = calloc(keysCapacity, sizeof(KeyboardKey)),
         .keysCapacity = keysCapacity,
         .keysLength = 0,
-        .buttons = calloc(buttonsCapacity, sizeof(GamepadButton)),
-        .buttonsCapacity = buttonsCapacity,
-        .buttonsLength = 0,
         .bufferDuration = 0,
         .bufferTimer = 0
     };
 }
 
-void ButtonBindingSetBuffer(ButtonBinding* self, f32 bufferDuration)
+void KeyboardBindingSetBuffer(KeyboardBinding* self, f32 bufferDuration)
 {
     self->bufferDuration = bufferDuration;
     self->bufferTimer = bufferDuration;
 }
 
-void ButtonBindingAddKey(ButtonBinding* self, KeyboardKey key)
+void KeyboardBindingAddKey(KeyboardBinding* self, KeyboardKey key)
 {
     if (self->keysLength == self->keysCapacity)
     {
@@ -38,7 +53,26 @@ void ButtonBindingAddKey(ButtonBinding* self, KeyboardKey key)
     self->keysLength += 1;
 }
 
-void ButtonBindingAddButton(ButtonBinding* self, GamepadButton button)
+GamepadBinding GamepadBindingCreate(char* name, usize buttonsCapacity)
+{
+    return (GamepadBinding)
+    {
+        .name = name,
+        .buttons = calloc(buttonsCapacity, sizeof(GamepadButton)),
+        .buttonsCapacity = buttonsCapacity,
+        .buttonsLength = 0,
+        .bufferDuration = 0,
+        .bufferTimer = 0,
+    };
+}
+
+void GamepadBindingSetBuffer(GamepadBinding* self, f32 bufferDuration)
+{
+    self->bufferDuration = bufferDuration;
+    self->bufferTimer = bufferDuration;
+}
+
+void GamepadBindingAddButton(GamepadBinding* self, GamepadButton button)
 {
     if (self->buttonsLength == self->buttonsCapacity)
     {
@@ -50,7 +84,38 @@ void ButtonBindingAddButton(ButtonBinding* self, GamepadButton button)
     self->buttonsLength += 1;
 }
 
-static void ButtonBindingUpdate(ButtonBinding* binding, usize gamepad)
+MouseBinding MouseBindingCreate(char* name, usize buttonsCapacity)
+{
+    return (MouseBinding)
+    {
+        .name = name,
+        .buttons = calloc(buttonsCapacity, sizeof(MouseButton)),
+        .buttonsCapacity = buttonsCapacity,
+        .buttonsLength = 0,
+        .bufferDuration = 0,
+        .bufferTimer = 0,
+    };
+}
+
+void MouseBindingSetBuffer(MouseBinding* self, f32 bufferDuration)
+{
+    self->bufferDuration = bufferDuration;
+    self->bufferTimer = bufferDuration;
+}
+
+void MouseBindingAddButton(MouseBinding* self, MouseButton button)
+{
+    if (self->buttonsLength == self->buttonsCapacity)
+    {
+        return;
+    }
+
+    self->buttons[self->buttonsLength] = button;
+
+    self->buttonsLength += 1;
+}
+
+static void KeyboardBindingUpdate(KeyboardBinding* binding)
 {
     binding->bufferTimer += CTX_DT;
 
@@ -69,29 +134,68 @@ static void ButtonBindingUpdate(ButtonBinding* binding, usize gamepad)
         }
     }
 
-    if (IsGamepadAvailable(gamepad))
+    if (released)
     {
-        for (usize i = 0; i < binding->buttonsLength; ++i)
-        {
-            if (IsGamepadButtonPressed(gamepad, binding->buttons[i]))
-            {
-                binding->bufferTimer = 0;
-            }
+        KeyboardBindingConsume(binding);
+    }
+}
 
-            if (!IsGamepadButtonUp(gamepad, binding->buttons[i]))
-            {
-                released = false;
-            }
+static void GamepadBindingUpdate(GamepadBinding* binding, usize gamepad)
+{
+    if (!IsGamepadAvailable(gamepad))
+    {
+        return;
+    }
+
+    binding->bufferTimer += CTX_DT;
+
+    bool released = true;
+
+    for (usize i = 0; i < binding->buttonsLength; ++i)
+    {
+        if (IsGamepadButtonPressed(gamepad, binding->buttons[i]))
+        {
+            binding->bufferTimer = 0;
+        }
+
+        if (!IsGamepadButtonUp(gamepad, binding->buttons[i]))
+        {
+            released = false;
         }
     }
 
     if (released)
     {
-        ButtonBindingConsume(binding);
+        GamepadBindingConsume(binding, gamepad);
     }
 }
 
-static bool ButtonBindingPressed(const ButtonBinding* binding, usize gamepad)
+static void MouseBindingUpdate(MouseBinding* binding)
+{
+    binding->bufferTimer += CTX_DT;
+
+    bool released = true;
+
+    for (usize i = 0; i < binding->buttonsLength; ++i)
+    {
+        if (IsMouseButtonPressed(binding->buttons[i]))
+        {
+            binding->bufferTimer = 0;
+        }
+
+        if (!IsMouseButtonUp(binding->buttons[i]))
+        {
+            released = false;
+        }
+    }
+
+    if (released)
+    {
+        MouseBindingConsume(binding);
+    }
+}
+
+static bool KeyboardBindingPressed(const KeyboardBinding* binding)
 {
     if (binding->bufferDuration != 0 && binding->bufferTimer < binding->bufferDuration)
     {
@@ -106,21 +210,51 @@ static bool ButtonBindingPressed(const ButtonBinding* binding, usize gamepad)
         }
     }
 
-    if (IsGamepadAvailable(gamepad))
+    return false;
+}
+
+static bool GamepadBindingPressed(const GamepadBinding* binding, usize gamepad)
+{
+    if (!IsGamepadAvailable(gamepad))
     {
-        for (usize i = 0; i < binding->buttonsLength; ++i)
+        return false;
+    }
+
+    if (binding->bufferDuration != 0 && binding->bufferTimer < binding->bufferDuration)
+    {
+        return true;
+    }
+
+    for (usize i = 0; i < binding->buttonsLength; ++i)
+    {
+        if (IsGamepadButtonPressed(gamepad, binding->buttons[i]))
         {
-            if (IsGamepadButtonPressed(gamepad, binding->buttons[i]))
-            {
-                return true;
-            }
+            return true;
         }
     }
 
     return false;
 }
 
-static bool ButtonBindingPressing(const ButtonBinding* binding, usize gamepad)
+static bool MouseBindingPressed(const MouseBinding* binding)
+{
+    if (binding->bufferDuration != 0 && binding->bufferTimer < binding->bufferDuration)
+    {
+        return true;
+    }
+
+    for (usize i = 0; i < binding->buttonsLength; ++i)
+    {
+        if (IsMouseButtonPressed(binding->buttons[i]))
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+static bool KeyboardBindingPressing(const KeyboardBinding* binding)
 {
     for (usize i = 0; i < binding->keysLength; ++i)
     {
@@ -130,45 +264,88 @@ static bool ButtonBindingPressing(const ButtonBinding* binding, usize gamepad)
         }
     }
 
-    if (IsGamepadAvailable(gamepad))
+    return false;
+}
+
+static bool GamepadBindingPressing(const GamepadBinding* binding, usize gamepad)
+{
+    if (!IsGamepadAvailable(gamepad))
     {
-        for (usize i = 0; i < binding->buttonsLength; ++i)
+        return false;
+    }
+
+    for (usize i = 0; i < binding->buttonsLength; ++i)
+    {
+        if (IsGamepadButtonDown(gamepad, binding->buttons[i]))
         {
-            if (IsGamepadButtonDown(gamepad, binding->buttons[i]))
-            {
-                return true;
-            }
+            return true;
         }
     }
 
     return false;
 }
 
-static void ButtonBindingConsume(ButtonBinding* self)
+static bool MouseBindingPressing(const MouseBinding* binding)
 {
-    self->bufferTimer = self->bufferDuration;
+    for (usize i = 0; i < binding->buttonsLength; ++i)
+    {
+        if (IsMouseButtonDown(binding->buttons[i]))
+        {
+            return true;
+        }
+    }
+
+    return false;
 }
 
-InputProfile InputProfileCreate(usize totalBindings)
+InputProfile InputProfileCreate(usize bindingsCapactity)
 {
     return (InputProfile)
     {
-        .bindings = calloc(totalBindings, sizeof(ButtonBinding)),
-        .bindingsCapacity = totalBindings,
-        .bindingsLength = 0,
+        .bindingsCapacity = bindingsCapactity,
+        .keyboardBindings = calloc(bindingsCapactity, sizeof(KeyboardBinding)),
+        .keyboardBindingsLength = 0,
+        .gamepadBindings = calloc(bindingsCapactity, sizeof(GamepadBinding)),
+        .gamepadBindingsLength = 0,
+        .mouseBindings = calloc(bindingsCapactity, sizeof(MouseBinding)),
+        .mouseBindingsLength = 0,
     };
 }
 
-void InputProfileAddBinding(InputProfile* self, ButtonBinding binding)
+void InputProfileAddKeyboardBinding(InputProfile* self, KeyboardBinding binding)
 {
-    if (self->bindingsLength == self->bindingsCapacity)
+    if (self->keyboardBindingsLength == self->bindingsCapacity)
     {
         return;
     }
 
-    self->bindings[self->bindingsLength] = binding;
+    self->keyboardBindings[self->keyboardBindingsLength] = binding;
 
-    self->bindingsLength += 1;
+    self->keyboardBindingsLength += 1;
+}
+
+void InputProfileAddGamepadBinding(InputProfile* self, GamepadBinding binding)
+{
+    if (self->gamepadBindingsLength == self->bindingsCapacity)
+    {
+        return;
+    }
+
+    self->gamepadBindings[self->gamepadBindingsLength] = binding;
+
+    self->gamepadBindingsLength += 1;
+}
+
+void InputProfileAddMouseBinding(InputProfile* self, MouseBinding binding)
+{
+    if (self->gamepadBindingsLength == self->bindingsCapacity)
+    {
+        return;
+    }
+
+    self->mouseBindings[self->mouseBindingsLength] = binding;
+
+    self->mouseBindingsLength += 1;
 }
 
 InputHandler InputHandlerCreate(usize gamepad)
@@ -194,9 +371,19 @@ void InputHandlerUpdate(InputHandler* self)
         return;
     }
 
-    for (usize i = 0; i < self->profile.bindingsLength; ++i)
+    for (usize i = 0; i < self->profile.keyboardBindingsLength; ++i)
     {
-        ButtonBindingUpdate(&self->profile.bindings[i], self->gamepad);
+        KeyboardBindingUpdate(&self->profile.keyboardBindings[i]);
+    }
+
+    for (usize i = 0; i < self->profile.gamepadBindingsLength; ++i)
+    {
+        GamepadBindingUpdate(&self->profile.gamepadBindings[i], self->gamepad);
+    }
+
+    for (usize i = 0; i < self->profile.mouseBindingsLength; ++i)
+    {
+        MouseBindingUpdate(&self->profile.mouseBindings[i]);
     }
 }
 
@@ -207,11 +394,36 @@ bool InputHandlerPressed(const InputHandler* self, char* binding)
         return false;
     }
 
-    for (usize i = 0; i < self->profile.bindingsLength; ++i)
+    for (usize i = 0; i < self->profile.keyboardBindingsLength; ++i)
     {
-        if (strcmp(self->profile.bindings[i].name, binding) == 0)
+        if (strcmp(self->profile.keyboardBindings[i].name, binding) == 0)
         {
-            return ButtonBindingPressed(&self->profile.bindings[i], self->gamepad);
+            if (KeyboardBindingPressed(&self->profile.keyboardBindings[i]))
+            {
+                return true;
+            }
+        }
+    }
+
+    for (usize i = 0; i < self->profile.gamepadBindingsLength; ++i)
+    {
+        if (strcmp(self->profile.gamepadBindings[i].name, binding) == 0)
+        {
+            if (GamepadBindingPressed(&self->profile.gamepadBindings[i], self->gamepad))
+            {
+                return true;
+            }
+        }
+    }
+
+    for (usize i = 0; i < self->profile.mouseBindingsLength; ++i)
+    {
+        if (strcmp(self->profile.mouseBindings[i].name, binding) == 0)
+        {
+            if (MouseBindingPressed(&self->profile.mouseBindings[i]))
+            {
+                return true;
+            }
         }
     }
 
@@ -225,11 +437,36 @@ bool InputHandlerPressing(const InputHandler* self, char* binding)
         return false;
     }
 
-    for (usize i = 0; i < self->profile.bindingsLength; ++i)
+    for (usize i = 0; i < self->profile.keyboardBindingsLength; ++i)
     {
-        if (strcmp(self->profile.bindings[i].name, binding) == 0)
+        if (strcmp(self->profile.keyboardBindings[i].name, binding) == 0)
         {
-            return ButtonBindingPressing(&self->profile.bindings[i], self->gamepad);
+            if (KeyboardBindingPressing(&self->profile.keyboardBindings[i]))
+            {
+                return true;
+            }
+        }
+    }
+
+    for (usize i = 0; i < self->profile.gamepadBindingsLength; ++i)
+    {
+        if (strcmp(self->profile.gamepadBindings[i].name, binding) == 0)
+        {
+            if (GamepadBindingPressing(&self->profile.gamepadBindings[i], self->gamepad))
+            {
+                return true;
+            }
+        }
+    }
+
+    for (usize i = 0; i < self->profile.mouseBindingsLength; ++i)
+    {
+        if (strcmp(self->profile.mouseBindings[i].name, binding) == 0)
+        {
+            if (MouseBindingPressing(&self->profile.mouseBindings[i]))
+            {
+                return true;
+            }
         }
     }
 
@@ -243,11 +480,31 @@ void InputHandlerConsume(InputHandler* self, char* binding)
         return;
     }
 
-    for (usize i = 0; i < self->profile.bindingsLength; ++i)
+    for (usize i = 0; i < self->profile.keyboardBindingsLength; ++i)
     {
-        if (strcmp(self->profile.bindings[i].name, binding) == 0)
+        if (strcmp(self->profile.keyboardBindings[i].name, binding) == 0)
         {
-            ButtonBindingConsume(&self->profile.bindings[i]);
+            KeyboardBindingConsume(&self->profile.keyboardBindings[i]);
+
+            break;
+        }
+    }
+
+    for (usize i = 0; i < self->profile.gamepadBindingsLength; ++i)
+    {
+        if (strcmp(self->profile.gamepadBindings[i].name, binding) == 0)
+        {
+            GamepadBindingConsume(&self->profile.gamepadBindings[i], self->gamepad);
+
+            break;
+        }
+    }
+
+    for (usize i = 0; i < self->profile.mouseBindingsLength; ++i)
+    {
+        if (strcmp(self->profile.mouseBindings[i].name, binding) == 0)
+        {
+            MouseBindingConsume(&self->profile.mouseBindings[i]);
 
             break;
         }
