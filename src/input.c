@@ -144,7 +144,7 @@ static void KeyboardBindingUpdate(KeyboardBinding* binding)
 {
     binding->bufferTimer += CTX_DT;
 
-    bool released = true;
+    bool inactive = true;
 
     for (usize i = 0; i < binding->keysLength; ++i)
     {
@@ -153,13 +153,18 @@ static void KeyboardBindingUpdate(KeyboardBinding* binding)
             binding->bufferTimer = 0;
         }
 
+        if (IsKeyReleased(binding->keys[i]))
+        {
+            binding->bufferTimer = 0;
+        }
+
         if (!IsKeyUp(binding->keys[i]))
         {
-            released = false;
+            inactive = false;
         }
     }
 
-    if (released)
+    if (inactive)
     {
         KeyboardBindingConsume(binding);
     }
@@ -174,7 +179,7 @@ static void GamepadBindingUpdate(GamepadBinding* binding, usize gamepad)
 
     binding->bufferTimer += CTX_DT;
 
-    bool released = true;
+    bool inactive = true;
 
     for (usize i = 0; i < binding->buttonsLength; ++i)
     {
@@ -183,13 +188,18 @@ static void GamepadBindingUpdate(GamepadBinding* binding, usize gamepad)
             binding->bufferTimer = 0;
         }
 
+        if (IsGamepadButtonReleased(gamepad, binding->buttons[i]))
+        {
+            binding->bufferTimer = 0;
+        }
+
         if (!IsGamepadButtonUp(gamepad, binding->buttons[i]))
         {
-            released = false;
+            inactive = false;
         }
     }
 
-    if (released)
+    if (inactive)
     {
         GamepadBindingConsume(binding, gamepad);
     }
@@ -199,7 +209,7 @@ static void MouseBindingUpdate(MouseBinding* binding)
 {
     binding->bufferTimer += CTX_DT;
 
-    bool released = true;
+    bool inactive = true;
 
     for (usize i = 0; i < binding->buttonsLength; ++i)
     {
@@ -208,13 +218,18 @@ static void MouseBindingUpdate(MouseBinding* binding)
             binding->bufferTimer = 0;
         }
 
+        if (IsMouseButtonReleased(binding->buttons[i]))
+        {
+            binding->bufferTimer = 0;
+        }
+
         if (!IsMouseButtonUp(binding->buttons[i]))
         {
-            released = false;
+            inactive = false;
         }
     }
 
-    if (released)
+    if (inactive)
     {
         MouseBindingConsume(binding);
     }
@@ -340,6 +355,66 @@ static bool AxisBindingPressing(const AxisBinding* binding, usize gamepad)
         }
 
         if (binding->ordering == ORD_GREATER && value > binding->target)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
+static bool KeyboardBindingReleased(const KeyboardBinding* binding)
+{
+    if (binding->bufferDuration != 0 && binding->bufferTimer < binding->bufferDuration)
+    {
+        return true;
+    }
+
+    for (usize i = 0; i < binding->keysLength; ++i)
+    {
+        if (IsKeyReleased(binding->keys[i]))
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+static bool GamepadBindingReleased(const GamepadBinding* binding, usize gamepad)
+{
+    if (!IsGamepadAvailable(gamepad))
+    {
+        return false;
+    }
+
+    if (binding->bufferDuration != 0 && binding->bufferTimer < binding->bufferDuration)
+    {
+        return true;
+    }
+
+    for (usize i = 0; i < binding->buttonsLength; ++i)
+    {
+        if (IsGamepadButtonReleased(gamepad, binding->buttons[i]))
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+static bool MouseBindingReleased(const MouseBinding* binding)
+{
+    if (binding->bufferDuration != 0 && binding->bufferTimer < binding->bufferDuration)
+    {
+        return true;
+    }
+
+    for (usize i = 0; i < binding->buttonsLength; ++i)
+    {
+        if (IsMouseButtonReleased(binding->buttons[i]))
         {
             return true;
         }
@@ -539,6 +614,49 @@ bool InputHandlerPressing(const InputHandler* self, char* binding)
         if (strcmp(self->profile.axisBindings[i].name, binding) == 0)
         {
             if (AxisBindingPressing(&self->profile.axisBindings[i], self->gamepad))
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+bool InputHandlerReleased(const InputHandler* self, char* binding)
+{
+    if (!self->enabled)
+    {
+        return false;
+    }
+
+    for (usize i = 0; i < self->profile.keyboardBindingsLength; ++i)
+    {
+        if (strcmp(self->profile.keyboardBindings[i].name, binding) == 0)
+        {
+            if (KeyboardBindingReleased(&self->profile.keyboardBindings[i]))
+            {
+                return true;
+            }
+        }
+    }
+
+    for (usize i = 0; i < self->profile.gamepadBindingsLength; ++i)
+    {
+        if (strcmp(self->profile.gamepadBindings[i].name, binding) == 0)
+        {
+            if (GamepadBindingReleased(&self->profile.gamepadBindings[i], self->gamepad))
+            {
+                return true;
+            }
+        }
+    }
+
+    for (usize i = 0; i < self->profile.mouseBindingsLength; ++i)
+    {
+        if (strcmp(self->profile.mouseBindings[i].name, binding) == 0)
+        {
+            if (MouseBindingReleased(&self->profile.mouseBindings[i]))
             {
                 return true;
             }

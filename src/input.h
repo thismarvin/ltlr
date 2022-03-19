@@ -95,4 +95,5 @@ void InputHandlerUpdate(InputHandler* self);
 // TODO(thismarvin): Return the active bindings somehow...
 bool InputHandlerPressed(const InputHandler* self, char* binding);
 bool InputHandlerPressing(const InputHandler* self, char* binding);
+bool InputHandlerReleased(const InputHandler* self, char* binding);
 void InputHandlerConsume(InputHandler* self, char* binding);
