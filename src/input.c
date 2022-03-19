@@ -43,7 +43,7 @@ void KeyboardBindingSetBuffer(KeyboardBinding* self, f32 bufferDuration)
 
 void KeyboardBindingAddKey(KeyboardBinding* self, KeyboardKey key)
 {
-    if (self->keysLength == self->keysCapacity)
+    if (self->keysLength >= self->keysCapacity)
     {
         return;
     }
@@ -74,7 +74,7 @@ void GamepadBindingSetBuffer(GamepadBinding* self, f32 bufferDuration)
 
 void GamepadBindingAddButton(GamepadBinding* self, GamepadButton button)
 {
-    if (self->buttonsLength == self->buttonsCapacity)
+    if (self->buttonsLength >= self->buttonsCapacity)
     {
         return;
     }
@@ -105,7 +105,7 @@ void MouseBindingSetBuffer(MouseBinding* self, f32 bufferDuration)
 
 void MouseBindingAddButton(MouseBinding* self, MouseButton button)
 {
-    if (self->buttonsLength == self->buttonsCapacity)
+    if (self->buttonsLength >= self->buttonsCapacity)
     {
         return;
     }
@@ -130,7 +130,7 @@ AxisBinding AxisBindingCreate(char* name, usize axesCapacity, Ordering ordering,
 
 void AxisBindingAddAxis(AxisBinding* self, GamepadAxis axis)
 {
-    if (self->axesLength == self->axesCapacity)
+    if (self->axesLength >= self->axesCapacity)
     {
         return;
     }
@@ -366,7 +366,7 @@ InputProfile InputProfileCreate(usize bindingsCapactity)
 
 void InputProfileAddKeyboardBinding(InputProfile* self, KeyboardBinding binding)
 {
-    if (self->keyboardBindingsLength == self->bindingsCapacity)
+    if (self->keyboardBindingsLength >= self->bindingsCapacity)
     {
         return;
     }
@@ -378,7 +378,7 @@ void InputProfileAddKeyboardBinding(InputProfile* self, KeyboardBinding binding)
 
 void InputProfileAddGamepadBinding(InputProfile* self, GamepadBinding binding)
 {
-    if (self->gamepadBindingsLength == self->bindingsCapacity)
+    if (self->gamepadBindingsLength >= self->bindingsCapacity)
     {
         return;
     }
@@ -390,7 +390,7 @@ void InputProfileAddGamepadBinding(InputProfile* self, GamepadBinding binding)
 
 void InputProfileAddMouseBinding(InputProfile* self, MouseBinding binding)
 {
-    if (self->gamepadBindingsLength == self->bindingsCapacity)
+    if (self->gamepadBindingsLength >= self->bindingsCapacity)
     {
         return;
     }
@@ -402,7 +402,7 @@ void InputProfileAddMouseBinding(InputProfile* self, MouseBinding binding)
 
 void InputProfileAddAxisBinding(InputProfile* self, AxisBinding binding)
 {
-    if (self->axisBindingsLength == self->bindingsCapacity)
+    if (self->axisBindingsLength >= self->bindingsCapacity)
     {
         return;
     }
