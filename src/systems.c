@@ -166,12 +166,12 @@ void SPlayerInputUpdate(Scene* scene, usize entity)
     {
         i8 strafe = 0;
 
-        if (IsKeyDown(KEY_LEFT))
+        if (InputHandlerPressing(&scene->input, "left"))
         {
             strafe = -1;
         }
 
-        if (IsKeyDown(KEY_RIGHT))
+        if (InputHandlerPressing(&scene->input, "right"))
         {
             strafe = 1;
         }
@@ -181,16 +181,20 @@ void SPlayerInputUpdate(Scene* scene, usize entity)
 
     // Jumping.
     {
-        if (player->grounded && !player->jumping && IsKeyDown(KEY_SPACE))
+        if (player->grounded && !player->jumping && InputHandlerPressed(&scene->input, "jump"))
         {
+            InputHandlerConsume(&scene->input, "jump");
+
             player->grounded = false;
             player->jumping = true;
             kinetic->velocity.y = -player->jumpVelocity;
         }
 
         // Variable Jump Height.
-        if (player->jumping && !IsKeyDown(KEY_SPACE) && kinetic->velocity.y < 0)
+        if (InputHandlerReleased(&scene->input, "jump") && kinetic->velocity.y < 0)
         {
+            InputHandlerConsume(&scene->input, "jump");
+
             player->jumping = false;
             kinetic->velocity.y = MAX(kinetic->velocity.y, -player->jumpVelocity * 0.5);
         }

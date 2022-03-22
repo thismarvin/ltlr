@@ -3,6 +3,7 @@
 #include "common.h"
 #include "components.h"
 #include "events.h"
+#include "input.h"
 #include "level_segment.h"
 
 #define MAX_ENTITIES 64
@@ -48,6 +49,8 @@ typedef struct
     Rectangle bounds;
     LevelSegment* segments;
     usize segmentsLength;
+    // TODO(thismarvin): Should this exist in Scene?
+    InputHandler input;
 } Scene;
 
 void SceneInit(Scene* self);

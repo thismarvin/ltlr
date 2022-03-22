@@ -132,8 +132,107 @@ usize SceneGetEventCount(Scene* self)
     return self->eventManager.nextEvent;
 }
 
+static void SceneSetupInput(Scene* self)
+{
+    InputProfile profile = InputProfileCreate(5);
+
+    // Keyboard.
+    {
+        {
+            KeyboardBinding binding = KeyboardBindingCreate("left", 2);
+
+            KeyboardBindingAddKey(&binding, KEY_LEFT);
+            KeyboardBindingAddKey(&binding, KEY_A);
+
+            InputProfileAddKeyboardBinding(&profile, binding);
+        }
+
+        {
+            KeyboardBinding binding = KeyboardBindingCreate("right", 2);
+
+            KeyboardBindingAddKey(&binding, KEY_RIGHT);
+            KeyboardBindingAddKey(&binding, KEY_D);
+
+            InputProfileAddKeyboardBinding(&profile, binding);
+        }
+
+        {
+            KeyboardBinding binding = KeyboardBindingCreate("jump", 2);
+
+            KeyboardBindingAddKey(&binding, KEY_Z);
+            KeyboardBindingAddKey(&binding, KEY_SPACE);
+
+            KeyboardBindingSetBuffer(&binding, CTX_DT * 8);
+
+            InputProfileAddKeyboardBinding(&profile, binding);
+        }
+    }
+
+    // Gamepad.
+    {
+        // Buttons.
+        {
+            {
+                GamepadBinding binding = GamepadBindingCreate("left", 1);
+
+                GamepadBindingAddButton(&binding, GAMEPAD_BUTTON_LEFT_FACE_LEFT);
+
+                InputProfileAddGamepadBinding(&profile, binding);
+            }
+
+            {
+                GamepadBinding binding = GamepadBindingCreate("right", 1);
+
+                GamepadBindingAddButton(&binding, GAMEPAD_BUTTON_LEFT_FACE_RIGHT);
+
+                InputProfileAddGamepadBinding(&profile, binding);
+            }
+
+            {
+                GamepadBinding binding = GamepadBindingCreate("jump", 2);
+
+                GamepadBindingAddButton(&binding, GAMEPAD_BUTTON_RIGHT_FACE_DOWN);
+                GamepadBindingAddButton(&binding, GAMEPAD_BUTTON_RIGHT_FACE_UP);
+
+                GamepadBindingSetBuffer(&binding, CTX_DT * 8);
+
+                InputProfileAddGamepadBinding(&profile, binding);
+            }
+        }
+
+        // Axes.
+        {
+            f32 threshold = 0.25;
+
+            {
+                AxisBinding binding = AxisBindingCreate("left", 2, ORD_LESS, -threshold);
+
+                AxisBindingAddAxis(&binding, GAMEPAD_AXIS_LEFT_X);
+                AxisBindingAddAxis(&binding, GAMEPAD_AXIS_RIGHT_X);
+
+                InputProfileAddAxisBinding(&profile, binding);
+            }
+
+            {
+                AxisBinding binding = AxisBindingCreate("right", 2, ORD_GREATER, threshold);
+
+                AxisBindingAddAxis(&binding, GAMEPAD_AXIS_LEFT_X);
+                AxisBindingAddAxis(&binding, GAMEPAD_AXIS_RIGHT_X);
+
+                InputProfileAddAxisBinding(&profile, binding);
+            }
+        }
+    }
+
+    self->input = InputHandlerCreate(0);
+
+    InputHandlerSetProfile(&self->input, profile);
+}
+
 void SceneInit(Scene* self)
 {
+    SceneSetupInput(self);
+
     memset(&self->components.tags, 0, sizeof(u64) * MAX_ENTITIES);
 
     // TODO(thismarvin): Do we need to initialize positions, dimensions, etc.?
@@ -217,6 +316,8 @@ void SceneInit(Scene* self)
 
 void SceneUpdate(Scene* self)
 {
+    InputHandlerUpdate(&self->input);
+
     if (IsKeyPressed(KEY_EQUAL))
     {
         self->debugging = !self->debugging;
