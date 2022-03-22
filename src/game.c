@@ -21,9 +21,6 @@ static f64 previousTime = 0.0;
 // TODO(thismarvin): Expose preferences somehow...
 static bool preferIntegerScaling = false;
 
-static bool ensureResize;
-static f32 delayedResizeTimer;
-
 static Camera2D screenSpace;
 static RenderTexture2D targetTexture;
 static Rectangle targetTextureSource;
@@ -65,14 +62,6 @@ static void CalculateZoom(void)
 
 static void Timestep(void)
 {
-    if (IsWindowResized())
-    {
-        CalculateZoom();
-
-        ensureResize = true;
-        delayedResizeTimer = 0;
-    }
-
     f64 currentTime = GetTime();
 
     f32 deltaTime = currentTime - previousTime;
@@ -99,22 +88,10 @@ static void Timestep(void)
 
     ContextSetAlpha(accumulator / targetFrameTime);
 
+    CalculateZoom();
     Draw();
 
     SwapScreenBuffer();
-
-    if (ensureResize)
-    {
-        delayedResizeTimer += deltaTime;
-
-        if (delayedResizeTimer > 1)
-        {
-            CalculateZoom();
-
-            ensureResize = false;
-            delayedResizeTimer = 0;
-        }
-    }
 }
 
 int main(void)
