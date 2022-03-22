@@ -19,7 +19,7 @@ static f32 accumulator = 0.0;
 static f64 previousTime = 0.0;
 
 // TODO(thismarvin): Expose preferences somehow...
-static bool preferIntegerScaling = false;
+static bool preferIntegerScaling = true;
 
 static Camera2D screenSpace;
 static RenderTexture2D targetTexture;
@@ -55,8 +55,8 @@ static void CalculateZoom(void)
     // Account for letterboxing/pillarboxing.
     screenSpace.offset = (Vector2)
     {
-        .x = (screenWidth - CTX_VIEWPORT_WIDTH * zoom) * 0.5,
-        .y = (screenHeight - CTX_VIEWPORT_HEIGHT * zoom) * 0.5,
+        .x = floor((screenWidth - CTX_VIEWPORT_WIDTH * zoom) * 0.5),
+        .y = floor((screenHeight - CTX_VIEWPORT_HEIGHT * zoom) * 0.5),
     };
 }
 
