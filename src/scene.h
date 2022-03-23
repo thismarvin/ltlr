@@ -49,6 +49,8 @@ typedef struct
     Rectangle bounds;
     LevelSegment* segments;
     usize segmentsLength;
+    Rectangle trueResolution;
+    RenderTexture2D targetTexture;
     // TODO(thismarvin): Should this exist in Scene?
     InputHandler input;
 } Scene;

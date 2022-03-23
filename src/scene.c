@@ -229,6 +229,60 @@ static void SceneSetupInput(Scene* self)
     InputHandlerSetProfile(&self->input, profile);
 }
 
+// Returns the maximum value the dimensions of a given region can be multiplied by and still fit
+// within a given container.
+static f32 CalculateZoom(const Rectangle region, const Rectangle container)
+{
+    // Assume we need letterboxing.
+    f32 zoom = container.width / region.width;
+
+    // Check if pillarboxing is more appropriate.
+    if (region.height * zoom > container.height)
+    {
+        zoom = container.height / region.height;
+    }
+
+    return zoom;
+}
+
+static void SceneSetupTargetTexture(Scene* self)
+{
+    self->trueResolution = (Rectangle)
+    {
+        .x = 0,
+        .y = 0,
+        .width = CTX_VIEWPORT_WIDTH,
+        .height = CTX_VIEWPORT_HEIGHT,
+    };
+
+    // TODO(thismarvin): Expose a "Render Resolution" option.
+    Rectangle renderResolution = (Rectangle)
+    {
+        .x = 0,
+        .y = 0,
+        .width = GetMonitorWidth(GetCurrentMonitor()),
+        .height = GetMonitorHeight(GetCurrentMonitor()),
+    };
+
+    f32 zoom = CalculateZoom(self->trueResolution, renderResolution);
+
+    // Ensure that the render resolution uses integer scaling.
+    zoom = floor(zoom);
+
+    self->targetTexture = LoadRenderTexture(CTX_VIEWPORT_WIDTH * zoom, CTX_VIEWPORT_HEIGHT * zoom);
+
+    // Setup Camera.
+    {
+        Vector2 offset = VECTOR2_ZERO;
+        Vector2 target = VECTOR2_ZERO;
+
+        self->camera.offset = offset;
+        self->camera.target = target;
+        self->camera.rotation = 0;
+        self->camera.zoom = zoom;
+    }
+}
+
 void SceneInit(Scene* self)
 {
     SceneSetupInput(self);
@@ -256,16 +310,7 @@ void SceneInit(Scene* self)
 
     self->debugging = false;
 
-    // Setup Camera.
-    {
-        Vector2 offset = { 0, 0 };
-        Vector2 target = { 0, 0 };
-
-        self->camera.offset = offset;
-        self->camera.target = target;
-        self->camera.rotation = 0;
-        self->camera.zoom = 1;
-    }
+    SceneSetupTargetTexture(self);
 
     // Level Loading.
     {
@@ -339,10 +384,57 @@ void SceneUpdate(Scene* self)
     }
 }
 
+static void SceneDrawTargetTexture(const Scene* self)
+{
+    BeginDrawing();
+
+    Rectangle screenResolution = (Rectangle)
+    {
+        .x = 0,
+        .y = 0,
+        .width = GetScreenWidth(),
+        .height = GetScreenHeight(),
+    };
+
+    f32 zoom = CalculateZoom(self->trueResolution, screenResolution);
+
+    // TODO(thismarvin): Expose "preferIntegerScaling" option.
+    // Prefer integer scaling.
+    zoom = floor(zoom);
+
+    i32 width = CTX_VIEWPORT_WIDTH * zoom;
+    i32 height = CTX_VIEWPORT_HEIGHT * zoom;
+
+    Rectangle source = (Rectangle)
+    {
+        .x = 0,
+        .y = 0,
+        .width = self->targetTexture.texture.width,
+        .height = -self->targetTexture.texture.height,
+    };
+
+    Rectangle destination = (Rectangle)
+    {
+        .x = floor(screenResolution.width * 0.5),
+        .y = floor(screenResolution.height * 0.5),
+        .width = width,
+        .height = height,
+    };
+
+    Vector2 origin = (Vector2)
+    {
+        .x = floor(width * 0.5),
+        .y = floor(height * 0.5),
+    };
+
+    ClearBackground(BLACK);
+    DrawTexturePro(self->targetTexture.texture, source, destination, origin, 0, WHITE);
+
+    EndDrawing();
+}
+
 void SceneDraw(Scene* self, Texture2D* atlas)
 {
-    ClearBackground(WHITE);
-
     // TODO(thismarvin): This should ultimately be a System... somehow...
     // Update Camera
     {
@@ -372,63 +464,63 @@ void SceneDraw(Scene* self, Texture2D* atlas)
         }
     }
 
+    BeginTextureMode(self->targetTexture);
     BeginMode2D(self->camera);
-
-    // Draw Tilemap.
     {
-        Vector2 offset = VECTOR2_ZERO;
+        ClearBackground(WHITE);
 
-        for (usize i = 0; i < self->segmentsLength; ++i)
+        // Draw Tilemap.
         {
-            for (usize j = 0; j < self->segments[i].spritesLength; ++j)
+            Vector2 offset = VECTOR2_ZERO;
+
+            for (usize i = 0; i < self->segmentsLength; ++i)
             {
-                if (self->segments[i].sprites[j] == 0)
+                for (usize j = 0; j < self->segments[i].spritesLength; ++j)
                 {
-                    continue;
+                    if (self->segments[i].sprites[j] == 0)
+                    {
+                        continue;
+                    }
+
+                    u16 sprite = self->segments[i].sprites[j] - 1;
+
+                    Vector2 position = (Vector2)
+                    {
+                        .x = (j % self->segments[i].tilemapWidth) * self->segments[i].tileWidth,
+                        .y = (j / self->segments[i].tilemapWidth) * self->segments[i].tileHeight
+                    };
+
+                    position = Vector2Add(position, offset);
+
+                    Rectangle source = (Rectangle)
+                    {
+                        .x = (sprite % self->segments[i].tilesetColumns) * self->segments[i].tileWidth,
+                        .y = (sprite / self->segments[i].tilesetColumns) * self->segments[i].tileHeight,
+                        .width = self->segments[i].tileWidth,
+                        .height = self->segments[i].tileHeight
+                    };
+
+                    DrawTextureRec(*atlas, source, position, WHITE);
                 }
 
-                u16 sprite = self->segments[i].sprites[j] - 1;
-
-                Vector2 position = (Vector2)
-                {
-                    .x = (j % self->segments[i].tilemapWidth) * self->segments[i].tileWidth,
-                    .y = (j / self->segments[i].tilemapWidth) * self->segments[i].tileHeight
-                };
-
-                position = Vector2Add(position, offset);
-
-                Rectangle source = (Rectangle)
-                {
-                    .x = (sprite % self->segments[i].tilesetColumns) * self->segments[i].tileWidth,
-                    .y = (sprite / self->segments[i].tilesetColumns) * self->segments[i].tileHeight,
-                    .width = self->segments[i].tileWidth,
-                    .height = self->segments[i].tileHeight
-                };
-
-                DrawTextureRec(*atlas, source, position, WHITE);
+                offset.x += self->segments[i].bounds.width;
             }
-
-            offset.x += self->segments[i].bounds.width;
         }
-    }
 
-    for (usize i = 0; i < SceneGetEntityCount(self); ++i)
-    {
-        SSpriteDraw(self, atlas, i);
-
-        if (self->debugging)
+        for (usize i = 0; i < SceneGetEntityCount(self); ++i)
         {
-            SDebugDraw(self, i);
+            SSpriteDraw(self, atlas, i);
+
+            if (self->debugging)
+            {
+                SDebugDraw(self, i);
+            }
         }
     }
-
-
     EndMode2D();
+    EndTextureMode();
 
-    if (self->debugging)
-    {
-        DrawFPS(8, 8);
-    }
+    SceneDrawTargetTexture(self);
 }
 
 void SceneReset(Scene* self)
@@ -445,4 +537,6 @@ void SceneDestroy(Scene* self)
     {
         LevelSegmentDestroy(&self->segments[i]);
     }
+
+    UnloadRenderTexture(self->targetTexture);
 }
