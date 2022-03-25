@@ -283,13 +283,37 @@ static void SceneSetupTargetTexture(Scene* self)
     }
 }
 
-void SceneInit(Scene* self)
+static void SceneSetupLevelSegments(Scene* self)
 {
-    SceneSetupInput(self);
+    // TODO(thismarvin): Should we crawl the resource directory to find levels?
 
+#if defined(PLATFORM_WEB)
+    const char* levels[2] = { "./src/resources/build/level_00.json", "./src/resources/build/level_01.json" };
+#else
+    const char* levels[2] = { "./resources/build/level_00.json", "./resources/build/level_01.json" };
+#endif
+
+    self->segmentsLength = 2;
+    self->segments = malloc(sizeof(LevelSegment) * self->segmentsLength);
+
+    self->bounds = (Rectangle)
+    {
+        .x = 0,
+        .y = 0,
+        .width = 0,
+        .height = 180,
+    };
+
+    for (usize i = 0; i < self->segmentsLength; ++i)
+    {
+        LevelSegmentInit(&self->segments[i], levels[i]);
+        self->bounds.width += self->segments[i].bounds.width;
+    }
+}
+
+static void SceneStart(Scene* self)
+{
     memset(&self->components.tags, 0, sizeof(u64) * MAX_ENTITIES);
-
-    // TODO(thismarvin): Do we need to initialize positions, dimensions, etc.?
 
     // Initialize EntityManager.
     {
@@ -308,37 +332,12 @@ void SceneInit(Scene* self)
         }
     }
 
-    self->debugging = false;
-
-    SceneSetupTargetTexture(self);
-
-    // Level Loading.
+    // Populate level
     {
-        // TODO(thismarvin): Should we crawl the resource directory to find levels?
-
-#if defined(PLATFORM_WEB)
-        char* levels[2] = { "./src/resources/build/level_00.json", "./src/resources/build/level_01.json" };
-#else
-        char* levels[2] = { "./resources/build/level_00.json", "./resources/build/level_01.json" };
-#endif
-
-        self->segmentsLength = 2;
-        self->segments = malloc(sizeof(LevelSegment) * self->segmentsLength);
-
-        self->bounds = (Rectangle)
-        {
-            .x = 0,
-            .y = 0,
-            .width = 0,
-            .height = 180,
-        };
-
         Vector2 offset = VECTOR2_ZERO;
 
         for (usize i = 0; i < self->segmentsLength; ++i)
         {
-            LevelSegmentInit(&self->segments[i], levels[i]);
-
             for (usize j = 0; j < self->segments[i].collidersLength; ++j)
             {
                 Rectangle collider = self->segments[i].colliders[j];
@@ -346,8 +345,7 @@ void SceneInit(Scene* self)
                 ECreateBlock(self, offset.x + collider.x, offset.y + collider.y, collider.width, collider.height);
             }
 
-            self->bounds.width += self->segments[i].bounds.width;
-            offset.x += self->bounds.width;
+            offset.x += self->segments[i].bounds.width;
         }
     }
 
@@ -357,6 +355,17 @@ void SceneInit(Scene* self)
     ECreateWalker(self, 16 * 16, 8 * 16);
     ECreateWalker(self, 16 * 16, 0 * 16);
     ECreateWalker(self, 16 * 16, 4 * 16);
+}
+
+void SceneInit(Scene* self)
+{
+    SceneSetupInput(self);
+    SceneSetupTargetTexture(self);
+    SceneSetupLevelSegments(self);
+
+    self->debugging = false;
+
+    SceneStart(self);
 }
 
 void SceneUpdate(Scene* self)
@@ -525,10 +534,7 @@ void SceneDraw(Scene* self, Texture2D* atlas)
 
 void SceneReset(Scene* self)
 {
-    // TODO(austin0209): For now this is a 'hacky' reset that reloads the level every time.
-    // TODO(austin0209): Need to add a starting position player within level data.
-    SceneDestroy(self);
-    SceneInit(self);
+    SceneStart(self);
 }
 
 void SceneDestroy(Scene* self)
