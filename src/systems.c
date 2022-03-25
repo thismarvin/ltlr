@@ -543,7 +543,7 @@ void SPlayerMortalUpdate(Scene* scene, usize entity)
 
         assert(ENTITY_HAS_DEPS(otherEntity, tagDamage));
 
-        const CDamage* otherDamage = GET_COMPONENT(otherDamage, entity);
+        const CDamage* otherDamage = GET_COMPONENT(otherDamage, otherEntity);
 
         mortal->hp -= otherDamage->value;
         player->invulnerableTimer = 0;
