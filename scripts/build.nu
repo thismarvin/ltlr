@@ -4,6 +4,12 @@ let make = 'mingw32-make'
 let directory-build = 'build\release\desktop'
 let directory-bin = 'bin\release\desktop'
 
+let directory-raylib = 'vendor\raylib'
+
+if (ls $directory-raylib | length) == 0 {
+	error make { msg: $"(ansi wi)Please(ansi reset) run (ansi cb)git submodule update --init --recursive(ansi reset)!" }
+}
+
 let flags = '-std=c17 -O3 -DPLATFORM_DESKTOP'
 let flags-include = '-I.\vendor\raylib\src'
 let flags-library = '-L.\build\vendor\raylib\desktop -static -lraylib -lopengl32 -lgdi32 -lwinmm'
@@ -27,7 +33,6 @@ rmdir /s /q src\\vendor
 rmdir /s /q build
 rmdir /s /q bin
 
-git submodule update --init --recursive
 cd vendor\\raylib\\src
 ($make) PLATFORM=PLATFORM_DESKTOP CUSTOM_CFLAGS=-DSUPPORT_CUSTOM_FRAME_CONTROL
 cd ..
