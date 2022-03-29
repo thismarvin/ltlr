@@ -144,6 +144,8 @@ void SPlayerInputUpdate(Scene* scene, usize entity)
         return;
     }
 
+    bool coyoteTimeActive = player->coyoteTimer < player->coyoteDuration;
+
     // Maintenance.
     {
         if (player->grounded)
@@ -160,6 +162,11 @@ void SPlayerInputUpdate(Scene* scene, usize entity)
         }
 
         kinetic->acceleration = gravityForce;
+
+        if (coyoteTimeActive)
+        {
+            player->coyoteTimer += CTX_DT;
+        }
     }
 
     // Lateral Movement.
@@ -181,7 +188,8 @@ void SPlayerInputUpdate(Scene* scene, usize entity)
 
     // Jumping.
     {
-        if (player->grounded && !player->jumping && InputHandlerPressed(&scene->input, "jump"))
+        if ((player->grounded || coyoteTimeActive) && !player->jumping
+                && InputHandlerPressed(&scene->input, "jump"))
         {
             InputHandlerConsume(&scene->input, "jump");
 
@@ -420,6 +428,8 @@ void SPlayerCollisionUpdate(Scene* scene, usize entity)
     CPosition* position = GET_COMPONENT(position, entity);
     const CDimension* dimension = GET_COMPONENT(dimension, entity);
 
+    bool groundedLastFrame = player->grounded;
+
     // General purpose player specific collision logic.
     {
         // Assume that the player is not grounded; prove that it is later.
@@ -464,6 +474,12 @@ void SPlayerCollisionUpdate(Scene* scene, usize entity)
         {
             position->value.y = original.y;
         }
+    }
+
+    // Enable "Coyote Time" if the player walked off an edge.
+    if (groundedLastFrame && !player->grounded)
+    {
+        player->coyoteTimer = 0;
     }
 
     // Consume Collision events.

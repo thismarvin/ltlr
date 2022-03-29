@@ -69,6 +69,8 @@ typedef struct
 typedef struct
 {
     bool grounded;
+    f32 coyoteTimer;
+    f32 coyoteDuration;
     bool jumping;
     bool dead;
     f32 moveSpeed;

@@ -1,4 +1,5 @@
 #include "components.h"
+#include "context.h"
 #include "entities.h"
 
 usize ECreatePlayer(Scene* scene, f32 x, f32 y)
@@ -53,10 +54,13 @@ usize ECreatePlayer(Scene* scene, f32 x, f32 y)
 
         f32 jumpVelocity = jumpGravity * jumpDuration;
 
+        f32 coyoteDuration = CTX_DT * 6;
         f32 invulnerableDuration = 1.5f;
 
         scene->components.players[entity] = (CPlayer)
         {
+            .coyoteTimer = coyoteDuration,
+            .coyoteDuration = coyoteDuration,
             .moveSpeed = 200,
             .jumping = false,
             .dead = false,
