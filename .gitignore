@@ -3,6 +3,7 @@
 bin
 build
 src/vendor
+build.bat
 
 # Prerequisites
 *.d

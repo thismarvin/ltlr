@@ -16,7 +16,7 @@ let files-source = (
 let files-object = (
 	$files-source
 	| each { |it| $it.input | str find-replace '(src)(\\\w+)*((\\\w+)(\.c))' '$2$4.o' }
-	| each { |it| $it | $"($directory-build)($in)" }
+	| each { |it| $"($directory-build)($it)" }
 	| wrap 'output'
 )
 
@@ -67,7 +67,7 @@ let commands-build = (
 
 let commands-link = (
 	($files-object).output | str collect ' '
-	| $"($cc) ($flags) -o ($directory-bin)\\($exc) ($in) ($flags-library) "
+	| $"($cc) ($flags) -o ($directory-bin)\\($exc) ($in) ($flags-library)"
 )
 
 $":: Windows Command Prompt Build Script
