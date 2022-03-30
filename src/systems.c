@@ -662,6 +662,59 @@ void SFleetingUpdate(Scene* scene, usize entity)
     }
 }
 
+void SGenericCollisionUpdate(Scene* scene, usize entity)
+{
+    REQUIRE_DEPS(tagPosition | tagDimension | tagCollider);
+
+    CPosition* position = GET_COMPONENT(position, entity);
+    const CDimension* dimension = GET_COMPONENT(dimension, entity);
+
+    Rectangle aabb = (Rectangle)
+    {
+        .x = position->value.x,
+        .y = position->value.y,
+        .width = dimension->width,
+        .height = dimension->height,
+    };
+
+    // Consume Collision event.
+    for (usize i = 0; i < SceneGetEventCount(scene); ++i)
+    {
+        Event* event = &scene->eventManager.events[i];
+
+        if (event->entity != entity || event->tag != EVENT_COLLISION)
+        {
+            continue;
+        }
+
+        SceneConsumeEvent(scene, i);
+
+        const EventCollisionInner* collisionInner = &event->collisionInner;
+
+        assert(ENTITY_HAS_DEPS(collisionInner->otherEntity, tagPosition | tagDimension | tagCollider));
+
+        const CPosition* otherPosition = GET_COMPONENT(otherPosition, collisionInner->otherEntity);
+        const CDimension* otherDimension = GET_COMPONENT(otherDimension, collisionInner->otherEntity);
+        const CCollider* otherCollider = GET_COMPONENT(otherCollider, collisionInner->otherEntity);
+
+        Rectangle otherAabb = (Rectangle)
+        {
+            .x = otherPosition->value.x,
+            .y = otherPosition->value.y,
+            .width = otherDimension->width,
+            .height = otherDimension->height,
+        };
+
+        Vector2 rawResolution = RectangleRectangleResolution(aabb, otherAabb);
+        Vector2 resolution = ExtractResolution(rawResolution, otherCollider->layer);
+
+        position->value = Vector2Add(position->value, resolution);
+
+        aabb.x += resolution.x;
+        aabb.y += resolution.y;
+    }
+}
+
 void SSpriteDraw(Scene* scene, Texture2D* atlas, usize entity)
 {
     REQUIRE_DEPS(tagPosition | tagColor | tagSprite);

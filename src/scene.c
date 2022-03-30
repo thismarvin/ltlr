@@ -405,6 +405,7 @@ void SceneUpdate(Scene* self)
         SPlayerCollisionUpdate(self, i);
         SWalkerCollisionUpdate(self, i);
         SPlayerMortalUpdate(self, i);
+        SGenericCollisionUpdate(self, i);
     }
 }
 
