@@ -168,7 +168,7 @@ static void SceneSetupInput(Scene* self)
         }
     }
 
-    // Gamepad.
+// Gamepad.
     {
         // Buttons.
         {
@@ -200,7 +200,7 @@ static void SceneSetupInput(Scene* self)
             }
         }
 
-        // Axes.
+// Axes.
         {
             f32 threshold = 0.25;
 
@@ -405,6 +405,8 @@ void SceneUpdate(Scene* self)
         SPlayerCollisionUpdate(self, i);
         SWalkerCollisionUpdate(self, i);
         SPlayerMortalUpdate(self, i);
+        SCloudParticleCollisionUpdate(self, i);
+
         SGenericCollisionUpdate(self, i);
     }
 }
@@ -492,7 +494,10 @@ void SceneDraw(Scene* self, Texture2D* atlas)
     BeginTextureMode(self->targetTexture);
     BeginMode2D(self->camera);
     {
-        ClearBackground(WHITE);
+        ClearBackground((Color)
+        {
+            41, 173, 255, 255
+        });
 
         // Draw Tilemap.
         {
@@ -535,6 +540,7 @@ void SceneDraw(Scene* self, Texture2D* atlas)
         for (usize i = 0; i < SceneGetEntityCount(self); ++i)
         {
             SSpriteDraw(self, atlas, i);
+            SCloudParticleDraw(self, i);
 
             if (self->debugging)
             {

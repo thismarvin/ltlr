@@ -1,6 +1,7 @@
 #include "collider.h"
 #include "components.h"
 #include "context.h"
+#include "entities.h"
 #include "raymath.h"
 #include "systems.h"
 #include <assert.h>
@@ -134,9 +135,11 @@ static Vector2 ExtractResolution(Vector2 resolution, u64 layers)
 
 void SPlayerInputUpdate(Scene* scene, usize entity)
 {
-    REQUIRE_DEPS(tagPlayer | tagKinetic);
+    REQUIRE_DEPS(tagPlayer | tagKinetic | tagPosition);
 
     CPlayer* player = GET_COMPONENT(player, entity);
+    // TODO(austin0209): Use an event to spawn particles instead of grabbing position.
+    const CPosition* position = GET_COMPONENT(position, entity);
     CKinetic* kinetic = GET_COMPONENT(kinetic, entity);
 
     if (player->dead)
@@ -196,6 +199,17 @@ void SPlayerInputUpdate(Scene* scene, usize entity)
             player->grounded = false;
             player->jumping = true;
             kinetic->velocity.y = -player->jumpVelocity;
+
+            // TODO(austin0209): use events to spawn particles.
+            int particleCount = GetRandomValue(4, 12);
+
+            for (int i = 0; i < particleCount; ++i)
+            {
+                Vector2 offset = Vector2Create(GetRandomValue(-4, 4), GetRandomValue(-8, 8));
+                Vector2 startingPosition = Vector2Add(position->value, offset);
+                Vector2 direction = GetRandomValue(0, 1) == 0 ? Vector2Create(1, 0) : Vector2Create(-1, 0);
+                ECreateCloudParticle(scene, startingPosition.x + 8, startingPosition.y + 32, direction);
+            }
         }
 
         // Variable Jump Height.
@@ -713,6 +727,86 @@ void SGenericCollisionUpdate(Scene* scene, usize entity)
         aabb.x += resolution.x;
         aabb.y += resolution.y;
     }
+}
+
+void SCloudParticleCollisionUpdate(Scene* scene, usize entity)
+{
+    REQUIRE_DEPS(tagPosition | tagDimension | tagCollider | tagFleeting);
+
+    CPosition* position = GET_COMPONENT(position, entity);
+    const CDimension* dimension = GET_COMPONENT(dimension, entity);
+    const CFleeting* fleeting = GET_COMPONENT(fleeting, entity);
+
+    const f32 collisionSize = dimension->width * (fleeting->lifetime - fleeting->age) /
+                              fleeting->lifetime;
+
+    Rectangle aabb = (Rectangle)
+    {
+        .x = position->value.x,
+        .y = position->value.y,
+        .width = collisionSize,
+        .height = collisionSize,
+    };
+
+    // Consume Collision event.
+    for (usize i = 0; i < SceneGetEventCount(scene); ++i)
+    {
+        Event* event = &scene->eventManager.events[i];
+
+        if (event->entity != entity || event->tag != EVENT_COLLISION)
+        {
+            continue;
+        }
+
+        SceneConsumeEvent(scene, i);
+
+        const EventCollisionInner* collisionInner = &event->collisionInner;
+
+        assert(ENTITY_HAS_DEPS(collisionInner->otherEntity, tagPosition | tagDimension | tagCollider));
+
+        const CPosition* otherPosition = GET_COMPONENT(otherPosition, collisionInner->otherEntity);
+        const CDimension* otherDimension = GET_COMPONENT(otherDimension, collisionInner->otherEntity);
+        const CCollider* otherCollider = GET_COMPONENT(otherCollider, collisionInner->otherEntity);
+
+        Rectangle otherAabb = (Rectangle)
+        {
+            .x = otherPosition->value.x,
+            .y = otherPosition->value.y,
+            .width = otherDimension->width,
+            .height = otherDimension->height,
+        };
+
+        Vector2 rawResolution = RectangleRectangleResolution(aabb, otherAabb);
+        Vector2 resolution = ExtractResolution(rawResolution, otherCollider->layer);
+
+        position->value = Vector2Add(position->value, resolution);
+
+        aabb.x += resolution.x;
+        aabb.y += resolution.y;
+    }
+}
+
+void SCloudParticleDraw(Scene* scene, usize entity)
+{
+    REQUIRE_DEPS(tagPosition | tagDimension | tagFleeting | tagColor | tagSmooth);
+
+    const CPosition* position = GET_COMPONENT(position, entity);
+    const CColor* color = GET_COMPONENT(color, entity);
+    const CFleeting* fleeting = GET_COMPONENT(fleeting, entity);
+    const CDimension* dimension = GET_COMPONENT(dimension, entity);
+    const CSmooth* smooth = GET_COMPONENT(smooth, entity);
+
+    const f32 drawSize = dimension->width * (fleeting->lifetime - fleeting->age) / fleeting->lifetime;
+
+    Vector2 interpolated = Vector2Lerp(smooth->previous, position->value, ContextGetAlpha());
+
+    Vector2 center = (Vector2)
+    {
+        .x = interpolated.x + drawSize * 0.5f,
+        .y = interpolated.y + drawSize * 0.5f,
+    };
+
+    DrawCircleV(center, drawSize * 0.5f, color->value);
 }
 
 void SSpriteDraw(Scene* scene, Texture2D* atlas, usize entity)

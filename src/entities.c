@@ -1,6 +1,7 @@
 #include "components.h"
 #include "context.h"
 #include "entities.h"
+#include "raymath.h"
 
 usize ECreatePlayer(Scene* scene, f32 x, f32 y)
 {
@@ -139,6 +140,63 @@ usize ECreateWalker(Scene* scene, f32 x, f32 y)
     {
         .layer = layerAll,
         .mask = layerAll,
+    };
+
+    return entity;
+}
+
+usize ECreateCloudParticle(Scene* scene, f32 x, f32 y, Vector2 direction)
+{
+    usize entity = SceneAllocateEntity(scene);
+
+    scene->components.tags[entity] = tagPosition | tagDimension | tagColor | tagKinetic | tagSmooth
+                                     | tagCollider | tagFleeting;
+
+    Vector2 position = Vector2Create(x, y);
+
+    scene->components.positions[entity] = (CPosition)
+    {
+        .value = position,
+    };
+
+    f32 radius = GetRandomValue(1, 6);
+    scene->components.dimensions[entity] = (CDimension)
+    {
+        .width = radius * 2,
+        .height = radius * 2,
+    };
+
+    scene->components.colors[entity] = (CColor)
+    {
+        .value = (Color)
+        {
+            255, 255, 255, 255
+        }
+    };
+
+    f32 speed = GetRandomValue(10, 25);
+    scene->components.kinetics[entity] = (CKinetic)
+    {
+        .velocity = Vector2Scale(direction, speed),
+        .acceleration = VECTOR2_ZERO,
+    };
+
+    scene->components.smooths[entity] = (CSmooth)
+    {
+        .previous = position,
+    };
+
+    scene->components.colliders[entity] = (CCollider)
+    {
+        .layer = layerNone,
+        .mask = layerAll,
+    };
+
+    f32 lifetime = GetRandomValue(1, 4);
+    scene->components.fleetings[entity] = (CFleeting)
+    {
+        .age = 0,
+        .lifetime = lifetime,
     };
 
     return entity;
