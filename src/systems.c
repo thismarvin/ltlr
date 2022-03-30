@@ -138,8 +138,6 @@ void SPlayerInputUpdate(Scene* scene, usize entity)
     REQUIRE_DEPS(tagPlayer | tagKinetic | tagPosition);
 
     CPlayer* player = GET_COMPONENT(player, entity);
-    // TODO(austin0209): Use an event to spawn particles instead of grabbing position.
-    const CPosition* position = GET_COMPONENT(position, entity);
     CKinetic* kinetic = GET_COMPONENT(kinetic, entity);
 
     if (player->dead)
@@ -200,16 +198,10 @@ void SPlayerInputUpdate(Scene* scene, usize entity)
             player->jumping = true;
             kinetic->velocity.y = -player->jumpVelocity;
 
-            // TODO(austin0209): use events to spawn particles.
             int particleCount = GetRandomValue(4, 12);
-
-            for (int i = 0; i < particleCount; ++i)
-            {
-                Vector2 offset = Vector2Create(GetRandomValue(-4, 4), GetRandomValue(-8, 8));
-                Vector2 startingPosition = Vector2Add(position->value, offset);
-                Vector2 direction = GetRandomValue(0, 1) == 0 ? Vector2Create(1, 0) : Vector2Create(-1, 0);
-                ECreateCloudParticle(scene, startingPosition.x + 8, startingPosition.y + 32, direction);
-            }
+            Event particleEvent;
+            EventCloudParticleInit(&particleEvent, entity, particleCount);
+            SceneRaiseEvent(scene, &particleEvent);
         }
 
         // Variable Jump Height.
@@ -783,6 +775,35 @@ void SCloudParticleCollisionUpdate(Scene* scene, usize entity)
 
         aabb.x += resolution.x;
         aabb.y += resolution.y;
+    }
+}
+
+void SCloudParticleSpawnUpdate(Scene* scene, usize entity)
+{
+    REQUIRE_DEPS(tagPosition);
+
+    const CPosition* position = GET_COMPONENT(position, entity);
+
+    for (usize i = 0; i < SceneGetEventCount(scene); ++i)
+    {
+        Event* event = &scene->eventManager.events[i];
+
+        if (event->entity != entity || event->tag != EVENT_CLOUD_PARTICLE)
+        {
+            continue;
+        }
+
+        SceneConsumeEvent(scene, i);
+
+        const EventCloudParticleInner* cloudInner = &event->cloudParticleInner;
+
+        for (usize j = 0; j < cloudInner->spawnCount; ++j)
+        {
+            Vector2 offset = Vector2Create(GetRandomValue(-4, 4), GetRandomValue(-8, 8));
+            Vector2 startingPosition = Vector2Add(position->value, offset);
+            Vector2 direction = GetRandomValue(0, 1) == 0 ? Vector2Create(1, 0) : Vector2Create(-1, 0);
+            ECreateCloudParticle(scene, startingPosition.x + 8, startingPosition.y + 32, direction);
+        }
     }
 }
 

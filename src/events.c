@@ -19,3 +19,14 @@ void EventDamageInit(Event* self, usize entity, usize otherEntity)
         .otherEntity = otherEntity,
     };
 }
+
+void EventCloudParticleInit(Event* self, usize entity, int spawnCount)
+{
+    self->tag = EVENT_CLOUD_PARTICLE;
+    self->entity = entity;
+
+    self->cloudParticleInner = (EventCloudParticleInner)
+    {
+        .spawnCount = spawnCount,
+    };
+}
