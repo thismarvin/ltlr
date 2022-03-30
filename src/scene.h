@@ -6,7 +6,7 @@
 #include "input.h"
 #include "level_segment.h"
 
-#define MAX_ENTITIES 64
+#define MAX_ENTITIES 1024
 
 typedef struct
 {
