@@ -11,7 +11,6 @@ void SPlayerCollisionUpdate(Scene* scene, usize entity);
 void SPlayerMortalUpdate(Scene* scene, usize entity);
 
 void SWalkerCollisionUpdate(Scene* scene, usize entity);
-void SWalkerUpdate(Scene* scene, usize entity);
 
 void SFleetingUpdate(Scene* scene, usize entity);
 
