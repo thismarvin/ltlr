@@ -13,5 +13,7 @@ void SPlayerMortalUpdate(Scene* scene, usize entity);
 void SWalkerCollisionUpdate(Scene* scene, usize entity);
 void SWalkerUpdate(Scene* scene, usize entity);
 
+void SFleetingUpdate(Scene* scene, usize entity);
+
 void SSpriteDraw(Scene* scene, Texture2D* atlas, usize entity);
 void SDebugDraw(Scene* scene, usize entity);

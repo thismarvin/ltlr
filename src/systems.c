@@ -648,6 +648,20 @@ void SWalkerCollisionUpdate(Scene* scene, usize entity)
     }
 }
 
+void SFleetingUpdate(Scene* scene, usize entity)
+{
+    REQUIRE_DEPS(tagFleeting);
+
+    CFleeting* fleeting = GET_COMPONENT(fleeting, entity);
+
+    fleeting->age += CTX_DT;
+
+    if (fleeting->age > fleeting->lifetime)
+    {
+        scene->components.tags[entity] = tagNone;
+    }
+}
+
 void SSpriteDraw(Scene* scene, Texture2D* atlas, usize entity)
 {
     REQUIRE_DEPS(tagPosition | tagColor | tagSprite);
