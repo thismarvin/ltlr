@@ -21,6 +21,7 @@ typedef struct
     CPlayer players[MAX_ENTITIES];
     CMortal mortals[MAX_ENTITIES];
     CDamage damages[MAX_ENTITIES];
+    CFleeting fleetings[MAX_ENTITIES];
 } Components;
 
 typedef struct
@@ -90,4 +91,6 @@ void SceneDestroy(Scene* self);
     const CMortal*: &SceneGetComponents(scene)->mortals[mEntity], \
     CMortal*: &SceneGetComponents(scene)->mortals[mEntity], \
     const CDamage*: &SceneGetComponents(scene)->damages[mEntity], \
-    CDamage*: &SceneGetComponents(scene)->damages[mEntity])
+    CDamage*: &SceneGetComponents(scene)->damages[mEntity], \
+    const CFleeting*: &SceneGetComponents(scene)->fleetings[mEntity], \
+    CFleeting*: &SceneGetComponents(scene)->fleetings[mEntity])

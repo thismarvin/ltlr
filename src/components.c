@@ -12,6 +12,7 @@ const u64 tagCollider = (u64)1 << 7;
 const u64 tagWalker = (u64)1 << 8;
 const u64 tagMortal = (u64)1 << 9;
 const u64 tagDamage = (u64)1 << 10;
+const u64 tagFleeting = (u64)1 << 11;
 
 const u64 layerNone = (u64)0;
 const u64 layerUp = (u64)1 << 0;

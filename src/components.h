@@ -14,6 +14,7 @@ extern const u64 tagCollider;
 extern const u64 tagWalker;
 extern const u64 tagMortal;
 extern const u64 tagDamage;
+extern const u64 tagFleeting;
 
 extern const u64 layerNone;
 extern const u64 layerUp;
@@ -90,3 +91,9 @@ typedef struct
 {
     i16 value;
 } CDamage;
+
+typedef struct
+{
+    f32 age;
+    f32 lifetime;
+} CFleeting;
