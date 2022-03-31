@@ -145,25 +145,24 @@ usize ECreateWalker(Scene* scene, f32 x, f32 y)
     return entity;
 }
 
-usize ECreateCloudParticle(Scene* scene, f32 x, f32 y, Vector2 direction)
+usize ECreateCloudParticle(Scene* scene, f32 centerX, f32 centerY, Vector2 direction)
 {
     usize entity = SceneAllocateEntity(scene);
 
     scene->components.tags[entity] = tagPosition | tagDimension | tagColor | tagKinetic | tagSmooth
                                      | tagCollider | tagFleeting;
 
-    Vector2 position = Vector2Create(x, y);
-
-    scene->components.positions[entity] = (CPosition)
-    {
-        .value = position,
-    };
-
-    f32 radius = GetRandomValue(1, 6);
+    f32 radius = (f32)GetRandomValue(1, 3);
     scene->components.dimensions[entity] = (CDimension)
     {
         .width = radius * 2,
         .height = radius * 2,
+    };
+
+    Vector2 position = Vector2Create(centerX - radius, centerY - radius);
+    scene->components.positions[entity] = (CPosition)
+    {
+            .value = position,
     };
 
     scene->components.colors[entity] = (CColor)
