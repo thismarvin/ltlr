@@ -723,9 +723,10 @@ void SGenericCollisionUpdate(Scene* scene, usize entity)
 
 void SCloudParticleCollisionUpdate(Scene* scene, usize entity)
 {
-    REQUIRE_DEPS(tagPosition | tagDimension | tagCollider | tagFleeting);
+    REQUIRE_DEPS(tagPosition | tagDimension | tagCollider | tagKinetic | tagFleeting);
 
     CPosition* position = GET_COMPONENT(position, entity);
+    CKinetic* kinetic = GET_COMPONENT(kinetic, entity);
     const CDimension* dimension = GET_COMPONENT(dimension, entity);
     const CFleeting* fleeting = GET_COMPONENT(fleeting, entity);
 
@@ -771,6 +772,20 @@ void SCloudParticleCollisionUpdate(Scene* scene, usize entity)
         Vector2 rawResolution = RectangleRectangleResolution(aabb, otherAabb);
         Vector2 resolution = ExtractResolution(rawResolution, otherCollider->layer);
 
+        f32 dampening = 0.1f;
+
+        if (resolution.x != 0)
+        {
+            kinetic->velocity.x *= -dampening;
+            kinetic->velocity.y *= dampening;
+        }
+
+        if (resolution.y != 0)
+        {
+            kinetic->velocity.x *= dampening;
+            kinetic->velocity.y *= -dampening;
+        }
+
         position->value = Vector2Add(position->value, resolution);
 
         aabb.x += resolution.x;
@@ -780,9 +795,11 @@ void SCloudParticleCollisionUpdate(Scene* scene, usize entity)
 
 void SCloudParticleSpawnUpdate(Scene* scene, usize entity)
 {
-    REQUIRE_DEPS(tagPosition);
+    REQUIRE_DEPS(tagPosition | tagDimension | tagKinetic);
 
     const CPosition* position = GET_COMPONENT(position, entity);
+    const CDimension * dimensions = GET_COMPONENT(dimensions, entity);
+    const CKinetic* kinetic = GET_COMPONENT(kinetic, entity);
 
     for (usize i = 0; i < SceneGetEventCount(scene); ++i)
     {
@@ -797,12 +814,22 @@ void SCloudParticleSpawnUpdate(Scene* scene, usize entity)
 
         const EventCloudParticleInner* cloudInner = &event->cloudParticleInner;
 
+        // Set offset anchor point to left, middle, or right depending on movement direction.
+        f32 anchor = kinetic->velocity.x == 0 ? dimensions->width * 0.5f :
+                     kinetic->velocity.x > 0 ? 0 : dimensions->width;
+
+        i32 spreadFactor = 5;
+
         for (usize j = 0; j < cloudInner->spawnCount; ++j)
         {
-            Vector2 offset = Vector2Create(GetRandomValue(-4, 4), GetRandomValue(-8, 8));
+            f32 xOffset = (f32)GetRandomValue(-spreadFactor, spreadFactor);
+            Vector2 offset = Vector2Create(anchor + xOffset, dimensions->height);
             Vector2 startingPosition = Vector2Add(position->value, offset);
-            Vector2 direction = GetRandomValue(0, 1) == 0 ? Vector2Create(1, 0) : Vector2Create(-1, 0);
-            ECreateCloudParticle(scene, startingPosition.x + 8, startingPosition.y + 32, direction);
+
+            Vector2 direction = Vector2Normalize(Vector2Negate(kinetic->velocity));
+            f32 directionOffset = (f32)GetRandomValue(DEG2RAD * -45, DEG2RAD * 45);
+            direction = Vector2Rotate(direction, directionOffset);
+            ECreateCloudParticle(scene, startingPosition.x, startingPosition.y, direction);
         }
     }
 }
