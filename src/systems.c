@@ -664,7 +664,7 @@ void SFleetingUpdate(Scene* scene, usize entity)
 
     if (fleeting->age > fleeting->lifetime)
     {
-        scene->components.tags[entity] = tagNone;
+        SceneDeallocateEntity(scene, entity);
     }
 }
 
