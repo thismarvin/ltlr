@@ -16,7 +16,7 @@ usize ECreatePlayer(Scene* scene, f32 x, f32 y)
     scene->components.mortals[entity].hp = 2;
     scene->components.dimensions[entity] = (CDimension)
     {
-        .width = 16,
+        .width = 15,
         .height = 35
     };
     scene->components.colors[entity] = (CColor)
@@ -29,7 +29,7 @@ usize ECreatePlayer(Scene* scene, f32 x, f32 y)
     scene->components.sprites[entity] = (CSprite)
     {
         .source = (Rectangle) { 16, 0, 32, 48 },
-        .offset = Vector2Create(-7, -13),
+        .offset = Vector2Create(-8, -13),
     };
     scene->components.kinetics[entity] = (CKinetic)
     {
