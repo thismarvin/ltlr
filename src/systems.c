@@ -255,10 +255,10 @@ static bool PlayerOnCollision(Scene* scene, CollisionParams params)
         return false;
     }
 
+    Rectangle overlap = GetCollisionRec(params.aabb, params.otherAabb);
+
     // Make sure that the resolution is part of the axis with the least overlap.
     {
-        Rectangle overlap = GetCollisionRec(params.aabb, params.otherAabb);
-
         if (resolution.x != 0 && overlap.width > overlap.height)
         {
             return false;
@@ -294,6 +294,24 @@ static bool PlayerOnCollision(Scene* scene, CollisionParams params)
 
         if (resolution.y > 0 && fabsf(offsetDown) > fabsf(offsetUp))
         {
+            return false;
+        }
+    }
+
+    // Collision leeway.
+    {
+        // Check if the player hit its head on the bottom of a collider.
+        if (resolution.y > 0 && fabsf(overlap.width) <= 4)
+        {
+            if (params.aabb.x < params.otherAabb.x)
+            {
+                position->value.x = RectangleLeft(params.otherAabb) - params.aabb.width;
+            }
+            else
+            {
+                position->value.x = RectangleRight(params.otherAabb);
+            }
+
             return false;
         }
     }
