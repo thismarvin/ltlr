@@ -57,9 +57,7 @@ static void Timestep(void)
 int main(void)
 {
     // TODO(thismarvin): Incorporate a config file or cli options for window resolution.
-    const f32 scale = 3;
-
-    InitWindow(CTX_VIEWPORT_WIDTH * scale, CTX_VIEWPORT_HEIGHT * scale, "LTL");
+    InitWindow(DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT, "LTL");
     InitAudioDevice();
 
     SetWindowState(FLAG_VSYNC_HINT | FLAG_WINDOW_RESIZABLE);

@@ -256,12 +256,25 @@ static void SceneSetupTargetTexture(Scene* self)
     };
 
     // TODO(thismarvin): Expose a "Render Resolution" option.
+
+    // Use the monitor's resolution as the default render resolution.
+    const int currentMonitor = GetCurrentMonitor();
+    int width = GetMonitorWidth(currentMonitor);
+    int height = GetMonitorHeight(currentMonitor);
+
+    // The following is always true for every platform except desktop.
+    if (width == 0 || height == 0)
+    {
+        width = DEFAULT_WINDOW_WIDTH;
+        height = DEFAULT_WINDOW_HEIGHT;
+    }
+
     Rectangle renderResolution = (Rectangle)
     {
         .x = 0,
         .y = 0,
-        .width = GetMonitorWidth(GetCurrentMonitor()),
-        .height = GetMonitorHeight(GetCurrentMonitor()),
+        .width = width,
+        .height = height,
     };
 
     f32 zoom = CalculateZoom(self->trueResolution, renderResolution);
