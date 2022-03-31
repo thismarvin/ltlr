@@ -173,7 +173,7 @@ usize ECreateCloudParticle(Scene* scene, f32 centerX, f32 centerY, Vector2 direc
         }
     };
 
-    f32 speed = GetRandomValue(10, 25);
+    f32 speed = (f32)GetRandomValue(5, 15);
     scene->components.kinetics[entity] = (CKinetic)
     {
         .velocity = Vector2Scale(direction, speed),
@@ -191,7 +191,7 @@ usize ECreateCloudParticle(Scene* scene, f32 centerX, f32 centerY, Vector2 direc
         .mask = layerAll,
     };
 
-    f32 lifetime = GetRandomValue(1, 4);
+    f32 lifetime = MIN(1.0f, (f32)GetRandomValue(1, 100) * 0.03f);
     scene->components.fleetings[entity] = (CFleeting)
     {
         .age = 0,

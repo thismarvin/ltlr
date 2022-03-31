@@ -198,7 +198,7 @@ void SPlayerInputUpdate(Scene* scene, usize entity)
             player->jumping = true;
             kinetic->velocity.y = -player->jumpVelocity;
 
-            int particleCount = GetRandomValue(4, 12);
+            int particleCount = GetRandomValue(10, 25);
             Event particleEvent;
             EventCloudParticleInit(&particleEvent, entity, particleCount);
             SceneRaiseEvent(scene, &particleEvent);
