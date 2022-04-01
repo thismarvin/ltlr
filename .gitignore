@@ -1,9 +1,10 @@
 .ccls-cache
+.idea
 .vscode
 bin
 build
-src/vendor
 build.bat
+src/vendor
 
 # Prerequisites
 *.d
