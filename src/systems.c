@@ -135,7 +135,7 @@ static Vector2 ExtractResolution(Vector2 resolution, u64 layers)
 
 void SPlayerInputUpdate(Scene* scene, usize entity)
 {
-    REQUIRE_DEPS(tagPlayer | tagKinetic | tagPosition);
+    REQUIRE_DEPS(tagPlayer | tagKinetic);
 
     CPlayer* player = GET_COMPONENT(player, entity);
     CKinetic* kinetic = GET_COMPONENT(kinetic, entity);
