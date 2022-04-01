@@ -152,7 +152,16 @@ usize ECreateCloudParticle(Scene* scene, f32 centerX, f32 centerY, Vector2 direc
     scene->components.tags[entity] = tagPosition | tagDimension | tagColor | tagKinetic | tagSmooth
                                      | tagCollider | tagFleeting;
 
-    f32 radius = (f32)GetRandomValue(1, 3);
+    f32 radius;
+    if (GetRandomValue(1, 100) < 25)
+    {
+        radius = (f32) GetRandomValue(4, 5);
+    }
+    else
+    {
+        radius = (f32)GetRandomValue(1, 3);
+    }
+
     scene->components.dimensions[entity] = (CDimension)
     {
         .width = radius * 2,
@@ -162,7 +171,7 @@ usize ECreateCloudParticle(Scene* scene, f32 centerX, f32 centerY, Vector2 direc
     Vector2 position = Vector2Create(centerX - radius, centerY - radius);
     scene->components.positions[entity] = (CPosition)
     {
-            .value = position,
+        .value = position,
     };
 
     scene->components.colors[entity] = (CColor)
@@ -177,7 +186,7 @@ usize ECreateCloudParticle(Scene* scene, f32 centerX, f32 centerY, Vector2 direc
     scene->components.kinetics[entity] = (CKinetic)
     {
         .velocity = Vector2Scale(direction, speed),
-        .acceleration = VECTOR2_ZERO,
+        .acceleration = Vector2Create(0, 15),
     };
 
     scene->components.smooths[entity] = (CSmooth)

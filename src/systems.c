@@ -772,20 +772,6 @@ void SCloudParticleCollisionUpdate(Scene* scene, usize entity)
         Vector2 rawResolution = RectangleRectangleResolution(aabb, otherAabb);
         Vector2 resolution = ExtractResolution(rawResolution, otherCollider->layer);
 
-        f32 dampening = 0.1f;
-
-        if (resolution.x != 0)
-        {
-            kinetic->velocity.x *= -dampening;
-            kinetic->velocity.y *= dampening;
-        }
-
-        if (resolution.y != 0)
-        {
-            kinetic->velocity.x *= dampening;
-            kinetic->velocity.y *= -dampening;
-        }
-
         position->value = Vector2Add(position->value, resolution);
 
         aabb.x += resolution.x;
@@ -818,7 +804,7 @@ void SCloudParticleSpawnUpdate(Scene* scene, usize entity)
         f32 anchor = kinetic->velocity.x == 0 ? dimensions->width * 0.5f :
                      kinetic->velocity.x > 0 ? 0 : dimensions->width;
 
-        i32 spreadFactor = 5;
+        i32 spreadFactor = 14;
 
         for (usize j = 0; j < cloudInner->spawnCount; ++j)
         {
@@ -827,6 +813,7 @@ void SCloudParticleSpawnUpdate(Scene* scene, usize entity)
             Vector2 startingPosition = Vector2Add(position->value, offset);
 
             Vector2 direction = Vector2Normalize(Vector2Negate(kinetic->velocity));
+            direction.y *= -1;
             f32 directionOffset = (f32)GetRandomValue(DEG2RAD * -45, DEG2RAD * 45);
             direction = Vector2Rotate(direction, directionOffset);
             ECreateCloudParticle(scene, startingPosition.x, startingPosition.y, direction);
