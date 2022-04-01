@@ -769,6 +769,16 @@ void SCloudParticleCollisionUpdate(Scene* scene, usize entity)
             .height = otherDimension->height,
         };
 
+        Rectangle overlap = GetCollisionRec(aabb, otherAabb);
+
+        // If the aabb is completely within another collider then remove it.
+        if (overlap.width >= aabb.width && overlap.height >= aabb.height)
+        {
+            SceneDeallocateEntity(scene, entity);
+
+            return;
+        }
+
         Vector2 rawResolution = RectangleRectangleResolution(aabb, otherAabb);
         Vector2 resolution = ExtractResolution(rawResolution, otherCollider->layer);
 
