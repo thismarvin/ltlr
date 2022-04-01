@@ -735,8 +735,8 @@ void SCloudParticleCollisionUpdate(Scene* scene, usize entity)
 
     Rectangle aabb = (Rectangle)
     {
-        .x = position->value.x,
-        .y = position->value.y,
+        .x = position->value.x + dimension->width * 0.5f - collisionSize * 0.5f,
+        .y = position->value.y + dimension->height * 0.5f - collisionSize * 0.5f,
         .width = collisionSize,
         .height = collisionSize,
     };
@@ -850,8 +850,8 @@ void SCloudParticleDraw(Scene* scene, usize entity)
 
     Vector2 center = (Vector2)
     {
-        .x = interpolated.x + drawSize * 0.5f,
-        .y = interpolated.y + drawSize * 0.5f,
+        .x = interpolated.x + dimension->width * 0.5f,
+        .y = interpolated.y + dimension->height * 0.5f,
     };
 
     DrawCircleV(center, drawSize * 0.5f, color->value);
