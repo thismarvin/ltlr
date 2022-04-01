@@ -784,7 +784,7 @@ void SCloudParticleSpawnUpdate(Scene* scene, usize entity)
     REQUIRE_DEPS(tagPosition | tagDimension | tagKinetic);
 
     const CPosition* position = GET_COMPONENT(position, entity);
-    const CDimension * dimensions = GET_COMPONENT(dimensions, entity);
+    const CDimension* dimensions = GET_COMPONENT(dimensions, entity);
     const CKinetic* kinetic = GET_COMPONENT(kinetic, entity);
 
     for (usize i = 0; i < SceneGetEventCount(scene); ++i)

@@ -168,7 +168,7 @@ static void SceneSetupInput(Scene* self)
         }
     }
 
-// Gamepad.
+    // Gamepad.
     {
         // Buttons.
         {
@@ -200,7 +200,7 @@ static void SceneSetupInput(Scene* self)
             }
         }
 
-// Axes.
+        // Axes.
         {
             f32 threshold = 0.25;
 

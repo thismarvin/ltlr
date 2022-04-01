@@ -153,6 +153,7 @@ usize ECreateCloudParticle(Scene* scene, f32 centerX, f32 centerY, Vector2 direc
                                      | tagCollider | tagFleeting;
 
     f32 radius;
+
     if (GetRandomValue(1, 100) < 25)
     {
         radius = (f32) GetRandomValue(4, 5);
