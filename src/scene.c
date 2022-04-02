@@ -293,8 +293,8 @@ static void SceneSetupTargetTexture(Scene* self)
     // Ensure that the render resolution uses integer scaling.
     zoom = floor(zoom);
 
-    self->pixelatedTexture = LoadRenderTexture(CTX_VIEWPORT_WIDTH, CTX_VIEWPORT_HEIGHT);
     self->targetTexture = LoadRenderTexture(CTX_VIEWPORT_WIDTH * zoom, CTX_VIEWPORT_HEIGHT * zoom);
+    self->pixelatedTexture = LoadRenderTexture(CTX_VIEWPORT_WIDTH, CTX_VIEWPORT_HEIGHT);
 }
 
 static void SceneSetupLevelSegments(Scene* self)
@@ -524,64 +524,37 @@ static void SceneDrawTargetTexture(const Scene* self)
     // Prefer integer scaling.
     zoom = floor(zoom);
 
+    i32 width = CTX_VIEWPORT_WIDTH * zoom;
+    i32 height = CTX_VIEWPORT_HEIGHT * zoom;
+
+    Rectangle destination = (Rectangle)
+    {
+        .x = floor(screenResolution.width * 0.5),
+        .y = floor(screenResolution.height * 0.5),
+        .width = width,
+        .height = height,
+    };
+
+    Vector2 origin = (Vector2)
+    {
+        .x = floor(width * 0.5),
+        .y = floor(height * 0.5),
+    };
+
     ClearBackground(BLACK);
 
-    // Draw target layer first.
+    // Draw target layer next.
     {
-        i32 width = CTX_VIEWPORT_WIDTH * zoom;
-        i32 height = CTX_VIEWPORT_HEIGHT * zoom;
-
-        Rectangle source = (Rectangle)
-        {
-            .x = 0,
-            .y = 0,
-            .width = self->targetTexture.texture.width,
-            .height = -self->targetTexture.texture.height,
-        };
-
-        Rectangle destination = (Rectangle)
-        {
-            .x = floor(screenResolution.width * 0.5),
-            .y = floor(screenResolution.height * 0.5),
-            .width = width,
-            .height = height,
-        };
-
-        Vector2 origin = (Vector2)
-        {
-            .x = floor(width * 0.5),
-            .y = floor(height * 0.5),
-        };
+        Rectangle source = RectangleFromRenderTexture(self->targetTexture);
+        source.height *= -1;
 
         DrawTexturePro(self->targetTexture.texture, source, destination, origin, 0, WHITE);
     }
 
     // Draw pixelated layer last.
     {
-        i32 width = CTX_VIEWPORT_WIDTH;
-        i32 height = CTX_VIEWPORT_HEIGHT;
-
-        Rectangle source = (Rectangle)
-        {
-            .x = 0,
-            .y = 0,
-            .width = width,
-            .height = -height,
-        };
-
-        Rectangle destination = (Rectangle)
-        {
-            .x = floor(screenResolution.width * 0.5),
-            .y = floor(screenResolution.height * 0.5),
-            .width = width * zoom,
-            .height = height * zoom,
-        };
-
-        Vector2 origin = (Vector2)
-        {
-            .x = floor(width * zoom * 0.5),
-            .y = floor(height * zoom * 0.5),
-        };
+        Rectangle source = RectangleFromRenderTexture(self->pixelatedTexture);
+        source.height *= -1;
 
         DrawTexturePro(self->pixelatedTexture.texture, source, destination, origin, 0, WHITE);
     }
@@ -595,7 +568,8 @@ void SceneDraw(Scene* self, Texture2D* atlas)
 
     // Render target layer.
     {
-        const f32 zoom = CalculateZoom(self->trueResolution, self->renderResolution);
+        const Rectangle bounds = RectangleFromRenderTexture(self->targetTexture);
+        const f32 zoom = CalculateZoom(self->trueResolution, bounds);
         const Camera2D camera = CreateLayerCamera(cameraPosition, zoom);
 
         BeginTextureMode(self->targetTexture);
@@ -624,7 +598,8 @@ void SceneDraw(Scene* self, Texture2D* atlas)
 
     // Render pixelated layer.
     {
-        const f32 zoom = 1;
+        const Rectangle bounds = RectangleFromRenderTexture(self->pixelatedTexture);
+        const f32 zoom = CalculateZoom(self->trueResolution, bounds);
         const Camera2D camera = CreateLayerCamera(cameraPosition, zoom);
 
         BeginTextureMode(self->pixelatedTexture);
@@ -659,6 +634,6 @@ void SceneDestroy(Scene* self)
         LevelSegmentDestroy(&self->segments[i]);
     }
 
-    UnloadRenderTexture(self->pixelatedTexture);
     UnloadRenderTexture(self->targetTexture);
+    UnloadRenderTexture(self->pixelatedTexture);
 }
