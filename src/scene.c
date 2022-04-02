@@ -412,6 +412,44 @@ void SceneUpdate(Scene* self)
     }
 }
 
+static void SceneDrawTilemap(const Scene* self, const Texture2D* atlas)
+{
+    Vector2 offset = VECTOR2_ZERO;
+
+    for (usize i = 0; i < self->segmentsLength; ++i)
+    {
+        for (usize j = 0; j < self->segments[i].spritesLength; ++j)
+        {
+            if (self->segments[i].sprites[j] == 0)
+            {
+                continue;
+            }
+
+            u16 sprite = self->segments[i].sprites[j] - 1;
+
+            Vector2 position = (Vector2)
+            {
+                .x = (j % self->segments[i].tilemapWidth) * self->segments[i].tileWidth,
+                .y = (j / self->segments[i].tilemapWidth) * self->segments[i].tileHeight
+            };
+
+            position = Vector2Add(position, offset);
+
+            Rectangle source = (Rectangle)
+            {
+                .x = (sprite % self->segments[i].tilesetColumns) * self->segments[i].tileWidth,
+                .y = (sprite / self->segments[i].tilesetColumns) * self->segments[i].tileHeight,
+                .width = self->segments[i].tileWidth,
+                .height = self->segments[i].tileHeight
+            };
+
+            DrawTextureRec(*atlas, source, position, WHITE);
+        }
+
+        offset.x += self->segments[i].bounds.width;
+    }
+}
+
 static void SceneDrawTargetTexture(const Scene* self)
 {
     BeginDrawing();
@@ -500,43 +538,7 @@ void SceneDraw(Scene* self, Texture2D* atlas)
             41, 173, 255, 255
         });
 
-        // Draw Tilemap.
-        {
-            Vector2 offset = VECTOR2_ZERO;
-
-            for (usize i = 0; i < self->segmentsLength; ++i)
-            {
-                for (usize j = 0; j < self->segments[i].spritesLength; ++j)
-                {
-                    if (self->segments[i].sprites[j] == 0)
-                    {
-                        continue;
-                    }
-
-                    u16 sprite = self->segments[i].sprites[j] - 1;
-
-                    Vector2 position = (Vector2)
-                    {
-                        .x = (j % self->segments[i].tilemapWidth) * self->segments[i].tileWidth,
-                        .y = (j / self->segments[i].tilemapWidth) * self->segments[i].tileHeight
-                    };
-
-                    position = Vector2Add(position, offset);
-
-                    Rectangle source = (Rectangle)
-                    {
-                        .x = (sprite % self->segments[i].tilesetColumns) * self->segments[i].tileWidth,
-                        .y = (sprite / self->segments[i].tilesetColumns) * self->segments[i].tileHeight,
-                        .width = self->segments[i].tileWidth,
-                        .height = self->segments[i].tileHeight
-                    };
-
-                    DrawTextureRec(*atlas, source, position, WHITE);
-                }
-
-                offset.x += self->segments[i].bounds.width;
-            }
-        }
+        SceneDrawTilemap(self, atlas);
 
         for (usize i = 0; i < SceneGetEntityCount(self); ++i)
         {
