@@ -441,6 +441,22 @@ static Vector2 SceneCalculateCameraPosition(const Scene* self)
     return cameraPosition;
 }
 
+// Return a new Camera2D that converts a given world-space position to camera-space.
+static Camera2D CreateLayerCamera(Vector2 center, f32 zoom)
+{
+    return (Camera2D)
+    {
+        .zoom = zoom,
+        .offset = Vector2Scale(center, -zoom),
+        .target = (Vector2)
+        {
+            .x = -CTX_VIEWPORT_WIDTH * 0.5,
+            .y = -CTX_VIEWPORT_HEIGHT * 0.5,
+        },
+        .rotation = 0,
+    };
+}
+
 static void SceneDrawTilemap(const Scene* self, const Texture2D* atlas)
 {
     Vector2 offset = VECTOR2_ZERO;
@@ -569,17 +585,7 @@ void SceneDraw(Scene* self, Texture2D* atlas)
     // Render target layer.
     {
         const f32 zoom = CalculateZoom(self->trueResolution, self->renderResolution);
-        const Camera2D camera = (Camera2D)
-        {
-            .zoom = zoom,
-            .offset = Vector2Scale(cameraPosition, -zoom),
-            .target = (Vector2)
-            {
-                .x = -CTX_VIEWPORT_WIDTH * 0.5,
-                .y = -CTX_VIEWPORT_HEIGHT * 0.5,
-            },
-            .rotation = 0,
-        };
+        const Camera2D camera = CreateLayerCamera(cameraPosition, zoom);
 
         BeginTextureMode(self->targetTexture);
         BeginMode2D(camera);
@@ -608,17 +614,7 @@ void SceneDraw(Scene* self, Texture2D* atlas)
     // Render pixelated layer.
     {
         const f32 zoom = 1;
-        const Camera2D camera = (Camera2D)
-        {
-            .zoom = zoom,
-            .offset = Vector2Scale(cameraPosition, -zoom),
-            .target = (Vector2)
-            {
-                .x = -CTX_VIEWPORT_WIDTH * 0.5,
-                .y = -CTX_VIEWPORT_HEIGHT * 0.5,
-            },
-            .rotation = 0,
-        };
+        const Camera2D camera = CreateLayerCamera(cameraPosition, zoom);
 
         BeginTextureMode(self->pixelatedTexture);
         BeginMode2D(camera);
