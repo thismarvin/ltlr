@@ -51,6 +51,7 @@ typedef struct
     usize segmentsLength;
     Rectangle trueResolution;
     Rectangle renderResolution;
+    RenderTexture2D backgroundTexture;
     RenderTexture2D targetTexture;
     RenderTexture2D pixelatedTexture;
     // TODO(thismarvin): Should this exist in Scene?

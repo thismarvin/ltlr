@@ -293,6 +293,7 @@ static void SceneSetupTargetTexture(Scene* self)
     // Ensure that the render resolution uses integer scaling.
     zoom = floor(zoom);
 
+    self->backgroundTexture = LoadRenderTexture(1, 1);
     self->targetTexture = LoadRenderTexture(CTX_VIEWPORT_WIDTH * zoom, CTX_VIEWPORT_HEIGHT * zoom);
     self->pixelatedTexture = LoadRenderTexture(CTX_VIEWPORT_WIDTH, CTX_VIEWPORT_HEIGHT);
 }
@@ -543,6 +544,14 @@ static void SceneDrawTargetTexture(const Scene* self)
 
     ClearBackground(BLACK);
 
+    // Draw background layer.
+    {
+        Rectangle source = RectangleFromRenderTexture(self->backgroundTexture);
+        source.height *= -1;
+
+        DrawTexturePro(self->backgroundTexture.texture, source, destination, origin, 0, WHITE);
+    }
+
     // Draw target layer next.
     {
         Rectangle source = RectangleFromRenderTexture(self->targetTexture);
@@ -566,6 +575,24 @@ void SceneDraw(Scene* self, Texture2D* atlas)
 {
     Vector2 cameraPosition = SceneCalculateCameraPosition(self);
 
+    // Render background layer.
+    {
+        const Rectangle bounds = RectangleFromRenderTexture(self->backgroundTexture);
+        const f32 zoom = CalculateZoom(self->trueResolution, bounds);
+        const Camera2D camera = CreateLayerCamera(cameraPosition, zoom);
+
+        BeginTextureMode(self->backgroundTexture);
+        BeginMode2D(camera);
+        {
+            ClearBackground((Color)
+            {
+                41, 173, 255, 255
+            });
+        }
+        EndMode2D();
+        EndTextureMode();
+    }
+
     // Render target layer.
     {
         const Rectangle bounds = RectangleFromRenderTexture(self->targetTexture);
@@ -577,7 +604,7 @@ void SceneDraw(Scene* self, Texture2D* atlas)
         {
             ClearBackground((Color)
             {
-                41, 173, 255, 255
+                0, 0, 0, 0
             });
 
             SceneDrawTilemap(self, atlas);
@@ -634,6 +661,7 @@ void SceneDestroy(Scene* self)
         LevelSegmentDestroy(&self->segments[i]);
     }
 
+    UnloadRenderTexture(self->backgroundTexture);
     UnloadRenderTexture(self->targetTexture);
     UnloadRenderTexture(self->pixelatedTexture);
 }
