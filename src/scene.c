@@ -402,6 +402,45 @@ void SceneUpdate(Scene* self)
     }
 }
 
+static Vector2 SceneCalculateCameraPosition(const Scene* self)
+{
+    Scene* scene = (Scene*)self;
+    const CSmooth* smooth = GET_COMPONENT(smooth, self->player);
+    const CPosition* position = GET_COMPONENT(position, self->player);
+    const CDimension* dimension = GET_COMPONENT(dimension, self->player);
+
+    const Vector2 interpolated = Vector2Lerp(smooth->previous, position->value, ContextGetAlpha());
+    const Vector2 playerOffset = (Vector2)
+    {
+        .x = dimension->width * 0.5,
+        .y = dimension->height * 0.5,
+    };
+
+    const Vector2 playerCenter = Vector2Add(interpolated, playerOffset);
+
+    Vector2 cameraPosition = playerCenter;
+
+    // Camera x-axis collision.
+    {
+        f32 min = RectangleLeft(self->bounds) + CTX_VIEWPORT_WIDTH * 0.5;
+        f32 max = RectangleRight(self->bounds) - CTX_VIEWPORT_WIDTH * 0.5;
+
+        cameraPosition.x = MAX(min, cameraPosition.x);
+        cameraPosition.x = MIN(max, cameraPosition.x);
+    }
+
+    // Camera y-axis collison.
+    {
+        f32 min = RectangleTop(self->bounds) + CTX_VIEWPORT_HEIGHT * 0.5;
+        f32 max = RectangleBottom(self->bounds) - CTX_VIEWPORT_HEIGHT * 0.5;
+
+        cameraPosition.y = MAX(min, cameraPosition.y);
+        cameraPosition.y = MIN(max, cameraPosition.y);
+    }
+
+    return cameraPosition;
+}
+
 static void SceneDrawTilemap(const Scene* self, const Texture2D* atlas)
 {
     Vector2 offset = VECTOR2_ZERO;
@@ -525,44 +564,7 @@ static void SceneDrawTargetTexture(const Scene* self)
 
 void SceneDraw(Scene* self, Texture2D* atlas)
 {
-    Vector2 cameraPosition = VECTOR2_ZERO;
-
-    // Calculate the camera's position.
-    {
-        Scene* scene = self;
-        const CSmooth* smooth = GET_COMPONENT(smooth, self->player);
-        const CPosition* position = GET_COMPONENT(position, self->player);
-        const CDimension* dimension = GET_COMPONENT(dimension, self->player);
-
-        const Vector2 interpolated = Vector2Lerp(smooth->previous, position->value, ContextGetAlpha());
-        const Vector2 playerOffset = (Vector2)
-        {
-            .x = dimension->width * 0.5,
-            .y = dimension->height * 0.5,
-        };
-
-        const Vector2 playerCenter = Vector2Add(interpolated, playerOffset);
-
-        cameraPosition = playerCenter;
-
-        // Camera x-axis collision.
-        {
-            f32 min = RectangleLeft(self->bounds) + CTX_VIEWPORT_WIDTH * 0.5;
-            f32 max = RectangleRight(self->bounds) - CTX_VIEWPORT_WIDTH * 0.5;
-
-            cameraPosition.x = MAX(min, cameraPosition.x);
-            cameraPosition.x = MIN(max, cameraPosition.x);
-        }
-
-        // Camera y-axis collison.
-        {
-            f32 min = RectangleTop(self->bounds) + CTX_VIEWPORT_HEIGHT * 0.5;
-            f32 max = RectangleBottom(self->bounds) - CTX_VIEWPORT_HEIGHT * 0.5;
-
-            cameraPosition.y = MAX(min, cameraPosition.y);
-            cameraPosition.y = MIN(max, cameraPosition.y);
-        }
-    }
+    Vector2 cameraPosition = SceneCalculateCameraPosition(self);
 
     // Render target layer.
     {
