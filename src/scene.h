@@ -45,7 +45,6 @@ typedef struct
     EntityManager entityManager;
     EventManager eventManager;
     bool debugging;
-    Camera2D camera;
     usize player;
     Rectangle bounds;
     LevelSegment* segments;
@@ -53,6 +52,7 @@ typedef struct
     Rectangle trueResolution;
     Rectangle renderResolution;
     RenderTexture2D targetTexture;
+    RenderTexture2D pixelatedTexture;
     // TODO(thismarvin): Should this exist in Scene?
     InputHandler input;
 } Scene;

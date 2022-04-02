@@ -282,18 +282,8 @@ static void SceneSetupTargetTexture(Scene* self)
     // Ensure that the render resolution uses integer scaling.
     zoom = floor(zoom);
 
+    self->pixelatedTexture = LoadRenderTexture(CTX_VIEWPORT_WIDTH, CTX_VIEWPORT_HEIGHT);
     self->targetTexture = LoadRenderTexture(CTX_VIEWPORT_WIDTH * zoom, CTX_VIEWPORT_HEIGHT * zoom);
-
-    // Setup Camera.
-    {
-        Vector2 offset = VECTOR2_ZERO;
-        Vector2 target = VECTOR2_ZERO;
-
-        self->camera.offset = offset;
-        self->camera.target = target;
-        self->camera.rotation = 0;
-        self->camera.zoom = zoom;
-    }
 }
 
 static void SceneSetupLevelSegments(Scene* self)
@@ -468,91 +458,182 @@ static void SceneDrawTargetTexture(const Scene* self)
     // Prefer integer scaling.
     zoom = floor(zoom);
 
-    i32 width = CTX_VIEWPORT_WIDTH * zoom;
-    i32 height = CTX_VIEWPORT_HEIGHT * zoom;
-
-    Rectangle source = (Rectangle)
-    {
-        .x = 0,
-        .y = 0,
-        .width = self->targetTexture.texture.width,
-        .height = -self->targetTexture.texture.height,
-    };
-
-    Rectangle destination = (Rectangle)
-    {
-        .x = floor(screenResolution.width * 0.5),
-        .y = floor(screenResolution.height * 0.5),
-        .width = width,
-        .height = height,
-    };
-
-    Vector2 origin = (Vector2)
-    {
-        .x = floor(width * 0.5),
-        .y = floor(height * 0.5),
-    };
-
     ClearBackground(BLACK);
-    DrawTexturePro(self->targetTexture.texture, source, destination, origin, 0, WHITE);
+
+    // Draw target layer first.
+    {
+        i32 width = CTX_VIEWPORT_WIDTH * zoom;
+        i32 height = CTX_VIEWPORT_HEIGHT * zoom;
+
+        Rectangle source = (Rectangle)
+        {
+            .x = 0,
+            .y = 0,
+            .width = self->targetTexture.texture.width,
+            .height = -self->targetTexture.texture.height,
+        };
+
+        Rectangle destination = (Rectangle)
+        {
+            .x = floor(screenResolution.width * 0.5),
+            .y = floor(screenResolution.height * 0.5),
+            .width = width,
+            .height = height,
+        };
+
+        Vector2 origin = (Vector2)
+        {
+            .x = floor(width * 0.5),
+            .y = floor(height * 0.5),
+        };
+
+        DrawTexturePro(self->targetTexture.texture, source, destination, origin, 0, WHITE);
+    }
+
+    // Draw pixelated layer last.
+    {
+        i32 width = CTX_VIEWPORT_WIDTH;
+        i32 height = CTX_VIEWPORT_HEIGHT;
+
+        Rectangle source = (Rectangle)
+        {
+            .x = 0,
+            .y = 0,
+            .width = width,
+            .height = -height,
+        };
+
+        Rectangle destination = (Rectangle)
+        {
+            .x = floor(screenResolution.width * 0.5),
+            .y = floor(screenResolution.height * 0.5),
+            .width = width * zoom,
+            .height = height * zoom,
+        };
+
+        Vector2 origin = (Vector2)
+        {
+            .x = floor(width * zoom * 0.5),
+            .y = floor(height * zoom * 0.5),
+        };
+
+        DrawTexturePro(self->pixelatedTexture.texture, source, destination, origin, 0, WHITE);
+    }
 
     EndDrawing();
 }
 
 void SceneDraw(Scene* self, Texture2D* atlas)
 {
-    // TODO(thismarvin): This should ultimately be a System... somehow...
-    // Update Camera
+    Vector2 cameraPosition = VECTOR2_ZERO;
+
+    // Calculate the camera's position.
     {
-        CDimension dimension = self->components.dimensions[self->player];
+        Scene* scene = self;
+        const CSmooth* smooth = GET_COMPONENT(smooth, self->player);
+        const CPosition* position = GET_COMPONENT(position, self->player);
+        const CDimension* dimension = GET_COMPONENT(dimension, self->player);
 
-        if (!self->components.players[self->player].dead)
+        const Vector2 interpolated = Vector2Lerp(smooth->previous, position->value, ContextGetAlpha());
+        const Vector2 playerOffset = (Vector2)
         {
-            Vector2 previous = self->components.smooths[self->player].previous;
-            Vector2 current = self->components.positions[self->player].value;
+            .x = dimension->width * 0.5,
+            .y = dimension->height * 0.5,
+        };
 
-            Vector2 position = Vector2Lerp(previous, current, ContextGetAlpha());
+        const Vector2 playerCenter = Vector2Add(interpolated, playerOffset);
 
-            position = Vector2Add(position, Vector2Create(dimension.width * 0.5, dimension.height * 0.5));
+        cameraPosition = playerCenter;
 
-            self->camera.offset.x = (-position.x + CTX_VIEWPORT_WIDTH * 0.5) * self->camera.zoom;
-            self->camera.offset.y = (-position.y + CTX_VIEWPORT_HEIGHT * 0.5) * self->camera.zoom;
+        // Camera x-axis collision.
+        {
+            f32 min = RectangleLeft(self->bounds) + CTX_VIEWPORT_WIDTH * 0.5;
+            f32 max = RectangleRight(self->bounds) - CTX_VIEWPORT_WIDTH * 0.5;
 
-            self->camera.offset.x = MIN(RectangleLeft(self->bounds), self->camera.offset.x);
-            self->camera.offset.x = MAX(-(RectangleRight(self->bounds) - CTX_VIEWPORT_WIDTH) *
-                                        self->camera.zoom,
-                                        self->camera.offset.x);
+            cameraPosition.x = MAX(min, cameraPosition.x);
+            cameraPosition.x = MIN(max, cameraPosition.x);
+        }
 
-            self->camera.offset.y = MIN(RectangleTop(self->bounds), self->camera.offset.y);
-            self->camera.offset.y = MAX(-(RectangleBottom(self->bounds) - CTX_VIEWPORT_HEIGHT) *
-                                        self->camera.zoom,
-                                        self->camera.offset.y);
+        // Camera y-axis collison.
+        {
+            f32 min = RectangleTop(self->bounds) + CTX_VIEWPORT_HEIGHT * 0.5;
+            f32 max = RectangleBottom(self->bounds) - CTX_VIEWPORT_HEIGHT * 0.5;
+
+            cameraPosition.y = MAX(min, cameraPosition.y);
+            cameraPosition.y = MIN(max, cameraPosition.y);
         }
     }
 
-    BeginTextureMode(self->targetTexture);
-    BeginMode2D(self->camera);
+    // Render target layer.
     {
-        ClearBackground((Color)
+        const f32 zoom = CalculateZoom(self->trueResolution, self->renderResolution);
+        const Camera2D camera = (Camera2D)
         {
-            41, 173, 255, 255
-        });
-
-        SceneDrawTilemap(self, atlas);
-
-        for (usize i = 0; i < SceneGetEntityCount(self); ++i)
-        {
-            SSpriteDraw(self, atlas, i);
-            SCloudParticleDraw(self, i);
-
-            if (self->debugging)
+            .zoom = zoom,
+            .offset = Vector2Scale(cameraPosition, -zoom),
+            .target = (Vector2)
             {
-                SDebugDraw(self, i);
+                .x = -CTX_VIEWPORT_WIDTH * 0.5,
+                .y = -CTX_VIEWPORT_HEIGHT * 0.5,
+            },
+            .rotation = 0,
+        };
+
+        BeginTextureMode(self->targetTexture);
+        BeginMode2D(camera);
+        {
+            ClearBackground((Color)
+            {
+                41, 173, 255, 255
+            });
+
+            SceneDrawTilemap(self, atlas);
+
+            for (usize i = 0; i < SceneGetEntityCount(self); ++i)
+            {
+                SSpriteDraw(self, atlas, i);
+
+                if (self->debugging)
+                {
+                    SDebugDraw(self, i);
+                }
             }
         }
+        EndMode2D();
+        EndTextureMode();
     }
-    EndMode2D();
-    EndTextureMode();
+
+    // Render pixelated layer.
+    {
+        const f32 zoom = 1;
+        const Camera2D camera = (Camera2D)
+        {
+            .zoom = zoom,
+            .offset = Vector2Scale(cameraPosition, -zoom),
+            .target = (Vector2)
+            {
+                .x = -CTX_VIEWPORT_WIDTH * 0.5,
+                .y = -CTX_VIEWPORT_HEIGHT * 0.5,
+            },
+            .rotation = 0,
+        };
+
+        BeginTextureMode(self->pixelatedTexture);
+        BeginMode2D(camera);
+        {
+            ClearBackground((Color)
+            {
+                0, 0, 0, 0
+            });
+
+            for (usize i = 0; i < SceneGetEntityCount(self); ++i)
+            {
+                SCloudParticleDraw(self, i);
+            }
+        }
+        EndMode2D();
+        EndTextureMode();
+    }
 
     SceneDrawTargetTexture(self);
 }
@@ -569,5 +650,6 @@ void SceneDestroy(Scene* self)
         LevelSegmentDestroy(&self->segments[i]);
     }
 
+    UnloadRenderTexture(self->pixelatedTexture);
     UnloadRenderTexture(self->targetTexture);
 }
