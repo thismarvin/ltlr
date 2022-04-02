@@ -51,6 +51,7 @@ typedef struct
     LevelSegment* segments;
     usize segmentsLength;
     Rectangle trueResolution;
+    Rectangle renderResolution;
     RenderTexture2D targetTexture;
     // TODO(thismarvin): Should this exist in Scene?
     InputHandler input;

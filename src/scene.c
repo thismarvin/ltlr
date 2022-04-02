@@ -269,7 +269,7 @@ static void SceneSetupTargetTexture(Scene* self)
         height = DEFAULT_WINDOW_HEIGHT;
     }
 
-    Rectangle renderResolution = (Rectangle)
+    self->renderResolution = (Rectangle)
     {
         .x = 0,
         .y = 0,
@@ -277,7 +277,7 @@ static void SceneSetupTargetTexture(Scene* self)
         .height = height,
     };
 
-    f32 zoom = CalculateZoom(self->trueResolution, renderResolution);
+    f32 zoom = CalculateZoom(self->trueResolution, self->renderResolution);
 
     // Ensure that the render resolution uses integer scaling.
     zoom = floor(zoom);
