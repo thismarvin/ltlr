@@ -229,6 +229,17 @@ static void SceneSetupInput(Scene* self)
     InputHandlerSetProfile(&self->input, profile);
 }
 
+static Rectangle RectangleFromRenderTexture(const RenderTexture renderTexture)
+{
+    return (Rectangle)
+    {
+        .x = 0,
+        .y = 0,
+        .width = renderTexture.texture.width,
+        .height = renderTexture.texture.height,
+    };
+}
+
 // Returns the maximum value the dimensions of a given region can be multiplied by and still fit
 // within a given container.
 static f32 CalculateZoom(const Rectangle region, const Rectangle container)
