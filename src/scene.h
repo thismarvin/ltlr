@@ -51,9 +51,9 @@ typedef struct
     usize segmentsLength;
     Rectangle trueResolution;
     Rectangle renderResolution;
-    RenderTexture2D backgroundTexture;
-    RenderTexture2D targetTexture;
-    RenderTexture2D pixelatedTexture;
+    RenderTexture2D backgroundLayer;
+    RenderTexture2D targetLayer;
+    RenderTexture2D foregroundLayer;
     // TODO(thismarvin): Should this exist in Scene?
     InputHandler input;
 } Scene;

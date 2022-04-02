@@ -256,7 +256,7 @@ static f32 CalculateZoom(const Rectangle region, const Rectangle container)
     return zoom;
 }
 
-static void SceneSetupTargetTexture(Scene* self)
+static void SceneSetupLayers(Scene* self)
 {
     self->trueResolution = (Rectangle)
     {
@@ -293,9 +293,9 @@ static void SceneSetupTargetTexture(Scene* self)
     // Ensure that the render resolution uses integer scaling.
     zoom = floor(zoom);
 
-    self->backgroundTexture = LoadRenderTexture(1, 1);
-    self->targetTexture = LoadRenderTexture(CTX_VIEWPORT_WIDTH * zoom, CTX_VIEWPORT_HEIGHT * zoom);
-    self->pixelatedTexture = LoadRenderTexture(CTX_VIEWPORT_WIDTH, CTX_VIEWPORT_HEIGHT);
+    self->backgroundLayer = LoadRenderTexture(1, 1);
+    self->targetLayer = LoadRenderTexture(CTX_VIEWPORT_WIDTH * zoom, CTX_VIEWPORT_HEIGHT * zoom);
+    self->foregroundLayer = LoadRenderTexture(CTX_VIEWPORT_WIDTH, CTX_VIEWPORT_HEIGHT);
 }
 
 static void SceneSetupLevelSegments(Scene* self)
@@ -375,7 +375,7 @@ static void SceneStart(Scene* self)
 void SceneInit(Scene* self)
 {
     SceneSetupInput(self);
-    SceneSetupTargetTexture(self);
+    SceneSetupLayers(self);
     SceneSetupLevelSegments(self);
 
     self->debugging = false;
@@ -507,7 +507,7 @@ static void SceneDrawTilemap(const Scene* self, const Texture2D* atlas)
     }
 }
 
-static void SceneDrawTargetTexture(const Scene* self)
+static void SceneDrawLayers(const Scene* self)
 {
     BeginDrawing();
 
@@ -546,26 +546,26 @@ static void SceneDrawTargetTexture(const Scene* self)
 
     // Draw background layer.
     {
-        Rectangle source = RectangleFromRenderTexture(self->backgroundTexture);
+        Rectangle source = RectangleFromRenderTexture(self->backgroundLayer);
         source.height *= -1;
 
-        DrawTexturePro(self->backgroundTexture.texture, source, destination, origin, 0, WHITE);
+        DrawTexturePro(self->backgroundLayer.texture, source, destination, origin, 0, WHITE);
     }
 
-    // Draw target layer next.
+    // Draw target layer.
     {
-        Rectangle source = RectangleFromRenderTexture(self->targetTexture);
+        Rectangle source = RectangleFromRenderTexture(self->targetLayer);
         source.height *= -1;
 
-        DrawTexturePro(self->targetTexture.texture, source, destination, origin, 0, WHITE);
+        DrawTexturePro(self->targetLayer.texture, source, destination, origin, 0, WHITE);
     }
 
-    // Draw pixelated layer last.
+    // Draw foreground layer.
     {
-        Rectangle source = RectangleFromRenderTexture(self->pixelatedTexture);
+        Rectangle source = RectangleFromRenderTexture(self->foregroundLayer);
         source.height *= -1;
 
-        DrawTexturePro(self->pixelatedTexture.texture, source, destination, origin, 0, WHITE);
+        DrawTexturePro(self->foregroundLayer.texture, source, destination, origin, 0, WHITE);
     }
 
     EndDrawing();
@@ -577,11 +577,11 @@ void SceneDraw(Scene* self, Texture2D* atlas)
 
     // Render background layer.
     {
-        const Rectangle bounds = RectangleFromRenderTexture(self->backgroundTexture);
+        const Rectangle bounds = RectangleFromRenderTexture(self->backgroundLayer);
         const f32 zoom = CalculateZoom(self->trueResolution, bounds);
         const Camera2D camera = CreateLayerCamera(cameraPosition, zoom);
 
-        BeginTextureMode(self->backgroundTexture);
+        BeginTextureMode(self->backgroundLayer);
         BeginMode2D(camera);
         {
             ClearBackground((Color)
@@ -595,11 +595,11 @@ void SceneDraw(Scene* self, Texture2D* atlas)
 
     // Render target layer.
     {
-        const Rectangle bounds = RectangleFromRenderTexture(self->targetTexture);
+        const Rectangle bounds = RectangleFromRenderTexture(self->targetLayer);
         const f32 zoom = CalculateZoom(self->trueResolution, bounds);
         const Camera2D camera = CreateLayerCamera(cameraPosition, zoom);
 
-        BeginTextureMode(self->targetTexture);
+        BeginTextureMode(self->targetLayer);
         BeginMode2D(camera);
         {
             ClearBackground((Color)
@@ -623,13 +623,13 @@ void SceneDraw(Scene* self, Texture2D* atlas)
         EndTextureMode();
     }
 
-    // Render pixelated layer.
+    // Render foreground layer.
     {
-        const Rectangle bounds = RectangleFromRenderTexture(self->pixelatedTexture);
+        const Rectangle bounds = RectangleFromRenderTexture(self->foregroundLayer);
         const f32 zoom = CalculateZoom(self->trueResolution, bounds);
         const Camera2D camera = CreateLayerCamera(cameraPosition, zoom);
 
-        BeginTextureMode(self->pixelatedTexture);
+        BeginTextureMode(self->foregroundLayer);
         BeginMode2D(camera);
         {
             ClearBackground((Color)
@@ -646,7 +646,7 @@ void SceneDraw(Scene* self, Texture2D* atlas)
         EndTextureMode();
     }
 
-    SceneDrawTargetTexture(self);
+    SceneDrawLayers(self);
 }
 
 void SceneReset(Scene* self)
@@ -661,7 +661,7 @@ void SceneDestroy(Scene* self)
         LevelSegmentDestroy(&self->segments[i]);
     }
 
-    UnloadRenderTexture(self->backgroundTexture);
-    UnloadRenderTexture(self->targetTexture);
-    UnloadRenderTexture(self->pixelatedTexture);
+    UnloadRenderTexture(self->backgroundLayer);
+    UnloadRenderTexture(self->targetLayer);
+    UnloadRenderTexture(self->foregroundLayer);
 }
