@@ -6,6 +6,14 @@
 #include <assert.h>
 #include <string.h>
 
+typedef struct
+{
+    Scene* scene;
+    Rectangle cameraBounds;
+} RenderFnParams;
+
+typedef void (*RenderFn)(const RenderFnParams*);
+
 static void EntityManagerPushFree(Scene* self, usize value)
 {
     EntityManager* entityManager = &self->entityManager;
@@ -424,23 +432,35 @@ void SceneUpdate(Scene* self)
     }
 }
 
-static Vector2 SceneCalculateCameraPosition(const Scene* self)
+// Return a Rectangle that is within the scene's bounds and centered on a given entity.
+static Rectangle SceneCalculateActionCameraBounds(const Scene* self, usize targetEntity)
 {
-    Scene* scene = (Scene*)self;
-    const CSmooth* smooth = GET_COMPONENT(smooth, self->player);
-    const CPosition* position = GET_COMPONENT(position, self->player);
-    const CDimension* dimension = GET_COMPONENT(dimension, self->player);
-
-    const Vector2 interpolated = Vector2Lerp(smooth->previous, position->value, ContextGetAlpha());
-    const Vector2 playerOffset = (Vector2)
+    if ((self->components.tags[targetEntity] & (tagPosition)) != (tagPosition))
     {
-        .x = dimension->width * 0.5,
-        .y = dimension->height * 0.5,
-    };
+        return self->trueResolution;
+    }
 
-    const Vector2 playerCenter = Vector2Add(interpolated, playerOffset);
+    Vector2 cameraPosition = self->components.positions[targetEntity].value;
 
-    Vector2 cameraPosition = playerCenter;
+    if ((self->components.tags[targetEntity] & (tagSmooth)) == (tagSmooth))
+    {
+        const CSmooth* smooth = &self->components.smooths[self->player];
+
+        cameraPosition = Vector2Lerp(smooth->previous, cameraPosition, ContextGetAlpha());
+    }
+
+    if ((self->components.tags[targetEntity] & (tagDimension)) == (tagDimension))
+    {
+        const CDimension* dimension = &self->components.dimensions[self->player];
+
+        const Vector2 offset = (Vector2)
+        {
+            .x = dimension->width * 0.5,
+            .y = dimension->height * 0.5,
+        };
+
+        cameraPosition = Vector2Add(cameraPosition, offset);
+    }
 
     // Camera x-axis collision.
     {
@@ -460,22 +480,12 @@ static Vector2 SceneCalculateCameraPosition(const Scene* self)
         cameraPosition.y = MIN(max, cameraPosition.y);
     }
 
-    return cameraPosition;
-}
-
-// Return a new Camera2D that converts a given world-space position to camera-space.
-static Camera2D CreateLayerCamera(Vector2 center, f32 zoom)
-{
-    return (Camera2D)
+    return (Rectangle)
     {
-        .zoom = zoom,
-        .offset = Vector2Scale(center, -zoom),
-        .target = (Vector2)
-        {
-            .x = -CTX_VIEWPORT_WIDTH * 0.5,
-            .y = -CTX_VIEWPORT_HEIGHT * 0.5,
-        },
-        .rotation = 0,
+        .x = cameraPosition.x - CTX_VIEWPORT_WIDTH * 0.5,
+        .y = cameraPosition.y - CTX_VIEWPORT_HEIGHT * 0.5,
+        .width = CTX_VIEWPORT_WIDTH,
+        .height = CTX_VIEWPORT_HEIGHT,
     };
 }
 
@@ -515,6 +525,43 @@ static void SceneDrawTilemap(const Scene* self)
 
         offset.x += self->segments[i].bounds.width;
     }
+}
+
+static void SceneRenderLayer
+(
+    const RenderTexture* renderTexture,
+    const RenderFn fn,
+    const RenderFnParams* params
+)
+{
+    const Rectangle bounds = RectangleFromRenderTexture(*renderTexture);
+    const f32 zoom = CalculateZoom(params->scene->trueResolution, bounds);
+
+    const Vector2 cameraCenter = (Vector2)
+    {
+        .x = params->cameraBounds.x + CTX_VIEWPORT_WIDTH * 0.5,
+        .y = params->cameraBounds.y + CTX_VIEWPORT_HEIGHT * 0.5,
+    };
+
+    const Camera2D camera = (Camera2D)
+    {
+        .zoom = zoom,
+        .offset = Vector2Scale(cameraCenter, -zoom),
+        .target = (Vector2)
+        {
+            .x = -CTX_VIEWPORT_WIDTH * 0.5,
+            .y = -CTX_VIEWPORT_HEIGHT * 0.5,
+        },
+        .rotation = 0,
+    };
+
+    BeginTextureMode(*renderTexture);
+    BeginMode2D(camera);
+    {
+        fn(params);
+    }
+    EndMode2D();
+    EndTextureMode();
 }
 
 static void SceneDrawLayers(const Scene* self)
@@ -581,80 +628,60 @@ static void SceneDrawLayers(const Scene* self)
     EndDrawing();
 }
 
+static void RenderBackgroundLayer()
+{
+    ClearBackground((Color)
+    {
+        41, 173, 255, 255
+    });
+}
+
+static void RenderTargetLayer(const RenderFnParams* params)
+{
+    ClearBackground((Color)
+    {
+        0, 0, 0, 0
+    });
+
+    SceneDrawTilemap(params->scene);
+
+    for (usize i = 0; i < SceneGetEntityCount(params->scene); ++i)
+    {
+        SSpriteDraw(params->scene, i);
+
+        if (params->scene->debugging)
+        {
+            SDebugDraw(params->scene, i);
+        }
+    }
+}
+
+static void RenderForegroundLayer(const RenderFnParams* params)
+{
+    ClearBackground((Color)
+    {
+        0, 0, 0, 0
+    });
+
+    for (usize i = 0; i < SceneGetEntityCount(params->scene); ++i)
+    {
+        SCloudParticleDraw(params->scene, i);
+    }
+}
+
 void SceneDraw(Scene* self)
 {
-    Vector2 cameraPosition = SceneCalculateCameraPosition(self);
+    Rectangle actionCameraBounds = SceneCalculateActionCameraBounds(self, self->player);
 
-    // Render background layer.
+    const RenderFnParams params = (RenderFnParams)
     {
-        const Rectangle bounds = RectangleFromRenderTexture(self->backgroundLayer);
-        const f32 zoom = CalculateZoom(self->trueResolution, bounds);
-        const Camera2D camera = CreateLayerCamera(cameraPosition, zoom);
+        .scene = self,
+        .cameraBounds = actionCameraBounds,
+    };
 
-        BeginTextureMode(self->backgroundLayer);
-        BeginMode2D(camera);
-        {
-            ClearBackground((Color)
-            {
-                41, 173, 255, 255
-            });
-        }
-        EndMode2D();
-        EndTextureMode();
-    }
-
-    // Render target layer.
-    {
-        const Rectangle bounds = RectangleFromRenderTexture(self->targetLayer);
-        const f32 zoom = CalculateZoom(self->trueResolution, bounds);
-        const Camera2D camera = CreateLayerCamera(cameraPosition, zoom);
-
-        BeginTextureMode(self->targetLayer);
-        BeginMode2D(camera);
-        {
-            ClearBackground((Color)
-            {
-                0, 0, 0, 0
-            });
-
-            SceneDrawTilemap(self, atlas);
-
-            for (usize i = 0; i < SceneGetEntityCount(self); ++i)
-            {
-                SSpriteDraw(self, atlas, i);
-
-                if (self->debugging)
-                {
-                    SDebugDraw(self, i);
-                }
-            }
-        }
-        EndMode2D();
-        EndTextureMode();
-    }
-
-    // Render foreground layer.
-    {
-        const Rectangle bounds = RectangleFromRenderTexture(self->foregroundLayer);
-        const f32 zoom = CalculateZoom(self->trueResolution, bounds);
-        const Camera2D camera = CreateLayerCamera(cameraPosition, zoom);
-
-        BeginTextureMode(self->foregroundLayer);
-        BeginMode2D(camera);
-        {
-            ClearBackground((Color)
-            {
-                0, 0, 0, 0
-            });
-
-            for (usize i = 0; i < SceneGetEntityCount(self); ++i)
-            {
-                SCloudParticleDraw(self, i);
-            }
-        }
-        EndMode2D();
-        EndTextureMode();
-    }
+    SceneRenderLayer(&self->backgroundLayer, RenderBackgroundLayer, &params);
+    SceneRenderLayer(&self->targetLayer, RenderTargetLayer, &params);
+    SceneRenderLayer(&self->foregroundLayer, RenderForegroundLayer, &params);
 
     SceneDrawLayers(self);
 }
