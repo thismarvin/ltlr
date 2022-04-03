@@ -915,7 +915,7 @@ void SCloudParticleDraw(Scene* scene, usize entity)
     DrawCircleV(center, drawSize * 0.5f, color->value);
 }
 
-void SSpriteDraw(Scene* scene, Texture2D* atlas, usize entity)
+void SSpriteDraw(Scene* scene, usize entity)
 {
     REQUIRE_DEPS(tagPosition | tagColor | tagSprite);
 
@@ -930,13 +930,13 @@ void SSpriteDraw(Scene* scene, Texture2D* atlas, usize entity)
         Vector2 interpolated = Vector2Lerp(smooth->previous, position->value, ContextGetAlpha());
         Vector2 drawPosition = Vector2Add(interpolated, sprite->offset);
 
-        DrawTextureRec(*atlas, sprite->source, drawPosition, color->value);
+        DrawTextureRec(scene->atlas, sprite->source, drawPosition, color->value);
     }
     else
     {
         Vector2 drawPosition = Vector2Add(position->value, sprite->offset);
 
-        DrawTextureRec(*atlas, sprite->source, drawPosition, color->value);
+        DrawTextureRec(scene->atlas, sprite->source, drawPosition, color->value);
     }
 }
 

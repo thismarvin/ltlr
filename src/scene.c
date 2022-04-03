@@ -132,6 +132,15 @@ usize SceneGetEventCount(Scene* self)
     return self->eventManager.nextEvent;
 }
 
+static void SceneSetupContent(Scene* self)
+{
+#if defined(PLATFORM_WEB)
+    self->atlas = LoadTexture("./src/resources/build/atlas.png");
+#else
+    self->atlas = LoadTexture("./resources/build/atlas.png");
+#endif
+}
+
 static void SceneSetupInput(Scene* self)
 {
     InputProfile profile = InputProfileCreate(5);
@@ -374,6 +383,7 @@ static void SceneStart(Scene* self)
 
 void SceneInit(Scene* self)
 {
+    SceneSetupContent(self);
     SceneSetupInput(self);
     SceneSetupLayers(self);
     SceneSetupLevelSegments(self);
@@ -469,7 +479,7 @@ static Camera2D CreateLayerCamera(Vector2 center, f32 zoom)
     };
 }
 
-static void SceneDrawTilemap(const Scene* self, const Texture2D* atlas)
+static void SceneDrawTilemap(const Scene* self)
 {
     Vector2 offset = VECTOR2_ZERO;
 
@@ -500,7 +510,7 @@ static void SceneDrawTilemap(const Scene* self, const Texture2D* atlas)
                 .height = self->segments[i].tileHeight
             };
 
-            DrawTextureRec(*atlas, source, position, WHITE);
+            DrawTextureRec(self->atlas, source, position, WHITE);
         }
 
         offset.x += self->segments[i].bounds.width;
@@ -571,7 +581,7 @@ static void SceneDrawLayers(const Scene* self)
     EndDrawing();
 }
 
-void SceneDraw(Scene* self, Texture2D* atlas)
+void SceneDraw(Scene* self)
 {
     Vector2 cameraPosition = SceneCalculateCameraPosition(self);
 
@@ -656,6 +666,8 @@ void SceneReset(Scene* self)
 
 void SceneDestroy(Scene* self)
 {
+    UnloadTexture(self->atlas);
+
     for (usize i = 0; i < self->segmentsLength; ++i)
     {
         LevelSegmentDestroy(&self->segments[i]);

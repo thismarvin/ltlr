@@ -47,6 +47,7 @@ typedef struct
     bool debugging;
     usize player;
     Rectangle bounds;
+    Texture2D atlas;
     LevelSegment* segments;
     usize segmentsLength;
     Rectangle trueResolution;
@@ -69,7 +70,7 @@ usize SceneGetEventCount(Scene* self);
 void SceneRaiseEvent(Scene* self, const Event* event);
 void SceneConsumeEvent(Scene* self, usize eventIndex);
 void SceneUpdate(Scene* self);
-void SceneDraw(Scene* self, Texture2D* atlas);
+void SceneDraw(Scene* self);
 void SceneReset(Scene* self);
 void SceneDestroy(Scene* self);
 

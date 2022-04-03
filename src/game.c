@@ -18,7 +18,6 @@ static const f32 maxDeltaTime = maxFrameSkip * targetFrameTime;
 static f32 accumulator = 0.0;
 static f64 previousTime = 0.0;
 
-static Texture2D atlas;
 static Scene scene;
 
 static void Timestep(void)
@@ -79,7 +78,6 @@ int main(void)
 #endif
 
     SceneDestroy(&scene);
-    UnloadTexture(atlas);
 
     CloseAudioDevice();
     CloseWindow();
@@ -89,12 +87,6 @@ int main(void)
 
 static void Initialize(void)
 {
-#if defined(PLATFORM_WEB)
-    atlas = LoadTexture("./src/resources/build/atlas.png");
-#else
-    atlas = LoadTexture("./resources/build/atlas.png");
-#endif
-
     SceneInit(&scene);
 }
 
@@ -105,5 +97,5 @@ static void Update(void)
 
 static void Draw(void)
 {
-    SceneDraw(&scene, &atlas);
+    SceneDraw(&scene);
 }

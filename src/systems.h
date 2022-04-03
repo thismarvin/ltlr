@@ -20,5 +20,5 @@ void SCloudParticleCollisionUpdate(Scene* scene, usize entity);
 void SCloudParticleSpawnUpdate(Scene* scene, usize entity);
 void SCloudParticleDraw(Scene* scene, usize entity);
 
-void SSpriteDraw(Scene* scene, Texture2D* atlas, usize entity);
+void SSpriteDraw(Scene* scene, usize entity);
 void SDebugDraw(Scene* scene, usize entity);
