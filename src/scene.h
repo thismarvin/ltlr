@@ -52,6 +52,7 @@ typedef struct
     usize segmentsLength;
     Rectangle trueResolution;
     Rectangle renderResolution;
+    RenderTexture2D rootLayer;
     RenderTexture2D backgroundLayer;
     RenderTexture2D targetLayer;
     RenderTexture2D foregroundLayer;

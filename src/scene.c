@@ -310,7 +310,8 @@ static void SceneSetupLayers(Scene* self)
     // Ensure that the render resolution uses integer scaling.
     zoom = floor(zoom);
 
-    self->backgroundLayer = LoadRenderTexture(1, 1);
+    self->rootLayer = LoadRenderTexture(1, 1);
+    self->backgroundLayer = LoadRenderTexture(CTX_VIEWPORT_WIDTH, CTX_VIEWPORT_HEIGHT);
     self->targetLayer = LoadRenderTexture(CTX_VIEWPORT_WIDTH * zoom, CTX_VIEWPORT_HEIGHT * zoom);
     self->foregroundLayer = LoadRenderTexture(CTX_VIEWPORT_WIDTH, CTX_VIEWPORT_HEIGHT);
 }
@@ -601,6 +602,14 @@ static void SceneDrawLayers(const Scene* self)
 
     ClearBackground(BLACK);
 
+    // Draw root layer.
+    {
+        Rectangle source = RectangleFromRenderTexture(self->rootLayer);
+        source.height *= -1;
+
+        DrawTexturePro(self->rootLayer.texture, source, destination, origin, 0, WHITE);
+    }
+
     // Draw background layer.
     {
         Rectangle source = RectangleFromRenderTexture(self->backgroundLayer);
@@ -628,12 +637,22 @@ static void SceneDrawLayers(const Scene* self)
     EndDrawing();
 }
 
-static void RenderBackgroundLayer()
+static void RenderRootLayer()
 {
     ClearBackground((Color)
     {
         41, 173, 255, 255
     });
+}
+
+static void RenderBackgroundLayer()
+{
+    ClearBackground((Color)
+    {
+        0, 0, 0, 0
+    });
+
+    // TODO(thismarvin): Draw trees here.
 }
 
 static void RenderTargetLayer(const RenderFnParams* params)
@@ -679,6 +698,7 @@ void SceneDraw(Scene* self)
         .cameraBounds = actionCameraBounds,
     };
 
+    SceneRenderLayer(&self->rootLayer, RenderRootLayer, &params);
     SceneRenderLayer(&self->backgroundLayer, RenderBackgroundLayer, &params);
     SceneRenderLayer(&self->targetLayer, RenderTargetLayer, &params);
     SceneRenderLayer(&self->foregroundLayer, RenderForegroundLayer, &params);
