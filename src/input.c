@@ -7,7 +7,7 @@ static void KeyboardBindingConsume(KeyboardBinding* binding)
     binding->bufferTimer = binding->bufferDuration;
 }
 
-static void GamepadBindingConsume(GamepadBinding* binding, usize gamepad)
+static void GamepadBindingConsume(GamepadBinding* binding, const usize gamepad)
 {
     if (!IsGamepadAvailable(gamepad))
     {
@@ -22,11 +22,11 @@ static void MouseBindingConsume(MouseBinding* binding)
     binding->bufferTimer = binding->bufferDuration;
 }
 
-KeyboardBinding KeyboardBindingCreate(char* name, usize keysCapacity)
+KeyboardBinding KeyboardBindingCreate(const char* name, const usize keysCapacity)
 {
     return (KeyboardBinding)
     {
-        .name = name,
+        .name = (char*)name,
         .keys = calloc(keysCapacity, sizeof(KeyboardKey)),
         .keysCapacity = keysCapacity,
         .keysLength = 0,
@@ -35,13 +35,13 @@ KeyboardBinding KeyboardBindingCreate(char* name, usize keysCapacity)
     };
 }
 
-void KeyboardBindingSetBuffer(KeyboardBinding* self, f32 bufferDuration)
+void KeyboardBindingSetBuffer(KeyboardBinding* self, const f32 bufferDuration)
 {
     self->bufferDuration = bufferDuration;
     self->bufferTimer = bufferDuration;
 }
 
-void KeyboardBindingAddKey(KeyboardBinding* self, KeyboardKey key)
+void KeyboardBindingAddKey(KeyboardBinding* self, const KeyboardKey key)
 {
     if (self->keysLength >= self->keysCapacity)
     {
@@ -53,11 +53,11 @@ void KeyboardBindingAddKey(KeyboardBinding* self, KeyboardKey key)
     self->keysLength += 1;
 }
 
-GamepadBinding GamepadBindingCreate(char* name, usize buttonsCapacity)
+GamepadBinding GamepadBindingCreate(const char* name, const usize buttonsCapacity)
 {
     return (GamepadBinding)
     {
-        .name = name,
+        .name = (char*)name,
         .buttons = calloc(buttonsCapacity, sizeof(GamepadButton)),
         .buttonsCapacity = buttonsCapacity,
         .buttonsLength = 0,
@@ -66,13 +66,13 @@ GamepadBinding GamepadBindingCreate(char* name, usize buttonsCapacity)
     };
 }
 
-void GamepadBindingSetBuffer(GamepadBinding* self, f32 bufferDuration)
+void GamepadBindingSetBuffer(GamepadBinding* self, const f32 bufferDuration)
 {
     self->bufferDuration = bufferDuration;
     self->bufferTimer = bufferDuration;
 }
 
-void GamepadBindingAddButton(GamepadBinding* self, GamepadButton button)
+void GamepadBindingAddButton(GamepadBinding* self, const GamepadButton button)
 {
     if (self->buttonsLength >= self->buttonsCapacity)
     {
@@ -84,11 +84,11 @@ void GamepadBindingAddButton(GamepadBinding* self, GamepadButton button)
     self->buttonsLength += 1;
 }
 
-MouseBinding MouseBindingCreate(char* name, usize buttonsCapacity)
+MouseBinding MouseBindingCreate(const char* name, const usize buttonsCapacity)
 {
     return (MouseBinding)
     {
-        .name = name,
+        .name = (char*)name,
         .buttons = calloc(buttonsCapacity, sizeof(MouseButton)),
         .buttonsCapacity = buttonsCapacity,
         .buttonsLength = 0,
@@ -97,13 +97,13 @@ MouseBinding MouseBindingCreate(char* name, usize buttonsCapacity)
     };
 }
 
-void MouseBindingSetBuffer(MouseBinding* self, f32 bufferDuration)
+void MouseBindingSetBuffer(MouseBinding* self, const f32 bufferDuration)
 {
     self->bufferDuration = bufferDuration;
     self->bufferTimer = bufferDuration;
 }
 
-void MouseBindingAddButton(MouseBinding* self, MouseButton button)
+void MouseBindingAddButton(MouseBinding* self, const MouseButton button)
 {
     if (self->buttonsLength >= self->buttonsCapacity)
     {
@@ -115,11 +115,17 @@ void MouseBindingAddButton(MouseBinding* self, MouseButton button)
     self->buttonsLength += 1;
 }
 
-AxisBinding AxisBindingCreate(char* name, usize axesCapacity, Ordering ordering, f32 target)
+AxisBinding AxisBindingCreate
+(
+    const char* name,
+    const usize axesCapacity,
+    const Ordering ordering,
+    const f32 target
+)
 {
     return (AxisBinding)
     {
-        .name = name,
+        .name = (char*)name,
         .axes = calloc(axesCapacity, sizeof(GamepadAxis)),
         .axesCapacity = axesCapacity,
         .axesLength = 0,
@@ -128,7 +134,7 @@ AxisBinding AxisBindingCreate(char* name, usize axesCapacity, Ordering ordering,
     };
 }
 
-void AxisBindingAddAxis(AxisBinding* self, GamepadAxis axis)
+void AxisBindingAddAxis(AxisBinding* self, const GamepadAxis axis)
 {
     if (self->axesLength >= self->axesCapacity)
     {
@@ -170,7 +176,7 @@ static void KeyboardBindingUpdate(KeyboardBinding* binding)
     }
 }
 
-static void GamepadBindingUpdate(GamepadBinding* binding, usize gamepad)
+static void GamepadBindingUpdate(GamepadBinding* binding, const usize gamepad)
 {
     if (!IsGamepadAvailable(gamepad))
     {
@@ -253,7 +259,7 @@ static bool KeyboardBindingPressed(const KeyboardBinding* binding)
     return false;
 }
 
-static bool GamepadBindingPressed(const GamepadBinding* binding, usize gamepad)
+static bool GamepadBindingPressed(const GamepadBinding* binding, const usize gamepad)
 {
     if (!IsGamepadAvailable(gamepad))
     {
@@ -307,7 +313,7 @@ static bool KeyboardBindingPressing(const KeyboardBinding* binding)
     return false;
 }
 
-static bool GamepadBindingPressing(const GamepadBinding* binding, usize gamepad)
+static bool GamepadBindingPressing(const GamepadBinding* binding, const usize gamepad)
 {
     if (!IsGamepadAvailable(gamepad))
     {
@@ -338,7 +344,7 @@ static bool MouseBindingPressing(const MouseBinding* binding)
     return false;
 }
 
-static bool AxisBindingPressing(const AxisBinding* binding, usize gamepad)
+static bool AxisBindingPressing(const AxisBinding* binding, const usize gamepad)
 {
     if (!IsGamepadAvailable(gamepad))
     {
@@ -382,7 +388,7 @@ static bool KeyboardBindingReleased(const KeyboardBinding* binding)
     return false;
 }
 
-static bool GamepadBindingReleased(const GamepadBinding* binding, usize gamepad)
+static bool GamepadBindingReleased(const GamepadBinding* binding, const usize gamepad)
 {
     if (!IsGamepadAvailable(gamepad))
     {
@@ -423,7 +429,7 @@ static bool MouseBindingReleased(const MouseBinding* binding)
     return false;
 }
 
-InputProfile InputProfileCreate(usize bindingsCapactity)
+InputProfile InputProfileCreate(const usize bindingsCapactity)
 {
     return (InputProfile)
     {
@@ -439,7 +445,7 @@ InputProfile InputProfileCreate(usize bindingsCapactity)
     };
 }
 
-void InputProfileAddKeyboardBinding(InputProfile* self, KeyboardBinding binding)
+void InputProfileAddKeyboardBinding(InputProfile* self, const KeyboardBinding binding)
 {
     if (self->keyboardBindingsLength >= self->bindingsCapacity)
     {
@@ -451,7 +457,7 @@ void InputProfileAddKeyboardBinding(InputProfile* self, KeyboardBinding binding)
     self->keyboardBindingsLength += 1;
 }
 
-void InputProfileAddGamepadBinding(InputProfile* self, GamepadBinding binding)
+void InputProfileAddGamepadBinding(InputProfile* self, const GamepadBinding binding)
 {
     if (self->gamepadBindingsLength >= self->bindingsCapacity)
     {
@@ -463,7 +469,7 @@ void InputProfileAddGamepadBinding(InputProfile* self, GamepadBinding binding)
     self->gamepadBindingsLength += 1;
 }
 
-void InputProfileAddMouseBinding(InputProfile* self, MouseBinding binding)
+void InputProfileAddMouseBinding(InputProfile* self, const MouseBinding binding)
 {
     if (self->gamepadBindingsLength >= self->bindingsCapacity)
     {
@@ -475,7 +481,7 @@ void InputProfileAddMouseBinding(InputProfile* self, MouseBinding binding)
     self->mouseBindingsLength += 1;
 }
 
-void InputProfileAddAxisBinding(InputProfile* self, AxisBinding binding)
+void InputProfileAddAxisBinding(InputProfile* self, const AxisBinding binding)
 {
     if (self->axisBindingsLength >= self->bindingsCapacity)
     {
@@ -487,7 +493,7 @@ void InputProfileAddAxisBinding(InputProfile* self, AxisBinding binding)
     self->axisBindingsLength += 1;
 }
 
-InputHandler InputHandlerCreate(usize gamepad)
+InputHandler InputHandlerCreate(const usize gamepad)
 {
     return (InputHandler)
     {
@@ -496,7 +502,7 @@ InputHandler InputHandlerCreate(usize gamepad)
     };
 }
 
-void InputHandlerSetProfile(InputHandler* self, InputProfile profile)
+void InputHandlerSetProfile(InputHandler* self, const InputProfile profile)
 {
     self->profile = profile;
 
@@ -526,7 +532,7 @@ void InputHandlerUpdate(InputHandler* self)
     }
 }
 
-bool InputHandlerPressed(const InputHandler* self, char* binding)
+bool InputHandlerPressed(const InputHandler* self, const char* binding)
 {
     if (!self->enabled)
     {
@@ -569,7 +575,7 @@ bool InputHandlerPressed(const InputHandler* self, char* binding)
     return false;
 }
 
-bool InputHandlerPressing(const InputHandler* self, char* binding)
+bool InputHandlerPressing(const InputHandler* self, const char* binding)
 {
     if (!self->enabled)
     {
@@ -623,7 +629,7 @@ bool InputHandlerPressing(const InputHandler* self, char* binding)
     return false;
 }
 
-bool InputHandlerReleased(const InputHandler* self, char* binding)
+bool InputHandlerReleased(const InputHandler* self, const char* binding)
 {
     if (!self->enabled)
     {
@@ -666,7 +672,7 @@ bool InputHandlerReleased(const InputHandler* self, char* binding)
     return false;
 }
 
-void InputHandlerConsume(InputHandler* self, char* binding)
+void InputHandlerConsume(InputHandler* self, const char* binding)
 {
     if (!self->enabled)
     {

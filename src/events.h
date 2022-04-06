@@ -39,6 +39,6 @@ typedef struct
     };
 } Event;
 
-void EventCollisionInit(Event* self, usize entity, usize otherEntity);
-void EventDamageInit(Event* self, usize entity, usize otherEntity);
-void EventCloudParticleInit(Event* self, usize entity, u16 spawnCount);
+void EventCollisionInit(Event* self, const usize entity, const usize otherEntity);
+void EventDamageInit(Event* self, const usize entity, const usize otherEntity);
+void EventCloudParticleInit(Event* self, const usize entity, const u16 spawnCount);

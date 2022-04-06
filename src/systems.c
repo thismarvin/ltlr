@@ -26,7 +26,7 @@ typedef struct
     Vector2 resolution;
 } CollisionParams;
 
-static i8 sign(f32 value)
+static i8 sign(const f32 value)
 {
     if (value < 0)
     {
@@ -41,7 +41,7 @@ static i8 sign(f32 value)
     return 0;
 }
 
-void SSmoothUpdate(Scene* scene, usize entity)
+void SSmoothUpdate(Scene* scene, const usize entity)
 {
     REQUIRE_DEPS(tagPosition | tagSmooth);
 
@@ -51,7 +51,7 @@ void SSmoothUpdate(Scene* scene, usize entity)
     smooth->previous = position->value;
 }
 
-void SKineticUpdate(Scene* scene, usize entity)
+void SKineticUpdate(Scene* scene, const usize entity)
 {
     REQUIRE_DEPS(tagPosition | tagKinetic);
 
@@ -65,7 +65,7 @@ void SKineticUpdate(Scene* scene, usize entity)
     position->value.y += kinetic->velocity.y * CTX_DT;
 }
 
-void SCollisionUpdate(Scene* scene, usize entity)
+void SCollisionUpdate(Scene* scene, const usize entity)
 {
     REQUIRE_DEPS(tagPosition | tagDimension | tagCollider);
 
@@ -141,7 +141,7 @@ static Vector2 ExtractResolution(Vector2 resolution, u64 layers)
     return result;
 }
 
-void SPlayerInputUpdate(Scene* scene, usize entity)
+void SPlayerInputUpdate(Scene* scene, const usize entity)
 {
     REQUIRE_DEPS(tagPlayer | tagKinetic);
 
@@ -381,7 +381,8 @@ static CollisionResult PlayerOnCollision(Scene* scene, CollisionParams params)
 }
 
 // TODO(thismarvin): Is it possible to have an `OnCollision` callback as a parameter?
-static CollisionResult SimulateCollisionOnAxis(Scene* scene, usize entity, Vector2 delta, u8 step)
+static CollisionResult SimulateCollisionOnAxis(Scene* scene, const usize entity,
+        const Vector2 delta, const u8 step)
 {
     // It is important that `delta` only consists of one axis, not both.
     assert(delta.x == 0 || delta.y == 0);
@@ -477,7 +478,7 @@ static CollisionResult SimulateCollisionOnAxis(Scene* scene, usize entity, Vecto
     };
 }
 
-void SPlayerCollisionUpdate(Scene* scene, usize entity)
+void SPlayerCollisionUpdate(Scene* scene, const usize entity)
 {
     REQUIRE_DEPS(tagPlayer | tagSmooth | tagPosition | tagDimension | tagCollider | tagKinetic);
 
@@ -565,7 +566,7 @@ void SPlayerCollisionUpdate(Scene* scene, usize entity)
     }
 }
 
-static void PlayerFlashingLogic(Scene* scene, usize entity)
+static void PlayerFlashingLogic(Scene* scene, const usize entity)
 {
     assert(ENTITY_HAS_DEPS(entity, tagPlayer));
 
@@ -595,7 +596,7 @@ static void PlayerFlashingLogic(Scene* scene, usize entity)
         SceneEnableComponent(scene, entity, tagSprite);
     }
 }
-void SPlayerMortalUpdate(Scene* scene, usize entity)
+void SPlayerMortalUpdate(Scene* scene, const usize entity)
 {
     REQUIRE_DEPS(tagPlayer | tagPosition | tagKinetic | tagMortal);
 
@@ -648,7 +649,7 @@ void SPlayerMortalUpdate(Scene* scene, usize entity)
     PlayerFlashingLogic(scene, entity);
 }
 
-void SWalkerCollisionUpdate(Scene* scene, usize entity)
+void SWalkerCollisionUpdate(Scene* scene, const usize entity)
 {
     REQUIRE_DEPS(tagWalker | tagPosition | tagDimension | tagCollider | tagKinetic);
 
@@ -715,7 +716,7 @@ void SWalkerCollisionUpdate(Scene* scene, usize entity)
     }
 }
 
-void SFleetingUpdate(Scene* scene, usize entity)
+void SFleetingUpdate(Scene* scene, const usize entity)
 {
     REQUIRE_DEPS(tagFleeting);
 
@@ -729,7 +730,7 @@ void SFleetingUpdate(Scene* scene, usize entity)
     }
 }
 
-void SGenericCollisionUpdate(Scene* scene, usize entity)
+void SGenericCollisionUpdate(Scene* scene, const usize entity)
 {
     REQUIRE_DEPS(tagPosition | tagDimension | tagCollider);
 
@@ -782,7 +783,7 @@ void SGenericCollisionUpdate(Scene* scene, usize entity)
     }
 }
 
-void SCloudParticleCollisionUpdate(Scene* scene, usize entity)
+void SCloudParticleCollisionUpdate(Scene* scene, const usize entity)
 {
     REQUIRE_DEPS(tagPosition | tagDimension | tagCollider | tagKinetic | tagFleeting);
 
@@ -850,7 +851,7 @@ void SCloudParticleCollisionUpdate(Scene* scene, usize entity)
     }
 }
 
-void SCloudParticleSpawnUpdate(Scene* scene, usize entity)
+void SCloudParticleSpawnUpdate(Scene* scene, const usize entity)
 {
     REQUIRE_DEPS(tagPosition | tagDimension | tagKinetic);
 
@@ -892,7 +893,7 @@ void SCloudParticleSpawnUpdate(Scene* scene, usize entity)
     }
 }
 
-void SCloudParticleDraw(Scene* scene, usize entity)
+void SCloudParticleDraw(const Scene* scene, const usize entity)
 {
     REQUIRE_DEPS(tagPosition | tagDimension | tagFleeting | tagColor | tagSmooth);
 
@@ -915,7 +916,7 @@ void SCloudParticleDraw(Scene* scene, usize entity)
     DrawCircleV(center, drawSize * 0.5f, color->value);
 }
 
-void SSpriteDraw(Scene* scene, usize entity)
+void SSpriteDraw(const Scene* scene, const usize entity)
 {
     REQUIRE_DEPS(tagPosition | tagColor | tagSprite);
 
@@ -940,7 +941,7 @@ void SSpriteDraw(Scene* scene, usize entity)
     }
 }
 
-void SDebugDraw(Scene* scene, usize entity)
+void SDebugDraw(const Scene* scene, const usize entity)
 {
     REQUIRE_DEPS(tagPosition | tagDimension);
 

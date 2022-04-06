@@ -1,6 +1,6 @@
 #include "events.h"
 
-void EventCollisionInit(Event* self, usize entity, usize otherEntity)
+void EventCollisionInit(Event* self, const usize entity, const usize otherEntity)
 {
     self->tag = EVENT_COLLISION;
     self->entity = entity;
@@ -10,7 +10,7 @@ void EventCollisionInit(Event* self, usize entity, usize otherEntity)
     };
 }
 
-void EventDamageInit(Event* self, usize entity, usize otherEntity)
+void EventDamageInit(Event* self, const usize entity, const usize otherEntity)
 {
     self->tag = EVENT_DAMAGE;
     self->entity = entity;
@@ -20,7 +20,7 @@ void EventDamageInit(Event* self, usize entity, usize otherEntity)
     };
 }
 
-void EventCloudParticleInit(Event* self, usize entity, u16 spawnCount)
+void EventCloudParticleInit(Event* self, const usize entity, const u16 spawnCount)
 {
     self->tag = EVENT_CLOUD_PARTICLE;
     self->entity = entity;

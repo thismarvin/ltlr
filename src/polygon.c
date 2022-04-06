@@ -1,6 +1,6 @@
 #include "polygon.h"
 
-Polygon PolygonCreate(usize totalVertices)
+Polygon PolygonCreate(const usize totalVertices)
 {
     return (Polygon)
     {

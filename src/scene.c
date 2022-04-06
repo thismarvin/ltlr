@@ -14,7 +14,7 @@ typedef struct
 
 typedef void (*RenderFn)(const RenderFnParams*);
 
-static void EntityManagerPushFree(Scene* self, usize value)
+static void EntityManagerPushFree(Scene* self, const usize value)
 {
     EntityManager* entityManager = &self->entityManager;
 
@@ -36,7 +36,7 @@ static usize EntityManagerPopFree(Scene* self)
     return slot;
 }
 
-static void EventManagerPushFree(Scene* self, usize value)
+static void EventManagerPushFree(Scene* self, const usize value)
 {
     EventManager* eventManager = &self->eventManager;
 
@@ -58,17 +58,17 @@ static usize EventManagerPopFree(Scene* self)
     return slot;
 }
 
-Components* SceneGetComponents(Scene* self)
+Components* SceneGetComponents(const Scene* self)
 {
-    return &self->components;
+    return (Components*)&self->components;
 }
 
-void SceneEnableComponent(Scene* self, usize entity, usize tag)
+void SceneEnableComponent(Scene* self, const usize entity, const usize tag)
 {
     self->components.tags[entity] |= tag;
 }
 
-void SceneDisableComponent(Scene* self, usize entity, usize tag)
+void SceneDisableComponent(Scene* self, const usize entity, const usize tag)
 {
     self->components.tags[entity] &= ~tag;
 }
@@ -95,7 +95,7 @@ usize SceneAllocateEntity(Scene* self)
     return EntityManagerPopFree(self);
 }
 
-void SceneDeallocateEntity(Scene* self, usize entity)
+void SceneDeallocateEntity(Scene* self, const usize entity)
 {
     self->components.tags[entity] = 0;
     EntityManagerPushFree(self, entity);
@@ -124,18 +124,18 @@ void SceneRaiseEvent(Scene* self, const Event* event)
     memcpy(&self->eventManager.events[next], event, sizeof(Event));
 }
 
-void SceneConsumeEvent(Scene* self, usize eventIndex)
+void SceneConsumeEvent(Scene* self, const usize eventIndex)
 {
     self->eventManager.events[eventIndex].tag = EVENT_NONE;
     EventManagerPushFree(self, eventIndex);
 }
 
-usize SceneGetEntityCount(Scene* self)
+usize SceneGetEntityCount(const Scene* self)
 {
     return self->entityManager.nextEntity;
 }
 
-usize SceneGetEventCount(Scene* self)
+usize SceneGetEventCount(const Scene* self)
 {
     return self->eventManager.nextEvent;
 }
@@ -434,7 +434,7 @@ void SceneUpdate(Scene* self)
 }
 
 // Return a Rectangle that is within the scene's bounds and centered on a given entity.
-static Rectangle SceneCalculateActionCameraBounds(const Scene* self, usize targetEntity)
+static Rectangle SceneCalculateActionCameraBounds(const Scene* self, const usize targetEntity)
 {
     if ((self->components.tags[targetEntity] & (tagPosition)) != (tagPosition))
     {
@@ -688,13 +688,13 @@ static void RenderForegroundLayer(const RenderFnParams* params)
     }
 }
 
-void SceneDraw(Scene* self)
+void SceneDraw(const Scene* self)
 {
     Rectangle actionCameraBounds = SceneCalculateActionCameraBounds(self, self->player);
 
     const RenderFnParams params = (RenderFnParams)
     {
-        .scene = self,
+        .scene = (Scene*)self,
         .cameraBounds = actionCameraBounds,
     };
 

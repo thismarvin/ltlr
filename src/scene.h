@@ -61,17 +61,17 @@ typedef struct
 } Scene;
 
 void SceneInit(Scene* self);
-Components* SceneGetComponents(Scene* self);
-void SceneEnableComponent(Scene* self, usize entity, usize tag);
-void SceneDisableComponent(Scene* self, usize entity, usize tag);
+Components* SceneGetComponents(const Scene* self);
+void SceneEnableComponent(Scene* self, const usize entity, const usize tag);
+void SceneDisableComponent(Scene* self, const usize entity, const usize tag);
 usize SceneAllocateEntity(Scene* self);
-void SceneDeallocateEntity(Scene* self, usize entity);
-usize SceneGetEntityCount(Scene* self);
-usize SceneGetEventCount(Scene* self);
+void SceneDeallocateEntity(Scene* self, const usize entity);
+usize SceneGetEntityCount(const Scene* self);
+usize SceneGetEventCount(const Scene* self);
 void SceneRaiseEvent(Scene* self, const Event* event);
-void SceneConsumeEvent(Scene* self, usize eventIndex);
+void SceneConsumeEvent(Scene* self, const usize eventIndex);
 void SceneUpdate(Scene* self);
-void SceneDraw(Scene* self);
+void SceneDraw(const Scene* self);
 void SceneReset(Scene* self);
 void SceneDestroy(Scene* self);
 

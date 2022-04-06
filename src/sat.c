@@ -10,7 +10,7 @@ typedef struct
     bool valid;
 } OverlapInformation;
 
-static Rectangle CalculateAABB(Vector2* vertices, size_t verticesLength)
+static Rectangle CalculateAABB(const Vector2* vertices, const usize verticesLength)
 {
     f32 xMin = vertices[0].x;
     f32 xMax = xMin;
@@ -34,7 +34,7 @@ static Rectangle CalculateAABB(Vector2* vertices, size_t verticesLength)
     };
 }
 
-static OverlapInformation CalculateOverlap(Polygon a, Polygon b)
+static OverlapInformation CalculateOverlap(const Polygon a, const Polygon b)
 {
     Vector2 minNormal = { 0, 0 };
     f32 minOverlap = FLT_MAX;
@@ -96,7 +96,7 @@ static OverlapInformation CalculateOverlap(Polygon a, Polygon b)
     };
 }
 
-static Vector2 RectangleGetCenter(Rectangle rectangle)
+static Vector2 RectangleGetCenter(const Rectangle rectangle)
 {
     return (Vector2)
     {
@@ -105,7 +105,7 @@ static Vector2 RectangleGetCenter(Rectangle rectangle)
     };
 }
 
-Vector2 SATGetResolution(Polygon a, Polygon b)
+Vector2 SATGetResolution(const Polygon a, const Polygon b)
 {
     Rectangle aAABB = CalculateAABB(a.vertices, a.verticesLength);
     Rectangle bAABB = CalculateAABB(b.vertices, b.verticesLength);

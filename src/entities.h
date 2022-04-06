@@ -3,7 +3,13 @@
 #include "common.h"
 #include "scene.h"
 
-usize ECreatePlayer(Scene* scene, f32 x, f32 y);
-usize ECreateBlock(Scene* scene, f32 x, f32 y, f32 width, f32 height);
-usize ECreateWalker(Scene* scene, f32 x, f32 y);
-usize ECreateCloudParticle(Scene* scene, f32 centerX, f32 centerY, Vector2 direction);
+usize ECreatePlayer(Scene* scene, const f32 x, const f32 y);
+usize ECreateBlock(Scene* scene, const f32 x, const f32 y, const f32 width, const f32 height);
+usize ECreateWalker(Scene* scene, const f32 x, const f32 y);
+usize ECreateCloudParticle
+(
+    Scene* scene,
+    const f32 centerX,
+    const f32 centerY,
+    const Vector2 direction
+);

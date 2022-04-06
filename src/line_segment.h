@@ -8,4 +8,4 @@ typedef struct
     Vector2 end;
 } LineSegment;
 
-LineSegment LineSegmentCreate(f32 x1, f32 y1, f32 x2, f32 y2);
+LineSegment LineSegmentCreate(const f32 x1, const f32 y1, const f32 x2, const f32 y2);

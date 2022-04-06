@@ -1,7 +1,7 @@
 #include "./vendor/cJSON.h"
 #include "level_segment.h"
 
-void LevelSegmentInit(LevelSegment* self, char* path)
+void LevelSegmentInit(LevelSegment* self, const char* path)
 {
     char* buffer = LoadFileText(path);
 

@@ -2,7 +2,7 @@
 #include "common.h"
 #include "raymath.h"
 
-Vector2 RectangleRectangleResolution(Rectangle a, Rectangle b)
+Vector2 RectangleRectangleResolution(const Rectangle a, const Rectangle b)
 {
     f32 aLeft = a.x;
     f32 aRight = a.x + a.width;
@@ -44,7 +44,7 @@ Vector2 RectangleRectangleResolution(Rectangle a, Rectangle b)
     return resolution;
 }
 
-Polygon PolygonFromRectangle(Rectangle rectangle)
+Polygon PolygonFromRectangle(const Rectangle rectangle)
 {
     Polygon polygon = PolygonCreate(4);
 

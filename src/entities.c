@@ -3,7 +3,7 @@
 #include "entities.h"
 #include "raymath.h"
 
-usize ECreatePlayer(Scene* scene, f32 x, f32 y)
+usize ECreatePlayer(Scene* scene, const f32 x, const f32 y)
 {
     usize entity = SceneAllocateEntity(scene);
 
@@ -76,7 +76,7 @@ usize ECreatePlayer(Scene* scene, f32 x, f32 y)
     return entity;
 }
 
-usize ECreateBlock(Scene* scene, f32 x, f32 y, f32 width, f32 height)
+usize ECreateBlock(Scene* scene, const f32 x, const f32 y, const f32 width, const f32 height)
 {
     usize entity = SceneAllocateEntity(scene);
 
@@ -99,7 +99,7 @@ usize ECreateBlock(Scene* scene, f32 x, f32 y, f32 width, f32 height)
     return entity;
 }
 
-usize ECreateWalker(Scene* scene, f32 x, f32 y)
+usize ECreateWalker(Scene* scene, const f32 x, const f32 y)
 {
     usize entity = SceneAllocateEntity(scene);
 
@@ -145,7 +145,13 @@ usize ECreateWalker(Scene* scene, f32 x, f32 y)
     return entity;
 }
 
-usize ECreateCloudParticle(Scene* scene, f32 centerX, f32 centerY, Vector2 direction)
+usize ECreateCloudParticle
+(
+    Scene* scene,
+    const f32 centerX,
+    const f32 centerY,
+    const Vector2 direction
+)
 {
     usize entity = SceneAllocateEntity(scene);
 

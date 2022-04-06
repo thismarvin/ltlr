@@ -13,7 +13,7 @@ f64 ContextGetTotalTime()
     return totalTime;
 }
 
-void ContextSetTotalTime(f64 value)
+void ContextSetTotalTime(const f64 value)
 {
     totalTime = value;
 }
@@ -23,7 +23,7 @@ f32 ContextGetAlpha()
     return alpha;
 }
 
-void ContextSetAlpha(f32 value)
+void ContextSetAlpha(const f32 value)
 {
     alpha = value;
 }
