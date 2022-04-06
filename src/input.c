@@ -1,6 +1,6 @@
-#include <string.h>
 #include "context.h"
 #include "input.h"
+#include <string.h>
 
 static void KeyboardBindingConsume(KeyboardBinding* binding)
 {

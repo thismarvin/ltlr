@@ -1,7 +1,6 @@
 #include "common.h"
 #include "context.h"
 #include "math.h"
-#include "raylib.h"
 #include "scene.h"
 
 #if defined(PLATFORM_WEB)
