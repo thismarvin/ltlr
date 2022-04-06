@@ -41,4 +41,4 @@ typedef struct
 
 void EventCollisionInit(Event* self, usize entity, usize otherEntity);
 void EventDamageInit(Event* self, usize entity, usize otherEntity);
-void EventCloudParticleInit(Event* self, usize entity, int spawnCount);
+void EventCloudParticleInit(Event* self, usize entity, u16 spawnCount);
