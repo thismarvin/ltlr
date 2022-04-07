@@ -13,7 +13,7 @@ typedef struct
     // Next index to insert into the back of the deque.
     usize _tailIndex;
     // True if the deque is full.
-    bool fullCapacity;
+    bool _fullCapacity;
 } UsizeDeque;
 
 UsizeDeque UsizeDequeCreate(const usize initalCapacity);
