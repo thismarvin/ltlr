@@ -3,7 +3,6 @@
 #include "raymath.h"
 #include "scene.h"
 #include "systems.h"
-#include <assert.h>
 #include <string.h>
 
 typedef struct
@@ -13,50 +12,6 @@ typedef struct
 } RenderFnParams;
 
 typedef void (*RenderFn)(const RenderFnParams*);
-
-static void EntityManagerPushFree(Scene* self, const usize value)
-{
-    EntityManager* entityManager = &self->entityManager;
-
-    assert(entityManager->nextFreeSlot < MAX_ENTITIES);
-
-    entityManager->freeSlots[entityManager->nextFreeSlot] = value;
-    entityManager->nextFreeSlot += 1;
-}
-
-static usize EntityManagerPopFree(Scene* self)
-{
-    EntityManager* entityManager = &self->entityManager;
-
-    assert(entityManager->nextFreeSlot > 0);
-
-    usize slot = entityManager->freeSlots[entityManager->nextFreeSlot - 1];
-    entityManager->nextFreeSlot -= 1;
-
-    return slot;
-}
-
-static void EventManagerPushFree(Scene* self, const usize value)
-{
-    EventManager* eventManager = &self->eventManager;
-
-    assert(eventManager->nextFreeSlot < MAX_EVENTS);
-
-    eventManager->freeSlots[eventManager->nextFreeSlot] = value;
-    eventManager->nextFreeSlot += 1;
-}
-
-static usize EventManagerPopFree(Scene* self)
-{
-    EventManager* eventManager = &self->eventManager;
-
-    assert(eventManager->nextFreeSlot < MAX_EVENTS);
-
-    usize slot = eventManager->freeSlots[eventManager->nextFreeSlot - 1];
-    eventManager->nextFreeSlot -= 1;
-
-    return slot;
-}
 
 Components* SceneGetComponents(const Scene* self)
 {
@@ -77,14 +32,15 @@ usize SceneAllocateEntity(Scene* self)
 {
     EntityManager* entityManager = &self->entityManager;
 
-    if (entityManager->nextFreeSlot == 0)
+    if (UsizeDequeSize(&entityManager->freeUsedEntityIndices) == 0)
     {
-        usize next = MIN(entityManager->nextEntity, MAX_ENTITIES - 1);
+        // No used indices, use next available fresh one.
+        usize next = MIN(entityManager->nextFreshEntityIndex, MAX_ENTITIES - 1);
 
-        entityManager->nextEntity = entityManager->nextEntity + 1;
-        entityManager->nextEntity = MIN(entityManager->nextEntity, MAX_ENTITIES);
+        entityManager->nextFreshEntityIndex = entityManager->nextFreshEntityIndex + 1;
+        entityManager->nextFreshEntityIndex = MIN(entityManager->nextFreshEntityIndex, MAX_ENTITIES);
 
-        if (entityManager->nextEntity == MAX_ENTITIES)
+        if (entityManager->nextFreshEntityIndex == MAX_ENTITIES)
         {
             TraceLog(LOG_WARNING, "Maximum amount of entities reached.");
         }
@@ -92,27 +48,28 @@ usize SceneAllocateEntity(Scene* self)
         return next;
     }
 
-    return EntityManagerPopFree(self);
+    return UsizeDequePopFront(&entityManager->freeUsedEntityIndices);
 }
 
 void SceneDeallocateEntity(Scene* self, const usize entity)
 {
     self->components.tags[entity] = 0;
-    EntityManagerPushFree(self, entity);
+    UsizeDequePushFront(&self->entityManager.freeUsedEntityIndices, entity);
 }
 
 void SceneRaiseEvent(Scene* self, const Event* event)
 {
-    if (self->eventManager.nextFreeSlot == 0)
+    if (UsizeDequeSize(&self->eventManager.freeUsedEventIndices) == 0)
     {
-        usize next = MIN(self->eventManager.nextEvent, MAX_EVENTS - 1);
+        // No used indices, use next available fresh one.
+        usize next = MIN(self->eventManager.nextFreshEventIndex, MAX_EVENTS - 1);
 
-        self->eventManager.nextEvent = self->eventManager.nextEvent + 1;
-        self->eventManager.nextEvent = MIN(self->eventManager.nextEvent, MAX_EVENTS);
+        self->eventManager.nextFreshEventIndex = self->eventManager.nextFreshEventIndex + 1;
+        self->eventManager.nextFreshEventIndex = MIN(self->eventManager.nextFreshEventIndex, MAX_EVENTS);
 
         memcpy(&self->eventManager.events[next], event, sizeof(Event));
 
-        if (self->eventManager.nextEvent == MAX_EVENTS)
+        if (self->eventManager.nextFreshEventIndex == MAX_EVENTS)
         {
             TraceLog(LOG_WARNING, "Maximum amount of events reached.");
         }
@@ -120,24 +77,24 @@ void SceneRaiseEvent(Scene* self, const Event* event)
         return;
     }
 
-    usize next = EventManagerPopFree(self);
+    usize next = UsizeDequePopFront(&self->eventManager.freeUsedEventIndices);
     memcpy(&self->eventManager.events[next], event, sizeof(Event));
 }
 
 void SceneConsumeEvent(Scene* self, const usize eventIndex)
 {
     self->eventManager.events[eventIndex].tag = EVENT_NONE;
-    EventManagerPushFree(self, eventIndex);
+    UsizeDequePushFront(&self->eventManager.freeUsedEventIndices, eventIndex);
 }
 
 usize SceneGetEntityCount(const Scene* self)
 {
-    return self->entityManager.nextEntity;
+    return self->entityManager.nextFreshEntityIndex;
 }
 
 usize SceneGetEventCount(const Scene* self)
 {
-    return self->eventManager.nextEvent;
+    return self->eventManager.nextFreshEventIndex;
 }
 
 static void SceneSetupContent(Scene* self)
@@ -350,14 +307,14 @@ static void SceneStart(Scene* self)
 
     // Initialize EntityManager.
     {
-        self->entityManager.nextEntity = 0;
-        self->entityManager.nextFreeSlot = 0;
+        self->entityManager.nextFreshEntityIndex = 0;
+        self->entityManager.freeUsedEntityIndices = UsizeDequeCreate(MAX_ENTITIES);
     }
 
     // Initialize EventManager.
     {
-        self->eventManager.nextEvent = 0;
-        self->eventManager.nextFreeSlot = 0;
+        self->eventManager.nextFreshEventIndex = 0;
+        self->eventManager.freeUsedEventIndices = UsizeDequeCreate(MAX_EVENTS);
 
         for (usize i = 0; i < MAX_EVENTS; ++i)
         {
@@ -719,6 +676,9 @@ void SceneDestroy(Scene* self)
     {
         LevelSegmentDestroy(&self->segments[i]);
     }
+
+    UsizeDequeDestroy(&self->entityManager.freeUsedEntityIndices);
+    UsizeDequeDestroy(&self->eventManager.freeUsedEventIndices);
 
     UnloadRenderTexture(self->backgroundLayer);
     UnloadRenderTexture(self->targetLayer);

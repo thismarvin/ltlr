@@ -5,6 +5,7 @@
 #include "events.h"
 #include "input.h"
 #include "level_segment.h"
+#include "usize_deque.h"
 
 #define MAX_ENTITIES 1024
 
@@ -26,17 +27,21 @@ typedef struct
 
 typedef struct
 {
-    usize nextEntity;
-    usize nextFreeSlot;
-    usize freeSlots[MAX_ENTITIES];
+    // The next available index in the Components struct that has not been used before.
+    usize nextFreshEntityIndex;
+    // A stack of indices in the Components struct that are not allocated and were previously
+    // deallocated (an entity once resided in these indices).
+    UsizeDeque freeUsedEntityIndices;
 } EntityManager;
 
 typedef struct
 {
     Event events[MAX_EVENTS];
-    usize nextEvent;
-    usize nextFreeSlot;
-    usize freeSlots[MAX_ENTITIES];
+    // The next available index in the events array that has not been used before.
+    usize nextFreshEventIndex;
+    // A stack of indices in the events array that are not allocated and were previously indices of
+    // a consumed event.
+    UsizeDeque freeUsedEventIndices;
 } EventManager;
 
 typedef struct
