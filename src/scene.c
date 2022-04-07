@@ -51,10 +51,20 @@ usize SceneAllocateEntity(Scene* self)
     return UsizeDequePopFront(&entityManager->freeUsedEntityIndices);
 }
 
-void SceneDeallocateEntity(Scene* self, const usize entity)
+void SceneDeferDeallocateEntity(Scene* self, const usize entity)
 {
-    self->components.tags[entity] = 0;
-    UsizeDequePushFront(&self->entityManager.freeUsedEntityIndices, entity);
+    UsizeDequePushFront(&self->entityManager.deferredDeallocations, entity);
+}
+
+void SceneFlushEntities(Scene* self)
+{
+    while (UsizeDequeSize(&self->entityManager.deferredDeallocations) > 0)
+    {
+        usize entity = UsizeDequePopFront(&self->entityManager.deferredDeallocations);
+
+        self->components.tags[entity] = 0;
+        UsizeDequePushFront(&self->entityManager.freeUsedEntityIndices, entity);
+    }
 }
 
 void SceneRaiseEvent(Scene* self, const Event* event)
@@ -308,6 +318,7 @@ static void SceneStart(Scene* self)
     // Initialize EntityManager.
     {
         self->entityManager.nextFreshEntityIndex = 0;
+        self->entityManager.deferredDeallocations = UsizeDequeCreate(MAX_ENTITIES);
         self->entityManager.freeUsedEntityIndices = UsizeDequeCreate(MAX_ENTITIES);
     }
 
@@ -388,6 +399,8 @@ void SceneUpdate(Scene* self)
 
         SGenericCollisionUpdate(self, i);
     }
+
+    SceneFlushEntities(self);
 }
 
 // Return a Rectangle that is within the scene's bounds and centered on a given entity.
@@ -665,6 +678,10 @@ void SceneDraw(const Scene* self)
 
 void SceneReset(Scene* self)
 {
+    UsizeDequeDestroy(&self->entityManager.freeUsedEntityIndices);
+    UsizeDequeDestroy(&self->entityManager.deferredDeallocations);
+    UsizeDequeDestroy(&self->eventManager.freeUsedEventIndices);
+
     SceneStart(self);
 }
 
@@ -678,6 +695,7 @@ void SceneDestroy(Scene* self)
     }
 
     UsizeDequeDestroy(&self->entityManager.freeUsedEntityIndices);
+    UsizeDequeDestroy(&self->entityManager.deferredDeallocations);
     UsizeDequeDestroy(&self->eventManager.freeUsedEventIndices);
 
     UnloadRenderTexture(self->backgroundLayer);

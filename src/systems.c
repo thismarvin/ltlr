@@ -726,7 +726,7 @@ void SFleetingUpdate(Scene* scene, const usize entity)
 
     if (fleeting->age > fleeting->lifetime)
     {
-        SceneDeallocateEntity(scene, entity);
+        SceneDeferDeallocateEntity(scene, entity);
     }
 }
 
@@ -836,7 +836,7 @@ void SCloudParticleCollisionUpdate(Scene* scene, const usize entity)
         // If the aabb is completely within another collider then remove it.
         if (overlap.width >= aabb.width && overlap.height >= aabb.height)
         {
-            SceneDeallocateEntity(scene, entity);
+            SceneDeferDeallocateEntity(scene, entity);
 
             return;
         }

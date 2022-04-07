@@ -27,6 +27,7 @@ typedef struct
 
 typedef struct
 {
+    UsizeDeque deferredDeallocations;
     // The next available index in the Components struct that has not been used before.
     usize nextFreshEntityIndex;
     // A stack of indices in the Components struct that are not allocated and were previously
@@ -70,7 +71,8 @@ Components* SceneGetComponents(const Scene* self);
 void SceneEnableComponent(Scene* self, const usize entity, const usize tag);
 void SceneDisableComponent(Scene* self, const usize entity, const usize tag);
 usize SceneAllocateEntity(Scene* self);
-void SceneDeallocateEntity(Scene* self, const usize entity);
+void SceneDeferDeallocateEntity(Scene* self, const usize entity);
+void SceneFlushEntities(Scene* self);
 usize SceneGetEntityCount(const Scene* self);
 usize SceneGetEventCount(const Scene* self);
 void SceneRaiseEvent(Scene* self, const Event* event);
