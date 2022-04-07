@@ -16,7 +16,7 @@ typedef struct
     bool _fullCapacity;
 } UsizeDeque;
 
-UsizeDeque UsizeDequeCreate(const usize initalCapacity);
+UsizeDeque UsizeDequeCreate(const usize initialCapacity);
 void UsizeDequePushFront(UsizeDeque* self, const usize value);
 void UsizeDequePushBack(UsizeDeque* self, const usize value);
 usize UsizeDequePopFront(UsizeDeque* self);

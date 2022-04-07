@@ -26,16 +26,16 @@ static void Resize(UsizeDeque* self)
     free(oldData);
 }
 
-UsizeDeque UsizeDequeCreate(const usize initalCapacity)
+UsizeDeque UsizeDequeCreate(const usize initialCapacity)
 {
-    usize* data = (usize*)malloc(sizeof(usize) * initalCapacity);
+    usize* data = (usize*)malloc(sizeof(usize) * initialCapacity);
 
     return (UsizeDeque)
     {
         ._data = data,
-        ._capacity = initalCapacity,
+        ._capacity = initialCapacity,
         ._headIndex = 0,
-        ._tailIndex = initalCapacity - 1,
+        ._tailIndex = initialCapacity - 1,
         ._fullCapacity = false,
     };
 }
