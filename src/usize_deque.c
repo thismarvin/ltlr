@@ -1,14 +1,14 @@
 #include "assert.h"
 #include "usize_deque.h"
 
-#define RESIZE_FACTOR 2
+#define USIZE_DEQUE_RESIZE_FACTOR 2
 
 static void Resize(UsizeDeque* self)
 {
     const usize oldCapacity = self->_capacity;
     usize* oldData = self->_data;
 
-    const usize newCapacity = (usize)(self->_capacity * RESIZE_FACTOR);
+    const usize newCapacity = (usize)(self->_capacity * USIZE_DEQUE_RESIZE_FACTOR);
     usize* newData = (usize*)malloc(sizeof(usize) * newCapacity);
 
     self->_data = newData;
@@ -20,7 +20,7 @@ static void Resize(UsizeDeque* self)
     for (usize i = 0; i < oldCapacity; ++i)
     {
         newData[self->_headIndex] = oldData[i];
-        self->_headIndex = (self->_headIndex + 1) % self->_capacity;
+        self->_headIndex += 1;
     }
 
     free(oldData);
