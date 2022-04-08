@@ -70,15 +70,15 @@ void SCollisionUpdate(Scene* scene, const usize entity)
     REQUIRE_DEPS(tagPosition | tagDimension | tagCollider);
 
     const CPosition* position = GET_COMPONENT(position, entity);
-    const CDimension* dimensions = GET_COMPONENT(dimensions, entity);
+    const CDimension* dimension = GET_COMPONENT(dimension, entity);
     const CCollider* collider = GET_COMPONENT(collider, entity);
 
     Rectangle aabb = (Rectangle)
     {
         .x = position->value.x,
         .y = position->value.y,
-        .width = dimensions->width,
-        .height = dimensions->height
+        .width = dimension->width,
+        .height = dimension->height
     };
 
     for (usize i = 0; i < SceneGetEntityCount(scene); ++i)
@@ -869,7 +869,7 @@ void SCloudParticleSpawnUpdate(Scene* scene, const usize entity)
     REQUIRE_DEPS(tagPosition | tagDimension | tagKinetic);
 
     const CPosition* position = GET_COMPONENT(position, entity);
-    const CDimension* dimensions = GET_COMPONENT(dimensions, entity);
+    const CDimension* dimension = GET_COMPONENT(dimension, entity);
     const CKinetic* kinetic = GET_COMPONENT(kinetic, entity);
 
     for (usize i = 0; i < SceneGetEventCount(scene); ++i)
@@ -886,15 +886,15 @@ void SCloudParticleSpawnUpdate(Scene* scene, const usize entity)
         const EventCloudParticleInner* cloudInner = &event->cloudParticleInner;
 
         // Set offset anchor point to left, middle, or right depending on movement direction.
-        f32 anchor = kinetic->velocity.x == 0 ? dimensions->width * 0.5f :
-                     kinetic->velocity.x > 0 ? 0 : dimensions->width;
+        f32 anchor = kinetic->velocity.x == 0 ? dimension->width * 0.5f :
+                     kinetic->velocity.x > 0 ? 0 : dimension->width;
 
         i32 spreadFactor = 14;
 
         for (usize j = 0; j < cloudInner->spawnCount; ++j)
         {
             f32 xOffset = (f32)GetRandomValue(-spreadFactor, spreadFactor);
-            Vector2 offset = Vector2Create(anchor + xOffset, dimensions->height);
+            Vector2 offset = Vector2Create(anchor + xOffset, dimension->height);
             Vector2 startingPosition = Vector2Add(position->value, offset);
 
             Vector2 direction = Vector2Normalize(Vector2Negate(kinetic->velocity));
@@ -959,14 +959,14 @@ void SDebugDraw(const Scene* scene, const usize entity)
     REQUIRE_DEPS(tagPosition | tagDimension);
 
     const CPosition* position = GET_COMPONENT(position, entity);
-    const CDimension* dimensions = GET_COMPONENT(dimensions, entity);
+    const CDimension* dimension = GET_COMPONENT(dimension, entity);
 
     Rectangle bounds = (Rectangle)
     {
         .x = position->value.x,
         .y = position->value.y,
-        .width = dimensions->width,
-        .height = dimensions->height
+        .width = dimension->width,
+        .height = dimension->height
     };
 
     DrawRectangleLinesEx(bounds, 4, RED);
