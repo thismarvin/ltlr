@@ -146,7 +146,7 @@ void* DequeGetUnchecked(const Deque* self, const usize index)
     return Get(self, (self->m_tailIndex + 1 + index) % self->m_capacity);
 }
 
-void DequeSetUnchecked(Deque* self, const usize index, void* value)
+void DequeSetUnchecked(Deque* self, const usize index, const void* value)
 {
     Set(self, (self->m_tailIndex + 1 + index) % self->m_capacity, value);
 }

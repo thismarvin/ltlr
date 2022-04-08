@@ -21,9 +21,9 @@ typedef double f64;
 
 #define VECTOR2_ZERO (Vector2) { .x = 0, .y = 0 }
 
-Vector2 Vector2Create(const f32 x, const f32 y);
+Vector2 Vector2Create(f32 x, f32 y);
 
-f32 RectangleLeft(const Rectangle rectangle);
-f32 RectangleRight(const Rectangle rectangle);
-f32 RectangleBottom(const Rectangle rectangle);
-f32 RectangleTop(const Rectangle rectangle);
+f32 RectangleLeft(Rectangle rectangle);
+f32 RectangleRight(Rectangle rectangle);
+f32 RectangleBottom(Rectangle rectangle);
+f32 RectangleTop(Rectangle rectangle);

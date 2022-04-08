@@ -11,5 +11,5 @@ typedef struct
     usize edgesLength;
 } Polygon;
 
-Polygon PolygonCreate(const usize totalVertices);
+Polygon PolygonCreate(usize totalVertices);
 void PolygonDestroy(Polygon* self);

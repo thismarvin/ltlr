@@ -18,15 +18,15 @@ typedef struct
     bool m_needsResize;
 } Deque;
 
-Deque DequeCreate(const usize initialCapacity, const usize dataSize);
+Deque DequeCreate(usize initialCapacity, usize dataSize);
 void DequePushFront(Deque* self, const void* value);
 void DequePushBack(Deque* self, const void* value);
 void* DequePopFront(Deque* self);
 void* DequePopBack(Deque* self);
 void* DequePeekFront(const Deque* self);
 void* DequePeekBack(const Deque* self);
-void* DequeGetUnchecked(const Deque* self, const usize index);
-void DequeSetUnchecked(Deque* self, const usize index, void* value);
+void* DequeGetUnchecked(const Deque* self, usize index);
+void DequeSetUnchecked(Deque* self, usize index, const void* value);
 usize DequeGetSize(const Deque* self);
 void DequeClear(Deque* self);
 void DequeDestroy(Deque* self);

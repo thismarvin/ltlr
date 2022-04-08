@@ -13,6 +13,6 @@
 
 // f32 ContextGetDeltaTime();
 f64 ContextGetTotalTime();
-void ContextSetTotalTime(const f64 value);
+void ContextSetTotalTime(f64 value);
 f32 ContextGetAlpha();
-void ContextSetAlpha(const f32 value);
+void ContextSetAlpha(f32 value);
