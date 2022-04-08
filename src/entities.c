@@ -9,8 +9,17 @@ usize ECreatePlayer(Scene* scene, const f32 x, const f32 y)
 
     Vector2 position = Vector2Create(x, y);
 
-    scene->components.tags[entity] = tagPosition | tagDimension | tagColor | tagSprite |
-                                     tagKinetic | tagSmooth | tagCollider | tagPlayer | tagMortal;
+    scene->components.tags[entity] =
+        tagNone
+        | tagPosition
+        | tagDimension
+        | tagColor
+        | tagSprite
+        | tagKinetic
+        | tagSmooth
+        | tagCollider
+        | tagPlayer
+        | tagMortal;
 
     scene->components.positions[entity].value = position;
     scene->components.mortals[entity].hp = 2;
@@ -82,7 +91,11 @@ usize ECreateBlock(Scene* scene, const f32 x, const f32 y, const f32 width, cons
 
     Vector2 position = Vector2Create(x, y);
 
-    scene->components.tags[entity] = tagPosition | tagDimension | tagCollider;
+    scene->components.tags[entity] =
+        tagNone
+        | tagPosition
+        | tagDimension
+        | tagCollider;
 
     scene->components.positions[entity].value = position;
     scene->components.dimensions[entity] = (CDimension)
@@ -105,8 +118,17 @@ usize ECreateWalker(Scene* scene, const f32 x, const f32 y)
 
     Vector2 position = Vector2Create(x, y);
 
-    scene->components.tags[entity] = tagPosition | tagDimension | tagColor | tagSprite |
-                                     tagKinetic | tagSmooth | tagCollider | tagWalker | tagDamage;
+    scene->components.tags[entity] =
+        tagNone
+        | tagPosition
+        | tagDimension
+        | tagColor
+        | tagSprite
+        | tagKinetic
+        | tagSmooth
+        | tagCollider
+        | tagWalker
+        | tagDamage;
 
     scene->components.damages[entity].value = 1;
     scene->components.positions[entity].value = position;
@@ -155,8 +177,15 @@ usize ECreateCloudParticle
 {
     usize entity = SceneAllocateEntity(scene);
 
-    scene->components.tags[entity] = tagPosition | tagDimension | tagColor | tagKinetic | tagSmooth
-                                     | tagCollider | tagFleeting;
+    scene->components.tags[entity] =
+        tagNone
+        | tagPosition
+        | tagDimension
+        | tagColor
+        | tagKinetic
+        | tagSmooth
+        | tagCollider
+        | tagFleeting;
 
     f32 radius;
 
