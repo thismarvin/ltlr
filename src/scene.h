@@ -81,27 +81,3 @@ void SceneUpdate(Scene* self);
 void SceneDraw(const Scene* self);
 void SceneReset(Scene* self);
 void SceneDestroy(Scene* self);
-
-#define GET_COMPONENT(mValue, mEntity) _Generic((mValue), \
-    const CPosition*: &SceneGetComponents(scene)->positions[mEntity], \
-    CPosition*: &SceneGetComponents(scene)->positions[mEntity], \
-    const CDimension*: &SceneGetComponents(scene)->dimensions[mEntity], \
-    CDimension*: &SceneGetComponents(scene)->dimensions[mEntity], \
-    const CColor*: &SceneGetComponents(scene)->colors[mEntity], \
-    CColor*: &SceneGetComponents(scene)->colors[mEntity], \
-    const CSprite*: &SceneGetComponents(scene)->sprites[mEntity], \
-    CSprite*: &SceneGetComponents(scene)->sprites[mEntity], \
-    const CKinetic*: &SceneGetComponents(scene)->kinetics[mEntity], \
-    CKinetic*: &SceneGetComponents(scene)->kinetics[mEntity], \
-    const CSmooth*: &SceneGetComponents(scene)->smooths[mEntity], \
-    CSmooth*: &SceneGetComponents(scene)->smooths[mEntity], \
-    const CCollider*: &SceneGetComponents(scene)->colliders[mEntity], \
-    CCollider*: &SceneGetComponents(scene)->colliders[mEntity], \
-    const CPlayer*: &SceneGetComponents(scene)->players[mEntity], \
-    CPlayer*: &SceneGetComponents(scene)->players[mEntity], \
-    const CMortal*: &SceneGetComponents(scene)->mortals[mEntity], \
-    CMortal*: &SceneGetComponents(scene)->mortals[mEntity], \
-    const CDamage*: &SceneGetComponents(scene)->damages[mEntity], \
-    CDamage*: &SceneGetComponents(scene)->damages[mEntity], \
-    const CFleeting*: &SceneGetComponents(scene)->fleetings[mEntity], \
-    CFleeting*: &SceneGetComponents(scene)->fleetings[mEntity])
