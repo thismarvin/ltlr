@@ -32,9 +32,9 @@ usize SceneAllocateEntity(Scene* self)
 {
     EntityManager* entityManager = &self->entityManager;
 
-    if (UsizeDequeGetSize(&entityManager->recycledEntityIndices) != 0)
+    if (DequeGetSize(&entityManager->recycledEntityIndices) != 0)
     {
-        return UsizeDequePopFront(&entityManager->recycledEntityIndices);
+        return *(usize*) DequePopFront(&entityManager->recycledEntityIndices);
     }
 
     // No used indices, use next available fresh one.
@@ -53,25 +53,25 @@ usize SceneAllocateEntity(Scene* self)
 
 void SceneDeferDeallocateEntity(Scene* self, const usize entity)
 {
-    UsizeDequePushFront(&self->entityManager.deferredDeallocations, entity);
+    DequePushFront(&self->entityManager.deferredDeallocations, &entity);
 }
 
 void SceneFlushEntities(Scene* self)
 {
-    while (UsizeDequeGetSize(&self->entityManager.deferredDeallocations) > 0)
+    while (DequeGetSize(&self->entityManager.deferredDeallocations) > 0)
     {
-        usize entity = UsizeDequePopFront(&self->entityManager.deferredDeallocations);
+        usize entity = *(usize*) DequePopFront(&self->entityManager.deferredDeallocations);
 
         self->components.tags[entity] = 0;
-        UsizeDequePushFront(&self->entityManager.recycledEntityIndices, entity);
+        DequePushFront(&self->entityManager.recycledEntityIndices, &entity);
     }
 }
 
 void SceneRaiseEvent(Scene* self, const Event* event)
 {
-    if (UsizeDequeGetSize(&self->eventManager.recycledEventIndices) != 0)
+    if (DequeGetSize(&self->eventManager.recycledEventIndices) != 0)
     {
-        usize next = UsizeDequePopFront(&self->eventManager.recycledEventIndices);
+        usize next = *(usize*) DequePopFront(&self->eventManager.recycledEventIndices);
         memcpy(&self->eventManager.events[next], event, sizeof(Event));
 
         return;
@@ -94,7 +94,7 @@ void SceneRaiseEvent(Scene* self, const Event* event)
 void SceneConsumeEvent(Scene* self, const usize eventIndex)
 {
     self->eventManager.events[eventIndex].tag = EVENT_NONE;
-    UsizeDequePushFront(&self->eventManager.recycledEventIndices, eventIndex);
+    DequePushFront(&self->eventManager.recycledEventIndices, &eventIndex);
 }
 
 usize SceneGetEntityCount(const Scene* self)
@@ -318,14 +318,14 @@ static void SceneStart(Scene* self)
     // Initialize EntityManager.
     {
         self->entityManager.nextFreshEntityIndex = 0;
-        self->entityManager.deferredDeallocations = UsizeDequeCreate(MAX_ENTITIES);
-        self->entityManager.recycledEntityIndices = UsizeDequeCreate(MAX_ENTITIES);
+        self->entityManager.deferredDeallocations = DequeCreate(MAX_ENTITIES, sizeof(usize));
+        self->entityManager.recycledEntityIndices = DequeCreate(MAX_ENTITIES, sizeof(usize));
     }
 
     // Initialize EventManager.
     {
         self->eventManager.nextFreshEventIndex = 0;
-        self->eventManager.recycledEventIndices = UsizeDequeCreate(MAX_EVENTS);
+        self->eventManager.recycledEventIndices = DequeCreate(MAX_EVENTS, sizeof(usize));
 
         for (usize i = 0; i < MAX_EVENTS; ++i)
         {
@@ -678,9 +678,9 @@ void SceneDraw(const Scene* self)
 
 void SceneReset(Scene* self)
 {
-    UsizeDequeDestroy(&self->entityManager.recycledEntityIndices);
-    UsizeDequeDestroy(&self->entityManager.deferredDeallocations);
-    UsizeDequeDestroy(&self->eventManager.recycledEventIndices);
+    DequeDestroy(&self->entityManager.recycledEntityIndices);
+    DequeDestroy(&self->entityManager.deferredDeallocations);
+    DequeDestroy(&self->eventManager.recycledEventIndices);
 
     SceneStart(self);
 }
@@ -694,9 +694,9 @@ void SceneDestroy(Scene* self)
         LevelSegmentDestroy(&self->segments[i]);
     }
 
-    UsizeDequeDestroy(&self->entityManager.recycledEntityIndices);
-    UsizeDequeDestroy(&self->entityManager.deferredDeallocations);
-    UsizeDequeDestroy(&self->eventManager.recycledEventIndices);
+    DequeDestroy(&self->entityManager.recycledEntityIndices);
+    DequeDestroy(&self->entityManager.deferredDeallocations);
+    DequeDestroy(&self->eventManager.recycledEventIndices);
 
     UnloadRenderTexture(self->backgroundLayer);
     UnloadRenderTexture(self->targetLayer);

@@ -5,7 +5,7 @@
 #include "events.h"
 #include "input.h"
 #include "level_segment.h"
-#include "usize_deque.h"
+#include "deque.h"
 
 #define MAX_ENTITIES 1024
 
@@ -27,12 +27,12 @@ typedef struct
 
 typedef struct
 {
-    UsizeDeque deferredDeallocations;
+    Deque deferredDeallocations;
     // The next available index in the Components struct that has not been used before.
     usize nextFreshEntityIndex;
     // A stack of indices in the Components struct that are not currently allocated but were
     // previously deallocated (an entity once resided in these indices).
-    UsizeDeque recycledEntityIndices;
+    Deque recycledEntityIndices;
 } EntityManager;
 
 typedef struct
@@ -42,7 +42,7 @@ typedef struct
     usize nextFreshEventIndex;
     // A stack of indices in the events array that are not currently raised but were once indices
     // of a consumed event.
-    UsizeDeque recycledEventIndices;
+    Deque recycledEventIndices;
 } EventManager;
 
 typedef struct
