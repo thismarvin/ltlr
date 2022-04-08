@@ -9,13 +9,13 @@ static void Resize(UsizeDeque* self)
     usize* oldData = self->_data;
 
     const usize newCapacity = (usize)(self->_capacity * USIZE_DEQUE_RESIZE_FACTOR);
-    usize* newData = (usize*)malloc(sizeof(usize) * newCapacity);
+    usize* newData = malloc(sizeof(usize) * newCapacity);
 
     self->_data = newData;
     self->_capacity = newCapacity;
     self->_headIndex = 0;
     self->_tailIndex = newCapacity - 1;
-    self->_fullCapacity = false;
+    self->_needsResize = false;
 
     for (usize i = 0; i < oldCapacity; ++i)
     {
@@ -28,7 +28,7 @@ static void Resize(UsizeDeque* self)
 
 UsizeDeque UsizeDequeCreate(const usize initialCapacity)
 {
-    usize* data = (usize*)malloc(sizeof(usize) * initialCapacity);
+    usize* data = malloc(sizeof(usize) * initialCapacity);
 
     return (UsizeDeque)
     {
@@ -36,19 +36,19 @@ UsizeDeque UsizeDequeCreate(const usize initialCapacity)
         ._capacity = initialCapacity,
         ._headIndex = 0,
         ._tailIndex = initialCapacity - 1,
-        ._fullCapacity = false,
+        ._needsResize = false,
     };
 }
 
 void UsizeDequePushFront(UsizeDeque* self, const usize value)
 {
-    if (self->_fullCapacity)
+    if (self->_needsResize)
     {
         Resize(self);
     }
-    else if (UsizeDequeSize(self) == self->_capacity - 1)
+    else if (UsizeDequeGetSize(self) == self->_capacity - 1)
     {
-        self->_fullCapacity = true;
+        self->_needsResize = true;
     }
 
     self->_data[self->_headIndex] = value;
@@ -57,13 +57,13 @@ void UsizeDequePushFront(UsizeDeque* self, const usize value)
 
 void UsizeDequePushBack(UsizeDeque* self, const usize value)
 {
-    if (self->_fullCapacity)
+    if (self->_needsResize)
     {
         Resize(self);
     }
-    else if (UsizeDequeSize(self) == self->_capacity - 1)
+    else if (UsizeDequeGetSize(self) == self->_capacity - 1)
     {
-        self->_fullCapacity = true;
+        self->_needsResize = true;
     }
 
     self->_data[self->_tailIndex] = value;
@@ -80,7 +80,7 @@ void UsizeDequePushBack(UsizeDeque* self, const usize value)
 
 usize UsizeDequePopFront(UsizeDeque* self)
 {
-    assert(UsizeDequeSize(self) > 0);
+    assert(UsizeDequeGetSize(self) > 0);
 
     const usize result = UsizeDequePeekFront(self);
 
@@ -98,7 +98,7 @@ usize UsizeDequePopFront(UsizeDeque* self)
 
 usize UsizeDequePopBack(UsizeDeque* self)
 {
-    assert(UsizeDequeSize(self) > 0);
+    assert(UsizeDequeGetSize(self) > 0);
 
     const usize result = UsizeDequePeekBack(self);
     self->_tailIndex = (self->_tailIndex + 1) % self->_capacity;
@@ -107,7 +107,7 @@ usize UsizeDequePopBack(UsizeDeque* self)
 
 usize UsizeDequePeekFront(const UsizeDeque* self)
 {
-    assert(UsizeDequeSize(self) > 0);
+    assert(UsizeDequeGetSize(self) > 0);
 
     if (self->_headIndex == 0)
     {
@@ -119,14 +119,14 @@ usize UsizeDequePeekFront(const UsizeDeque* self)
 
 usize UsizeDequePeekBack(const UsizeDeque* self)
 {
-    assert(UsizeDequeSize(self) > 0);
+    assert(UsizeDequeGetSize(self) > 0);
 
     return self->_data[(self->_tailIndex + 1) % self->_capacity];
 }
 
-usize UsizeDequeSize(const UsizeDeque* self)
+usize UsizeDequeGetSize(const UsizeDeque* self)
 {
-    if (self->_fullCapacity)
+    if (self->_needsResize)
     {
         return self->_capacity;
     }

@@ -30,9 +30,9 @@ typedef struct
     UsizeDeque deferredDeallocations;
     // The next available index in the Components struct that has not been used before.
     usize nextFreshEntityIndex;
-    // A stack of indices in the Components struct that are not allocated and were previously
-    // deallocated (an entity once resided in these indices).
-    UsizeDeque freeUsedEntityIndices;
+    // A stack of indices in the Components struct that are not currently allocated but were
+    // previously deallocated (an entity once resided in these indices).
+    UsizeDeque recycledEntityIndices;
 } EntityManager;
 
 typedef struct
@@ -40,9 +40,9 @@ typedef struct
     Event events[MAX_EVENTS];
     // The next available index in the events array that has not been used before.
     usize nextFreshEventIndex;
-    // A stack of indices in the events array that are not allocated and were previously indices of
-    // a consumed event.
-    UsizeDeque freeUsedEventIndices;
+    // A stack of indices in the events array that are not currently raised but were once indices
+    // of a consumed event.
+    UsizeDeque recycledEventIndices;
 } EventManager;
 
 typedef struct

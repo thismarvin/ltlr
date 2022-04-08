@@ -4,16 +4,16 @@
 
 typedef struct
 {
-    // Pointer to internal data (which is a circular buffer).
+    // A pointer to the Deque's internal data (which acts as a circular buffer).
     usize* _data;
-    // Maximum elements that the deque can hold.
+    // The maximum number of elements that the deque can hold.
     usize _capacity;
-    // Next index to insert into the front of the deque.
+    // The next index to insert into the front of the deque.
     usize _headIndex;
-    // Next index to insert into the back of the deque.
+    // The next index to insert into the back of the deque.
     usize _tailIndex;
-    // True if the deque is full.
-    bool _fullCapacity;
+    // True if the Deque's internal array is full.
+    bool _needsResize;
 } UsizeDeque;
 
 UsizeDeque UsizeDequeCreate(const usize initialCapacity);
@@ -23,5 +23,5 @@ usize UsizeDequePopFront(UsizeDeque* self);
 usize UsizeDequePopBack(UsizeDeque* self);
 usize UsizeDequePeekFront(const UsizeDeque* self);
 usize UsizeDequePeekBack(const UsizeDeque* self);
-usize UsizeDequeSize(const UsizeDeque* self);
+usize UsizeDequeGetSize(const UsizeDeque* self);
 void UsizeDequeDestroy(UsizeDeque* self);
