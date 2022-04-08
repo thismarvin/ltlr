@@ -114,7 +114,7 @@ void SCollisionUpdate(Scene* scene, const usize entity)
     }
 }
 
-static Vector2 ExtractResolution(Vector2 resolution, u64 layers)
+static Vector2 ExtractResolution(const Vector2 resolution, const u64 layers)
 {
     Vector2 result = VECTOR2_ZERO;
 
@@ -228,26 +228,26 @@ static bool PlayerIsVulnerable(const CPlayer* player)
     return player->invulnerableTimer >= player->invulnerableDuration;
 }
 
-static CollisionResult PlayerOnCollision(Scene* scene, CollisionParams params)
+static CollisionResult PlayerOnCollision(Scene* scene, const CollisionParams* params)
 {
-    assert(ENTITY_HAS_DEPS(params.entity, tagPlayer | tagPosition | tagKinetic));
-    assert(ENTITY_HAS_DEPS(params.otherEntity, tagCollider));
+    assert(ENTITY_HAS_DEPS(params->entity, tagPlayer | tagPosition | tagKinetic));
+    assert(ENTITY_HAS_DEPS(params->otherEntity, tagCollider));
 
-    CPlayer* player = GET_COMPONENT(player, params.entity);
-    CPosition* position = GET_COMPONENT(position, params.entity);
-    CKinetic* kinetic = GET_COMPONENT(kinetic, params.entity);
+    CPlayer* player = GET_COMPONENT(player, params->entity);
+    CPosition* position = GET_COMPONENT(position, params->entity);
+    CKinetic* kinetic = GET_COMPONENT(kinetic, params->entity);
 
-    const CCollider* otherCollider = GET_COMPONENT(otherCollider, params.otherEntity);
+    const CCollider* otherCollider = GET_COMPONENT(otherCollider, params->otherEntity);
 
     // Collision specific logic that will not resolve the player.
     {
-        if (ENTITY_HAS_DEPS(params.entity, tagMortal) &&
-                ENTITY_HAS_DEPS(params.otherEntity, tagWalker | tagDamage))
+        if (ENTITY_HAS_DEPS(params->entity, tagMortal)
+                && ENTITY_HAS_DEPS(params->otherEntity, tagWalker | tagDamage))
         {
             if (PlayerIsVulnerable(player))
             {
                 Event event;
-                EventDamageInit(&event, params.entity, params.otherEntity);
+                EventDamageInit(&event, params->entity, params->otherEntity);
                 SceneRaiseEvent(scene, &event);
                 player->invulnerableTimer = 0;
             }
@@ -256,14 +256,14 @@ static CollisionResult PlayerOnCollision(Scene* scene, CollisionParams params)
         }
     }
 
-    Vector2 resolution = ExtractResolution(params.resolution, otherCollider->layer);
+    Vector2 resolution = ExtractResolution(params->resolution, otherCollider->layer);
 
     if (resolution.x == 0 && resolution.y == 0)
     {
         return COLLISION_RESULT_NONE;
     }
 
-    Rectangle overlap = GetCollisionRec(params.aabb, params.otherAabb);
+    Rectangle overlap = GetCollisionRec(params->aabb, params->otherAabb);
 
     // Make sure that the resolution is part of the axis with the least overlap.
     {
@@ -280,10 +280,18 @@ static CollisionResult PlayerOnCollision(Scene* scene, CollisionParams params)
 
     // Make sure that the resolution points in the direction of the minimum offset.
     {
-        f32 offsetLeft = (RectangleLeft(params.otherAabb) - params.aabb.width) - RectangleLeft(params.aabb);
-        f32 offsetRight = RectangleRight(params.otherAabb) - RectangleLeft(params.aabb);
-        f32 offsetDown = RectangleBottom(params.otherAabb) - RectangleTop(params.aabb);
-        f32 offsetUp = (RectangleTop(params.otherAabb) - params.aabb.height) - RectangleTop(params.aabb);
+        f32 left = RectangleLeft(params->aabb);
+        f32 top = RectangleTop(params->aabb);
+
+        f32 otherLeft = RectangleLeft(params->otherAabb);
+        f32 otherRight = RectangleRight(params->otherAabb);
+        f32 otherTop = RectangleTop(params->otherAabb);
+        f32 otherBottom = RectangleBottom(params->otherAabb);
+
+        f32 offsetLeft = (otherLeft - params->aabb.width) - left;
+        f32 offsetRight = otherRight - left;
+        f32 offsetDown = otherBottom - top;
+        f32 offsetUp = (otherTop - params->aabb.height) - top;
 
         if (resolution.x < 0 && fabsf(offsetLeft) > fabsf(offsetRight))
         {
@@ -311,13 +319,13 @@ static CollisionResult PlayerOnCollision(Scene* scene, CollisionParams params)
         // Check if the player hit its head on the bottom of a collider.
         if (resolution.y > 0 && fabsf(overlap.width) <= 4)
         {
-            if (params.aabb.x < params.otherAabb.x)
+            if (params->aabb.x < params->otherAabb.x)
             {
-                position->value.x = RectangleLeft(params.otherAabb) - params.aabb.width;
+                position->value.x = RectangleLeft(params->otherAabb) - params->aabb.width;
             }
             else
             {
-                position->value.x = RectangleRight(params.otherAabb);
+                position->value.x = RectangleRight(params->otherAabb);
             }
 
             return (CollisionResult)
@@ -335,33 +343,33 @@ static CollisionResult PlayerOnCollision(Scene* scene, CollisionParams params)
     {
         if (resolution.x < 0)
         {
-            position->value.x = RectangleLeft(params.otherAabb) - params.aabb.width;
+            position->value.x = RectangleLeft(params->otherAabb) - params->aabb.width;
         }
         else if (resolution.x > 0)
         {
-            position->value.x = RectangleRight(params.otherAabb);
+            position->value.x = RectangleRight(params->otherAabb);
         }
 
         if (resolution.y < 0)
         {
-            position->value.y = RectangleTop(params.otherAabb) - params.aabb.height;
+            position->value.y = RectangleTop(params->otherAabb) - params->aabb.height;
         }
         else if (resolution.y > 0)
         {
-            position->value.y = RectangleBottom(params.otherAabb);
+            position->value.y = RectangleBottom(params->otherAabb);
         }
     }
 
     // Resolution specific player logic.
     {
-        if ((resolution.x < 0 && kinetic->velocity.x > 0) || (resolution.x > 0
-                && kinetic->velocity.x < 0))
+        if ((resolution.x < 0 && kinetic->velocity.x > 0)
+                || (resolution.x > 0 && kinetic->velocity.x < 0))
         {
             kinetic->velocity.x = 0;
         }
 
-        if ((resolution.y < 0 && kinetic->velocity.y > 0) || (resolution.y > 0
-                && kinetic->velocity.y < 0))
+        if ((resolution.y < 0 && kinetic->velocity.y > 0)
+                || (resolution.y > 0 && kinetic->velocity.y < 0))
         {
             kinetic->velocity.y = 0;
         }
@@ -381,8 +389,13 @@ static CollisionResult PlayerOnCollision(Scene* scene, CollisionParams params)
 }
 
 // TODO(thismarvin): Is it possible to have an `OnCollision` callback as a parameter?
-static CollisionResult SimulateCollisionOnAxis(Scene* scene, const usize entity,
-        const Vector2 delta, const u8 step)
+static CollisionResult SimulateCollisionOnAxis
+(
+    Scene* scene,
+    const usize entity,
+    const Vector2 delta,
+    const u8 step
+)
 {
     // It is important that `delta` only consists of one axis, not both.
     assert(delta.x == 0 || delta.y == 0);
@@ -454,7 +467,7 @@ static CollisionResult SimulateCollisionOnAxis(Scene* scene, const usize entity,
                     .resolution = Vector2Create(-direction.x, -direction.y),
                 };
 
-                CollisionResult result = PlayerOnCollision(scene, params);
+                CollisionResult result = PlayerOnCollision(scene, &params);
 
                 xAxisResolved |= result.xAxisResolved;
                 yAxisResolved |= result.yAxisResolved;
