@@ -3,6 +3,8 @@
 #include "entities.h"
 #include "raymath.h"
 
+#define SET_COMPONENT(mEntity, mValue) SCENE_GET_COMPONENT(scene, mEntity, mValue) = mValue
+
 usize ECreatePlayer(Scene* scene, const f32 x, const f32 y)
 {
     usize entity = SceneAllocateEntity(scene);
@@ -21,52 +23,52 @@ usize ECreatePlayer(Scene* scene, const f32 x, const f32 y)
 
     Vector2 position = Vector2Create(x, y);
 
-    scene->components.positions[entity] = (CPosition)
+    SET_COMPONENT(entity, ((CPosition)
     {
-        .value = position
-    };
+        .value = position,
+    }));
 
-    scene->components.dimensions[entity] = (CDimension)
+    SET_COMPONENT(entity, ((CDimension)
     {
         .width = 15,
-        .height = 35
-    };
+        .height = 35,
+    }));
 
-    scene->components.colors[entity] = (CColor)
+    SET_COMPONENT(entity, ((CColor)
     {
         .value = (Color)
         {
             255, 255, 255, 255
         }
-    };
+    }));
 
-    scene->components.sprites[entity] = (CSprite)
+    SET_COMPONENT(entity, ((CSprite)
     {
         .source = (Rectangle) { 16, 0, 32, 48 },
         .offset = Vector2Create(-8, -13),
-    };
+    }));
 
-    scene->components.kinetics[entity] = (CKinetic)
+    SET_COMPONENT(entity, ((CKinetic)
     {
         .velocity = VECTOR2_ZERO,
-        .acceleration = Vector2Create(0, 1000)
-    };
+        .acceleration = Vector2Create(0, 1000),
+    }));
 
-    scene->components.smooths[entity] = (CSmooth)
+    SET_COMPONENT(entity, ((CSmooth)
     {
-        .previous = position
-    };
+        .previous = position,
+    }));
 
-    scene->components.colliders[entity] = (CCollider)
+    SET_COMPONENT(entity, ((CCollider)
     {
         .layer = layerNone,
         .mask = layerAll,
-    };
+    }));
 
-    scene->components.mortals[entity] = (CMortal)
+    SET_COMPONENT(entity, ((CMortal)
     {
-        .hp = 2
-    };
+        .hp = 2,
+    }));
 
     f32 jumpHeight = 16 * 3 + 6;
     f32 jumpDuration = 0.4;
@@ -79,7 +81,7 @@ usize ECreatePlayer(Scene* scene, const f32 x, const f32 y)
     f32 coyoteDuration = CTX_DT * 6;
     f32 invulnerableDuration = 1.5f;
 
-    scene->components.players[entity] = (CPlayer)
+    SET_COMPONENT(entity, ((CPlayer)
     {
         .coyoteTimer = coyoteDuration,
         .coyoteDuration = coyoteDuration,
@@ -91,7 +93,7 @@ usize ECreatePlayer(Scene* scene, const f32 x, const f32 y)
         .defaultGravity = defaultGravity,
         .invulnerableTimer = invulnerableDuration,
         .invulnerableDuration = invulnerableDuration,
-    };
+    }));
 
     return entity;
 }
@@ -108,22 +110,22 @@ usize ECreateBlock(Scene* scene, const f32 x, const f32 y, const f32 width, cons
 
     Vector2 position = Vector2Create(x, y);
 
-    scene->components.positions[entity] = (CPosition)
+    SET_COMPONENT(entity, ((CPosition)
     {
-        .value = position
-    };
+        .value = position,
+    }));
 
-    scene->components.dimensions[entity] = (CDimension)
+    SET_COMPONENT(entity, ((CDimension)
     {
         .width = width,
-        .height = height
-    };
+        .height = height,
+    }));
 
-    scene->components.colliders[entity] = (CCollider)
+    SET_COMPONENT(entity, ((CCollider)
     {
         .layer = layerAll,
         .mask = layerNone,
-    };
+    }));
 
     return entity;
 }
@@ -146,52 +148,52 @@ usize ECreateWalker(Scene* scene, const f32 x, const f32 y)
 
     Vector2 position = Vector2Create(x, y);
 
-    scene->components.positions[entity] = (CPosition)
+    SET_COMPONENT(entity, ((CPosition)
     {
         .value = position,
-    };
+    }));
 
-    scene->components.dimensions[entity] = (CDimension)
+    SET_COMPONENT(entity, ((CDimension)
     {
         .width = 16,
         .height = 16,
-    };
+    }));
 
-    scene->components.colors[entity] = (CColor)
+    SET_COMPONENT(entity, ((CColor)
     {
         .value = (Color)
         {
             255, 255, 255, 255
         },
-    };
+    }));
 
-    scene->components.sprites[entity] = (CSprite)
+    SET_COMPONENT(entity, ((CSprite)
     {
         .source = (Rectangle) { 3 * 16, 5 * 16, 16, 16 },
         .offset = VECTOR2_ZERO,
-    };
+    }));
 
-    scene->components.kinetics[entity] = (CKinetic)
+    SET_COMPONENT(entity, ((CKinetic)
     {
         .velocity = Vector2Create(50, 0),
         .acceleration = Vector2Create(0, 1000),
-    };
+    }));
 
-    scene->components.smooths[entity] = (CSmooth)
+    SET_COMPONENT(entity, ((CSmooth)
     {
         .previous = position,
-    };
+    }));
 
-    scene->components.colliders[entity] = (CCollider)
+    SET_COMPONENT(entity, ((CCollider)
     {
         .layer = layerAll,
         .mask = layerAll,
-    };
+    }));
 
-    scene->components.damages[entity] = (CDamage)
+    SET_COMPONENT(entity, ((CDamage)
     {
         .value = 1,
-    };
+    }));
 
     return entity;
 }
@@ -229,51 +231,51 @@ usize ECreateCloudParticle
 
     Vector2 position = Vector2Create(centerX - radius, centerY - radius);
 
-    scene->components.positions[entity] = (CPosition)
+    SET_COMPONENT(entity, ((CPosition)
     {
         .value = position,
-    };
+    }));
 
-    scene->components.dimensions[entity] = (CDimension)
+    SET_COMPONENT(entity, ((CDimension)
     {
         .width = radius * 2,
         .height = radius * 2,
-    };
+    }));
 
-    scene->components.colors[entity] = (CColor)
+    SET_COMPONENT(entity, ((CColor)
     {
         .value = (Color)
         {
             255, 255, 255, 255
         }
-    };
+    }));
 
     f32 speed = (f32)GetRandomValue(5, 15);
 
-    scene->components.kinetics[entity] = (CKinetic)
+    SET_COMPONENT(entity, ((CKinetic)
     {
         .velocity = Vector2Scale(direction, speed),
         .acceleration = Vector2Create(0, 15),
-    };
+    }));
 
-    scene->components.smooths[entity] = (CSmooth)
+    SET_COMPONENT(entity, ((CSmooth)
     {
         .previous = position,
-    };
+    }));
 
-    scene->components.colliders[entity] = (CCollider)
+    SET_COMPONENT(entity, ((CCollider)
     {
         .layer = layerNone,
         .mask = layerAll,
-    };
+    }));
 
     f32 lifetime = MIN(1.0f, (f32)GetRandomValue(1, 100) * 0.03f);
 
-    scene->components.fleetings[entity] = (CFleeting)
+    SET_COMPONENT(entity, ((CFleeting)
     {
-        .age = 0,
         .lifetime = lifetime,
-    };
+        .age = 0,
+    }));
 
     return entity;
 }

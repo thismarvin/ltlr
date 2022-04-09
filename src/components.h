@@ -94,6 +94,6 @@ typedef struct
 
 typedef struct
 {
-    f32 age;
     f32 lifetime;
+    f32 age;
 } CFleeting;
