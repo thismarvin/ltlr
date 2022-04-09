@@ -56,7 +56,7 @@ Deque DequeCreate(const usize initialCapacity, const usize dataSize)
     };
 }
 
-void DequePushFront(Deque* self, const void* value)
+void DequePushFront(Deque* self, const void* valuePointer)
 {
     if (self->m_needsResize)
     {
@@ -67,11 +67,11 @@ void DequePushFront(Deque* self, const void* value)
         self->m_needsResize = true;
     }
 
-    Set(self, self->m_headIndex, value);
+    Set(self, self->m_headIndex, valuePointer);
     self->m_headIndex = (self->m_headIndex + 1) % self->m_capacity;
 }
 
-void DequePushBack(Deque* self, const void* value)
+void DequePushBack(Deque* self, const void* valuePointer)
 {
     if (self->m_needsResize)
     {
@@ -82,7 +82,7 @@ void DequePushBack(Deque* self, const void* value)
         self->m_needsResize = true;
     }
 
-    Set(self, self->m_tailIndex, value);
+    Set(self, self->m_tailIndex, valuePointer);
 
     if (self->m_tailIndex == 0)
     {
@@ -146,9 +146,9 @@ void* DequeGetUnchecked(const Deque* self, const usize index)
     return Get(self, (self->m_tailIndex + 1 + index) % self->m_capacity);
 }
 
-void DequeSetUnchecked(Deque* self, const usize index, const void* value)
+void DequeSetUnchecked(Deque* self, const usize index, const void* valuePointer)
 {
-    Set(self, (self->m_tailIndex + 1 + index) % self->m_capacity, value);
+    Set(self, (self->m_tailIndex + 1 + index) % self->m_capacity, valuePointer);
 }
 
 void DequeClear(Deque* self)

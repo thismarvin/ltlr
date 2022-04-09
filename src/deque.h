@@ -19,14 +19,14 @@ typedef struct
 } Deque;
 
 Deque DequeCreate(usize initialCapacity, usize dataSize);
-void DequePushFront(Deque* self, const void* value);
-void DequePushBack(Deque* self, const void* value);
+void DequePushFront(Deque* self, const void* valuePointer);
+void DequePushBack(Deque* self, const void* valuePointer);
 void* DequePopFront(Deque* self);
 void* DequePopBack(Deque* self);
 void* DequePeekFront(const Deque* self);
 void* DequePeekBack(const Deque* self);
 void* DequeGetUnchecked(const Deque* self, usize index);
-void DequeSetUnchecked(Deque* self, usize index, const void* value);
+void DequeSetUnchecked(Deque* self, usize index, const void* valuePointer);
 usize DequeGetSize(const Deque* self);
 void DequeClear(Deque* self);
 void DequeDestroy(Deque* self);
