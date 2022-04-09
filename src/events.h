@@ -2,8 +2,6 @@
 
 #include "common.h"
 
-#define MAX_EVENTS 64
-
 typedef enum
 {
     EVENT_NONE,

@@ -8,6 +8,7 @@
 #include "deque.h"
 
 #define MAX_ENTITIES 1024
+#define MAX_EVENTS 64
 
 typedef struct
 {
