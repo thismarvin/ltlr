@@ -68,7 +68,6 @@ typedef struct
 } Scene;
 
 void SceneInit(Scene* self);
-Components* SceneGetComponents(const Scene* self);
 void SceneEnableComponent(Scene* self, usize entity, usize tag);
 void SceneDisableComponent(Scene* self, usize entity, usize tag);
 usize SceneAllocateEntity(Scene* self);
@@ -82,3 +81,40 @@ void SceneUpdate(Scene* self);
 void SceneDraw(const Scene* self);
 void SceneReset(Scene* self);
 void SceneDestroy(Scene* self);
+
+#define SCENE_GET_COMPONENT(mScene, mEntity, mValue) _Generic((mValue), \
+    CPosition: mScene->components.positions[mEntity], \
+    CDimension: mScene->components.dimensions[mEntity], \
+    CColor: mScene->components.colors[mEntity], \
+    CSprite: mScene->components.sprites[mEntity], \
+    CKinetic: mScene->components.kinetics[mEntity], \
+    CSmooth: mScene->components.smooths[mEntity], \
+    CCollider: mScene->components.colliders[mEntity], \
+    CPlayer: mScene->components.players[mEntity], \
+    CMortal: mScene->components.mortals[mEntity], \
+    CDamage: mScene->components.damages[mEntity], \
+    CFleeting: mScene->components.fleetings[mEntity])
+
+#define SCENE_GET_COMPONENT_PTR(mScene, mEntity, mValue) _Generic((mValue), \
+    const CPosition*: &mScene->components.positions[mEntity], \
+    CPosition*: &mScene->components.positions[mEntity], \
+    const CDimension*: &mScene->components.dimensions[mEntity], \
+    CDimension*: &mScene->components.dimensions[mEntity], \
+    const CColor*: &mScene->components.colors[mEntity], \
+    CColor*: &mScene->components.colors[mEntity], \
+    const CSprite*: &mScene->components.sprites[mEntity], \
+    CSprite*: &mScene->components.sprites[mEntity], \
+    const CKinetic*: &mScene->components.kinetics[mEntity], \
+    CKinetic*: &mScene->components.kinetics[mEntity], \
+    const CSmooth*: &mScene->components.smooths[mEntity], \
+    CSmooth*: &mScene->components.smooths[mEntity], \
+    const CCollider*: &mScene->components.colliders[mEntity], \
+    CCollider*: &mScene->components.colliders[mEntity], \
+    const CPlayer*: &mScene->components.players[mEntity], \
+    CPlayer*: &mScene->components.players[mEntity], \
+    const CMortal*: &mScene->components.mortals[mEntity], \
+    CMortal*: &mScene->components.mortals[mEntity], \
+    const CDamage*: &mScene->components.damages[mEntity], \
+    CDamage*: &mScene->components.damages[mEntity], \
+    const CFleeting*: &mScene->components.fleetings[mEntity], \
+    CFleeting*: &mScene->components.fleetings[mEntity])

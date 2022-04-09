@@ -13,11 +13,6 @@ typedef struct
 
 typedef void (*RenderFn)(const RenderFnParams*);
 
-Components* SceneGetComponents(const Scene* self)
-{
-    return (Components*)&self->components;
-}
-
 void SceneEnableComponent(Scene* self, const usize entity, const usize tag)
 {
     self->components.tags[entity] |= tag;
