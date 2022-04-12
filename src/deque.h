@@ -18,7 +18,7 @@ typedef struct
     bool m_needsResize;
 } Deque;
 
-Deque DequeCreate(usize initialCapacity, usize dataSize);
+Deque DequeCreate(usize dataSize, usize initialCapacity);
 void DequePushFront(Deque* self, const void* valuePointer);
 void DequePushBack(Deque* self, const void* valuePointer);
 void* DequePopFront(Deque* self);

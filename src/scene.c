@@ -313,14 +313,14 @@ static void SceneStart(Scene* self)
     // Initialize EntityManager.
     {
         self->entityManager.nextFreshEntityIndex = 0;
-        self->entityManager.deferredDeallocations = DequeCreate(MAX_ENTITIES, sizeof(usize));
-        self->entityManager.recycledEntityIndices = DequeCreate(MAX_ENTITIES, sizeof(usize));
+        self->entityManager.deferredDeallocations = DequeCreate(sizeof(usize), MAX_ENTITIES);
+        self->entityManager.recycledEntityIndices = DequeCreate(sizeof(usize), MAX_ENTITIES);
     }
 
     // Initialize EventManager.
     {
         self->eventManager.nextFreshEventIndex = 0;
-        self->eventManager.recycledEventIndices = DequeCreate(MAX_EVENTS, sizeof(usize));
+        self->eventManager.recycledEventIndices = DequeCreate(sizeof(usize), MAX_EVENTS);
 
         for (usize i = 0; i < MAX_EVENTS; ++i)
         {

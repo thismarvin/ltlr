@@ -41,7 +41,7 @@ static void Resize(Deque* self)
     free(oldData);
 }
 
-Deque DequeCreate(const usize initialCapacity, const usize dataSize)
+Deque DequeCreate(const usize dataSize, const usize initialCapacity)
 {
     void* data = malloc(dataSize * initialCapacity);
 
