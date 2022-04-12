@@ -970,5 +970,5 @@ void SDebugDraw(const Scene* scene, const usize entity)
         .height = dimension->height
     };
 
-    DrawRectangleLinesEx(bounds, 4, RED);
+    DrawRectangleLinesEx(bounds, 4, COLOR_RED);
 }

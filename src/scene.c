@@ -612,20 +612,14 @@ static void RenderRootLayer()
 
 static void RenderBackgroundLayer()
 {
-    ClearBackground((Color)
-    {
-        0, 0, 0, 0
-    });
+    ClearBackground(COLOR_TRANSPARENT);
 
     // TODO(thismarvin): Draw trees here.
 }
 
 static void RenderTargetLayer(const RenderFnParams* params)
 {
-    ClearBackground((Color)
-    {
-        0, 0, 0, 0
-    });
+    ClearBackground(COLOR_TRANSPARENT);
 
     SceneDrawTilemap(params->scene);
 
@@ -642,10 +636,7 @@ static void RenderTargetLayer(const RenderFnParams* params)
 
 static void RenderForegroundLayer(const RenderFnParams* params)
 {
-    ClearBackground((Color)
-    {
-        0, 0, 0, 0
-    });
+    ClearBackground(COLOR_TRANSPARENT);
 
     for (usize i = 0; i < SceneGetEntityCount(params->scene); ++i)
     {

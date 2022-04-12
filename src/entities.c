@@ -36,10 +36,7 @@ usize ECreatePlayer(Scene* scene, const f32 x, const f32 y)
 
     SET_COMPONENT(entity, ((CColor)
     {
-        .value = (Color)
-        {
-            255, 255, 255, 255
-        }
+        .value = COLOR_WHITE,
     }));
 
     SET_COMPONENT(entity, ((CSprite)
@@ -161,10 +158,7 @@ usize ECreateWalker(Scene* scene, const f32 x, const f32 y)
 
     SET_COMPONENT(entity, ((CColor)
     {
-        .value = (Color)
-        {
-            255, 255, 255, 255
-        },
+        .value = COLOR_WHITE,
     }));
 
     SET_COMPONENT(entity, ((CSprite)
@@ -244,10 +238,7 @@ usize ECreateCloudParticle
 
     SET_COMPONENT(entity, ((CColor)
     {
-        .value = (Color)
-        {
-            255, 255, 255, 255
-        }
+        .value = COLOR_WHITE,
     }));
 
     f32 speed = (f32)GetRandomValue(5, 15);
