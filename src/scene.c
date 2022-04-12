@@ -1,5 +1,6 @@
 #include "context.h"
 #include "entities.h"
+#include "palette.h"
 #include "raymath.h"
 #include "scene.h"
 #include "systems.h"
@@ -604,10 +605,7 @@ static void SceneDrawLayers(const Scene* self)
 
 static void RenderRootLayer()
 {
-    ClearBackground((Color)
-    {
-        41, 173, 255, 255
-    });
+    ClearBackground(P8_BLUE);
 }
 
 static void RenderBackgroundLayer()
