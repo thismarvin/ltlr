@@ -146,9 +146,23 @@ void* DequeGetUnchecked(const Deque* self, const usize index)
     return Get(self, (self->m_tailIndex + 1 + index) % self->m_capacity);
 }
 
+void* DequeGet(const Deque* self, const usize index)
+{
+    assert(index < DequeGetSize(self));
+
+    return DequeGetUnchecked(self, index);
+}
+
 void DequeSetUnchecked(Deque* self, const usize index, const void* valuePointer)
 {
     Set(self, (self->m_tailIndex + 1 + index) % self->m_capacity, valuePointer);
+}
+
+void DequeSet(Deque* self, const usize index, const void* valuePointer)
+{
+    assert(index < DequeGetSize(self));
+
+    DequeSetUnchecked(self, index, valuePointer);
 }
 
 void DequeClear(Deque* self)
