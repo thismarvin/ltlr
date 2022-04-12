@@ -32,3 +32,32 @@ void DequeSet(Deque* self, usize index, const void* valuePointer);
 usize DequeGetSize(const Deque* self);
 void DequeClear(Deque* self);
 void DequeDestroy(Deque* self);
+
+#define DEQUE_OF(mType) DequeCreate(sizeof(mType), 16)
+#define DEQUE_WITH_CAPACITY(mType, mCapacity) DequeCreate(sizeof(mType), mCapacity)
+#define DEQUE_PUSH_FRONT(mDequePtr, mType, mValue) \
+{ \
+    mType temp = mValue; \
+    DequePushFront(mDequePtr, &temp); \
+}
+#define DEQUE_PUSH_BACK(mDequePtr, mType, mValue) \
+{ \
+    mType temp = mValue; \
+    DequePushBack(mDequePtr, &temp); \
+}
+#define DEQUE_POP_FRONT(mDequePtr, mType) (*((mType*)DequePopFront(mDequePtr)))
+#define DEQUE_POP_BACK(mDequePtr, mType) (*((mType*)DequePopBack(mDequePtr)))
+#define DEQUE_PEEK_FRONT(mDequePtr, mType) (*((mType*)DequePeekFront(mDequePtr)))
+#define DEQUE_PEEK_BACK(mDequePtr, mType) (*((mType*)DequePeekBack(mDequePtr)))
+#define DEQUE_GET_UNCHECKED(mDequePtr, mType, mIndex) (*((mType*)DequeGetUnchecked(mDequePtr, mIndex)))
+#define DEQUE_SET_UNCHECKED(mDequePtr, mIndex, mType, mValue) \
+{ \
+    mType temp = mValue; \
+    DequeSetUnchecked(mDequePtr, mIndex, &temp); \
+}
+#define DEQUE_GET(mDequePtr, mType, mIndex) (*((mType*)DequeGet(mDequePtr, mIndex)))
+#define DEQUE_SET(mDequePtr, mIndex, mType, mValue) \
+{ \
+    mType temp = mValue; \
+    DequeSet(mDequePtr, mIndex, &temp); \
+}
