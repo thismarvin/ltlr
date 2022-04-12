@@ -29,7 +29,7 @@ usize SceneAllocateEntity(Scene* self)
 
     if (DequeGetSize(&entityManager->recycledEntityIndices) != 0)
     {
-        return *(usize*) DequePopFront(&entityManager->recycledEntityIndices);
+        return DEQUE_POP_FRONT(&entityManager->recycledEntityIndices, usize);
     }
 
     // No used indices, use next available fresh one.
@@ -55,7 +55,7 @@ void SceneFlushEntities(Scene* self)
 {
     while (DequeGetSize(&self->entityManager.deferredDeallocations) > 0)
     {
-        usize entity = *(usize*) DequePopFront(&self->entityManager.deferredDeallocations);
+        usize entity = DEQUE_POP_FRONT(&self->entityManager.deferredDeallocations, usize);
 
         self->components.tags[entity] = 0;
         DequePushFront(&self->entityManager.recycledEntityIndices, &entity);
@@ -66,7 +66,7 @@ void SceneRaiseEvent(Scene* self, const Event* event)
 {
     if (DequeGetSize(&self->eventManager.recycledEventIndices) != 0)
     {
-        usize next = *(usize*) DequePopFront(&self->eventManager.recycledEventIndices);
+        usize next = DEQUE_POP_FRONT(&self->eventManager.recycledEventIndices, usize);
         memcpy(&self->eventManager.events[next], event, sizeof(Event));
 
         return;
@@ -313,14 +313,14 @@ static void SceneStart(Scene* self)
     // Initialize EntityManager.
     {
         self->entityManager.nextFreshEntityIndex = 0;
-        self->entityManager.deferredDeallocations = DequeCreate(sizeof(usize), MAX_ENTITIES);
-        self->entityManager.recycledEntityIndices = DequeCreate(sizeof(usize), MAX_ENTITIES);
+        self->entityManager.deferredDeallocations = DEQUE_WITH_CAPACITY(usize, MAX_ENTITIES);
+        self->entityManager.recycledEntityIndices = DEQUE_WITH_CAPACITY(usize, MAX_ENTITIES);
     }
 
     // Initialize EventManager.
     {
         self->eventManager.nextFreshEventIndex = 0;
-        self->eventManager.recycledEventIndices = DequeCreate(sizeof(usize), MAX_EVENTS);
+        self->eventManager.recycledEventIndices = DEQUE_WITH_CAPACITY(usize, MAX_EVENTS);
 
         for (usize i = 0; i < MAX_EVENTS; ++i)
         {
