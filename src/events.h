@@ -33,7 +33,7 @@ typedef struct
     {
         EventCollisionInner collisionInner;
         EventDamageInner damageInner;
-        EventCloudParticleInner  cloudParticleInner;
+        EventCloudParticleInner cloudParticleInner;
     };
 } Event;
 

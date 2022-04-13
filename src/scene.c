@@ -4,6 +4,7 @@
 #include "raymath.h"
 #include "scene.h"
 #include "systems.h"
+#include <assert.h>
 #include <string.h>
 
 typedef struct
@@ -26,20 +27,20 @@ void SceneDisableComponent(Scene* self, const usize entity, const usize tag)
 
 usize SceneAllocateEntity(Scene* self)
 {
-    EntityManager* entityManager = &self->entityManager;
+    EntityManager* entityManager = &self->m_entityManager;
 
-    if (DequeGetSize(&entityManager->recycledEntityIndices) != 0)
+    if (DequeGetSize(&entityManager->m_recycledEntityIndices) != 0)
     {
-        return DEQUE_POP_FRONT(&entityManager->recycledEntityIndices, usize);
+        return DEQUE_POP_FRONT(&entityManager->m_recycledEntityIndices, usize);
     }
 
     // No used indices, use next available fresh one.
-    usize next = MIN(entityManager->nextFreshEntityIndex, MAX_ENTITIES - 1);
+    usize next = MIN(entityManager->m_nextFreshEntityIndex, MAX_ENTITIES - 1);
 
-    entityManager->nextFreshEntityIndex = entityManager->nextFreshEntityIndex + 1;
-    entityManager->nextFreshEntityIndex = MIN(entityManager->nextFreshEntityIndex, MAX_ENTITIES);
+    entityManager->m_nextFreshEntityIndex = entityManager->m_nextFreshEntityIndex + 1;
+    entityManager->m_nextFreshEntityIndex = MIN(entityManager->m_nextFreshEntityIndex, MAX_ENTITIES);
 
-    if (entityManager->nextFreshEntityIndex == MAX_ENTITIES)
+    if (entityManager->m_nextFreshEntityIndex == MAX_ENTITIES)
     {
         TraceLog(LOG_WARNING, "Maximum amount of entities reached.");
     }
@@ -49,39 +50,40 @@ usize SceneAllocateEntity(Scene* self)
 
 void SceneDeferDeallocateEntity(Scene* self, const usize entity)
 {
-    DequePushFront(&self->entityManager.deferredDeallocations, &entity);
+    DequePushFront(&self->m_entityManager.m_deferredDeallocations, &entity);
 }
 
 void SceneFlushEntities(Scene* self)
 {
-    while (DequeGetSize(&self->entityManager.deferredDeallocations) > 0)
+    while (DequeGetSize(&self->m_entityManager.m_deferredDeallocations) > 0)
     {
-        usize entity = DEQUE_POP_FRONT(&self->entityManager.deferredDeallocations, usize);
+        usize entity = DEQUE_POP_FRONT(&self->m_entityManager.m_deferredDeallocations, usize);
 
         self->components.tags[entity] = 0;
-        DequePushFront(&self->entityManager.recycledEntityIndices, &entity);
+        DequePushFront(&self->m_entityManager.m_recycledEntityIndices, &entity);
     }
 }
 
 void SceneRaiseEvent(Scene* self, const Event* event)
 {
-    if (DequeGetSize(&self->eventManager.recycledEventIndices) != 0)
+    if (DequeGetSize(&self->m_eventManager.m_recycledEventIndices) != 0)
     {
-        usize next = DEQUE_POP_FRONT(&self->eventManager.recycledEventIndices, usize);
-        memcpy(&self->eventManager.events[next], event, sizeof(Event));
+        usize next = DEQUE_POP_FRONT(&self->m_eventManager.m_recycledEventIndices, usize);
+        memcpy(&self->m_eventManager.m_events[next], event, sizeof(Event));
 
         return;
     }
 
     // No used indices, use next available fresh one.
-    usize next = MIN(self->eventManager.nextFreshEventIndex, MAX_EVENTS - 1);
+    usize next = MIN(self->m_eventManager.m_nextFreshEventIndex, MAX_EVENTS - 1);
 
-    self->eventManager.nextFreshEventIndex = self->eventManager.nextFreshEventIndex + 1;
-    self->eventManager.nextFreshEventIndex = MIN(self->eventManager.nextFreshEventIndex, MAX_EVENTS);
+    self->m_eventManager.m_nextFreshEventIndex = self->m_eventManager.m_nextFreshEventIndex + 1;
+    self->m_eventManager.m_nextFreshEventIndex = MIN(self->m_eventManager.m_nextFreshEventIndex,
+            MAX_EVENTS);
 
-    memcpy(&self->eventManager.events[next], event, sizeof(Event));
+    memcpy(&self->m_eventManager.m_events[next], event, sizeof(Event));
 
-    if (self->eventManager.nextFreshEventIndex == MAX_EVENTS)
+    if (self->m_eventManager.m_nextFreshEventIndex == MAX_EVENTS)
     {
         TraceLog(LOG_WARNING, "Maximum amount of events reached.");
     }
@@ -89,18 +91,25 @@ void SceneRaiseEvent(Scene* self, const Event* event)
 
 void SceneConsumeEvent(Scene* self, const usize eventIndex)
 {
-    self->eventManager.events[eventIndex].tag = EVENT_NONE;
-    DequePushFront(&self->eventManager.recycledEventIndices, &eventIndex);
+    self->m_eventManager.m_events[eventIndex].tag = EVENT_NONE;
+    DequePushFront(&self->m_eventManager.m_recycledEventIndices, &eventIndex);
 }
 
 usize SceneGetEntityCount(const Scene* self)
 {
-    return self->entityManager.nextFreshEntityIndex;
+    return self->m_entityManager.m_nextFreshEntityIndex;
 }
 
 usize SceneGetEventCount(const Scene* self)
 {
-    return self->eventManager.nextFreshEventIndex;
+    return self->m_eventManager.m_nextFreshEventIndex;
+}
+
+const Event* SceneGetEvent(const Scene* self, usize index)
+{
+    assert(index < SceneGetEventCount(self));
+
+    return &self->m_eventManager.m_events[index];
 }
 
 static void SceneSetupContent(Scene* self)
@@ -313,19 +322,19 @@ static void SceneStart(Scene* self)
 
     // Initialize EntityManager.
     {
-        self->entityManager.nextFreshEntityIndex = 0;
-        self->entityManager.deferredDeallocations = DEQUE_WITH_CAPACITY(usize, MAX_ENTITIES);
-        self->entityManager.recycledEntityIndices = DEQUE_WITH_CAPACITY(usize, MAX_ENTITIES);
+        self->m_entityManager.m_nextFreshEntityIndex = 0;
+        self->m_entityManager.m_deferredDeallocations = DEQUE_WITH_CAPACITY(usize, MAX_ENTITIES);
+        self->m_entityManager.m_recycledEntityIndices = DEQUE_WITH_CAPACITY(usize, MAX_ENTITIES);
     }
 
     // Initialize EventManager.
     {
-        self->eventManager.nextFreshEventIndex = 0;
-        self->eventManager.recycledEventIndices = DEQUE_WITH_CAPACITY(usize, MAX_EVENTS);
+        self->m_eventManager.m_nextFreshEventIndex = 0;
+        self->m_eventManager.m_recycledEventIndices = DEQUE_WITH_CAPACITY(usize, MAX_EVENTS);
 
         for (usize i = 0; i < MAX_EVENTS; ++i)
         {
-            self->eventManager.events[i].tag = EVENT_NONE;
+            self->m_eventManager.m_events[i].tag = EVENT_NONE;
         }
     }
 
@@ -662,9 +671,9 @@ void SceneDraw(const Scene* self)
 
 void SceneReset(Scene* self)
 {
-    DequeDestroy(&self->entityManager.recycledEntityIndices);
-    DequeDestroy(&self->entityManager.deferredDeallocations);
-    DequeDestroy(&self->eventManager.recycledEventIndices);
+    DequeDestroy(&self->m_entityManager.m_recycledEntityIndices);
+    DequeDestroy(&self->m_entityManager.m_deferredDeallocations);
+    DequeDestroy(&self->m_eventManager.m_recycledEventIndices);
 
     SceneStart(self);
 }
@@ -678,9 +687,9 @@ void SceneDestroy(Scene* self)
         LevelSegmentDestroy(&self->segments[i]);
     }
 
-    DequeDestroy(&self->entityManager.recycledEntityIndices);
-    DequeDestroy(&self->entityManager.deferredDeallocations);
-    DequeDestroy(&self->eventManager.recycledEventIndices);
+    DequeDestroy(&self->m_entityManager.m_recycledEntityIndices);
+    DequeDestroy(&self->m_entityManager.m_deferredDeallocations);
+    DequeDestroy(&self->m_eventManager.m_recycledEventIndices);
 
     UnloadRenderTexture(self->backgroundLayer);
     UnloadRenderTexture(self->targetLayer);

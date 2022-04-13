@@ -435,7 +435,7 @@ static CollisionResult SimulateCollisionOnAxis
 
         for (usize i = 0; i < SceneGetEventCount(scene); ++i)
         {
-            Event* event = &scene->eventManager.events[i];
+            const Event* event = SceneGetEvent(scene, i);
 
             if (event->entity != entity || event->tag != EVENT_COLLISION)
             {
@@ -568,7 +568,7 @@ void SPlayerCollisionUpdate(Scene* scene, const usize entity)
     {
         for (usize i = 0; i < SceneGetEventCount(scene); ++i)
         {
-            Event* event = &scene->eventManager.events[i];
+            const Event* event = SceneGetEvent(scene, i);
 
             if (event->entity != entity || event->tag != EVENT_COLLISION)
             {
@@ -627,7 +627,7 @@ void SPlayerMortalUpdate(Scene* scene, const usize entity)
 
     for (usize i = 0; i < SceneGetEventCount(scene); ++i)
     {
-        Event* event = &scene->eventManager.events[i];
+        const Event* event = SceneGetEvent(scene, i);
 
         if (event->entity != entity || event->tag != EVENT_DAMAGE)
         {
@@ -684,7 +684,7 @@ void SWalkerCollisionUpdate(Scene* scene, const usize entity)
     // Consume Collision event.
     for (usize i = 0; i < SceneGetEventCount(scene); ++i)
     {
-        Event* event = &scene->eventManager.events[i];
+        const Event* event = SceneGetEvent(scene, i);
 
         if (event->entity != entity || event->tag != EVENT_COLLISION)
         {
@@ -762,7 +762,7 @@ void SGenericCollisionUpdate(Scene* scene, const usize entity)
     // Consume Collision event.
     for (usize i = 0; i < SceneGetEventCount(scene); ++i)
     {
-        Event* event = &scene->eventManager.events[i];
+        const Event* event = SceneGetEvent(scene, i);
 
         if (event->entity != entity || event->tag != EVENT_COLLISION)
         {
@@ -820,7 +820,7 @@ void SCloudParticleCollisionUpdate(Scene* scene, const usize entity)
     // Consume Collision event.
     for (usize i = 0; i < SceneGetEventCount(scene); ++i)
     {
-        Event* event = &scene->eventManager.events[i];
+        const Event* event = SceneGetEvent(scene, i);
 
         if (event->entity != entity || event->tag != EVENT_COLLISION)
         {
@@ -875,7 +875,7 @@ void SCloudParticleSpawnUpdate(Scene* scene, const usize entity)
 
     for (usize i = 0; i < SceneGetEventCount(scene); ++i)
     {
-        Event* event = &scene->eventManager.events[i];
+        const Event* event = SceneGetEvent(scene, i);
 
         if (event->entity != entity || event->tag != EVENT_CLOUD_PARTICLE)
         {

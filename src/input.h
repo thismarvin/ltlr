@@ -10,62 +10,62 @@ typedef enum
 
 typedef struct
 {
-    char* name;
-    KeyboardKey* keys;
-    usize keysCapacity;
-    usize keysLength;
-    f32 bufferDuration;
-    f32 bufferTimer;
+    char* m_name;
+    KeyboardKey* m_keys;
+    usize m_keysCapacity;
+    usize m_keysLength;
+    f32 m_bufferDuration;
+    f32 m_bufferTimer;
 } KeyboardBinding;
 
 typedef struct
 {
-    char* name;
-    GamepadButton* buttons;
-    usize buttonsCapacity;
-    usize buttonsLength;
-    f32 bufferDuration;
-    f32 bufferTimer;
+    char* m_name;
+    GamepadButton* m_buttons;
+    usize m_buttonsCapacity;
+    usize m_buttonsLength;
+    f32 m_bufferDuration;
+    f32 m_bufferTimer;
 } GamepadBinding;
 
 typedef struct
 {
-    char* name;
-    MouseButton* buttons;
-    usize buttonsCapacity;
-    usize buttonsLength;
-    f32 bufferDuration;
-    f32 bufferTimer;
+    char* m_name;
+    MouseButton* m_buttons;
+    usize m_buttonsCapacity;
+    usize m_buttonsLength;
+    f32 m_bufferDuration;
+    f32 m_bufferTimer;
 } MouseBinding;
 
 typedef struct
 {
-    char* name;
-    GamepadAxis* axes;
-    usize axesCapacity;
-    usize axesLength;
-    Ordering ordering;
-    f32 target;
+    char* m_name;
+    GamepadAxis* m_axes;
+    usize m_axesCapacity;
+    usize m_axesLength;
+    Ordering m_ordering;
+    f32 m_target;
 } AxisBinding;
 
 typedef struct
 {
-    usize bindingsCapacity;
-    KeyboardBinding* keyboardBindings;
-    usize keyboardBindingsLength;
-    GamepadBinding* gamepadBindings;
-    usize gamepadBindingsLength;
-    MouseBinding* mouseBindings;
-    usize mouseBindingsLength;
-    AxisBinding* axisBindings;
-    usize axisBindingsLength;
+    usize m_bindingsCapacity;
+    KeyboardBinding* m_keyboardBindings;
+    usize m_keyboardBindingsLength;
+    GamepadBinding* m_gamepadBindings;
+    usize m_gamepadBindingsLength;
+    MouseBinding* m_mouseBindings;
+    usize m_mouseBindingsLength;
+    AxisBinding* m_axisBindings;
+    usize m_axisBindingsLength;
 } InputProfile;
 
 typedef struct
 {
-    usize gamepad;
-    bool enabled;
-    InputProfile profile;
+    usize m_gamepad;
+    bool m_enabled;
+    InputProfile m_profile;
 } InputHandler;
 
 KeyboardBinding KeyboardBindingCreate(const char* name, usize keysCapacity);

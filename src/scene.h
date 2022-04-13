@@ -28,29 +28,29 @@ typedef struct
 
 typedef struct
 {
-    Deque deferredDeallocations;
+    Deque m_deferredDeallocations;
     // The next available index in the Components struct that has not been used before.
-    usize nextFreshEntityIndex;
+    usize m_nextFreshEntityIndex;
     // A stack of indices in the Components struct that are not currently allocated but were
     // previously deallocated (an entity once resided in these indices).
-    Deque recycledEntityIndices;
+    Deque m_recycledEntityIndices;
 } EntityManager;
 
 typedef struct
 {
-    Event events[MAX_EVENTS];
+    Event m_events[MAX_EVENTS];
     // The next available index in the events array that has not been used before.
-    usize nextFreshEventIndex;
+    usize m_nextFreshEventIndex;
     // A stack of indices in the events array that are not currently raised but were once indices
     // of a consumed event.
-    Deque recycledEventIndices;
+    Deque m_recycledEventIndices;
 } EventManager;
 
 typedef struct
 {
     Components components;
-    EntityManager entityManager;
-    EventManager eventManager;
+    EntityManager m_entityManager;
+    EventManager m_eventManager;
     bool debugging;
     usize player;
     Rectangle bounds;
@@ -75,6 +75,7 @@ void SceneDeferDeallocateEntity(Scene* self, usize entity);
 void SceneFlushEntities(Scene* self);
 usize SceneGetEntityCount(const Scene* self);
 usize SceneGetEventCount(const Scene* self);
+const Event* SceneGetEvent(const Scene* self, usize index);
 void SceneRaiseEvent(Scene* self, const Event* event);
 void SceneConsumeEvent(Scene* self, usize eventIndex);
 void SceneUpdate(Scene* self);
