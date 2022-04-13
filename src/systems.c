@@ -799,10 +799,9 @@ void SGenericCollisionUpdate(Scene* scene, const usize entity)
 
 void SCloudParticleCollisionUpdate(Scene* scene, const usize entity)
 {
-    REQUIRE_DEPS(tagPosition | tagDimension | tagCollider | tagKinetic | tagFleeting);
+    REQUIRE_DEPS(tagPosition | tagDimension | tagCollider | tagFleeting);
 
     CPosition* position = GET_COMPONENT(position, entity);
-    CKinetic* kinetic = GET_COMPONENT(kinetic, entity);
     const CDimension* dimension = GET_COMPONENT(dimension, entity);
     const CFleeting* fleeting = GET_COMPONENT(fleeting, entity);
 
