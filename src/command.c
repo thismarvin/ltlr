@@ -1,5 +1,18 @@
 #include "command.h"
 
+Command CommandCreateSetTag(const usize entity, const u64 tag)
+{
+    return (Command)
+    {
+        .type = CT_SET_TAG,
+        .setTag = (CommandSetTag)
+        {
+            .entity = entity,
+            .tag = tag,
+        },
+    };
+}
+
 Command CommandCreateSetComponent(const usize entity, const Component* component)
 {
     return (Command)

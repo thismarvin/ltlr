@@ -6,6 +6,12 @@
 typedef struct
 {
     usize entity;
+    u64 tag;
+} CommandSetTag;
+
+typedef struct
+{
+    usize entity;
     Component component;
 } CommandSetComponent;
 
@@ -24,6 +30,7 @@ typedef struct
 typedef enum
 {
     CT_NONE,
+    CT_SET_TAG,
     CT_SET_COMPONENT,
     CT_ENABLE_COMPONENT,
     CT_DISABLE_COMPONENT,
@@ -34,12 +41,14 @@ typedef struct
     CommandType type;
     union
     {
+        CommandSetTag setTag;
         CommandSetComponent setComponent;
         CommandEnableComponent enableComponent;
         CommandDisableComponent disableComponent;
     };
 } Command;
 
+Command CommandCreateSetTag(usize entity, u64 tag);
 Command CommandCreateSetComponent(usize entity, const Component* component);
 Command CommandCreateEnableComponent(usize entity, u64 componentTag);
 Command CommandCreateDisableComponent(usize entity, u64 componentTag);

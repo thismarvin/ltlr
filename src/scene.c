@@ -116,6 +116,11 @@ void SceneSubmitCommand(Scene* self, Command command)
     DequePushFront(&self->commands, &command);
 }
 
+static void SceneExecuteSetTag(Scene* self, const CommandSetTag* setTag)
+{
+    self->components.tags[setTag->entity] = setTag->tag;
+}
+
 static void SceneExecuteSetComponent(Scene* self, const CommandSetComponent* setCommand)
 {
     usize entity = setCommand->entity;
@@ -221,6 +226,12 @@ void SceneExecuteCommands(Scene* self)
 
         switch (command->type)
         {
+            case CT_SET_TAG:
+            {
+                SceneExecuteSetTag(self, &command->setTag);
+                break;
+            }
+
             case CT_SET_COMPONENT:
             {
                 SceneExecuteSetComponent(self, &command->setComponent);
