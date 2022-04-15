@@ -580,21 +580,21 @@ void SceneUpdate(Scene* self)
 // Return a Rectangle that is within the scene's bounds and centered on a given entity.
 static Rectangle SceneCalculateActionCameraBounds(const Scene* self, const usize targetEntity)
 {
-    if ((self->components.tags[targetEntity] & (tagPosition)) != (tagPosition))
+    if ((self->components.tags[targetEntity] & (TAG_POSITION)) != (TAG_POSITION))
     {
         return self->trueResolution;
     }
 
     Vector2 cameraPosition = self->components.positions[targetEntity].value;
 
-    if ((self->components.tags[targetEntity] & (tagSmooth)) == (tagSmooth))
+    if ((self->components.tags[targetEntity] & (TAG_SMOOTH)) == (TAG_SMOOTH))
     {
         const CSmooth* smooth = &self->components.smooths[self->player];
 
         cameraPosition = Vector2Lerp(smooth->previous, cameraPosition, ContextGetAlpha());
     }
 
-    if ((self->components.tags[targetEntity] & (tagDimension)) == (tagDimension))
+    if ((self->components.tags[targetEntity] & (TAG_DIMENSION)) == (TAG_DIMENSION))
     {
         const CDimension* dimension = &self->components.dimensions[self->player];
 

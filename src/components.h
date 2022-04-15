@@ -16,20 +16,6 @@
 #define TAG_DAMAGE ((u64)1 << 10)
 #define TAG_FLEETING ((u64)1 << 11)
 
-extern const u64 tagNone;
-extern const u64 tagPosition;
-extern const u64 tagDimension;
-extern const u64 tagColor;
-extern const u64 tagSprite;
-extern const u64 tagKinetic;
-extern const u64 tagSmooth;
-extern const u64 tagPlayer;
-extern const u64 tagCollider;
-extern const u64 tagWalker;
-extern const u64 tagMortal;
-extern const u64 tagDamage;
-extern const u64 tagFleeting;
-
 extern const u64 layerNone;
 extern const u64 layerUp;
 extern const u64 layerRight;

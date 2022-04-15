@@ -44,7 +44,7 @@ static i8 sign(const f32 value)
 
 void SSmoothUpdate(Scene* scene, const usize entity)
 {
-    REQUIRE_DEPS(tagPosition | tagSmooth);
+    REQUIRE_DEPS(TAG_POSITION | TAG_SMOOTH);
 
     const CPosition* position = GET_COMPONENT(position, entity);
     CSmooth* smooth = GET_COMPONENT(smooth, entity);
@@ -54,7 +54,7 @@ void SSmoothUpdate(Scene* scene, const usize entity)
 
 void SKineticUpdate(Scene* scene, const usize entity)
 {
-    REQUIRE_DEPS(tagPosition | tagKinetic);
+    REQUIRE_DEPS(TAG_POSITION | TAG_KINETIC);
 
     CPosition* position = GET_COMPONENT(position, entity);
     CKinetic* kinetic = GET_COMPONENT(kinetic, entity);
@@ -68,7 +68,7 @@ void SKineticUpdate(Scene* scene, const usize entity)
 
 void SCollisionUpdate(Scene* scene, const usize entity)
 {
-    REQUIRE_DEPS(tagPosition | tagDimension | tagCollider);
+    REQUIRE_DEPS(TAG_POSITION | TAG_DIMENSION | TAG_COLLIDER);
 
     const CPosition* position = GET_COMPONENT(position, entity);
     const CDimension* dimension = GET_COMPONENT(dimension, entity);
@@ -84,7 +84,7 @@ void SCollisionUpdate(Scene* scene, const usize entity)
 
     for (usize i = 0; i < SceneGetEntityCount(scene); ++i)
     {
-        if (i == entity || !ENTITY_HAS_DEPS(i, tagPosition | tagDimension | tagCollider))
+        if (i == entity || !ENTITY_HAS_DEPS(i, TAG_POSITION | TAG_DIMENSION | TAG_COLLIDER))
         {
             continue;
         }
@@ -144,7 +144,7 @@ static Vector2 ExtractResolution(const Vector2 resolution, const u64 layers)
 
 void SPlayerInputUpdate(Scene* scene, const usize entity)
 {
-    REQUIRE_DEPS(tagPlayer | tagKinetic);
+    REQUIRE_DEPS(TAG_PLAYER | TAG_KINETIC);
 
     CPlayer* player = GET_COMPONENT(player, entity);
     CKinetic* kinetic = GET_COMPONENT(kinetic, entity);
@@ -231,8 +231,8 @@ static bool PlayerIsVulnerable(const CPlayer* player)
 
 static CollisionResult PlayerOnCollision(Scene* scene, const CollisionParams* params)
 {
-    assert(ENTITY_HAS_DEPS(params->entity, tagPlayer | tagPosition | tagKinetic));
-    assert(ENTITY_HAS_DEPS(params->otherEntity, tagCollider));
+    assert(ENTITY_HAS_DEPS(params->entity, TAG_PLAYER | TAG_POSITION | TAG_KINETIC));
+    assert(ENTITY_HAS_DEPS(params->otherEntity, TAG_COLLIDER));
 
     CPlayer* player = GET_COMPONENT(player, params->entity);
     CPosition* position = GET_COMPONENT(position, params->entity);
@@ -242,8 +242,8 @@ static CollisionResult PlayerOnCollision(Scene* scene, const CollisionParams* pa
 
     // Collision specific logic that will not resolve the player.
     {
-        if (ENTITY_HAS_DEPS(params->entity, tagMortal)
-                && ENTITY_HAS_DEPS(params->otherEntity, tagWalker | tagDamage))
+        if (ENTITY_HAS_DEPS(params->entity, TAG_MORTAL)
+                && ENTITY_HAS_DEPS(params->otherEntity, TAG_WALKER | TAG_DAMAGE))
         {
             if (PlayerIsVulnerable(player))
             {
@@ -401,7 +401,7 @@ static CollisionResult SimulateCollisionOnAxis
     // It is important that `delta` only consists of one axis, not both.
     assert(delta.x == 0 || delta.y == 0);
 
-    assert(ENTITY_HAS_DEPS(entity, tagPosition | tagDimension));
+    assert(ENTITY_HAS_DEPS(entity, TAG_POSITION | TAG_DIMENSION));
 
     const CPosition* positionPointer = GET_COMPONENT(positionPointer, entity);
 
@@ -444,7 +444,7 @@ static CollisionResult SimulateCollisionOnAxis
 
             const EventCollisionInner* collisionInner = &event->collisionInner;
 
-            assert(ENTITY_HAS_DEPS(collisionInner->otherEntity, tagPosition | tagDimension | tagCollider));
+            assert(ENTITY_HAS_DEPS(collisionInner->otherEntity, TAG_POSITION | TAG_DIMENSION | TAG_COLLIDER));
 
             const CPosition* otherPosition = GET_COMPONENT(otherPosition, collisionInner->otherEntity);
             const CDimension* otherDimensions = GET_COMPONENT(otherDimensions, collisionInner->otherEntity);
@@ -494,7 +494,7 @@ static CollisionResult SimulateCollisionOnAxis
 
 void SPlayerCollisionUpdate(Scene* scene, const usize entity)
 {
-    REQUIRE_DEPS(tagPlayer | tagSmooth | tagPosition | tagDimension | tagCollider | tagKinetic);
+    REQUIRE_DEPS(TAG_PLAYER | TAG_SMOOTH | TAG_POSITION | TAG_DIMENSION | TAG_COLLIDER | TAG_KINETIC);
 
     CPlayer* player = GET_COMPONENT(player, entity);
     const CSmooth* smooth = GET_COMPONENT(smooth, entity);
@@ -582,7 +582,7 @@ void SPlayerCollisionUpdate(Scene* scene, const usize entity)
 
 static void PlayerFlashingLogic(Scene* scene, const usize entity)
 {
-    assert(ENTITY_HAS_DEPS(entity, tagPlayer));
+    assert(ENTITY_HAS_DEPS(entity, TAG_PLAYER));
 
     CPlayer* player = GET_COMPONENT(player, entity);
 
@@ -597,22 +597,22 @@ static void PlayerFlashingLogic(Scene* scene, const usize entity)
 
         if (passedSlices % 2 == 0)
         {
-            SceneDeferDisableComponent(scene, entity, tagSprite);
+            SceneDeferDisableComponent(scene, entity, TAG_SPRITE);
         }
         else
         {
-            SceneDeferEnableComponent(scene, entity, tagSprite);
+            SceneDeferEnableComponent(scene, entity, TAG_SPRITE);
         }
     }
     else
     {
         // This is a pre-caution to make sure the last state isn't off.
-        SceneDeferEnableComponent(scene, entity, tagSprite);
+        SceneDeferEnableComponent(scene, entity, TAG_SPRITE);
     }
 }
 void SPlayerMortalUpdate(Scene* scene, const usize entity)
 {
-    REQUIRE_DEPS(tagPlayer | tagPosition | tagKinetic | tagMortal);
+    REQUIRE_DEPS(TAG_PLAYER | TAG_POSITION | TAG_KINETIC | TAG_MORTAL);
 
     CPlayer* player = GET_COMPONENT(player, entity);
     CKinetic* kinetic = GET_COMPONENT(kinetic, entity);
@@ -639,7 +639,7 @@ void SPlayerMortalUpdate(Scene* scene, const usize entity)
         const EventDamageInner* damageInner = &event->damageInner;
         usize otherEntity = damageInner->otherEntity;
 
-        assert(ENTITY_HAS_DEPS(otherEntity, tagDamage));
+        assert(ENTITY_HAS_DEPS(otherEntity, TAG_DAMAGE));
 
         const CDamage* otherDamage = GET_COMPONENT(otherDamage, otherEntity);
 
@@ -650,7 +650,7 @@ void SPlayerMortalUpdate(Scene* scene, const usize entity)
         {
             player->dead = true;
 
-            SceneDeferDisableComponent(scene, entity, tagCollider);
+            SceneDeferDisableComponent(scene, entity, TAG_COLLIDER);
 
             kinetic->velocity = (Vector2)
             {
@@ -665,7 +665,7 @@ void SPlayerMortalUpdate(Scene* scene, const usize entity)
 
 void SWalkerCollisionUpdate(Scene* scene, const usize entity)
 {
-    REQUIRE_DEPS(tagWalker | tagPosition | tagDimension | tagCollider | tagKinetic);
+    REQUIRE_DEPS(TAG_WALKER | TAG_POSITION | TAG_DIMENSION | TAG_COLLIDER | TAG_KINETIC);
 
     CPosition* position = GET_COMPONENT(position, entity);
     const CDimension* dimension = GET_COMPONENT(dimension, entity);
@@ -695,7 +695,7 @@ void SWalkerCollisionUpdate(Scene* scene, const usize entity)
 
         const EventCollisionInner* collisionInner = &event->collisionInner;
 
-        assert(ENTITY_HAS_DEPS(collisionInner->otherEntity, tagPosition | tagDimension | tagCollider));
+        assert(ENTITY_HAS_DEPS(collisionInner->otherEntity, TAG_POSITION | TAG_DIMENSION | TAG_COLLIDER));
 
         const CPosition* otherPosition = GET_COMPONENT(otherPosition, collisionInner->otherEntity);
         const CDimension* otherDimension = GET_COMPONENT(otherDimension, collisionInner->otherEntity);
@@ -732,7 +732,7 @@ void SWalkerCollisionUpdate(Scene* scene, const usize entity)
 
 void SFleetingUpdate(Scene* scene, const usize entity)
 {
-    REQUIRE_DEPS(tagFleeting);
+    REQUIRE_DEPS(TAG_FLEETING);
 
     CFleeting* fleeting = GET_COMPONENT(fleeting, entity);
 
@@ -746,7 +746,7 @@ void SFleetingUpdate(Scene* scene, const usize entity)
 
 void SGenericCollisionUpdate(Scene* scene, const usize entity)
 {
-    REQUIRE_DEPS(tagPosition | tagDimension | tagCollider);
+    REQUIRE_DEPS(TAG_POSITION | TAG_DIMENSION | TAG_COLLIDER);
 
     CPosition* position = GET_COMPONENT(position, entity);
     const CDimension* dimension = GET_COMPONENT(dimension, entity);
@@ -773,7 +773,7 @@ void SGenericCollisionUpdate(Scene* scene, const usize entity)
 
         const EventCollisionInner* collisionInner = &event->collisionInner;
 
-        assert(ENTITY_HAS_DEPS(collisionInner->otherEntity, tagPosition | tagDimension | tagCollider));
+        assert(ENTITY_HAS_DEPS(collisionInner->otherEntity, TAG_POSITION | TAG_DIMENSION | TAG_COLLIDER));
 
         const CPosition* otherPosition = GET_COMPONENT(otherPosition, collisionInner->otherEntity);
         const CDimension* otherDimension = GET_COMPONENT(otherDimension, collisionInner->otherEntity);
@@ -799,7 +799,7 @@ void SGenericCollisionUpdate(Scene* scene, const usize entity)
 
 void SCloudParticleCollisionUpdate(Scene* scene, const usize entity)
 {
-    REQUIRE_DEPS(tagPosition | tagDimension | tagCollider | tagFleeting);
+    REQUIRE_DEPS(TAG_POSITION | TAG_DIMENSION | TAG_COLLIDER | TAG_FLEETING);
 
     CPosition* position = GET_COMPONENT(position, entity);
     const CDimension* dimension = GET_COMPONENT(dimension, entity);
@@ -830,7 +830,7 @@ void SCloudParticleCollisionUpdate(Scene* scene, const usize entity)
 
         const EventCollisionInner* collisionInner = &event->collisionInner;
 
-        assert(ENTITY_HAS_DEPS(collisionInner->otherEntity, tagPosition | tagDimension | tagCollider));
+        assert(ENTITY_HAS_DEPS(collisionInner->otherEntity, TAG_POSITION | TAG_DIMENSION | TAG_COLLIDER));
 
         const CPosition* otherPosition = GET_COMPONENT(otherPosition, collisionInner->otherEntity);
         const CDimension* otherDimension = GET_COMPONENT(otherDimension, collisionInner->otherEntity);
@@ -866,7 +866,7 @@ void SCloudParticleCollisionUpdate(Scene* scene, const usize entity)
 
 void SCloudParticleSpawnUpdate(Scene* scene, const usize entity)
 {
-    REQUIRE_DEPS(tagPosition | tagDimension | tagKinetic);
+    REQUIRE_DEPS(TAG_POSITION | TAG_DIMENSION | TAG_KINETIC);
 
     const CPosition* position = GET_COMPONENT(position, entity);
     const CDimension* dimension = GET_COMPONENT(dimension, entity);
@@ -908,7 +908,7 @@ void SCloudParticleSpawnUpdate(Scene* scene, const usize entity)
 
 void SCloudParticleDraw(const Scene* scene, const usize entity)
 {
-    REQUIRE_DEPS(tagPosition | tagDimension | tagFleeting | tagColor | tagSmooth);
+    REQUIRE_DEPS(TAG_POSITION | TAG_DIMENSION | TAG_FLEETING | TAG_COLOR | TAG_SMOOTH);
 
     const CPosition* position = GET_COMPONENT(position, entity);
     const CColor* color = GET_COMPONENT(color, entity);
@@ -931,13 +931,13 @@ void SCloudParticleDraw(const Scene* scene, const usize entity)
 
 void SSpriteDraw(const Scene* scene, const usize entity)
 {
-    REQUIRE_DEPS(tagPosition | tagColor | tagSprite);
+    REQUIRE_DEPS(TAG_POSITION | TAG_COLOR | TAG_SPRITE);
 
     const CPosition* position = GET_COMPONENT(position, entity);
     const CColor* color = GET_COMPONENT(color, entity);
     const CSprite* sprite = GET_COMPONENT(sprite, entity);
 
-    if (ENTITY_HAS_DEPS(entity, tagSmooth))
+    if (ENTITY_HAS_DEPS(entity, TAG_SMOOTH))
     {
         const CSmooth* smooth = GET_COMPONENT(smooth, entity);
 
@@ -956,7 +956,7 @@ void SSpriteDraw(const Scene* scene, const usize entity)
 
 void SDebugDraw(const Scene* scene, const usize entity)
 {
-    REQUIRE_DEPS(tagPosition | tagDimension);
+    REQUIRE_DEPS(TAG_POSITION | TAG_DIMENSION);
 
     const CPosition* position = GET_COMPONENT(position, entity);
     const CDimension* dimension = GET_COMPONENT(dimension, entity);
