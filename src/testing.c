@@ -40,7 +40,7 @@ void TestSuiteAdd(TestSuite* self, const char* name, TestFn fn)
     }
 }
 
-void TestSuitePresentResults(TestSuite* self)
+bool TestSuitePresentResults(TestSuite* self)
 {
     printf("%s %s\n", evalPrompt, self->name);
 
@@ -58,14 +58,16 @@ void TestSuitePresentResults(TestSuite* self)
         }
     }
 
+    DequeDestroy(&self->records);
+
     if (self->failed == 0)
     {
-        printf("%s %lu passed; %lu failed\n", donePassPrompt, self->passed, self->failed);
+        printf("%s %lu passed; %lu failed\n\n", donePassPrompt, self->passed, self->failed);
+        return true;
     }
     else
     {
-        printf("%s %lu passed; %lu failed\n", doneFailPrompt, self->passed, self->failed);
+        printf("%s %lu passed; %lu failed\n\n", doneFailPrompt, self->passed, self->failed);
+        return false;
     }
-
-    DequeDestroy(&self->records);
 }

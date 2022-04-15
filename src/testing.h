@@ -21,4 +21,4 @@ typedef struct
 
 TestSuite TestSuiteCreate(const char* name);
 void TestSuiteAdd(TestSuite* self, const char* name, TestFn fn);
-void TestSuitePresentResults(TestSuite* self);
+bool TestSuitePresentResults(TestSuite* self);
