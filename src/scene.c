@@ -1,5 +1,4 @@
 #include "context.h"
-#include "entities.h"
 #include "palette.h"
 #include "raymath.h"
 #include "scene.h"
@@ -49,17 +48,21 @@ static usize SceneAllocateEntity(Scene* self)
     return next;
 }
 
-usize SceneDeferAddEntity(Scene* self, Deque components)
+usize SceneDeferAddEntity(Scene* self, EntityBuilder entityBuilder)
 {
     const usize entity = SceneAllocateEntity(self);
 
-    for (usize i = 0; i < DequeGetSize(&components); ++i)
-    {
-        const Component* component = &DEQUE_GET_UNCHECKED(&components, Component, i);
+    SceneSubmitCommand(self, CommandCreateSetTag(entity, entityBuilder.tags));
 
-        SceneDeferEnableComponent(self, entity, component->tag);
+    for (usize i = 0; i < DequeGetSize(&entityBuilder.components); ++i)
+    {
+        const Component* component = &DEQUE_GET_UNCHECKED(&entityBuilder.components, Component, i);
+
         SceneSubmitCommand(self, CommandCreateSetComponent(entity, component));
     }
+
+    // TODO(thismarvin): Do we need to call Destroy on a copy? Probably...
+    // DequeDestroy(&entityBuilder.components);
 
     return entity;
 }

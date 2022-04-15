@@ -5,9 +5,21 @@
 
 #define ADD_COMPONENT(mType, mValue) DEQUE_PUSH_FRONT(&components, Component, ComponentCreate##mType(mValue))
 
-Deque ECreatePlayer(const f32 x, const f32 y)
+EntityBuilder ECreatePlayer(const f32 x, const f32 y)
 {
     Deque components = DEQUE_OF(Component);
+
+    const u64 tags =
+        TAG_NONE
+        | TAG_POSITION
+        | TAG_DIMENSION
+        | TAG_COLOR
+        | TAG_SPRITE
+        | TAG_KINETIC
+        | TAG_SMOOTH
+        | TAG_COLLIDER
+        | TAG_PLAYER
+        | TAG_MORTAL;
 
     Vector2 position = Vector2Create(x, y);
 
@@ -80,12 +92,22 @@ Deque ECreatePlayer(const f32 x, const f32 y)
         .invulnerableDuration = invulnerableDuration,
     }));
 
-    return components;
+    return (EntityBuilder)
+    {
+        .tags = tags,
+        .components = components,
+    };
 }
 
-Deque ECreateBlock(const f32 x, const f32 y, const f32 width, const f32 height)
+EntityBuilder ECreateBlock(const f32 x, const f32 y, const f32 width, const f32 height)
 {
     Deque components = DEQUE_OF(Component);
+
+    const u64 tags =
+        TAG_NONE
+        | TAG_POSITION
+        | TAG_DIMENSION
+        | TAG_COLLIDER;
 
     Vector2 position = Vector2Create(x, y);
 
@@ -106,12 +128,28 @@ Deque ECreateBlock(const f32 x, const f32 y, const f32 width, const f32 height)
         .mask = LAYER_NONE,
     }));
 
-    return components;
+    return (EntityBuilder)
+    {
+        .tags = tags,
+        .components = components,
+    };
 }
 
-Deque ECreateWalker(const f32 x, const f32 y)
+EntityBuilder ECreateWalker(const f32 x, const f32 y)
 {
     Deque components = DEQUE_OF(Component);
+
+    const u64 tags =
+        TAG_NONE
+        | TAG_POSITION
+        | TAG_DIMENSION
+        | TAG_COLOR
+        | TAG_SPRITE
+        | TAG_KINETIC
+        | TAG_SMOOTH
+        | TAG_COLLIDER
+        | TAG_WALKER
+        | TAG_DAMAGE;
 
     Vector2 position = Vector2Create(x, y);
 
@@ -164,10 +202,14 @@ Deque ECreateWalker(const f32 x, const f32 y)
         .value = 1,
     }));
 
-    return components;
+    return (EntityBuilder)
+    {
+        .tags = tags,
+        .components = components,
+    };
 }
 
-Deque ECreateCloudParticle
+EntityBuilder ECreateCloudParticle
 (
     const f32 centerX,
     const f32 centerY,
@@ -175,6 +217,16 @@ Deque ECreateCloudParticle
 )
 {
     Deque components = DEQUE_OF(Component);
+
+    const u64 tags =
+        TAG_NONE
+        | TAG_POSITION
+        | TAG_DIMENSION
+        | TAG_COLOR
+        | TAG_KINETIC
+        | TAG_SMOOTH
+        | TAG_COLLIDER
+        | TAG_FLEETING;
 
     f32 radius = 1;
 
@@ -232,5 +284,9 @@ Deque ECreateCloudParticle
         .age = 0,
     }));
 
-    return components;
+    return (EntityBuilder)
+    {
+        .tags = tags,
+        .components = components,
+    };
 }

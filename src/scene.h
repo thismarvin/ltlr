@@ -4,6 +4,7 @@
 #include "common.h"
 #include "components.h"
 #include "deque.h"
+#include "entities.h"
 #include "events.h"
 #include "input.h"
 #include "level_segment.h"
@@ -72,7 +73,7 @@ typedef struct
 void SceneInit(Scene* self);
 void SceneDeferEnableComponent(Scene* self, usize entity, usize tag);
 void SceneDeferDisableComponent(Scene* self, usize entity, usize tag);
-usize SceneDeferAddEntity(Scene* self, Deque components);
+usize SceneDeferAddEntity(Scene* self, EntityBuilder entityBuilder);
 void SceneDeferDeallocateEntity(Scene* self, usize entity);
 void SceneFlushEntities(Scene* self);
 usize SceneGetEntityCount(const Scene* self);
