@@ -18,32 +18,12 @@ typedef void (*RenderFn)(const RenderFnParams*);
 
 void SceneDeferEnableComponent(Scene* self, const usize entity, const usize tag)
 {
-    CommandEnableComponent enableCommand = (CommandEnableComponent)
-    {
-        .entity = entity,
-        .componentTag = tag,
-    };
-
-    SceneSubmitCommand(self, (Command)
-    {
-        .type = CT_ENABLE_COMPONENT,
-        .enableComponent = enableCommand,
-    });
+    SceneSubmitCommand(self, CommandCreateEnableComponent(entity, tag));
 }
 
 void SceneDeferDisableComponent(Scene* self, const usize entity, const usize tag)
 {
-    CommandDisableComponent disableCommand = (CommandDisableComponent)
-    {
-        .entity = entity,
-        .componentTag = tag,
-    };
-
-    SceneSubmitCommand(self, (Command)
-    {
-        .type = CT_DISABLE_COMPONENT,
-        .disableComponent = disableCommand,
-    });
+    SceneSubmitCommand(self, CommandCreateDisableComponent(entity, tag));
 }
 
 static usize SceneAllocateEntity(Scene* self)
@@ -77,19 +57,8 @@ usize SceneDeferAddEntity(Scene* self, Deque components)
     {
         const Component* component = &DEQUE_GET_UNCHECKED(&components, Component, i);
 
-        CommandSetComponent setCommand = (CommandSetComponent)
-        {
-            .entity = entity,
-            .component = *component,
-        };
-
-        SceneSubmitCommand(self, (Command)
-        {
-            .type = CT_SET_COMPONENT,
-            .setComponent = setCommand,
-        });
-
-        SceneDeferEnableComponent(self, entity, DEQUE_GET_UNCHECKED(&components, Component, i).tag);
+        SceneDeferEnableComponent(self, entity, component->tag);
+        SceneSubmitCommand(self, CommandCreateSetComponent(entity, component));
     }
 
     return entity;
