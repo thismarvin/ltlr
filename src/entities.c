@@ -46,8 +46,8 @@ Deque ECreatePlayer(const f32 x, const f32 y)
 
     ADD_COMPONENT(CCollider, ((CCollider)
     {
-        .layer = layerNone,
-        .mask = layerAll,
+        .layer = LAYER_NONE,
+        .mask = LAYER_ALL,
     }));
 
     ADD_COMPONENT(CMortal, ((CMortal)
@@ -102,8 +102,8 @@ Deque ECreateBlock(const f32 x, const f32 y, const f32 width, const f32 height)
 
     ADD_COMPONENT(CCollider, ((CCollider)
     {
-        .layer = layerAll,
-        .mask = layerNone,
+        .layer = LAYER_ALL,
+        .mask = LAYER_NONE,
     }));
 
     return components;
@@ -155,8 +155,8 @@ Deque ECreateWalker(const f32 x, const f32 y)
 
     ADD_COMPONENT(CCollider, ((CCollider)
     {
-        .layer = layerAll,
-        .mask = layerAll,
+        .layer = LAYER_ALL,
+        .mask = LAYER_ALL,
     }));
 
     ADD_COMPONENT(CDamage, ((CDamage)
@@ -220,8 +220,8 @@ Deque ECreateCloudParticle
 
     ADD_COMPONENT(CCollider, ((CCollider)
     {
-        .layer = layerNone,
-        .mask = layerAll,
+        .layer = LAYER_NONE,
+        .mask = LAYER_ALL,
     }));
 
     f32 lifetime = MIN(1.0f, (f32)GetRandomValue(1, 100) * 0.03f);

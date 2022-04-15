@@ -16,12 +16,12 @@
 #define TAG_DAMAGE ((u64)1 << 10)
 #define TAG_FLEETING ((u64)1 << 11)
 
-extern const u64 layerNone;
-extern const u64 layerUp;
-extern const u64 layerRight;
-extern const u64 layerDown;
-extern const u64 layerLeft;
-extern const u64 layerAll;
+#define LAYER_NONE ((u64)0)
+#define LAYER_UP ((u64)1 << 0)
+#define LAYER_RIGHT ((u64)1 << 1)
+#define LAYER_DOWN ((u64)1 << 2)
+#define LAYER_LEFT ((u64)1 << 3)
+#define LAYER_ALL (LAYER_UP | LAYER_RIGHT | LAYER_DOWN | LAYER_LEFT)
 
 // TODO(thismarvin): Naming components is hard...
 

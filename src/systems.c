@@ -119,22 +119,22 @@ static Vector2 ExtractResolution(const Vector2 resolution, const u64 layers)
 {
     Vector2 result = VECTOR2_ZERO;
 
-    if ((layers & layerLeft) != 0 && resolution.x < 0)
+    if ((layers & LAYER_LEFT) != 0 && resolution.x < 0)
     {
         result.x = resolution.x;
     }
 
-    if ((layers & layerRight) != 0 && resolution.x > 0)
+    if ((layers & LAYER_RIGHT) != 0 && resolution.x > 0)
     {
         result.x = resolution.x;
     }
 
-    if ((layers & layerUp) != 0 && resolution.y < 0)
+    if ((layers & LAYER_UP) != 0 && resolution.y < 0)
     {
         result.y = resolution.y;
     }
 
-    if ((layers & layerDown) != 0 && resolution.y > 0)
+    if ((layers & LAYER_DOWN) != 0 && resolution.y > 0)
     {
         result.y = resolution.y;
     }

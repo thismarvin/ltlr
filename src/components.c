@@ -1,12 +1,5 @@
 #include "components.h"
 
-const u64 layerNone = (u64)0;
-const u64 layerUp = (u64)1 << 0;
-const u64 layerRight = (u64)1 << 1;
-const u64 layerDown = (u64)1 << 2;
-const u64 layerLeft = (u64)1 << 3;
-const u64 layerAll = layerUp | layerRight | layerDown | layerLeft;
-
 Component ComponentCreateCPosition(CPosition value)
 {
     return (Component)
