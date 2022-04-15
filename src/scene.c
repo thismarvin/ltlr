@@ -7,6 +7,7 @@
 #include <assert.h>
 #include <string.h>
 
+#include "debug.h"
 typedef struct
 {
     Scene* scene;
@@ -15,17 +16,37 @@ typedef struct
 
 typedef void (*RenderFn)(const RenderFnParams*);
 
-void SceneEnableComponent(Scene* self, const usize entity, const usize tag)
+void SceneDeferEnableComponent(Scene* self, const usize entity, const usize tag)
 {
-    self->components.tags[entity] |= tag;
+    CommandEnableComponent enableCommand = (CommandEnableComponent)
+    {
+        .entity = entity,
+        .componentTag = tag,
+    };
+
+    SceneSubmitCommand(self, (Command)
+    {
+        .type = CT_ENABLE_COMPONENT,
+        .enableComponent = enableCommand,
+    });
 }
 
-void SceneDisableComponent(Scene* self, const usize entity, const usize tag)
+void SceneDeferDisableComponent(Scene* self, const usize entity, const usize tag)
 {
-    self->components.tags[entity] &= ~tag;
+    CommandDisableComponent disableCommand = (CommandDisableComponent)
+    {
+        .entity = entity,
+        .componentTag = tag,
+    };
+
+    SceneSubmitCommand(self, (Command)
+    {
+        .type = CT_DISABLE_COMPONENT,
+        .disableComponent = disableCommand,
+    });
 }
 
-usize SceneAllocateEntity(Scene* self)
+static usize SceneAllocateEntity(Scene* self)
 {
     EntityManager* entityManager = &self->m_entityManager;
 
@@ -46,6 +67,32 @@ usize SceneAllocateEntity(Scene* self)
     }
 
     return next;
+}
+
+usize SceneDeferAddEntity(Scene* self, Deque components)
+{
+    const usize entity = SceneAllocateEntity(self);
+
+    for (usize i = 0; i < DequeGetSize(&components); ++i)
+    {
+        const Component* component = &DEQUE_GET_UNCHECKED(&components, Component, i);
+
+        CommandSetComponent setCommand = (CommandSetComponent)
+        {
+            .entity = entity,
+            .component = *component,
+        };
+
+        SceneSubmitCommand(self, (Command)
+        {
+            .type = CT_SET_COMPONENT,
+            .setComponent = setCommand,
+        });
+
+        SceneDeferEnableComponent(self, entity, DEQUE_GET_UNCHECKED(&components, Component, i).tag);
+    }
+
+    return entity;
 }
 
 void SceneDeferDeallocateEntity(Scene* self, const usize entity)
@@ -93,6 +140,124 @@ void SceneConsumeEvent(Scene* self, const usize eventIndex)
 {
     self->m_eventManager.m_events[eventIndex].tag = EVENT_NONE;
     DequePushFront(&self->m_eventManager.m_recycledEventIndices, &eventIndex);
+}
+
+void SceneSubmitCommand(Scene* self, Command command)
+{
+    DequePushFront(&self->commands, &command);
+}
+
+static void SceneExecuteSetComponent(Scene* self, const CommandSetComponent* setCommand)
+{
+    usize entity = setCommand->entity;
+    const Component* component = &setCommand->component;
+    switch (component->tag)
+    {
+        case TAG_NONE:
+        {
+            break;
+        }
+        case TAG_POSITION:
+        {
+            SCENE_GET_COMPONENT(self, entity, component->position) = component->position;
+            break;
+        }
+        case TAG_DIMENSION:
+        {
+            SCENE_GET_COMPONENT(self, entity, component->dimension) = component->dimension;
+            break;
+        }
+        case TAG_COLOR:
+        {
+            SCENE_GET_COMPONENT(self, entity, component->color) = component->color;
+            break;
+        }
+        case TAG_SPRITE:
+        {
+            SCENE_GET_COMPONENT(self, entity, component->sprite) = component->sprite;
+            break;
+        }
+        case TAG_KINETIC:
+        {
+            SCENE_GET_COMPONENT(self, entity, component->kinetic) = component->kinetic;
+            break;
+        }
+        case TAG_SMOOTH:
+        {
+            SCENE_GET_COMPONENT(self, entity, component->smooth) = component->smooth;
+            break;
+        }
+        case TAG_PLAYER:
+        {
+            SCENE_GET_COMPONENT(self, entity, component->player) = component->player;
+            break;
+        }
+        case TAG_COLLIDER:
+        {
+            SCENE_GET_COMPONENT(self, entity, component->collider) = component->collider;
+            break;
+        }
+        case TAG_WALKER:
+        {
+            break;
+        }
+        case TAG_MORTAL:
+        {
+            SCENE_GET_COMPONENT(self, entity, component->mortal) = component->mortal;
+            break;
+        }
+        case TAG_DAMAGE:
+        {
+            SCENE_GET_COMPONENT(self, entity, component->damage) = component->damage;
+            break;
+        }
+        case TAG_FLEETING:
+        {
+            SCENE_GET_COMPONENT(self, entity, component->fleeting) = component->fleeting;
+            break;
+        }
+    }
+}
+
+void SceneExecuteEnableComponent(Scene* self, const CommandEnableComponent* enableCommand)
+{
+    self->components.tags[enableCommand->entity] |= enableCommand->componentTag;
+}
+
+void SceneExecuteRemoveComponent(Scene* self, const CommandDisableComponent* removeCommand)
+{
+    self->components.tags[removeCommand->entity] &= ~removeCommand->componentTag;
+}
+
+void SceneExecuteCommands(Scene* self)
+{
+    Deque* commands = &self->commands;
+    for (usize i = 0; i < DequeGetSize(commands); ++i)
+    {
+        const Command* command = &DEQUE_GET_UNCHECKED(commands, Command, i);
+        switch (command->type)
+        {
+            case CT_SET_COMPONENT:
+            {
+                SceneExecuteSetComponent(self, &command->setComponent);
+                break;
+            }
+            case CT_ENABLE_COMPONENT:
+                SceneExecuteEnableComponent(self, &command->enableComponent);
+                break;
+            case CT_DISABLE_COMPONENT:
+            {
+                SceneExecuteRemoveComponent(self, &command->disableComponent);
+                break;
+            }
+            default:
+            {
+                break;
+            }
+        }
+    }
+
+    DequeClear(commands);
 }
 
 usize SceneGetEntityCount(const Scene* self)
@@ -320,6 +485,9 @@ static void SceneStart(Scene* self)
 {
     memset(&self->components.tags, 0, sizeof(u64) * MAX_ENTITIES);
 
+    // TODO(austin0209): Use clear instead of re-initializing?
+    self->commands = DEQUE_OF(Command);
+
     // Initialize EntityManager.
     {
         self->m_entityManager.m_nextFreshEntityIndex = 0;
@@ -348,7 +516,7 @@ static void SceneStart(Scene* self)
             {
                 Rectangle collider = self->segments[i].colliders[j];
 
-                ECreateBlock(self, offset.x + collider.x, offset.y + collider.y, collider.width, collider.height);
+                SceneDeferAddEntity(self, ECreateBlock(offset.x + collider.x, offset.y + collider.y, collider.width, collider.height));
             }
 
             offset.x += self->segments[i].bounds.width;
@@ -356,11 +524,11 @@ static void SceneStart(Scene* self)
     }
 
     // TODO(thismarvin): Put this into level.json somehow...
-    self->player = ECreatePlayer(self, 16 * 1, 16 * - 4);
+    self->player = SceneDeferAddEntity(self, ECreatePlayer(16 * 1, 16 * - 4));
 
-    ECreateWalker(self, 16 * 16, 8 * 16);
-    ECreateWalker(self, 16 * 16, 0 * 16);
-    ECreateWalker(self, 16 * 16, 4 * 16);
+    SceneDeferAddEntity(self, ECreateWalker(16 * 16, 8 * 16));
+    SceneDeferAddEntity(self, ECreateWalker(16 * 16, 0 * 16));
+    SceneDeferAddEntity(self, ECreateWalker(16 * 16, 4 * 16));
 }
 
 void SceneInit(Scene* self)
@@ -383,6 +551,8 @@ void SceneUpdate(Scene* self)
     {
         self->debugging = !self->debugging;
     }
+
+    SceneExecuteCommands(self);
 
     for (usize i = 0; i < SceneGetEntityCount(self); ++i)
     {
@@ -671,6 +841,7 @@ void SceneDraw(const Scene* self)
 
 void SceneReset(Scene* self)
 {
+    DequeDestroy(&self->commands);
     DequeDestroy(&self->m_entityManager.m_recycledEntityIndices);
     DequeDestroy(&self->m_entityManager.m_deferredDeallocations);
     DequeDestroy(&self->m_eventManager.m_recycledEventIndices);
@@ -687,6 +858,7 @@ void SceneDestroy(Scene* self)
         LevelSegmentDestroy(&self->segments[i]);
     }
 
+    DequeDestroy(&self->commands);
     DequeDestroy(&self->m_entityManager.m_recycledEntityIndices);
     DequeDestroy(&self->m_entityManager.m_deferredDeallocations);
     DequeDestroy(&self->m_eventManager.m_recycledEventIndices);

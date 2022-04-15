@@ -1,9 +1,9 @@
 #pragma once
 
 #include "common.h"
-#include "scene.h"
+#include "deque.h"
 
-usize ECreatePlayer(Scene* scene, f32 x, f32 y);
-usize ECreateBlock(Scene* scene, f32 x, f32 y, f32 width, f32 height);
-usize ECreateWalker(Scene* scene, f32 x, f32 y);
-usize ECreateCloudParticle(Scene* scene, f32 centerX, f32 centerY, Vector2 direction);
+Deque ECreatePlayer(f32 x, f32 y);
+Deque ECreateBlock(f32 x, f32 y, f32 width, f32 height);
+Deque ECreateWalker(f32 x, f32 y);
+Deque ECreateCloudParticle(f32 centerX, f32 centerY, Vector2 direction);

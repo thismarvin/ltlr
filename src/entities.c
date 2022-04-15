@@ -3,66 +3,54 @@
 #include "entities.h"
 #include "raymath.h"
 
-#define SET_COMPONENT(mEntity, mValue) SCENE_GET_COMPONENT(scene, mEntity, mValue) = mValue
+#define ADD_COMPONENT(mType, mValue) DEQUE_PUSH_FRONT(&components, Component, ComponentCreate##mType(mValue))
 
-usize ECreatePlayer(Scene* scene, const f32 x, const f32 y)
+Deque ECreatePlayer(const f32 x, const f32 y)
 {
-    usize entity = SceneAllocateEntity(scene);
-
-    scene->components.tags[entity] =
-        tagNone
-        | tagPosition
-        | tagDimension
-        | tagColor
-        | tagSprite
-        | tagKinetic
-        | tagSmooth
-        | tagCollider
-        | tagPlayer
-        | tagMortal;
+    Deque components = DEQUE_OF(Component);
 
     Vector2 position = Vector2Create(x, y);
 
-    SET_COMPONENT(entity, ((CPosition)
+    ADD_COMPONENT(CPosition, ((CPosition)
     {
         .value = position,
     }));
 
-    SET_COMPONENT(entity, ((CDimension)
+    ADD_COMPONENT(CDimension, ((CDimension)
     {
         .width = 15,
         .height = 35,
     }));
 
-    SET_COMPONENT(entity, ((CColor)
+    ADD_COMPONENT(CColor, ((CColor)
     {
         .value = COLOR_WHITE,
     }));
 
-    SET_COMPONENT(entity, ((CSprite)
+    ADD_COMPONENT(CSprite, ((CSprite)
     {
         .source = (Rectangle) { 16, 0, 32, 48 },
         .offset = Vector2Create(-8, -13),
     }));
 
-    SET_COMPONENT(entity, ((CKinetic)
+    ADD_COMPONENT(CKinetic, ((CKinetic)
     {
         .velocity = VECTOR2_ZERO,
         .acceleration = Vector2Create(0, 1000),
     }));
 
-    SET_COMPONENT(entity, ((CSmooth)
+    ADD_COMPONENT(CSmooth, ((CSmooth)
     {
         .previous = position,
     }));
 
-    SET_COMPONENT(entity, ((CCollider)
+    ADD_COMPONENT(CCollider, ((CCollider)
     {
         .layer = layerNone,
         .mask = layerAll,
     }));
 
-    SET_COMPONENT(entity, ((CMortal)
+    ADD_COMPONENT(CMortal, ((CMortal)
     {
         .hp = 2,
     }));
@@ -78,7 +66,7 @@ usize ECreatePlayer(Scene* scene, const f32 x, const f32 y)
     f32 coyoteDuration = CTX_DT * 6;
     f32 invulnerableDuration = 1.5f;
 
-    SET_COMPONENT(entity, ((CPlayer)
+    ADD_COMPONENT(CPlayer, ((CPlayer)
     {
         .coyoteTimer = coyoteDuration,
         .coyoteDuration = coyoteDuration,
@@ -92,125 +80,101 @@ usize ECreatePlayer(Scene* scene, const f32 x, const f32 y)
         .invulnerableDuration = invulnerableDuration,
     }));
 
-    return entity;
+    return components;
 }
 
-usize ECreateBlock(Scene* scene, const f32 x, const f32 y, const f32 width, const f32 height)
+Deque ECreateBlock(const f32 x, const f32 y, const f32 width, const f32 height)
 {
-    usize entity = SceneAllocateEntity(scene);
-
-    scene->components.tags[entity] =
-        tagNone
-        | tagPosition
-        | tagDimension
-        | tagCollider;
+    Deque components = DEQUE_OF(Component);
 
     Vector2 position = Vector2Create(x, y);
 
-    SET_COMPONENT(entity, ((CPosition)
+    ADD_COMPONENT(CPosition, ((CPosition)
     {
         .value = position,
     }));
 
-    SET_COMPONENT(entity, ((CDimension)
+    ADD_COMPONENT(CDimension, ((CDimension)
     {
         .width = width,
         .height = height,
     }));
 
-    SET_COMPONENT(entity, ((CCollider)
+    ADD_COMPONENT(CCollider, ((CCollider)
     {
         .layer = layerAll,
         .mask = layerNone,
     }));
 
-    return entity;
+    return components;
 }
 
-usize ECreateWalker(Scene* scene, const f32 x, const f32 y)
+Deque ECreateWalker(const f32 x, const f32 y)
 {
-    usize entity = SceneAllocateEntity(scene);
-
-    scene->components.tags[entity] =
-        tagNone
-        | tagPosition
-        | tagDimension
-        | tagColor
-        | tagSprite
-        | tagKinetic
-        | tagSmooth
-        | tagCollider
-        | tagWalker
-        | tagDamage;
+    Deque components = DEQUE_OF(Component);
 
     Vector2 position = Vector2Create(x, y);
 
-    SET_COMPONENT(entity, ((CPosition)
+    ADD_COMPONENT(CWalker, ((CWalker)
+    {
+        .unused = 0,
+    }));
+
+    ADD_COMPONENT(CPosition, ((CPosition)
     {
         .value = position,
     }));
 
-    SET_COMPONENT(entity, ((CDimension)
+    ADD_COMPONENT(CDimension, ((CDimension)
     {
         .width = 16,
         .height = 16,
     }));
 
-    SET_COMPONENT(entity, ((CColor)
+    ADD_COMPONENT(CColor, ((CColor)
     {
         .value = COLOR_WHITE,
     }));
 
-    SET_COMPONENT(entity, ((CSprite)
+    ADD_COMPONENT(CSprite, ((CSprite)
     {
         .source = (Rectangle) { 3 * 16, 5 * 16, 16, 16 },
         .offset = VECTOR2_ZERO,
     }));
 
-    SET_COMPONENT(entity, ((CKinetic)
+    ADD_COMPONENT(CKinetic, ((CKinetic)
     {
         .velocity = Vector2Create(50, 0),
         .acceleration = Vector2Create(0, 1000),
     }));
 
-    SET_COMPONENT(entity, ((CSmooth)
+    ADD_COMPONENT(CSmooth, ((CSmooth)
     {
         .previous = position,
     }));
 
-    SET_COMPONENT(entity, ((CCollider)
+    ADD_COMPONENT(CCollider, ((CCollider)
     {
         .layer = layerAll,
         .mask = layerAll,
     }));
 
-    SET_COMPONENT(entity, ((CDamage)
+    ADD_COMPONENT(CDamage, ((CDamage)
     {
         .value = 1,
     }));
 
-    return entity;
+    return components;
 }
 
-usize ECreateCloudParticle
+Deque ECreateCloudParticle
 (
-    Scene* scene,
     const f32 centerX,
     const f32 centerY,
     const Vector2 direction
 )
 {
-    usize entity = SceneAllocateEntity(scene);
-
-    scene->components.tags[entity] =
-        tagNone
-        | tagPosition
-        | tagDimension
-        | tagColor
-        | tagKinetic
-        | tagSmooth
-        | tagCollider
-        | tagFleeting;
+    Deque components = DEQUE_OF(Component);
 
     f32 radius = 1;
 
@@ -225,36 +189,36 @@ usize ECreateCloudParticle
 
     Vector2 position = Vector2Create(centerX - radius, centerY - radius);
 
-    SET_COMPONENT(entity, ((CPosition)
+    ADD_COMPONENT(CPosition, ((CPosition)
     {
         .value = position,
     }));
 
-    SET_COMPONENT(entity, ((CDimension)
+    ADD_COMPONENT(CDimension, ((CDimension)
     {
         .width = radius * 2,
         .height = radius * 2,
     }));
 
-    SET_COMPONENT(entity, ((CColor)
+    ADD_COMPONENT(CColor, ((CColor)
     {
         .value = COLOR_WHITE,
     }));
 
     f32 speed = (f32)GetRandomValue(5, 15);
 
-    SET_COMPONENT(entity, ((CKinetic)
+    ADD_COMPONENT(CKinetic, ((CKinetic)
     {
         .velocity = Vector2Scale(direction, speed),
         .acceleration = Vector2Create(0, 15),
     }));
 
-    SET_COMPONENT(entity, ((CSmooth)
+    ADD_COMPONENT(CSmooth, ((CSmooth)
     {
         .previous = position,
     }));
 
-    SET_COMPONENT(entity, ((CCollider)
+    ADD_COMPONENT(CCollider, ((CCollider)
     {
         .layer = layerNone,
         .mask = layerAll,
@@ -262,11 +226,11 @@ usize ECreateCloudParticle
 
     f32 lifetime = MIN(1.0f, (f32)GetRandomValue(1, 100) * 0.03f);
 
-    SET_COMPONENT(entity, ((CFleeting)
+    ADD_COMPONENT(CFleeting, ((CFleeting)
     {
         .lifetime = lifetime,
         .age = 0,
     }));
 
-    return entity;
+    return components;
 }

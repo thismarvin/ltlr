@@ -12,6 +12,42 @@
 
 typedef struct
 {
+    usize entity;
+    Component component;
+} CommandSetComponent;
+
+typedef struct
+{
+    usize entity;
+    u64 componentTag;
+} CommandEnableComponent;
+
+typedef struct
+{
+    usize entity;
+    u64 componentTag;
+} CommandDisableComponent;
+
+typedef enum {
+    CT_NONE,
+    CT_SET_COMPONENT,
+    CT_ENABLE_COMPONENT,
+    CT_DISABLE_COMPONENT,
+} CommandType;
+
+typedef struct
+{
+    CommandType type;
+    union
+    {
+        CommandSetComponent setComponent;
+        CommandEnableComponent enableComponent;
+        CommandDisableComponent disableComponent;
+    };
+} Command;
+
+typedef struct
+{
     u64 tags[MAX_ENTITIES];
     CPosition positions[MAX_ENTITIES];
     CDimension dimensions[MAX_ENTITIES];
@@ -65,12 +101,13 @@ typedef struct
     RenderTexture2D foregroundLayer;
     // TODO(thismarvin): Should this exist in Scene?
     InputHandler input;
+    Deque commands;
 } Scene;
 
 void SceneInit(Scene* self);
-void SceneEnableComponent(Scene* self, usize entity, usize tag);
-void SceneDisableComponent(Scene* self, usize entity, usize tag);
-usize SceneAllocateEntity(Scene* self);
+void SceneDeferEnableComponent(Scene* self, const usize entity, const usize tag);
+void SceneDeferDisableComponent(Scene* self, const usize entity, const usize tag);
+usize SceneDeferAddEntity(Scene* self, Deque components);
 void SceneDeferDeallocateEntity(Scene* self, usize entity);
 void SceneFlushEntities(Scene* self);
 usize SceneGetEntityCount(const Scene* self);
@@ -78,6 +115,8 @@ usize SceneGetEventCount(const Scene* self);
 const Event* SceneGetEvent(const Scene* self, usize index);
 void SceneRaiseEvent(Scene* self, const Event* event);
 void SceneConsumeEvent(Scene* self, usize eventIndex);
+void SceneSubmitCommand(Scene* self, Command command);
+void SceneExecuteCommands(Scene* self);
 void SceneUpdate(Scene* self);
 void SceneDraw(const Scene* self);
 void SceneReset(Scene* self);

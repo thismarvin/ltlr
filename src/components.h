@@ -2,6 +2,20 @@
 
 #include "common.h"
 
+#define TAG_NONE ((u64)0)
+#define TAG_POSITION ((u64)1 << 0)
+#define TAG_DIMENSION ((u64)1 << 1)
+#define TAG_COLOR ((u64)1 << 2)
+#define TAG_SPRITE ((u64)1 << 3)
+#define TAG_KINETIC ((u64)1 << 4)
+#define TAG_SMOOTH ((u64)1 << 5)
+#define TAG_PLAYER ((u64)1 << 6)
+#define TAG_COLLIDER ((u64)1 << 7)
+#define TAG_WALKER ((u64)1 << 8)
+#define TAG_MORTAL ((u64)1 << 9)
+#define TAG_DAMAGE ((u64)1 << 10)
+#define TAG_FLEETING ((u64)1 << 11)
+
 extern const u64 tagNone;
 extern const u64 tagPosition;
 extern const u64 tagDimension;
@@ -66,6 +80,11 @@ typedef struct
     u64 mask;
 } CCollider;
 
+typedef struct
+{
+    u8 unused;
+} CWalker;
+
 // TODO(thismarvin): Should this be in some sort of Singleton?
 typedef struct
 {
@@ -97,3 +116,35 @@ typedef struct
     f32 lifetime;
     f32 age;
 } CFleeting;
+
+typedef struct
+{
+    u64 tag;
+    union
+    {
+        CPosition position;
+        CDimension dimension;
+        CColor color;
+        CSprite sprite;
+        CKinetic kinetic;
+        CSmooth smooth;
+        CCollider collider;
+        CPlayer player;
+        CMortal mortal;
+        CDamage damage;
+        CFleeting fleeting;
+    };
+} Component;
+
+Component ComponentCreateCPosition(CPosition value);
+Component ComponentCreateCDimension(CDimension value);
+Component ComponentCreateCColor(CColor value);
+Component ComponentCreateCSprite(CSprite value);
+Component ComponentCreateCKinetic(CKinetic value);
+Component ComponentCreateCSmooth(CSmooth value);
+Component ComponentCreateCCollider(CCollider value);
+Component ComponentCreateCWalker(CWalker value);
+Component ComponentCreateCPlayer(CPlayer value);
+Component ComponentCreateCMortal(CMortal value);
+Component ComponentCreateCDamage(CDamage value);
+Component ComponentCreateCFleeting(CFleeting value);

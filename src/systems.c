@@ -597,17 +597,17 @@ static void PlayerFlashingLogic(Scene* scene, const usize entity)
 
         if (passedSlices % 2 == 0)
         {
-            SceneDisableComponent(scene, entity, tagSprite);
+            SceneDeferDisableComponent(scene, entity, tagSprite);
         }
         else
         {
-            SceneEnableComponent(scene, entity, tagSprite);
+            SceneDeferEnableComponent(scene, entity, tagSprite);
         }
     }
     else
     {
         // This is a pre-caution to make sure the last state isn't off.
-        SceneEnableComponent(scene, entity, tagSprite);
+        SceneDeferEnableComponent(scene, entity, tagSprite);
     }
 }
 void SPlayerMortalUpdate(Scene* scene, const usize entity)
@@ -650,7 +650,7 @@ void SPlayerMortalUpdate(Scene* scene, const usize entity)
         {
             player->dead = true;
 
-            SceneDisableComponent(scene, entity, tagCollider);
+            SceneDeferDisableComponent(scene, entity, tagCollider);
 
             kinetic->velocity = (Vector2)
             {
@@ -901,7 +901,7 @@ void SCloudParticleSpawnUpdate(Scene* scene, const usize entity)
             direction.y *= -1;
             f32 directionOffset = (f32)GetRandomValue(DEG2RAD * -45, DEG2RAD * 45);
             direction = Vector2Rotate(direction, directionOffset);
-            ECreateCloudParticle(scene, startingPosition.x, startingPosition.y, direction);
+            SceneDeferAddEntity(scene, ECreateCloudParticle(startingPosition.x, startingPosition.y, direction));
         }
     }
 }
