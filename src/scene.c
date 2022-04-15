@@ -138,72 +138,67 @@ static void SceneExecuteSetComponent(Scene* self, const CommandSetComponent* set
 
         case TAG_POSITION:
         {
-            SCENE_GET_COMPONENT(self, entity, component->position) = component->position;
+            SCENE_SET_COMPONENT(self, entity, component->position);
             break;
         }
 
         case TAG_DIMENSION:
         {
-            SCENE_GET_COMPONENT(self, entity, component->dimension) = component->dimension;
+            SCENE_SET_COMPONENT(self, entity, component->dimension);
             break;
         }
 
         case TAG_COLOR:
         {
-            SCENE_GET_COMPONENT(self, entity, component->color) = component->color;
+            SCENE_SET_COMPONENT(self, entity, component->color);
             break;
         }
 
         case TAG_SPRITE:
         {
-            SCENE_GET_COMPONENT(self, entity, component->sprite) = component->sprite;
+            SCENE_SET_COMPONENT(self, entity, component->sprite);
             break;
         }
 
         case TAG_KINETIC:
         {
-            SCENE_GET_COMPONENT(self, entity, component->kinetic) = component->kinetic;
+            SCENE_SET_COMPONENT(self, entity, component->kinetic);
             break;
         }
 
         case TAG_SMOOTH:
         {
-            SCENE_GET_COMPONENT(self, entity, component->smooth) = component->smooth;
+            SCENE_SET_COMPONENT(self, entity, component->smooth);
             break;
         }
 
         case TAG_PLAYER:
         {
-            SCENE_GET_COMPONENT(self, entity, component->player) = component->player;
+            SCENE_SET_COMPONENT(self, entity, component->player);
             break;
         }
 
         case TAG_COLLIDER:
         {
-            SCENE_GET_COMPONENT(self, entity, component->collider) = component->collider;
-            break;
-        }
-
-        case TAG_WALKER:
-        {
+            SCENE_SET_COMPONENT(self, entity, component->collider);
             break;
         }
 
         case TAG_MORTAL:
         {
-            SCENE_GET_COMPONENT(self, entity, component->mortal) = component->mortal;
+            SCENE_SET_COMPONENT(self, entity, component->mortal);
             break;
         }
 
         case TAG_DAMAGE:
         {
-            SCENE_GET_COMPONENT(self, entity, component->damage) = component->damage;
+            SCENE_SET_COMPONENT(self, entity, component->damage);
             break;
         }
 
         case TAG_FLEETING:
         {
-            SCENE_GET_COMPONENT(self, entity, component->fleeting) = component->fleeting;
+            SCENE_SET_COMPONENT(self, entity, component->fleeting);
             break;
         }
     }
