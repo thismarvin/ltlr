@@ -1,51 +1,15 @@
 #pragma once
 
+#include "command.h"
 #include "common.h"
 #include "components.h"
+#include "deque.h"
 #include "events.h"
 #include "input.h"
 #include "level_segment.h"
-#include "deque.h"
 
 #define MAX_ENTITIES 1024
 #define MAX_EVENTS 64
-
-typedef struct
-{
-    usize entity;
-    Component component;
-} CommandSetComponent;
-
-typedef struct
-{
-    usize entity;
-    u64 componentTag;
-} CommandEnableComponent;
-
-typedef struct
-{
-    usize entity;
-    u64 componentTag;
-} CommandDisableComponent;
-
-typedef enum
-{
-    CT_NONE,
-    CT_SET_COMPONENT,
-    CT_ENABLE_COMPONENT,
-    CT_DISABLE_COMPONENT,
-} CommandType;
-
-typedef struct
-{
-    CommandType type;
-    union
-    {
-        CommandSetComponent setComponent;
-        CommandEnableComponent enableComponent;
-        CommandDisableComponent disableComponent;
-    };
-} Command;
 
 typedef struct
 {
