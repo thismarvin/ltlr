@@ -70,8 +70,8 @@ typedef struct
 } Scene;
 
 void SceneInit(Scene* self);
-void SceneDeferEnableComponent(Scene* self, const usize entity, const usize tag);
-void SceneDeferDisableComponent(Scene* self, const usize entity, const usize tag);
+void SceneDeferEnableComponent(Scene* self, usize entity, usize tag);
+void SceneDeferDisableComponent(Scene* self, usize entity, usize tag);
 usize SceneDeferAddEntity(Scene* self, Deque components);
 void SceneDeferDeallocateEntity(Scene* self, usize entity);
 void SceneFlushEntities(Scene* self);
