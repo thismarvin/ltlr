@@ -69,3 +69,8 @@ clean:
 	if [ -d "build" ]; then rm -rf build; fi
 	if [ -d "bin" ]; then rm -rf bin; fi
 	@echo "Done"
+
+.PHONY: test
+test:
+	gcc -o ./bin/debug/desktop/test src/unit_tests.c src/testing.c src/deque.c -DDO_TESTING
+	./bin/debug/desktop/test
