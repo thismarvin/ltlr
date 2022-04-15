@@ -233,7 +233,8 @@ int main()
     bool allPass = true;
     allPass &= ExecuteDequeTests();
 
-    if (!allPass) {
+    if (!allPass)
+    {
         return 1;
     }
 }

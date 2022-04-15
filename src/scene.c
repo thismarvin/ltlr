@@ -151,66 +151,79 @@ static void SceneExecuteSetComponent(Scene* self, const CommandSetComponent* set
 {
     usize entity = setCommand->entity;
     const Component* component = &setCommand->component;
+
     switch (component->tag)
     {
         case TAG_NONE:
         {
             break;
         }
+
         case TAG_POSITION:
         {
             SCENE_GET_COMPONENT(self, entity, component->position) = component->position;
             break;
         }
+
         case TAG_DIMENSION:
         {
             SCENE_GET_COMPONENT(self, entity, component->dimension) = component->dimension;
             break;
         }
+
         case TAG_COLOR:
         {
             SCENE_GET_COMPONENT(self, entity, component->color) = component->color;
             break;
         }
+
         case TAG_SPRITE:
         {
             SCENE_GET_COMPONENT(self, entity, component->sprite) = component->sprite;
             break;
         }
+
         case TAG_KINETIC:
         {
             SCENE_GET_COMPONENT(self, entity, component->kinetic) = component->kinetic;
             break;
         }
+
         case TAG_SMOOTH:
         {
             SCENE_GET_COMPONENT(self, entity, component->smooth) = component->smooth;
             break;
         }
+
         case TAG_PLAYER:
         {
             SCENE_GET_COMPONENT(self, entity, component->player) = component->player;
             break;
         }
+
         case TAG_COLLIDER:
         {
             SCENE_GET_COMPONENT(self, entity, component->collider) = component->collider;
             break;
         }
+
         case TAG_WALKER:
         {
             break;
         }
+
         case TAG_MORTAL:
         {
             SCENE_GET_COMPONENT(self, entity, component->mortal) = component->mortal;
             break;
         }
+
         case TAG_DAMAGE:
         {
             SCENE_GET_COMPONENT(self, entity, component->damage) = component->damage;
             break;
         }
+
         case TAG_FLEETING:
         {
             SCENE_GET_COMPONENT(self, entity, component->fleeting) = component->fleeting;
@@ -232,9 +245,11 @@ void SceneExecuteRemoveComponent(Scene* self, const CommandDisableComponent* rem
 void SceneExecuteCommands(Scene* self)
 {
     Deque* commands = &self->commands;
+
     for (usize i = 0; i < DequeGetSize(commands); ++i)
     {
         const Command* command = &DEQUE_GET_UNCHECKED(commands, Command, i);
+
         switch (command->type)
         {
             case CT_SET_COMPONENT:
@@ -242,14 +257,19 @@ void SceneExecuteCommands(Scene* self)
                 SceneExecuteSetComponent(self, &command->setComponent);
                 break;
             }
+
             case CT_ENABLE_COMPONENT:
+            {
                 SceneExecuteEnableComponent(self, &command->enableComponent);
                 break;
+            }
+
             case CT_DISABLE_COMPONENT:
             {
                 SceneExecuteRemoveComponent(self, &command->disableComponent);
                 break;
             }
+
             default:
             {
                 break;
@@ -516,7 +536,17 @@ static void SceneStart(Scene* self)
             {
                 Rectangle collider = self->segments[i].colliders[j];
 
-                SceneDeferAddEntity(self, ECreateBlock(offset.x + collider.x, offset.y + collider.y, collider.width, collider.height));
+                SceneDeferAddEntity
+                (
+                    self,
+                    ECreateBlock
+                    (
+                        offset.x + collider.x,
+                        offset.y + collider.y,
+                        collider.width,
+                        collider.height
+                    )
+                );
             }
 
             offset.x += self->segments[i].bounds.width;

@@ -28,7 +28,8 @@ typedef struct
     u64 componentTag;
 } CommandDisableComponent;
 
-typedef enum {
+typedef enum
+{
     CT_NONE,
     CT_SET_COMPONENT,
     CT_ENABLE_COMPONENT,
