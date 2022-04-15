@@ -63,14 +63,6 @@ Component ComponentCreateCCollider(CCollider value)
     };
 }
 
-Component ComponentCreateCWalker(CWalker value)
-{
-    return (Component)
-    {
-        .tag = TAG_WALKER,
-    };
-}
-
 Component ComponentCreateCPlayer(CPlayer value)
 {
     return (Component)

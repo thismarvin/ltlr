@@ -66,11 +66,6 @@ typedef struct
     u64 mask;
 } CCollider;
 
-typedef struct
-{
-    u8 unused;
-} CWalker;
-
 // TODO(thismarvin): Should this be in some sort of Singleton?
 typedef struct
 {
@@ -129,7 +124,6 @@ Component ComponentCreateCSprite(CSprite value);
 Component ComponentCreateCKinetic(CKinetic value);
 Component ComponentCreateCSmooth(CSmooth value);
 Component ComponentCreateCCollider(CCollider value);
-Component ComponentCreateCWalker(CWalker value);
 Component ComponentCreateCPlayer(CPlayer value);
 Component ComponentCreateCMortal(CMortal value);
 Component ComponentCreateCDamage(CDamage value);

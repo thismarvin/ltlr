@@ -153,11 +153,6 @@ EntityBuilder ECreateWalker(const f32 x, const f32 y)
 
     Vector2 position = Vector2Create(x, y);
 
-    ADD_COMPONENT(CWalker, ((CWalker)
-    {
-        .unused = 0,
-    }));
-
     ADD_COMPONENT(CPosition, ((CPosition)
     {
         .value = position,
