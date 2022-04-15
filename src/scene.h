@@ -124,3 +124,6 @@ void SceneDestroy(Scene* self);
     CDamage*: &mScene->components.damages[mEntity], \
     const CFleeting*: &mScene->components.fleetings[mEntity], \
     CFleeting*: &mScene->components.fleetings[mEntity])
+
+#define SCENE_SET_COMPONENT(mScene, mEntity, mValue) \
+    SCENE_GET_COMPONENT(mScene, mEntity, mValue) = mValue
