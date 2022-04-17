@@ -61,12 +61,33 @@ export def analyze-src [] {
 	| merge { $includes }
 }
 
+def get-unique-directories [ files ] {
+	$files
+	| each { |it| $it | path dirname }
+	| uniq
+	| if not ($in | empty?) { $in | sort } else { [] }
+}
+
 export def generate-makefile [] {
 	let data = analyze-src
+	let unique-directories = get-unique-directories $data.file
+
+	let directory-output = '$(DIR_OUT)'
+
+	let directories = (
+		$unique-directories
+		| each { |it| $it | str replace 'src' $directory-output }
+	)
+
+	let directory-rules = (
+		$directories
+		| each { |it| $it | path dirname | if not ($in | empty?) { $"($it): | ($in)" } else { $"($it):" }}
+		| each { |it| $"($it)\n\t$\(MKDIR) $@\n" }
+	)
 
 	let targets = (
 		$data.file
-		| each { |it| $it | str replace '(.+)\.c' '$1.o' }
+		| each { |it| $it | str replace '(src/)((\w+/)*\w+)(\.c)' $"($directory-output)/$2.o" }
 		| wrap 'target'
 	)
 
@@ -84,7 +105,7 @@ export def generate-makefile [] {
 
 	let recipes = (
 		$builder
-		| each { |entry| $"($entry.target): ($entry.input) ($entry.prerequisites)\n" }
+		| each { |entry| $"($entry.target): ($entry.input) ($entry.prerequisites) | ($entry.target | path dirname)\n" }
 	)
 
 	let command = '$(CC) $(FLAGS_INCLUDE) $(FLAGS) -o $@ -c $<'
@@ -98,28 +119,36 @@ export def generate-makefile [] {
 		| each { |it| $"\t($in) \\" }
 		| str collect "\n"
 	)
-	
+
 $"# This file is auto-generated; any changes you make may be overwritten.
 
 CC := gcc
+MKDIR := mkdir
 RM := rm
 
-EXC := ltlr
+DIR_OUT := build
+OUT := ltlr
+
 FLAGS_INCLUDE := -Ivendor/raylib/src
 FLAGS := -std=c17 -Wall -DPLATFORM_DESKTOP
-FLAGS_LIBRARY := -lm -lpthread -ldl -Lbuild/vendor/raylib/desktop -lraylib
+FLAGS_LIBRARY := -lm -lpthread -ldl -Llibraries/desktop -lraylib
 
 INPUT := \\
 ($makefile-inputs)\n
-OUTPUT := $\(patsubst src/%.c,src/%.o, $\(INPUT))
+OUTPUT := $\(patsubst src/%.c,$\(DIR_OUT)/%.o, $\(INPUT))
 
+all: clean output
+
+($directory-rules | str collect "\n")
 ($rules | str collect "\n")
-src/$\(EXC): $\(OUTPUT)
+$\(DIR_OUT)/$\(OUT): $\(OUTPUT)
 \t$\(CC) $\(FLAGS) -o $@ $^ $\(FLAGS_LIBRARY)
+
+.PHONY: output
+output: $\(DIR_OUT)/$\(OUT)
 
 .PHONY: clean
 clean:
-\t$\(RM) -f $\(OUTPUT)
-\t$\(RM) -f src/$\(EXC)\n"
+\tif [ -d $\(DIR_OUT) ]; then rm -rf $\(DIR_OUT); fi\n"
 	| str trim
 }
