@@ -72,11 +72,11 @@ export def generate-makefile [] {
 	let data = analyze-src
 	let unique-directories = get-unique-directories $data.file
 
-	let directory-output = '$(DIR_OUT)'
+	let output-directory = '$(OUT_DIR)'
 
 	let directories = (
 		$unique-directories
-		| each { |it| $it | str replace 'src' $directory-output }
+		| each { |it| $it | str replace 'src' $output-directory }
 	)
 
 	let directory-rules = (
@@ -87,7 +87,7 @@ export def generate-makefile [] {
 
 	let targets = (
 		$data.file
-		| each { |it| $it | str replace '(src/)((\w+/)*\w+)(\.c)' $"($directory-output)/$2.o" }
+		| each { |it| $it | str replace '(src/)((\w+/)*\w+)(\.c)' $"($output-directory)/$2.o" }
 		| wrap 'target'
 	)
 
@@ -108,7 +108,7 @@ export def generate-makefile [] {
 		| each { |entry| $"($entry.target): ($entry.input) ($entry.prerequisites) | ($entry.target | path dirname)\n" }
 	)
 
-	let command = '$(CC) $(FLAGS_INCLUDE) $(FLAGS) -o $@ -c $<'
+	let command = '$(CC) $(INCLUDE_FLAGS) $(FLAGS) -o $@ -c $<'
 	let rules = (
 		$recipes
 		| each { |it| $"($it)\t($command)\n" }
@@ -126,29 +126,31 @@ CC := gcc
 MKDIR := mkdir
 RM := rm
 
-DIR_OUT := build
+OUT_DIR := build
 OUT := ltlr
 
-FLAGS_INCLUDE := -Ivendor/raylib/src
-FLAGS := -std=c17 -Wall -DPLATFORM_DESKTOP
-FLAGS_LIBRARY := -lm -lpthread -ldl -Llibraries/desktop -lraylib
+FLAGS := -std=c17 -Wall -Wextra -Wpedantic -DPLATFORM_DESKTOP
+INCLUDE_FLAGS := -Ivendor/raylib/src
+LIBRARY_FLAGS := -lm -lpthread -ldl -Llibraries/desktop -lraylib
 
-INPUT := \\
+INPUT_FILES := \\
 ($makefile-inputs)\n
-OUTPUT := $\(patsubst src/%.c,$\(DIR_OUT)/%.o, $\(INPUT))
+OUTPUT_FILES := $\(patsubst src/%.c,$\(OUT_DIR)/%.o, $\(INPUT_FILES))
+
+$\(VERBOSE).SILENT:
 
 all: clean output
 
 ($directory-rules | str collect "\n")
 ($rules | str collect "\n")
-$\(DIR_OUT)/$\(OUT): $\(OUTPUT)
-\t$\(CC) $\(FLAGS) -o $@ $^ $\(FLAGS_LIBRARY)
+$\(OUT_DIR)/$\(OUT): $\(OUTPUT_FILES)
+\t$\(CC) $\(FLAGS) -o $@ $^ $\(LIBRARY_FLAGS)
 
 .PHONY: output
-output: $\(DIR_OUT)/$\(OUT)
+output: $\(OUT_DIR)/$\(OUT)
 
 .PHONY: clean
 clean:
-\tif [ -d $\(DIR_OUT) ]; then rm -rf $\(DIR_OUT); fi\n"
+\tif [ -d $\(OUT_DIR) ]; then rm -rf $\(OUT_DIR); fi\n"
 	| str trim
 }
