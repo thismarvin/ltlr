@@ -139,6 +139,7 @@ OUTPUT_FILES := $\(patsubst src/%.c,$\(OUT_DIR)/%.o, $\(INPUT_FILES))
 
 $\(VERBOSE).SILENT:
 
+.PHONY: all
 all: clean output
 
 ($directory-rules | str collect "\n")
