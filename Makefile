@@ -70,7 +70,8 @@ clean:
 	if [ -d "bin" ]; then rm -rf bin; fi
 	@echo "Done"
 
+# TODO(thismarvin): We need to automate this somehow!
 .PHONY: test
 test:
-	gcc -o ./bin/debug/desktop/test src/unit_tests.c src/testing.c src/deque.c -DDO_TESTING
+	gcc -Ivendor/raylib/src -o ./bin/debug/desktop/test src/unit_tests.c src/testing.c src/deque.c -Lbuild/vendor/raylib/desktop -DDO_TESTING
 	./bin/debug/desktop/test
