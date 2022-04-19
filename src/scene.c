@@ -6,7 +6,6 @@
 #include <assert.h>
 #include <string.h>
 
-#include "debug.h"
 typedef struct
 {
     Scene* scene;
@@ -68,18 +67,7 @@ usize SceneDeferAddEntity(Scene* self, EntityBuilder entityBuilder)
 
 void SceneDeferDeallocateEntity(Scene* self, const usize entity)
 {
-    DequePushFront(&self->m_entityManager.m_deferredDeallocations, &entity);
-}
-
-void SceneFlushEntities(Scene* self)
-{
-    while (DequeGetSize(&self->m_entityManager.m_deferredDeallocations) > 0)
-    {
-        usize entity = DEQUE_POP_FRONT(&self->m_entityManager.m_deferredDeallocations, usize);
-
-        self->components.tags[entity] = 0;
-        DequePushFront(&self->m_entityManager.m_recycledEntityIndices, &entity);
-    }
+    SceneSubmitCommand(self, CommandCreateDeallocateEntity(entity));
 }
 
 void SceneRaiseEvent(Scene* self, const Event* event)
@@ -502,7 +490,6 @@ static void SceneStart(Scene* self)
     // Initialize EntityManager.
     {
         self->m_entityManager.m_nextFreshEntityIndex = 0;
-        self->m_entityManager.m_deferredDeallocations = DEQUE_WITH_CAPACITY(usize, MAX_ENTITIES);
         self->m_entityManager.m_recycledEntityIndices = DEQUE_WITH_CAPACITY(usize, MAX_ENTITIES);
     }
 
@@ -595,8 +582,6 @@ void SceneUpdate(Scene* self)
 
         SGenericCollisionUpdate(self, i);
     }
-
-    SceneFlushEntities(self);
 }
 
 // Return a Rectangle that is within the scene's bounds and centered on a given entity.
@@ -864,7 +849,6 @@ void SceneReset(Scene* self)
 {
     DequeDestroy(&self->commands);
     DequeDestroy(&self->m_entityManager.m_recycledEntityIndices);
-    DequeDestroy(&self->m_entityManager.m_deferredDeallocations);
     DequeDestroy(&self->m_eventManager.m_recycledEventIndices);
 
     SceneStart(self);
@@ -881,7 +865,6 @@ void SceneDestroy(Scene* self)
 
     DequeDestroy(&self->commands);
     DequeDestroy(&self->m_entityManager.m_recycledEntityIndices);
-    DequeDestroy(&self->m_entityManager.m_deferredDeallocations);
     DequeDestroy(&self->m_eventManager.m_recycledEventIndices);
 
     UnloadRenderTexture(self->backgroundLayer);
