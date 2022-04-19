@@ -203,6 +203,14 @@ static void SceneExecuteSetComponent(Scene* self, const CommandSetComponent* set
     }
 }
 
+void SceneExecuteDeallocateEntity(Scene* self, const CommandDeallocateEntity* deallocateEntity)
+{
+    const usize entity = deallocateEntity->entity;
+
+    self->components.tags[entity] = TAG_NONE;
+    DequePushFront(&self->m_entityManager.m_recycledEntityIndices, &entity);
+}
+
 void SceneExecuteEnableComponent(Scene* self, const CommandEnableComponent* enableCommand)
 {
     self->components.tags[enableCommand->entity] |= enableCommand->componentTag;
@@ -232,6 +240,12 @@ void SceneExecuteCommands(Scene* self)
             case CT_SET_COMPONENT:
             {
                 SceneExecuteSetComponent(self, &command->setComponent);
+                break;
+            }
+
+            case CT_DEALLOCATE_ENTITY:
+            {
+                SceneExecuteDeallocateEntity(self, &command->deallocateEntity);
                 break;
             }
 

@@ -18,6 +18,11 @@ typedef struct
 typedef struct
 {
     usize entity;
+} CommandDeallocateEntity;
+
+typedef struct
+{
+    usize entity;
     u64 componentTag;
 } CommandEnableComponent;
 
@@ -32,6 +37,7 @@ typedef enum
     CT_NONE,
     CT_SET_TAG,
     CT_SET_COMPONENT,
+    CT_DEALLOCATE_ENTITY,
     CT_ENABLE_COMPONENT,
     CT_DISABLE_COMPONENT,
 } CommandType;
@@ -43,6 +49,7 @@ typedef struct
     {
         CommandSetTag setTag;
         CommandSetComponent setComponent;
+        CommandDeallocateEntity deallocateEntity;
         CommandEnableComponent enableComponent;
         CommandDisableComponent disableComponent;
     };
@@ -50,5 +57,6 @@ typedef struct
 
 Command CommandCreateSetTag(usize entity, u64 tag);
 Command CommandCreateSetComponent(usize entity, const Component* component);
+Command CommandCreateDeallocateEntity(usize entity);
 Command CommandCreateEnableComponent(usize entity, u64 componentTag);
 Command CommandCreateDisableComponent(usize entity, u64 componentTag);
