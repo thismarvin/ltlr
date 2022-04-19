@@ -8,7 +8,7 @@ def get-includes [ file ] {
 	open $file
 	| lines
 	| find -r '\s*#include\s+.+'
-	| str replace '\s*#include\s+["<](.+)[">]' '$1'
+	| str replace '\s*#include\s+"(.+)"' '$1'
 	| path basename
 }
 
