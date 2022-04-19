@@ -61,8 +61,7 @@ usize SceneDeferAddEntity(Scene* self, EntityBuilder entityBuilder)
         SceneSubmitCommand(self, CommandCreateSetComponent(entity, component));
     }
 
-    // TODO(thismarvin): Do we need to call Destroy on a copy? Probably...
-    // DequeDestroy(&entityBuilder.components);
+    DequeDestroy(&entityBuilder.components);
 
     return entity;
 }

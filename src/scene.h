@@ -73,6 +73,7 @@ typedef struct
 void SceneInit(Scene* self);
 void SceneDeferEnableComponent(Scene* self, usize entity, usize tag);
 void SceneDeferDisableComponent(Scene* self, usize entity, usize tag);
+// Defer the creation of a given entity (note that the EntityBuilder's Deque will be destroyed)
 usize SceneDeferAddEntity(Scene* self, EntityBuilder entityBuilder);
 void SceneDeferDeallocateEntity(Scene* self, usize entity);
 void SceneFlushEntities(Scene* self);
