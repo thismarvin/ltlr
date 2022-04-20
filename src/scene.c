@@ -560,6 +560,11 @@ void SceneUpdate(Scene* self)
         self->debugging = !self->debugging;
     }
 
+    for (usize i = 0; i < SceneGetEventCount(self); ++i)
+    {
+        SCloudParticleEmitter(self, i);
+    }
+
     SceneExecuteCommands(self);
 
     for (usize i = 0; i < SceneGetEntityCount(self); ++i)
@@ -569,7 +574,6 @@ void SceneUpdate(Scene* self)
         SSmoothUpdate(self, i);
 
         SPlayerInputUpdate(self, i);
-        SCloudParticleSpawnUpdate(self, i);
 
         SKineticUpdate(self, i);
 

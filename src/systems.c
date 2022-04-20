@@ -864,45 +864,47 @@ void SCloudParticleCollisionUpdate(Scene* scene, const usize entity)
     }
 }
 
-void SCloudParticleSpawnUpdate(Scene* scene, const usize entity)
+void SCloudParticleEmitter(Scene* scene, const usize eventIndex)
 {
-    REQUIRE_DEPS(TAG_POSITION | TAG_DIMENSION | TAG_KINETIC);
+    const Event* event = SceneGetEvent(scene, eventIndex);
 
-    const CPosition* position = GET_COMPONENT(position, entity);
-    const CDimension* dimension = GET_COMPONENT(dimension, entity);
-    const CKinetic* kinetic = GET_COMPONENT(kinetic, entity);
-
-    for (usize i = 0; i < SceneGetEventCount(scene); ++i)
+    if (event->tag != EVENT_CLOUD_PARTICLE)
     {
-        const Event* event = SceneGetEvent(scene, i);
+        return;
+    }
 
-        if (event->entity != entity || event->tag != EVENT_CLOUD_PARTICLE)
-        {
-            continue;
-        }
+    SceneConsumeEvent(scene, eventIndex);
 
-        SceneConsumeEvent(scene, i);
+    const EventCloudParticleInner* inner = &event->cloudParticleInner;
 
-        const EventCloudParticleInner* cloudInner = &event->cloudParticleInner;
+    // TODO(thismarvin): Look into having the event pass as much data as possible.
 
-        // Set offset anchor point to left, middle, or right depending on movement direction.
-        f32 anchor = kinetic->velocity.x == 0 ? dimension->width * 0.5f :
-                     kinetic->velocity.x > 0 ? 0 : dimension->width;
+    if (!ENTITY_HAS_DEPS(event->entity, TAG_POSITION | TAG_DIMENSION | TAG_KINETIC))
+    {
+        return;
+    }
 
-        i32 spreadFactor = 14;
+    const CPosition* position = GET_COMPONENT(position, event->entity);
+    const CDimension* dimension = GET_COMPONENT(dimension, event->entity);
+    const CKinetic* kinetic = GET_COMPONENT(kinetic, event->entity);
 
-        for (usize j = 0; j < cloudInner->spawnCount; ++j)
-        {
-            f32 xOffset = (f32)GetRandomValue(-spreadFactor, spreadFactor);
-            Vector2 offset = Vector2Create(anchor + xOffset, dimension->height);
-            Vector2 startingPosition = Vector2Add(position->value, offset);
+    // Set offset anchor point to left, middle, or right depending on movement direction.
+    f32 anchor = kinetic->velocity.x == 0 ? dimension->width * 0.5f :
+                 kinetic->velocity.x > 0 ? 0 : dimension->width;
 
-            Vector2 direction = Vector2Normalize(Vector2Negate(kinetic->velocity));
-            direction.y *= -1;
-            f32 directionOffset = (f32)GetRandomValue(DEG2RAD * -45, DEG2RAD * 45);
-            direction = Vector2Rotate(direction, directionOffset);
-            SceneDeferAddEntity(scene, ECreateCloudParticle(startingPosition.x, startingPosition.y, direction));
-        }
+    i32 spreadFactor = 14;
+
+    for (usize j = 0; j < inner->spawnCount; ++j)
+    {
+        f32 xOffset = (f32)GetRandomValue(-spreadFactor, spreadFactor);
+        Vector2 offset = Vector2Create(anchor + xOffset, dimension->height);
+        Vector2 startingPosition = Vector2Add(position->value, offset);
+
+        Vector2 direction = Vector2Normalize(Vector2Negate(kinetic->velocity));
+        direction.y *= -1;
+        f32 directionOffset = (f32)GetRandomValue(DEG2RAD * -45, DEG2RAD * 45);
+        direction = Vector2Rotate(direction, directionOffset);
+        SceneDeferAddEntity(scene, ECreateCloudParticle(startingPosition.x, startingPosition.y, direction));
     }
 }
 

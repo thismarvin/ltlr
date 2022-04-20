@@ -2,6 +2,8 @@
 
 #include "scene.h"
 
+void SCloudParticleEmitter(Scene* scene, usize eventIndex);
+
 void SSmoothUpdate(Scene* scene, usize entity);
 void SKineticUpdate(Scene* scene, usize entity);
 void SCollisionUpdate(Scene* scene, usize entity);
@@ -17,7 +19,6 @@ void SFleetingUpdate(Scene* scene, usize entity);
 void SGenericCollisionUpdate(Scene* scene, usize entity);
 
 void SCloudParticleCollisionUpdate(Scene* scene, usize entity);
-void SCloudParticleSpawnUpdate(Scene* scene, usize entity);
 
 void SCloudParticleDraw(const Scene* scene, usize entity);
 
