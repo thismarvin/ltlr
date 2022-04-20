@@ -47,7 +47,7 @@ typedef struct
     Deque m_recycledEventIndices;
 } EventManager;
 
-typedef struct
+struct Scene
 {
     Components components;
     EntityManager m_entityManager;
@@ -67,7 +67,7 @@ typedef struct
     // TODO(thismarvin): Should this exist in Scene?
     InputHandler input;
     Deque commands;
-} Scene;
+};
 
 void SceneInit(Scene* self);
 void SceneDeferEnableComponent(Scene* self, usize entity, usize tag);

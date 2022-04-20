@@ -224,34 +224,30 @@ void SPlayerInputUpdate(Scene* scene, const usize entity)
     }
 }
 
-static bool PlayerIsVulnerable(const CPlayer* player)
-{
-    return player->invulnerableTimer >= player->invulnerableDuration;
-}
-
 static CollisionResult PlayerOnCollision(Scene* scene, const CollisionParams* params)
 {
-    assert(ENTITY_HAS_DEPS(params->entity, TAG_PLAYER | TAG_POSITION | TAG_KINETIC));
+    assert(ENTITY_HAS_DEPS(params->entity, TAG_PLAYER | TAG_POSITION | TAG_KINETIC | TAG_MORTAL));
     assert(ENTITY_HAS_DEPS(params->otherEntity, TAG_COLLIDER));
 
     CPlayer* player = GET_COMPONENT(player, params->entity);
     CPosition* position = GET_COMPONENT(position, params->entity);
     CKinetic* kinetic = GET_COMPONENT(kinetic, params->entity);
+    const CMortal* mortal = GET_COMPONENT(mortal, params->entity);
 
     const CCollider* otherCollider = GET_COMPONENT(otherCollider, params->otherEntity);
 
     // Collision specific logic that will not resolve the player.
     {
-        if (ENTITY_HAS_DEPS(params->entity, TAG_MORTAL)
-                && ENTITY_HAS_DEPS(params->otherEntity, TAG_WALKER | TAG_DAMAGE))
+        if (ENTITY_HAS_DEPS(params->otherEntity, TAG_WALKER | TAG_DAMAGE))
         {
-            if (PlayerIsVulnerable(player))
+            OnDamageParams onDamageParams = (OnDamageParams)
             {
-                Event event;
-                EventDamageInit(&event, params->entity, params->otherEntity);
-                SceneRaiseEvent(scene, &event);
-                player->invulnerableTimer = 0;
-            }
+                .scene = scene,
+                .entity = params->entity,
+                .otherEntity = params->otherEntity,
+            };
+
+            mortal->onDamage(&onDamageParams);
 
             return COLLISION_RESULT_NONE;
         }
@@ -580,10 +576,13 @@ void SPlayerCollisionUpdate(Scene* scene, const usize entity)
     }
 }
 
+static bool PlayerIsVulnerable(const CPlayer* player)
+{
+    return player->invulnerableTimer >= player->invulnerableDuration;
+}
+
 static void PlayerFlashingLogic(Scene* scene, const usize entity)
 {
-    assert(ENTITY_HAS_DEPS(entity, TAG_PLAYER));
-
     CPlayer* player = GET_COMPONENT(player, entity);
 
     player->invulnerableTimer += CTX_DT;
@@ -610,54 +609,35 @@ static void PlayerFlashingLogic(Scene* scene, const usize entity)
         SceneDeferEnableComponent(scene, entity, TAG_SPRITE);
     }
 }
+
 void SPlayerMortalUpdate(Scene* scene, const usize entity)
 {
-    REQUIRE_DEPS(TAG_PLAYER | TAG_POSITION | TAG_KINETIC | TAG_MORTAL);
+    REQUIRE_DEPS(TAG_PLAYER | TAG_MORTAL | TAG_POSITION | TAG_KINETIC);
 
     CPlayer* player = GET_COMPONENT(player, entity);
+    const CMortal* mortal = GET_COMPONENT(mortal, entity);
+    const CPosition* position = GET_COMPONENT(position, entity);
     CKinetic* kinetic = GET_COMPONENT(kinetic, entity);
-    CMortal* mortal = GET_COMPONENT(mortal, entity);
 
-    if (scene->components.positions[entity].value.y > CTX_VIEWPORT_HEIGHT * 2)
+    if (position->value.y > CTX_VIEWPORT_HEIGHT * 2)
     {
+        // TODO(thismarvin): Defer resetting the Scene somehow...
         SceneReset(scene);
 
         return;
     }
 
-    for (usize i = 0; i < SceneGetEventCount(scene); ++i)
+    if (!player->dead && mortal->hp <= 0)
     {
-        const Event* event = SceneGetEvent(scene, i);
+        player->dead = true;
 
-        if (event->entity != entity || event->tag != EVENT_DAMAGE)
+        SceneDeferDisableComponent(scene, entity, TAG_COLLIDER);
+
+        kinetic->velocity = (Vector2)
         {
-            continue;
-        }
-
-        SceneConsumeEvent(scene, i);
-
-        const EventDamageInner* damageInner = &event->damageInner;
-        usize otherEntity = damageInner->otherEntity;
-
-        assert(ENTITY_HAS_DEPS(otherEntity, TAG_DAMAGE));
-
-        const CDamage* otherDamage = GET_COMPONENT(otherDamage, otherEntity);
-
-        mortal->hp -= otherDamage->value;
-        player->invulnerableTimer = 0;
-
-        if (mortal->hp == 0)
-        {
-            player->dead = true;
-
-            SceneDeferDisableComponent(scene, entity, TAG_COLLIDER);
-
-            kinetic->velocity = (Vector2)
-            {
-                .x = kinetic->velocity.x < 0 ? -50 : 50,
-                .y = -250,
-            };
-        }
+            .x = kinetic->velocity.x,
+            .y = -250,
+        };
     }
 
     PlayerFlashingLogic(scene, entity);

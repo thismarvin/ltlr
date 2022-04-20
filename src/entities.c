@@ -2,8 +2,37 @@
 #include "context.h"
 #include "entities.h"
 #include "raymath.h"
+#include "scene.h"
 
 #define ADD_COMPONENT(mType, mValue) DEQUE_PUSH_FRONT(&components, Component, ComponentCreate##mType(mValue))
+
+// TODO(thismarvin): We need some of the macros from systems.c...
+#define GET_COMPONENT(mValue, mEntity) SCENE_GET_COMPONENT_PTR(params->scene, mEntity, mValue)
+
+// TODO(thismarvin): Ideally the following would be in something like `src/entities/player.c`.
+
+static bool PlayerIsVulnerable(const CPlayer* player)
+{
+    return player->invulnerableTimer >= player->invulnerableDuration;
+}
+
+static void PlayerOnDamage(const OnDamageParams* params)
+{
+    // TODO(thismarvin): Can we just assume the following components will always exist?
+
+    CPlayer* player = GET_COMPONENT(player, params->entity);
+    CMortal* mortal = GET_COMPONENT(mortal, params->entity);
+
+    const CDamage* otherDamage = GET_COMPONENT(otherDamage, params->otherEntity);
+
+    if (!PlayerIsVulnerable(player))
+    {
+        return;
+    }
+
+    mortal->hp -= otherDamage->value;
+    player->invulnerableTimer = 0;
+}
 
 EntityBuilder ECreatePlayer(const f32 x, const f32 y)
 {
@@ -65,6 +94,7 @@ EntityBuilder ECreatePlayer(const f32 x, const f32 y)
     ADD_COMPONENT(CMortal, ((CMortal)
     {
         .hp = 2,
+        .onDamage = PlayerOnDamage,
     }));
 
     f32 jumpHeight = 16 * 3 + 6;

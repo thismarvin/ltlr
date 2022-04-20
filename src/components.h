@@ -25,6 +25,17 @@
 
 // TODO(thismarvin): Naming components is hard...
 
+typedef struct Scene Scene;
+
+typedef struct
+{
+    Scene* scene;
+    usize entity;
+    usize otherEntity;
+} OnDamageParams;
+
+typedef void (*OnDamage)(const OnDamageParams*);
+
 typedef struct
 {
     Vector2 value;
@@ -85,6 +96,7 @@ typedef struct
 typedef struct
 {
     i16 hp;
+    OnDamage onDamage;
 } CMortal;
 
 typedef struct
