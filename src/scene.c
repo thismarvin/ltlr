@@ -580,11 +580,8 @@ void SceneUpdate(Scene* self)
         SCollisionUpdate(self, i);
 
         SPlayerCollisionUpdate(self, i);
-        SWalkerCollisionUpdate(self, i);
-        SPlayerMortalUpdate(self, i);
-        SCloudParticleCollisionUpdate(self, i);
 
-        SGenericCollisionUpdate(self, i);
+        SPlayerMortalUpdate(self, i);
     }
 }
 

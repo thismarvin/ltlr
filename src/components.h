@@ -38,6 +38,27 @@ typedef void (*OnDamage)(const OnDamageParams*);
 
 typedef struct
 {
+    bool xAxisResolved;
+    bool yAxisResolved;
+} OnCollisionResult;
+
+#define ON_COLLISION_RESULT_NONE (OnCollisionResult) { false, false }
+
+typedef struct
+{
+    Scene* scene;
+    usize entity;
+    Rectangle aabb;
+    usize otherEntity;
+    Rectangle otherAabb;
+    Rectangle overlap;
+    Vector2 resolution;
+} OnCollisionParams;
+
+typedef OnCollisionResult (*OnCollision)(const OnCollisionParams*);
+
+typedef struct
+{
     Vector2 value;
 } CPosition;
 
@@ -75,11 +96,13 @@ typedef struct
     u64 layer;
     // Layers you collide with.
     u64 mask;
+    OnCollision onCollision;
 } CCollider;
 
 // TODO(thismarvin): Should this be in some sort of Singleton?
 typedef struct
 {
+    bool groundedLastFrame;
     bool grounded;
     f32 coyoteTimer;
     f32 coyoteDuration;

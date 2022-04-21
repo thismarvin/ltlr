@@ -1,3 +1,4 @@
+#include "collider.h"
 #include "components.h"
 #include "context.h"
 #include "entities.h"
@@ -8,8 +9,36 @@
 
 // TODO(thismarvin): We need some of the macros from systems.c...
 #define GET_COMPONENT(mValue, mEntity) SCENE_GET_COMPONENT_PTR(params->scene, mEntity, mValue)
+#define ENTITY_HAS_DEPS(mEntity, mDependencies) ((params->scene->components.tags[mEntity] & (mDependencies)) == (mDependencies))
 
 // TODO(thismarvin): Ideally the following would be in something like `src/entities/player.c`.
+
+static void ApplyResolutionPerfectly
+(
+    CPosition* position,
+    const Rectangle aabb,
+    const Rectangle otherAabb,
+    const Vector2 resolution
+)
+{
+    if (resolution.x < 0)
+    {
+        position->value.x = RectangleLeft(otherAabb) - aabb.width;
+    }
+    else if (resolution.x > 0)
+    {
+        position->value.x = RectangleRight(otherAabb);
+    }
+
+    if (resolution.y < 0)
+    {
+        position->value.y = RectangleTop(otherAabb) - aabb.height;
+    }
+    else if (resolution.y > 0)
+    {
+        position->value.y = RectangleBottom(otherAabb);
+    }
+}
 
 static bool PlayerIsVulnerable(const CPlayer* player)
 {
@@ -32,6 +61,141 @@ static void PlayerOnDamage(const OnDamageParams* params)
 
     mortal->hp -= otherDamage->value;
     player->invulnerableTimer = 0;
+}
+
+static OnCollisionResult PlayerOnCollision(const OnCollisionParams* params)
+{
+    // TODO(thismarvin): Can we just assume the following components will always exist?
+
+    CPlayer* player = GET_COMPONENT(player, params->entity);
+    CPosition* position = GET_COMPONENT(position, params->entity);
+    CKinetic* kinetic = GET_COMPONENT(kinetic, params->entity);
+    const CMortal* mortal = GET_COMPONENT(mortal, params->entity);
+
+    // Collision specific logic that will not resolve the player.
+    {
+        if (ENTITY_HAS_DEPS(params->otherEntity, TAG_WALKER | TAG_DAMAGE))
+        {
+            OnDamageParams onDamageParams = (OnDamageParams)
+            {
+                .scene = params->scene,
+                .entity = params->entity,
+                .otherEntity = params->otherEntity,
+            };
+
+            mortal->onDamage(&onDamageParams);
+
+            return ON_COLLISION_RESULT_NONE;
+        }
+    }
+
+    // Collision leeway.
+    {
+        // Check if the player hit its head on the bottom of a collider.
+        if (params->resolution.y > 0 && fabsf(params->overlap.width) <= 4)
+        {
+            if (params->aabb.x < params->otherAabb.x)
+            {
+                position->value.x = RectangleLeft(params->otherAabb) - params->aabb.width;
+            }
+            else
+            {
+                position->value.x = RectangleRight(params->otherAabb);
+            }
+
+            return (OnCollisionResult)
+            {
+                .xAxisResolved = true,
+                .yAxisResolved = false,
+            };
+        }
+    }
+
+    // Resolve collision.
+    ApplyResolutionPerfectly(position, params->aabb, params->otherAabb, params->resolution);
+
+    // Resolution specific player logic.
+    {
+        if ((params->resolution.x < 0 && kinetic->velocity.x > 0)
+                || (params->resolution.x > 0 && kinetic->velocity.x < 0))
+        {
+            kinetic->velocity.x = 0;
+        }
+
+        if ((params->resolution.y < 0 && kinetic->velocity.y > 0)
+                || (params->resolution.y > 0 && kinetic->velocity.y < 0))
+        {
+            kinetic->velocity.y = 0;
+        }
+
+        if (params->resolution.y < 0)
+        {
+            player->grounded = true;
+        }
+    }
+
+    return (OnCollisionResult)
+    {
+        .xAxisResolved = params->resolution.x != 0,
+        .yAxisResolved = params->resolution.y != 0,
+    };
+}
+
+// TODO(thismarvin): The collider no longer scales...
+static OnCollisionResult CloudParticleOnCollision(const OnCollisionParams* params)
+{
+    // TODO(thismarvin): Can we just assume the following components will always exist?
+
+    CPosition* position = GET_COMPONENT(position, params->entity);
+
+    // TODO(thismarvin): It seems that the following is no longer possible?
+
+    // If the aabb is completely within another collider then remove it.
+    if (params->overlap.width >= params->aabb.width && params->overlap.height >= params->aabb.height)
+    {
+        SceneDeferDeallocateEntity(params->scene, params->entity);
+
+        return ON_COLLISION_RESULT_NONE;
+    }
+
+    // Resolve collision.
+    ApplyResolutionPerfectly(position, params->aabb, params->otherAabb, params->resolution);
+
+    return (OnCollisionResult)
+    {
+        .xAxisResolved = params->resolution.x != 0,
+        .yAxisResolved = params->resolution.y != 0,
+    };
+}
+
+static OnCollisionResult WalkerOnCollision(const OnCollisionParams* params)
+{
+    // TODO(thismarvin): Can we just assume the following components will always exist?
+
+    CPosition* position = GET_COMPONENT(position, params->entity);
+    CKinetic* kinetic = GET_COMPONENT(kinetic, params->entity);
+
+    // Resolve collision.
+    ApplyResolutionPerfectly(position, params->aabb, params->otherAabb, params->resolution);
+
+    // Walk side to side.
+    {
+        if (params->resolution.x != 0)
+        {
+            kinetic->velocity.x *= -1;
+        }
+
+        if (params->resolution.y != 0)
+        {
+            kinetic->velocity.y = 0;
+        }
+    }
+
+    return (OnCollisionResult)
+    {
+        .xAxisResolved = params->resolution.x != 0,
+        .yAxisResolved = params->resolution.y != 0,
+    };
 }
 
 EntityBuilder ECreatePlayer(const f32 x, const f32 y)
@@ -89,6 +253,7 @@ EntityBuilder ECreatePlayer(const f32 x, const f32 y)
     {
         .layer = LAYER_NONE,
         .mask = LAYER_ALL,
+        .onCollision = PlayerOnCollision,
     }));
 
     ADD_COMPONENT(CMortal, ((CMortal)
@@ -110,6 +275,8 @@ EntityBuilder ECreatePlayer(const f32 x, const f32 y)
 
     ADD_COMPONENT(CPlayer, ((CPlayer)
     {
+        .groundedLastFrame = false,
+        .grounded = false,
         .coyoteTimer = coyoteDuration,
         .coyoteDuration = coyoteDuration,
         .moveSpeed = 200,
@@ -220,6 +387,7 @@ EntityBuilder ECreateWalker(const f32 x, const f32 y)
     {
         .layer = LAYER_ALL,
         .mask = LAYER_ALL,
+        .onCollision = WalkerOnCollision,
     }));
 
     ADD_COMPONENT(CDamage, ((CDamage)
@@ -299,6 +467,7 @@ EntityBuilder ECreateCloudParticle
     {
         .layer = LAYER_NONE,
         .mask = LAYER_ALL,
+        .onCollision = CloudParticleOnCollision,
     }));
 
     f32 lifetime = MIN(1.0f, (f32)GetRandomValue(1, 100) * 0.03f);
