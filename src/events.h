@@ -2,25 +2,16 @@
 
 #include "common.h"
 
-typedef enum
-{
-    EVENT_NONE,
-    EVENT_CLOUD_PARTICLE,
-} EventTag;
+typedef struct Scene Scene;
 
 typedef struct
 {
-    usize spawnCount;
-} EventCloudParticleInner;
-
-typedef struct
-{
-    EventTag tag;
+    Scene* scene;
     usize entity;
-    union
-    {
-        EventCloudParticleInner cloudParticleInner;
-    };
-} Event;
+    Vector2 anchor;
+    Vector2 direction;
+    usize spawnCount;
+    usize spread;
+} EventCloudParticleParams;
 
-void EventCloudParticleInit(Event* self, usize entity, u16 spawnCount);
+void RaiseSpawnCloudParticleEvent(const EventCloudParticleParams* params);

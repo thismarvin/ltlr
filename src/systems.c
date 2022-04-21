@@ -2,6 +2,7 @@
 #include "components.h"
 #include "context.h"
 #include "entities.h"
+#include "events.h"
 #include "raymath.h"
 #include "systems.h"
 #include <assert.h>
@@ -332,9 +333,11 @@ void SCollisionUpdate(Scene* scene, const usize entity)
 
 void SPlayerInputUpdate(Scene* scene, const usize entity)
 {
-    REQUIRE_DEPS(TAG_PLAYER | TAG_KINETIC);
+    REQUIRE_DEPS(TAG_PLAYER | TAG_POSITION | TAG_DIMENSION | TAG_KINETIC);
 
     CPlayer* player = GET_COMPONENT(player, entity);
+    const CPosition* position = GET_COMPONENT(position, entity);
+    const CDimension* dimension = GET_COMPONENT(dimension, entity);
     CKinetic* kinetic = GET_COMPONENT(kinetic, entity);
 
     if (player->dead)
@@ -397,10 +400,43 @@ void SPlayerInputUpdate(Scene* scene, const usize entity)
             player->jumping = true;
             kinetic->velocity.y = -player->jumpVelocity;
 
-            u16 particleCount = GetRandomValue(10, 25);
-            Event particleEvent;
-            EventCloudParticleInit(&particleEvent, entity, particleCount);
-            SceneRaiseEvent(scene, &particleEvent);
+            // Spawn cloud particles.
+            {
+                const Vector2 bottomCenter = (Vector2)
+                {
+                    .x = position->value.x + dimension->width * 0.5f,
+                    .y = position->value.y + dimension->height
+                };
+
+                Vector2 anchorOffset = VECTOR2_ZERO;
+
+                if (kinetic->velocity.x > 0)
+                {
+                    anchorOffset.x = -dimension->width * 0.5f;
+                }
+
+                if (kinetic->velocity.x < 0)
+                {
+                    anchorOffset.x = dimension->width * 0.5f;
+                }
+
+                const Vector2 anchor = Vector2Add(bottomCenter, anchorOffset);
+
+                Vector2 direction = Vector2Normalize(kinetic->velocity);
+                direction.x *= -1;
+
+                const EventCloudParticleParams params = (EventCloudParticleParams)
+                {
+                    .scene = scene,
+                    .entity = entity,
+                    .anchor = anchor,
+                    .direction = direction,
+                    .spawnCount = GetRandomValue(10, 25),
+                    .spread = dimension->width,
+                };
+
+                RaiseSpawnCloudParticleEvent(&params);
+            }
         }
 
         // Variable Jump Height.
@@ -525,50 +561,6 @@ void SFleetingUpdate(Scene* scene, const usize entity)
     if (fleeting->age > fleeting->lifetime)
     {
         SceneDeferDeallocateEntity(scene, entity);
-    }
-}
-
-void SCloudParticleEmitter(Scene* scene, const usize eventIndex)
-{
-    const Event* event = SceneGetEvent(scene, eventIndex);
-
-    if (event->tag != EVENT_CLOUD_PARTICLE)
-    {
-        return;
-    }
-
-    SceneConsumeEvent(scene, eventIndex);
-
-    const EventCloudParticleInner* inner = &event->cloudParticleInner;
-
-    // TODO(thismarvin): Look into having the event pass as much data as possible.
-
-    if (!ENTITY_HAS_DEPS(event->entity, TAG_POSITION | TAG_DIMENSION | TAG_KINETIC))
-    {
-        return;
-    }
-
-    const CPosition* position = GET_COMPONENT(position, event->entity);
-    const CDimension* dimension = GET_COMPONENT(dimension, event->entity);
-    const CKinetic* kinetic = GET_COMPONENT(kinetic, event->entity);
-
-    // Set offset anchor point to left, middle, or right depending on movement direction.
-    f32 anchor = kinetic->velocity.x == 0 ? dimension->width * 0.5f :
-                 kinetic->velocity.x > 0 ? 0 : dimension->width;
-
-    i32 spreadFactor = 14;
-
-    for (usize j = 0; j < inner->spawnCount; ++j)
-    {
-        f32 xOffset = (f32)GetRandomValue(-spreadFactor, spreadFactor);
-        Vector2 offset = Vector2Create(anchor + xOffset, dimension->height);
-        Vector2 startingPosition = Vector2Add(position->value, offset);
-
-        Vector2 direction = Vector2Normalize(Vector2Negate(kinetic->velocity));
-        direction.y *= -1;
-        f32 directionOffset = (f32)GetRandomValue(DEG2RAD * -45, DEG2RAD * 45);
-        direction = Vector2Rotate(direction, directionOffset);
-        SceneDeferAddEntity(scene, ECreateCloudParticle(startingPosition.x, startingPosition.y, direction));
     }
 }
 

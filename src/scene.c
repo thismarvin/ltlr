@@ -70,37 +70,6 @@ void SceneDeferDeallocateEntity(Scene* self, const usize entity)
     SceneSubmitCommand(self, CommandCreateDeallocateEntity(entity));
 }
 
-void SceneRaiseEvent(Scene* self, const Event* event)
-{
-    if (DequeGetSize(&self->m_eventManager.m_recycledEventIndices) != 0)
-    {
-        usize next = DEQUE_POP_FRONT(&self->m_eventManager.m_recycledEventIndices, usize);
-        memcpy(&self->m_eventManager.m_events[next], event, sizeof(Event));
-
-        return;
-    }
-
-    // No used indices, use next available fresh one.
-    usize next = MIN(self->m_eventManager.m_nextFreshEventIndex, MAX_EVENTS - 1);
-
-    self->m_eventManager.m_nextFreshEventIndex = self->m_eventManager.m_nextFreshEventIndex + 1;
-    self->m_eventManager.m_nextFreshEventIndex = MIN(self->m_eventManager.m_nextFreshEventIndex,
-            MAX_EVENTS);
-
-    memcpy(&self->m_eventManager.m_events[next], event, sizeof(Event));
-
-    if (self->m_eventManager.m_nextFreshEventIndex == MAX_EVENTS)
-    {
-        TraceLog(LOG_WARNING, "Maximum amount of events reached.");
-    }
-}
-
-void SceneConsumeEvent(Scene* self, const usize eventIndex)
-{
-    self->m_eventManager.m_events[eventIndex].tag = EVENT_NONE;
-    DequePushFront(&self->m_eventManager.m_recycledEventIndices, &eventIndex);
-}
-
 void SceneSubmitCommand(Scene* self, Command command)
 {
     DequePushFront(&self->commands, &command);
@@ -262,18 +231,6 @@ void SceneExecuteCommands(Scene* self)
 usize SceneGetEntityCount(const Scene* self)
 {
     return self->m_entityManager.m_nextFreshEntityIndex;
-}
-
-usize SceneGetEventCount(const Scene* self)
-{
-    return self->m_eventManager.m_nextFreshEventIndex;
-}
-
-const Event* SceneGetEvent(const Scene* self, usize index)
-{
-    assert(index < SceneGetEventCount(self));
-
-    return &self->m_eventManager.m_events[index];
 }
 
 static void SceneSetupContent(Scene* self)
@@ -493,17 +450,6 @@ static void SceneStart(Scene* self)
         self->m_entityManager.m_recycledEntityIndices = DEQUE_WITH_CAPACITY(usize, MAX_ENTITIES);
     }
 
-    // Initialize EventManager.
-    {
-        self->m_eventManager.m_nextFreshEventIndex = 0;
-        self->m_eventManager.m_recycledEventIndices = DEQUE_WITH_CAPACITY(usize, MAX_EVENTS);
-
-        for (usize i = 0; i < MAX_EVENTS; ++i)
-        {
-            self->m_eventManager.m_events[i].tag = EVENT_NONE;
-        }
-    }
-
     // Populate level
     {
         Vector2 offset = VECTOR2_ZERO;
@@ -558,11 +504,6 @@ void SceneUpdate(Scene* self)
     if (IsKeyPressed(KEY_EQUAL))
     {
         self->debugging = !self->debugging;
-    }
-
-    for (usize i = 0; i < SceneGetEventCount(self); ++i)
-    {
-        SCloudParticleEmitter(self, i);
     }
 
     SceneExecuteCommands(self);
@@ -850,7 +791,6 @@ void SceneReset(Scene* self)
 {
     DequeDestroy(&self->commands);
     DequeDestroy(&self->m_entityManager.m_recycledEntityIndices);
-    DequeDestroy(&self->m_eventManager.m_recycledEventIndices);
 
     SceneStart(self);
 }
@@ -866,7 +806,6 @@ void SceneDestroy(Scene* self)
 
     DequeDestroy(&self->commands);
     DequeDestroy(&self->m_entityManager.m_recycledEntityIndices);
-    DequeDestroy(&self->m_eventManager.m_recycledEventIndices);
 
     UnloadRenderTexture(self->backgroundLayer);
     UnloadRenderTexture(self->targetLayer);

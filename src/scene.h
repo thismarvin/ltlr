@@ -5,12 +5,10 @@
 #include "components.h"
 #include "deque.h"
 #include "entities.h"
-#include "events.h"
 #include "input.h"
 #include "level_segment.h"
 
 #define MAX_ENTITIES 1024
-#define MAX_EVENTS 64
 
 typedef struct
 {
@@ -37,21 +35,10 @@ typedef struct
     Deque m_recycledEntityIndices;
 } EntityManager;
 
-typedef struct
-{
-    Event m_events[MAX_EVENTS];
-    // The next available index in the events array that has not been used before.
-    usize m_nextFreshEventIndex;
-    // A stack of indices in the events array that are not currently raised but were once indices
-    // of a consumed event.
-    Deque m_recycledEventIndices;
-} EventManager;
-
 struct Scene
 {
     Components components;
     EntityManager m_entityManager;
-    EventManager m_eventManager;
     bool debugging;
     usize player;
     Rectangle bounds;
@@ -76,10 +63,6 @@ void SceneDeferDisableComponent(Scene* self, usize entity, usize tag);
 usize SceneDeferAddEntity(Scene* self, EntityBuilder entityBuilder);
 void SceneDeferDeallocateEntity(Scene* self, usize entity);
 usize SceneGetEntityCount(const Scene* self);
-usize SceneGetEventCount(const Scene* self);
-const Event* SceneGetEvent(const Scene* self, usize index);
-void SceneRaiseEvent(Scene* self, const Event* event);
-void SceneConsumeEvent(Scene* self, usize eventIndex);
 void SceneSubmitCommand(Scene* self, Command command);
 void SceneExecuteCommands(Scene* self);
 void SceneUpdate(Scene* self);
