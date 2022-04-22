@@ -19,11 +19,7 @@ export def builder [] {
 		| wrap 'output'
 	)
 
-	let pair = (
-		$input
-		| merge { $output }
-	)
-
+	# Make sure the directories required by output exist.
 	let _ = (
 		$output.output
 		| each { |it| $it | path dirname }
@@ -31,14 +27,10 @@ export def builder [] {
 		| each { |it| mkdir $it }
 	)
 
-	let _ = (
-		$pair
-		| each { |pair| ^$env.CC $cflags -o $pair.output -c $pair.input }
-	)
-
-	^$env.CC $cflags -o ([ $env.OUT_DIR $env.BIN] | path join) $output.output $ldlibs
+	^$env.CC $cflags -o ([ $env.OUT_DIR $env.BIN ] | path join) $input.input $ldlibs
 }
 
+# Compile ltlr
 export def build [ 
 	--bin: string # Change the name of the output binary
 	--release (-r) # Compile with optimizations enabled
