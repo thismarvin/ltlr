@@ -1,0 +1,102 @@
+GIT := git
+CC := gcc
+AR := ar
+EMCC := emcc
+EMAR := emar
+
+OUT_DIR := lib
+
+RAYLIB_SOURCES := \
+	vendor/raylib/src/raudio.c \
+	vendor/raylib/src/rcore.c \
+	vendor/raylib/src/rmodels.c \
+	vendor/raylib/src/rshapes.c \
+	vendor/raylib/src/rtext.c \
+	vendor/raylib/src/rtextures.c \
+	vendor/raylib/src/utils.c
+
+CJSON_SOURCES := \
+	vendor/cJSON/cJSON.c
+
+RAYLIB_WEB_OBJECTS := $(patsubst vendor/raylib/src/%.c,$(OUT_DIR)/web/raylib/%.o, $(RAYLIB_SOURCES))
+
+CJSON_DESKTOP_OBJECTS := $(patsubst vendor/cJSON/%.c,$(OUT_DIR)/desktop/cJSON/%.o, $(CJSON_SOURCES))
+CJSON_WEB_OBJECTS := $(patsubst vendor/cJSON/%.c,$(OUT_DIR)/web/cJSON/%.o, $(CJSON_SOURCES))
+
+$(VERBOSE).SILENT:
+
+.PHONY: all
+all: clean raylib cJSON
+
+$(OUT_DIR):
+	mkdir $@
+
+$(OUT_DIR)/desktop: | $(OUT_DIR)
+	mkdir $@
+
+$(OUT_DIR)/desktop/raylib: | $(OUT_DIR)/desktop
+	mkdir $@
+
+$(OUT_DIR)/desktop/cJSON: | $(OUT_DIR)/desktop
+	mkdir $@
+
+$(OUT_DIR)/web: | $(OUT_DIR)
+	mkdir $@
+
+$(OUT_DIR)/web/raylib: | $(OUT_DIR)/web
+	mkdir $@
+
+$(OUT_DIR)/web/cJSON: | $(OUT_DIR)/web
+	mkdir $@
+
+# raylib
+
+vendor/raylib/src/Makefile:
+	$(GIT) submodule update --init --recursive vendor/raylib
+
+$(OUT_DIR)/desktop/libraylib.a: vendor/raylib/src/Makefile | $(OUT_DIR)/desktop/raylib
+	cd vendor/raylib/src; $(MAKE) PLATFORM=PLATFORM_DESKTOP CUSTOM_CFLAGS=-DSUPPORT_CUSTOM_FRAME_CONTROL
+
+	mv vendor/raylib/src/raudio.o $(OUT_DIR)/desktop/raylib
+	mv vendor/raylib/src/rcore.o $(OUT_DIR)/desktop/raylib
+	mv vendor/raylib/src/rglfw.o $(OUT_DIR)/desktop/raylib
+	mv vendor/raylib/src/rmodels.o $(OUT_DIR)/desktop/raylib
+	mv vendor/raylib/src/rshapes.o $(OUT_DIR)/desktop/raylib
+	mv vendor/raylib/src/rtext.o $(OUT_DIR)/desktop/raylib
+	mv vendor/raylib/src/rtextures.o $(OUT_DIR)/desktop/raylib
+	mv vendor/raylib/src/utils.o $(OUT_DIR)/desktop/raylib
+
+	mv vendor/raylib/src/libraylib.a $(OUT_DIR)/desktop
+
+$(RAYLIB_WEB_OBJECTS): $(OUT_DIR)/web/raylib/%.o: vendor/raylib/src/%.c | $(OUT_DIR)/web/raylib
+	$(EMCC) -O1 -DPLATFORM_WEB -DGRAPHICS_API_OPENGL_ES2 -DSUPPORT_CUSTOM_FRAME_CONTROL -o $@ -c $<
+
+$(OUT_DIR)/web/libraylib.a: $(RAYLIB_WEB_OBJECTS) | $(OUT_DIR)/web
+	$(EMAR) rcs $@ $(RAYLIB_OBJECTS)
+
+# cJSON
+
+vendor/cJSON/cJSON.c:
+	$(GIT) submodule update --init --recursive vendor/cJSON
+
+$(CJSON_DESKTOP_OBJECTS): $(CJSON_SOURCES) | $(OUT_DIR)/desktop/cJSON
+	$(CC) -std=c89 -O1 -o $@ -c $^
+
+$(OUT_DIR)/desktop/libcJSON.a: $(CJSON_DESKTOP_OBJECTS) | $(OUT_DIR)/desktop
+	$(AR) rcs $@ $^
+
+$(CJSON_WEB_OBJECTS): $(CJSON_SOURCES) | $(OUT_DIR)/web/cJSON
+	$(EMCC) -std=c89 -O1 -o $@ -c $^
+
+$(OUT_DIR)/web/libcJSON.a: $(CJSON_WEB_OBJECTS) | $(OUT_DIR)/web
+	$(EMAR) rcs $@ $^
+
+.PHONY: raylib
+raylib: $(OUT_DIR)/desktop/libraylib.a $(OUT_DIR)/web/libraylib.a
+
+.PHONY: cJSON
+cJSON: $(OUT_DIR)/desktop/libcJSON.a $(OUT_DIR)/web/libcJSON.a
+
+.PHONY: clean
+clean:
+	if [ -d $(OUT_DIR) ]; then rm -r $(OUT_DIR); fi
