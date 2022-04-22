@@ -7,8 +7,9 @@ def find-respective-header [ file, files ] {
 def get-includes [ file ] {
 	open $file
 	| lines
-	| find -r '\s*#include\s+.+'
-	| str replace '\s*#include\s+"(.+)"' '$1'
+	| find -r '#include\s+".+"'
+	| str trim
+	| str replace '.*#include\s+"(.+)".*' '$1'
 	| path basename
 }
 
@@ -18,18 +19,15 @@ def get-local-dependencies [ file, files ] {
 	| flatten
 }
 
-export def analyze-src [] {
-	let files-c = (ls src/**/*.c).name
-	let files-h = (ls src/**/*.h).name
-
+export def analyze-files [ c-files, h-files ] {
 	let sources = (
-		$files-c
+		$c-files
 		| wrap 'source'
 	)
 
 	let headers = (
 		$sources.source
-		| each { |file| find-respective-header $file $files-h }
+		| each { |file| find-respective-header $file $h-files }
 		| wrap 'header'
 	)
 
@@ -40,13 +38,13 @@ export def analyze-src [] {
 
 	let includes-in-source = (
 		$pairs.source
-		| each { |file| if not ($file | empty?) { get-local-dependencies $file $files-h } else { [] }}
+		| each { |file| if not ($file | empty?) { get-local-dependencies $file $h-files } else { [] }}
 		| wrap 'lhs'
 	)
 
 	let includes-in-header = (
 		$pairs.header
-		| each { |file| if not ($file | empty?) { get-local-dependencies $file $files-h } else { [] }}
+		| each { |file| if not ($file | empty?) { get-local-dependencies $file $h-files } else { [] }}
 		| wrap 'rhs'
 	)
 
@@ -69,7 +67,7 @@ def get-unique-directories [ files ] {
 }
 
 export def generate-makefile [] {
-	let data = analyze-src
+	let data = analyze-files (ls src/**/*.c).name (ls src/**/*.h).name
 	let unique-directories = get-unique-directories $data.file
 
 	let output-directory = '$(OUT_DIR)'
@@ -152,6 +150,6 @@ output: $\(OUT_DIR)/$\(OUT)
 
 .PHONY: clean
 clean:
-\tif [ -d $\(OUT_DIR) ]; then rm -rf $\(OUT_DIR); fi\n"
+\tif [ -d $\(OUT_DIR) ]; then $\(RM) -r $\(OUT_DIR); fi\n"
 	| str trim
 }
