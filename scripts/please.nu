@@ -30,6 +30,55 @@ export def builder [] {
 	^$env.CC $cflags -o ([ $env.OUT_DIR $env.BIN ] | path join) $input.input $ldlibs
 }
 
+export def "builder content" [
+	--release (-r) # Format output for release
+] {
+	let image-sources = (
+		(ls content/aseprite/**/*.aseprite).name
+		| wrap 'input'
+	)
+	let level-sources = (
+		(ls content/tiled/**/*.tmx).name
+		| wrap 'input'
+	)
+
+	let image-output = (
+		$image-sources.input
+		| str replace 'content/aseprite/(\w+/)*((\w+)\.aseprite)' $"($env.OUT_DIR)/$1$3.png"
+		| wrap 'output'
+	)
+	let level-output = (
+		$level-sources.input
+		| str replace 'content/tiled/(\w+/)*((\w+)\.tmx)' $"($env.OUT_DIR)/$1$3.json"
+		| wrap 'output'
+	)
+
+	let images = (
+		$image-sources
+		| merge { $image-output }
+	)
+	let levels = (
+		$level-sources
+		| merge { $level-output }
+	)
+
+	let _ = (
+		$images
+		| each { |it| ^$env.ASEPRITE -b $it.input --save-as $it.output }
+	)
+	let _ = (
+		$levels
+		| each { |it| ^$env.TILED --embed-tilesets --export-map json $it.input $it.output }
+	)
+
+	if $release {
+		let _ = (
+			$levels
+			| each { |it| ^$env.PRETTIER -w --use-tabs $it.output }
+		)
+	}
+}
+
 # Compile ltlr
 export def build [ 
 	--bin: string # Change the name of the output binary
