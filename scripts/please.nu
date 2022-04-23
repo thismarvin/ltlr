@@ -84,6 +84,7 @@ export def build [
 	--bin: string # Change the name of the output binary
 	--release (-r) # Compile with optimizations enabled
 	--out-dir: string # Change the output directory
+	--content-out-dir: string # Change the name of the content's output directory
 ] {
 	let output-directory-basename = (
 		if ($out-dir | empty?) {
@@ -99,6 +100,18 @@ export def build [
 			[$output-directory-basename 'release'] | path join
 		}
 	)
+
+	let content-output-directory-basename = (
+		if ($content-out-dir | empty?) {
+			'content'
+		} else {
+			$content-out-dir
+		}
+	)
+	let content-output-directory = (
+		[$output-directory $content-output-directory-basename ] | path join
+	)
+
 	let output = (
 		if ($bin | empty?) {
 			'ltlr'
@@ -114,6 +127,17 @@ export def build [
 		}
 	)
 
+	# Build Content.
+	with-env [
+		OUT_DIR $content-output-directory
+		ASEPRITE 'aseprite'
+		TILED 'tiled'
+		PRETTIER 'prettier'
+	] {
+		builder content
+	}
+
+	# Build Binary.
 	with-env [
 		OUT_DIR $output-directory
 		BIN $output
