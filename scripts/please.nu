@@ -148,3 +148,35 @@ export def build [
 		builder
 	}
 }
+
+export def run [
+	--bin: string # Change the name of the output binary
+	--release (-r) # Compile with optimizations enabled
+	--out-dir: string # Change the output directory
+	--content-out-dir: string # Change the name of the content's output directory
+] {
+	let output-directory = (
+		if ($out-dir | empty?) {
+			'target'
+		} else {
+			$out-dir
+		}
+	)
+	let output = (
+		if ($bin | empty?) {
+			'ltlr'
+		} else {
+			$bin
+		}
+	)
+
+	if not $release {
+		build --bin $output --out-dir $output-directory --content-out-dir $content-out-dir
+		cd ([ $output-directory 'debug' ] | path join)
+		^([ './' $output ] | path join)
+	} else {
+		build --bin $output --release --out-dir $output-directory --content-out-dir $content-out-dir
+		cd ([ $output-directory 'release' ] | path join)
+		^([ './' $output ] | path join)
+	}
+}
