@@ -97,13 +97,13 @@ export def "makefile content" [
 		| str collect "\n"
 	)
 
-	let pairs = (
+	let entries = (
 		$required-directories
-		| each { |it| [ $it ($it | path dirname) ] }
+		| each { |it| { dir: $it, parent: ($it | path dirname) }}
 	)
 	let makefile-directory-rules = (
-		$pairs
-		| each { |pair| if not ($pair.1 | empty?) { $"($pair.0): | ($pair.1)\n" } else { $"($pair.0):\n" } }
+		$entries
+		| each { |it| if not ($it.parent | empty?) { $"($it.dir): | ($it.parent)\n" } else { $"($it.dir):\n" }}
 		| each { |it| $"($it)\tmkdir $@\n" }
 		| str collect "\n"
 	)
@@ -222,18 +222,13 @@ export def "makefile desktop" [
 		| str collect "\n"
 	)
 
-	let pairs = (
-		# TODO(thismarvin): Maybe this is a use case for records/tables?
-		if ($required-directories | length) == 1 {
-			[[ $required-directories '' ]]
-		} else {
-			$required-directories
-			| each { |it| [ $it ($it | path dirname) ] }
-		}
+	let entries = (
+		$required-directories
+		| each { |it| { dir: $it, parent: ($it | path dirname) }}
 	)
 	let makefile-directory-rules = (
-		$pairs
-		| each { |pair| if not ($pair.1 | empty?) { $"($pair.0): | ($pair.1)\n" } else { $"($pair.0):\n" } }
+		$entries
+		| each { |it| if not ($it.parent | empty?) { $"($it.dir): | ($it.parent)\n" } else { $"($it.dir):\n" }}
 		| each { |it| $"($it)\tmkdir $@\n" }
 		| str collect "\n"
 	)
