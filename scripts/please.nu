@@ -9,6 +9,7 @@ export def builder [] {
 	)
 	let input = (
 		(ls src/**/*.c).name
+		| str replace '\\' '/'
 	)
 	let ldlibs = (
 		$env.LDLIBS
@@ -23,10 +24,12 @@ export def "builder content" [
 ] {
 	let image-sources = (
 		(ls content/aseprite/**/*.aseprite).name
+		| str replace '\\' '/'
 		| wrap 'input'
 	)
 	let level-sources = (
 		(ls content/tiled/**/*.tmx).name
+		| str replace '\\' '/'
 		| wrap 'input'
 	)
 
