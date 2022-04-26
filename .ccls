@@ -2,3 +2,4 @@ clang
 %c -std=c17
 %h
 -Ivendor/raylib/src
+-Ivendor/cJSON

@@ -133,8 +133,8 @@ export def build [
 		OUT_DIR $output-directory
 		BIN $output
 		CC 'gcc'
-		CFLAGS $"-std=c17 -Wall -Wextra -Wpedantic ($optimization-flags) -Ivendor/raylib/src -DPLATFORM_DESKTOP"
-		LDLIBS '-lm -lpthread -ldl -Llib/desktop -lraylib'
+		CFLAGS $"-std=c17 -Wall -Wextra -Wpedantic ($optimization-flags) -Ivendor/raylib/src -Ivendor/cJSON -DPLATFORM_DESKTOP"
+		LDLIBS '-lm -lpthread -ldl -Llib/desktop -lraylib -lcJSON'
 	] {
 		builder
 	}
