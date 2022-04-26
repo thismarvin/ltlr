@@ -3,31 +3,19 @@ export def builder [] {
 		$env.CFLAGS
 		| split row ' '
 	)
+	let out = (
+		[ $env.OUT_DIR $env.BIN ]
+		| path join
+	)
+	let input = (
+		(ls src/**/*.c).name
+	)
 	let ldlibs = (
 		$env.LDLIBS
 		| split row ' '
 	)
 
-	let input = (
-		(ls src/**/*.c).name
-		| wrap 'input'
-	)
-
-	let output = (
-		$input.input
-		| str replace 'src/(\w+/)*((\w+)\.c)' $"($env.OUT_DIR)/$1$3.o"
-		| wrap 'output'
-	)
-
-	# Make sure the directories required by output exist.
-	let _ = (
-		$output.output
-		| each { |it| $it | path dirname }
-		| uniq
-		| each { |it| mkdir $it }
-	)
-
-	^$env.CC $cflags -o ([ $env.OUT_DIR $env.BIN ] | path join) $input.input $ldlibs
+	^$env.CC $cflags -o $out $input $ldlibs
 }
 
 export def "builder content" [
