@@ -76,6 +76,7 @@ export def build [
 	--release (-r) # Compile with optimizations enabled
 	--out-dir: string # Change the output directory
 	--content-out-dir: string # Change the name of the content's output directory
+	--target: string # Change the target platform the project will be built for
 ] {
 	let output-directory-basename = (
 		if ($out-dir | empty?) {
@@ -103,6 +104,14 @@ export def build [
 		[$output-directory $content-output-directory-basename ] | path join
 	)
 
+	let target = (
+		if ($target | empty?) {
+			'linux'
+		} else {
+			$target
+		}
+	)
+
 	let output = (
 		if ($bin | empty?) {
 			'ltlr'
@@ -115,6 +124,18 @@ export def build [
 			'-g -pg -O0'
 		} else {
 			'-O3'
+		}
+	)
+
+	let ldlibs = (
+		if $target == 'linux' {
+			'-lm -lpthread -ldl -Llib/desktop -lraylib -lcJSON'
+		} else if $target == 'windows' {
+			'-Llib/desktop -static -lraylib -lcJSON -lopengl32 -lgdi32 -lwinmm'
+		} else {
+			error make {
+				msg: $"'($target)' is not a supported target."
+			}
 		}
 	)
 
@@ -134,7 +155,7 @@ export def build [
 		BIN $output
 		CC 'gcc'
 		CFLAGS $"-std=c17 -Wall -Wextra -Wpedantic ($optimization-flags) -Ivendor/raylib/src -Ivendor/cJSON -DPLATFORM_DESKTOP"
-		LDLIBS '-lm -lpthread -ldl -Llib/desktop -lraylib -lcJSON'
+		LDLIBS $ldlibs
 	] {
 		builder
 	}
@@ -145,6 +166,7 @@ export def run [
 	--release (-r) # Compile with optimizations enabled
 	--out-dir: string # Change the output directory
 	--content-out-dir: string # Change the name of the content's output directory
+	--target: string # Change the target platform the project will be built for
 ] {
 	let output-directory = (
 		if ($out-dir | empty?) {
@@ -162,11 +184,11 @@ export def run [
 	)
 
 	if not $release {
-		build --bin $output --out-dir $output-directory --content-out-dir $content-out-dir
+		build --bin $output --out-dir $output-directory --content-out-dir $content-out-dir --target $target
 		cd ([ $output-directory 'debug' ] | path join)
 		^([ './' $output ] | path join)
 	} else {
-		build --bin $output --release --out-dir $output-directory --content-out-dir $content-out-dir
+		build --bin $output --release --out-dir $output-directory --content-out-dir $content-out-dir --target $target
 		cd ([ $output-directory 'release' ] | path join)
 		^([ './' $output ] | path join)
 	}
