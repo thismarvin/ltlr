@@ -3,8 +3,9 @@
 .vscode
 bin
 build
-build.bat
+lib
 src/vendor
+target
 
 # Prerequisites
 *.d
