@@ -71,7 +71,7 @@ export def "builder content" [
 }
 
 # Compile ltlr
-export def build [ 
+export def build [
 	--bin: string # Change the name of the output binary
 	--release (-r) # Compile with optimizations enabled
 	--out-dir: string # Change the output directory
@@ -111,7 +111,7 @@ export def build [
 		}
 	)
 	let optimization-flags = (
-		if not $release { 
+		if not $release {
 			'-g -pg -O0'
 		} else {
 			'-O3'
