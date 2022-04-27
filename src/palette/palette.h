@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common.h"
+#include "../common.h"
 
 #define P8_PALETTE_LENGTH 16
 

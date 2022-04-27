@@ -1,5 +1,5 @@
 #include "context.h"
-#include "palette.h"
+#include "palette/palette.h"
 #include "scene.h"
 #include "systems.h"
 #include <assert.h>
