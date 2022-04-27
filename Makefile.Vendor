@@ -26,7 +26,7 @@ CJSON_WEB_OBJECTS := $(patsubst vendor/cJSON/%.c,$(OUT_DIR)/web/cJSON/%.o, $(CJS
 $(VERBOSE).SILENT:
 
 .PHONY: all
-all: clean raylib cJSON
+all: clean vendor
 
 $(OUT_DIR):
 	mkdir $@
@@ -96,6 +96,9 @@ raylib: $(OUT_DIR)/desktop/libraylib.a $(OUT_DIR)/web/libraylib.a
 
 .PHONY: cJSON
 cJSON: $(OUT_DIR)/desktop/libcJSON.a $(OUT_DIR)/web/libcJSON.a
+
+.PHONY: vendor
+vendor: raylib cJSON
 
 .PHONY: clean
 clean:
