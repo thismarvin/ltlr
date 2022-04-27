@@ -1,9 +1,9 @@
 #pragma once
 
+#include "collections/deque.h"
 #include "command.h"
 #include "common.h"
 #include "components.h"
-#include "deque.h"
 #include "entities.h"
 #include "input.h"
 #include "level_segment.h"

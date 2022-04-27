@@ -1,7 +1,7 @@
 #pragma once
 
+#include "collections/deque.h"
 #include "common.h"
-#include "deque.h"
 
 typedef bool (*TestFn)(void);
 
