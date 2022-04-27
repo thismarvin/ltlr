@@ -1,8 +1,8 @@
-#include "collider.h"
 #include "components.h"
 #include "context.h"
 #include "entities.h"
 #include "events.h"
+#include "geometry/collider.h"
 #include "systems.h"
 #include <assert.h>
 #include <raymath.h>

@@ -1,4 +1,4 @@
-#include "common.h"
+#include "../common.h"
 #include "sat.h"
 #include <float.h>
 #include <raymath.h>
