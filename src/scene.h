@@ -62,6 +62,7 @@ void SceneDeferDisableComponent(Scene* self, usize entity, usize tag);
 // Defer the creation of a given entity (note that the EntityBuilder's Deque will be destroyed)
 usize SceneDeferAddEntity(Scene* self, EntityBuilder entityBuilder);
 void SceneDeferDeallocateEntity(Scene* self, usize entity);
+bool SceneEntityHasDependencies(Scene* self, usize entity, u64 dependencies);
 usize SceneGetEntityCount(const Scene* self);
 void SceneSubmitCommand(Scene* self, Command command);
 void SceneExecuteCommands(Scene* self);

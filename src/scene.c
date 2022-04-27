@@ -71,6 +71,11 @@ void SceneDeferDeallocateEntity(Scene* self, const usize entity)
     SceneSubmitCommand(self, CommandCreateDeallocateEntity(entity));
 }
 
+bool SceneEntityHasDependencies(Scene* self, usize entity, u64 dependencies)
+{
+    return (self->components.tags[entity] & dependencies) == dependencies;
+}
+
 void SceneSubmitCommand(Scene* self, Command command)
 {
     DequePushFront(&self->commands, &command);
