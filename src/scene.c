@@ -464,7 +464,7 @@ static void SceneStart(Scene* self)
                 SceneDeferAddEntity
                 (
                     self,
-                    ECreateBlock
+                    BlockCreate
                     (
                         offset.x + collider.x,
                         offset.y + collider.y,
