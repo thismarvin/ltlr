@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common.h"
+#include "../common.h"
 
 #define TAG_NONE ((u64)0)
 #define TAG_POSITION ((u64)1 << 0)

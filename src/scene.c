@@ -1,7 +1,7 @@
 #include "context.h"
+#include "ecs/systems.h"
 #include "palette/p8.h"
 #include "scene.h"
-#include "systems.h"
 #include <assert.h>
 #include <raymath.h>
 #include <string.h>

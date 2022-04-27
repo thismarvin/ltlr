@@ -1,5 +1,5 @@
+#include "../scene.h"
 #include "events.h"
-#include "scene.h"
 #include <raymath.h>
 
 EventHandler EventHandlerCreate()
