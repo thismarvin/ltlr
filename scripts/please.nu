@@ -16,6 +16,11 @@ export def builder [] {
 		| split row ' '
 	)
 
+	# Make sure the directories required by output exist.
+	let _ = (
+		mkdir $env.OUT_DIR
+	)
+
 	^$env.CC $cflags -o $out $input $ldlibs
 }
 
