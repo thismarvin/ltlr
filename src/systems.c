@@ -92,7 +92,8 @@ static OnCollisionResult SimulateCollisionOnAxis
     // It is important that `delta` only consists of one axis, not both.
     assert(delta.x == 0 || delta.y == 0);
 
-    // TODO(thismarvin): Can we just assume the following components will always exist?
+    assert(ENTITY_HAS_DEPS(entity, TAG_POSITION | TAG_DIMENSION));
+    assert(ENTITY_HAS_DEPS(otherEntity, TAG_POSITION | TAG_DIMENSION | TAG_COLLIDER));
 
     const CPosition* positionPointer = GET_COMPONENT(positionPointer, entity);
 

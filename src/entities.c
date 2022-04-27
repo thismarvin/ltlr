@@ -4,6 +4,7 @@
 #include "entities.h"
 #include "raymath.h"
 #include "scene.h"
+#include <assert.h>
 
 #define ADD_COMPONENT(mType, mValue) DEQUE_PUSH_FRONT(&components, Component, ComponentCreate##mType(mValue))
 
@@ -47,7 +48,7 @@ static bool PlayerIsVulnerable(const CPlayer* player)
 
 static void PlayerOnDamage(const OnDamageParams* params)
 {
-    // TODO(thismarvin): Can we just assume the following components will always exist?
+    assert(ENTITY_HAS_DEPS(params->entity, TAG_PLAYER | TAG_MORTAL));
 
     CPlayer* player = GET_COMPONENT(player, params->entity);
     CMortal* mortal = GET_COMPONENT(mortal, params->entity);
@@ -65,7 +66,7 @@ static void PlayerOnDamage(const OnDamageParams* params)
 
 static OnCollisionResult PlayerOnCollision(const OnCollisionParams* params)
 {
-    // TODO(thismarvin): Can we just assume the following components will always exist?
+    assert(ENTITY_HAS_DEPS(params->entity, TAG_PLAYER | TAG_POSITION | TAG_KINETIC | TAG_MORTAL));
 
     CPlayer* player = GET_COMPONENT(player, params->entity);
     CPosition* position = GET_COMPONENT(position, params->entity);
@@ -144,11 +145,9 @@ static OnCollisionResult PlayerOnCollision(const OnCollisionParams* params)
 // TODO(thismarvin): The collider no longer scales...
 static OnCollisionResult CloudParticleOnCollision(const OnCollisionParams* params)
 {
-    // TODO(thismarvin): Can we just assume the following components will always exist?
+    assert(ENTITY_HAS_DEPS(params->entity, TAG_POSITION));
 
     CPosition* position = GET_COMPONENT(position, params->entity);
-
-    // TODO(thismarvin): It seems that the following is no longer possible?
 
     // If the aabb is completely within another collider then remove it.
     if (params->overlap.width >= params->aabb.width && params->overlap.height >= params->aabb.height)
@@ -170,7 +169,7 @@ static OnCollisionResult CloudParticleOnCollision(const OnCollisionParams* param
 
 static OnCollisionResult WalkerOnCollision(const OnCollisionParams* params)
 {
-    // TODO(thismarvin): Can we just assume the following components will always exist?
+    assert(ENTITY_HAS_DEPS(params->entity, TAG_POSITION | TAG_KINETIC));
 
     CPosition* position = GET_COMPONENT(position, params->entity);
     CKinetic* kinetic = GET_COMPONENT(kinetic, params->entity);
