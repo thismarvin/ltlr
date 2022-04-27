@@ -1,4 +1,5 @@
 #include "context.h"
+#include "ecs/entities.h"
 #include "ecs/systems.h"
 #include "palette/p8.h"
 #include "scene.h"
@@ -478,7 +479,7 @@ static void SceneStart(Scene* self)
     }
 
     // TODO(thismarvin): Put this into level.json somehow...
-    self->player = SceneDeferAddEntity(self, ECreatePlayer(16 * 1, 16 * - 4));
+    self->player = SceneDeferAddEntity(self, PlayerCreate(16 * 1, 16 * - 4));
 
     SceneDeferAddEntity(self, ECreateWalker(16 * 16, 8 * 16));
     SceneDeferAddEntity(self, ECreateWalker(16 * 16, 0 * 16));
