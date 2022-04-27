@@ -1,13 +1,6 @@
 #pragma once
 
-#include "../collections/deque.h"
-#include "../common.h"
-
-typedef struct
-{
-    u64 tags;
-    Deque components;
-} EntityBuilder;
+#include "entity_builder.h"
 
 EntityBuilder ECreatePlayer(f32 x, f32 y);
 EntityBuilder ECreateBlock(f32 x, f32 y, f32 width, f32 height);
