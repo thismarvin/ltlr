@@ -44,6 +44,6 @@ void SpawnCloudParticles(const EventCloudParticleParams* params)
         const f32 rotation = (f32)GetRandomValue(DEG2RAD * -45, DEG2RAD * 45);
         const Vector2 direction = Vector2Rotate(params->direction, rotation);
 
-        SceneDeferAddEntity(params->scene, ECreateCloudParticle(center.x, center.y, direction));
+        SceneDeferAddEntity(params->scene, CloudParticleCreate(center.x, center.y, direction));
     }
 }
