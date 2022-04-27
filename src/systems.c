@@ -436,7 +436,7 @@ void SPlayerInputUpdate(Scene* scene, const usize entity)
                     .spread = dimension->width,
                 };
 
-                RaiseSpawnCloudParticleEvent(&params);
+                SpawnCloudParticles(&params);
             }
         }
 
@@ -456,7 +456,7 @@ void SPlayerInputUpdate(Scene* scene, const usize entity)
     // TODO(thismarvin): Should grounded logic really be in Input?
 }
 
-void SPlayerCollisionUpdate(Scene* scene, const usize entity)
+void SPlayerPostCollisionUpdate(Scene* scene, const usize entity)
 {
     REQUIRE_DEPS(TAG_PLAYER | TAG_POSITION | TAG_DIMENSION);
 

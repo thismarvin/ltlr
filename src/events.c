@@ -31,7 +31,7 @@ void EventHandlerDestroy(EventHandler* self)
 }
 
 // TODO(thismarvin): Is this too specialized?
-void RaiseSpawnCloudParticleEvent(const EventCloudParticleParams* params)
+void SpawnCloudParticles(const EventCloudParticleParams* params)
 {
     for (usize i = 0; i < params->spawnCount; ++i)
     {

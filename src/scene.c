@@ -520,7 +520,7 @@ void SceneUpdate(Scene* self)
 
         SCollisionUpdate(self, i);
 
-        SPlayerCollisionUpdate(self, i);
+        SPlayerPostCollisionUpdate(self, i);
 
         SPlayerMortalUpdate(self, i);
     }

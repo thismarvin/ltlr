@@ -27,4 +27,4 @@ typedef struct
     usize spread;
 } EventCloudParticleParams;
 
-void RaiseSpawnCloudParticleEvent(const EventCloudParticleParams* params);
+void SpawnCloudParticles(const EventCloudParticleParams* params);
