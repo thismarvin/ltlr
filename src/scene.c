@@ -481,9 +481,9 @@ static void SceneStart(Scene* self)
     // TODO(thismarvin): Put this into level.json somehow...
     self->player = SceneDeferAddEntity(self, PlayerCreate(16 * 1, 16 * - 4));
 
-    SceneDeferAddEntity(self, ECreateWalker(16 * 16, 8 * 16));
-    SceneDeferAddEntity(self, ECreateWalker(16 * 16, 0 * 16));
-    SceneDeferAddEntity(self, ECreateWalker(16 * 16, 4 * 16));
+    SceneDeferAddEntity(self, WalkerCreate(16 * 16, 8 * 16));
+    SceneDeferAddEntity(self, WalkerCreate(16 * 16, 0 * 16));
+    SceneDeferAddEntity(self, WalkerCreate(16 * 16, 4 * 16));
 }
 
 void SceneInit(Scene* self)
