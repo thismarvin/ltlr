@@ -3,9 +3,9 @@
 #include "context.h"
 #include "entities.h"
 #include "events.h"
-#include "raymath.h"
 #include "systems.h"
 #include <assert.h>
+#include <raymath.h>
 
 #define REQUIRE_DEPS(mDependencies) if ((scene->components.tags[entity] & (mDependencies)) != (mDependencies)) return
 #define ENTITY_HAS_DEPS(mEntity, mDependencies) ((scene->components.tags[mEntity] & (mDependencies)) == (mDependencies))

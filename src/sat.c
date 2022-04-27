@@ -1,7 +1,7 @@
 #include "common.h"
-#include "raymath.h"
 #include "sat.h"
 #include <float.h>
+#include <raymath.h>
 
 typedef struct
 {

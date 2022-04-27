@@ -1,7 +1,7 @@
 #include "common.h"
 #include "context.h"
-#include "math.h"
 #include "scene.h"
+#include <math.h>
 
 #if defined(PLATFORM_WEB)
     #include <emscripten/emscripten.h>

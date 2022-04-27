@@ -1,6 +1,6 @@
 #include "collider.h"
 #include "common.h"
-#include "raymath.h"
+#include <raymath.h>
 
 Vector2 RectangleRectangleResolution(const Rectangle a, const Rectangle b)
 {

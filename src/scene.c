@@ -1,9 +1,9 @@
 #include "context.h"
 #include "palette.h"
-#include "raymath.h"
 #include "scene.h"
 #include "systems.h"
 #include <assert.h>
+#include <raymath.h>
 #include <string.h>
 
 typedef struct

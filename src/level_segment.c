@@ -1,5 +1,5 @@
-#include "./vendor/cJSON.h"
 #include "level_segment.h"
+#include <cJSON.h>
 
 void LevelSegmentInit(LevelSegment* self, const char* path)
 {

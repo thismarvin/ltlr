@@ -2,9 +2,9 @@
 #include "components.h"
 #include "context.h"
 #include "entities.h"
-#include "raymath.h"
 #include "scene.h"
 #include <assert.h>
+#include <raymath.h>
 
 #define ADD_COMPONENT(mType, mValue) DEQUE_PUSH_FRONT(&components, Component, ComponentCreate##mType(mValue))
 

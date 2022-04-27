@@ -1,5 +1,5 @@
-#include "assert.h"
 #include "deque.h"
+#include <assert.h>
 #include <string.h>
 
 #define DEQUE_RESIZE_FACTOR 2
