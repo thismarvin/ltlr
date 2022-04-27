@@ -1,4 +1,4 @@
-#include "palette.h"
+#include "p8.h"
 
 Color P8PaletteGet(const usize index)
 {
