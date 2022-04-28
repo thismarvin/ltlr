@@ -37,12 +37,12 @@ export def "makefile content" [
 
 	let images-output = (
 		$images-input.input
-		| str replace 'content/aseprite/(\w+/)*((\w+)\.aseprite)' $"($output-directory)/$1$3.png"
+		| str replace 'content/aseprite/((?:\w+/)*)(?:(\w+)\.aseprite)' $"($output-directory)/$1$2.png"
 		| wrap 'output'
 	)
 	let levels-output = (
 		$levels-input.input
-		| str replace 'content/tiled/(\w+/)*((\w+)\.tmx)' $"($output-directory)/$1$3.json"
+		| str replace 'content/tiled/((?:\w+/)*)(?:(\w+)\.tmx)' $"($output-directory)/$1$2.json"
 		| wrap 'output'
 	)
 
@@ -182,7 +182,7 @@ export def "makefile desktop" [
 
 	let source-output = (
 		$source-input.input
-		| str replace 'src/(\w+/)*((\w+)\.c)' $"($output-directory)/$1$3.o"
+		| str replace 'src/((?:\w+/)*)(?:(\w+)\.c)' $"($output-directory)/$1$2.o"
 		| wrap 'output'
 	)
 

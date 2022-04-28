@@ -40,12 +40,12 @@ export def "builder content" [
 
 	let image-output = (
 		$image-sources.input
-		| str replace 'content/aseprite/(\w+/)*((\w+)\.aseprite)' $"($env.OUT_DIR)/$1$3.png"
+		| str replace 'content/aseprite/((?:\w+/)*)(?:(\w+)\.aseprite)' $"($env.OUT_DIR)/$1$2.png"
 		| wrap 'output'
 	)
 	let level-output = (
 		$level-sources.input
-		| str replace 'content/tiled/(\w+/)*((\w+)\.tmx)' $"($env.OUT_DIR)/$1$3.json"
+		| str replace 'content/tiled/((?:\w+/)*)(?:(\w+)\.tmx)' $"($env.OUT_DIR)/$1$2.json"
 		| wrap 'output'
 	)
 
