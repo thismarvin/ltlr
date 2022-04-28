@@ -1,4 +1,4 @@
-export def builder [] {
+export def "builder desktop" [] {
 	let cflags = (
 		$env.CFLAGS
 		| split row ' '
@@ -155,7 +155,7 @@ export def build [
 		if not $release {
 			'-g -pg -O0'
 		} else {
-			'-O3'
+			'-O2'
 		}
 	)
 
@@ -189,7 +189,7 @@ export def build [
 		CFLAGS $"-std=c17 -Wall -Wextra -Wpedantic ($optimization-flags) -Ivendor/raylib/src -Ivendor/cJSON -DPLATFORM_DESKTOP"
 		LDLIBS $ldlibs
 	] {
-		builder
+		builder desktop
 	}
 }
 
