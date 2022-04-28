@@ -24,6 +24,33 @@ export def builder [] {
 	^$env.CC $cflags -o $out $input $ldlibs
 }
 
+export def "builder web" [] {
+	let cflags = (
+		$env.CFLAGS
+		| split row ' '
+	)
+	let out = (
+		[ $env.OUT_DIR 'index.html' ]
+		| path join
+	)
+	let input = (
+		(ls src/**/*.c).name
+		| str replace '\\' '/'
+	)
+	let ldlibs = (
+		$env.LDLIBS
+		| split row ' '
+	)
+	let total-memory = $"TOTAL_MEMORY=($env.TOTAL_MEMORY)"
+
+	# Make sure the directories required by output exist.
+	let _ = (
+		mkdir $env.OUT_DIR
+	)
+
+	^$env.EMCC $cflags -o $out $input $ldlibs -s USE_GLFW=3 -s $total-memory --memory-init-file 0 --shell-file $env.SHELL_FILE --preload-file $env.CONTENT_DIR
+}
+
 export def "builder content" [
 	--release (-r) # Format output for release
 ] {
