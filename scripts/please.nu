@@ -1,3 +1,54 @@
+export def "builder content" [
+	--release (-r) # Format output for release
+] {
+	let image-sources = (
+		(ls content/aseprite/**/*.aseprite).name
+		| str replace '\\' '/'
+		| wrap 'input'
+	)
+	let level-sources = (
+		(ls content/tiled/**/*.tmx).name
+		| str replace '\\' '/'
+		| wrap 'input'
+	)
+
+	let image-output = (
+		$image-sources.input
+		| str replace 'content/aseprite/((?:\w+/)*)(?:(\w+)\.aseprite)' $"($env.OUT_DIR)/$1$2.png"
+		| wrap 'output'
+	)
+	let level-output = (
+		$level-sources.input
+		| str replace 'content/tiled/((?:\w+/)*)(?:(\w+)\.tmx)' $"($env.OUT_DIR)/$1$2.json"
+		| wrap 'output'
+	)
+
+	let images = (
+		$image-sources
+		| merge { $image-output }
+	)
+	let levels = (
+		$level-sources
+		| merge { $level-output }
+	)
+
+	let _ = (
+		$images
+		| each { |it| ^$env.ASEPRITE -b $it.input --save-as $it.output }
+	)
+	let _ = (
+		$levels
+		| each { |it| ^$env.TILED --embed-tilesets --export-map json $it.input $it.output }
+	)
+
+	if $release {
+		let _ = (
+			$levels
+			| each { |it| ^$env.PRETTIER -w --use-tabs $it.output }
+		)
+	}
+}
+
 export def "builder desktop" [] {
 	let cflags = (
 		$env.CFLAGS
@@ -49,57 +100,6 @@ export def "builder web" [] {
 	)
 
 	^$env.EMCC $cflags -o $out $input $ldlibs -s USE_GLFW=3 -s $total-memory --memory-init-file 0 --shell-file $env.SHELL_FILE --preload-file $env.CONTENT_DIR
-}
-
-export def "builder content" [
-	--release (-r) # Format output for release
-] {
-	let image-sources = (
-		(ls content/aseprite/**/*.aseprite).name
-		| str replace '\\' '/'
-		| wrap 'input'
-	)
-	let level-sources = (
-		(ls content/tiled/**/*.tmx).name
-		| str replace '\\' '/'
-		| wrap 'input'
-	)
-
-	let image-output = (
-		$image-sources.input
-		| str replace 'content/aseprite/((?:\w+/)*)(?:(\w+)\.aseprite)' $"($env.OUT_DIR)/$1$2.png"
-		| wrap 'output'
-	)
-	let level-output = (
-		$level-sources.input
-		| str replace 'content/tiled/((?:\w+/)*)(?:(\w+)\.tmx)' $"($env.OUT_DIR)/$1$2.json"
-		| wrap 'output'
-	)
-
-	let images = (
-		$image-sources
-		| merge { $image-output }
-	)
-	let levels = (
-		$level-sources
-		| merge { $level-output }
-	)
-
-	let _ = (
-		$images
-		| each { |it| ^$env.ASEPRITE -b $it.input --save-as $it.output }
-	)
-	let _ = (
-		$levels
-		| each { |it| ^$env.TILED --embed-tilesets --export-map json $it.input $it.output }
-	)
-
-	if $release {
-		let _ = (
-			$levels
-			| each { |it| ^$env.PRETTIER -w --use-tabs $it.output }
-		)
-	}
 }
 
 # Compile ltlr
