@@ -1,6 +1,9 @@
 .ccls-cache
 .idea
 .vscode
+Makefile.Content
+Makefile.Desktop
+Makefile.Web
 bin
 build
 lib
