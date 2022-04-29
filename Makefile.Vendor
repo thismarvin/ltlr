@@ -72,7 +72,7 @@ $(RAYLIB_WEB_OBJECTS): $(OUT_DIR)/web/raylib/%.o: vendor/raylib/src/%.c | $(OUT_
 	$(EMCC) -O1 -DPLATFORM_WEB -DGRAPHICS_API_OPENGL_ES2 -DSUPPORT_CUSTOM_FRAME_CONTROL -o $@ -c $<
 
 $(OUT_DIR)/web/libraylib.a: $(RAYLIB_WEB_OBJECTS) | $(OUT_DIR)/web
-	$(EMAR) rcs $@ $(RAYLIB_OBJECTS)
+	$(EMAR) rcs $@ $(RAYLIB_WEB_OBJECTS)
 
 # cJSON
 
