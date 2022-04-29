@@ -275,3 +275,123 @@ clean:
 	if [ -d \"($output-directory)\" ]; then rm -r ($output-directory); fi
 "
 }
+
+export def "makefile web" [
+	--out-dir: string # Change the output directory
+] {
+	# TODO(thismarvin): A lot of this is copied from "makefile desktop"...
+
+	let output-directory = (
+		if ($out-dir | empty?) {
+			'build/web'
+		} else {
+			$out-dir
+		}
+	)
+
+	let source-headers = (
+		(ls src/**/*.h).name
+		| wrap 'header'
+	)
+	let source-input = (
+		(ls src/**/*.c).name
+		| wrap 'input'
+	)
+
+	let source-output = (
+		$source-input.input
+		| str replace 'src/((?:\w+/)*)(?:(\w+)\.c)' $"($output-directory)/$1$2.o"
+		| wrap 'output'
+	)
+
+	let source = (
+		$source-input
+		| merge { $source-output }
+	)
+
+	let source-directories = (
+		$source.output
+		| each { |it| $it | path dirname }
+		| uniq
+	)
+
+	let required-directories = (
+		[]
+		| append $source-directories
+		| uniq
+		| each { |it| stagger-path $it }
+		| flatten
+		| uniq
+	)
+
+	let makefile-source-headers = (
+		$source-headers.header
+		| each { |it| $"\t($it) \\" }
+		| str collect "\n"
+	)
+	let makefile-source-input = (
+		$source.input
+		| each { |it| $"\t($it) \\" }
+		| str collect "\n"
+	)
+	let makefile-source-output = (
+		$source.output
+		| each { |it| $"\t($it) \\" }
+		| str collect "\n"
+	)
+
+	let entries = (
+		$required-directories
+		| each { |it| { dir: $it, parent: ($it | path dirname) }}
+	)
+	let makefile-directory-rules = (
+		$entries
+		| each { |it| if not ($it.parent | empty?) { $"($it.dir): | ($it.parent)\n" } else { $"($it.dir):\n" }}
+		| each { |it| $"($it)\tmkdir $@\n" }
+		| str collect "\n"
+	)
+
+	let makefile-source-rules = (
+		$source
+		| each { |it| $"($it.output): ($it.input) $\(SOURCE_HEADERS) | ($it.output | path dirname)\n" }
+		| each { |it| $"($it)\t$\(EMCC) $\(CFLAGS) -o $@ -c $<\n" }
+		| str collect "\n"
+	)
+
+$"# This file is auto-generated; any changes you make may be overwritten.
+
+EMCC := emcc
+
+CFLAGS := -std=c17 -Wall -Wextra -Wpedantic -O3 -Ivendor/raylib/src -Ivendor/cJSON -DPLATFORM_WEB
+LDLIBS := -Llib/web -lraylib -lcJSON
+
+TOTAL_MEMORY := 33554432
+SHELL_FILE := src/minshell.html
+
+SOURCE_HEADERS := \\
+($makefile-source-headers)
+
+SOURCE_INPUT := \\
+($makefile-source-input)
+
+SOURCE_OUTPUT := \\
+($makefile-source-output)
+
+$\(VERBOSE).SILENT:
+
+.PHONY: all
+all: clean web
+
+($makefile-directory-rules)
+($makefile-source-rules)
+($output-directory)/index.html: $\(SOURCE_OUTPUT) | ($output-directory)
+	$\(EMCC) $\(CFLAGS) -o $@ $^ $\(LDLIBS) -s USE_GLFW=3 -s TOTAL_MEMORY=$\(TOTAL_MEMORY) --memory-init-file 0 --shell-file $\(SHELL_FILE) --preload-file content/build
+
+.PHONY: web
+web: ($output-directory)/index.html
+
+.PHONY: clean
+clean:
+	if [ -d \"($output-directory)\" ]; then rm -r ($output-directory); fi
+"
+}
