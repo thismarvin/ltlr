@@ -225,3 +225,40 @@ export def run [
 		^([ './' $output ] | path join)
 	}
 }
+
+export def 'build web' [
+	--out-dir: string # Change the output directory
+] {
+	let output-directory-basename = (
+		if ($out-dir | empty?) {
+			'target'
+		} else {
+			$out-dir
+		}
+	)
+	let output-directory = (
+		[$output-directory-basename 'web'] | path join
+	)
+
+	# Build Content.
+	with-env [
+		OUT_DIR 'content/build'
+		ASEPRITE 'aseprite'
+		TILED 'tiled'
+		PRETTIER 'prettier'
+	] {
+		builder content --release
+	}
+
+	with-env [
+		OUT_DIR $output-directory
+		EMCC 'emcc'
+		CFLAGS '-std=c17 -Wall -Wextra -Wpedantic -O2 -Ivendor/raylib/src -Ivendor/cJSON -DPLATFORM_WEB'
+		LDLIBS '-Llib/web -lraylib -lcJSON'
+		SHELL_FILE 'src/minshell.html'
+		TOTAL_MEMORY '33554432'
+		CONTENT_DIR 'content/build'
+	] {
+		builder web
+	}
+}
