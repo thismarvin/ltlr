@@ -1,62 +1,44 @@
-$(VERBOSE).SILENT:
-
-ASEPRITE := aseprite
-TILED := tiled
+NU := nu
 ASTYLE := astyle
 PRETTIER := prettier
 
-VENDOR := vendor/raylib/src/raylib.h vendor/cJSON/cJSON.h
-EXTERNAL := src/vendor/cJSON.h src/vendor/cJSON.c
-
-IMAGE_SOURCES := $(shell find content/aseprite -type f -name "*.aseprite")
-IMAGE_PNG := $(patsubst content/aseprite/%.aseprite,src/resources/build/%.png, $(IMAGE_SOURCES))
-
-LEVEL_SOURCES := $(shell find content/tiled -type f -name "*.tmx")
-LEVEL_JSON := $(patsubst content/tiled/%.tmx,src/resources/build/%.json, $(LEVEL_SOURCES))
-
-CONTENT := $(IMAGE_PNG) $(LEVEL_JSON)
-
-DEPS := $(VENDOR) $(EXTERNAL) $(CONTENT)
-
-src/vendor:
-	mkdir $@
-
-src/resources/build:
-	mkdir $@
+$(VERBOSE).SILENT:
 
 .PHONY: all
-all:
-	$(MAKE) clean
-	$(MAKE) desktop
-	$(MAKE) web
+all: clean desktop web
 
-src/vendor/cJSON.h: vendor/cJSON/cJSON.h | src/vendor
-	cp $< src/vendor
+Makefile.Content: content
+	$(NU) -c "use scripts/generate.nu; generate makefile content | save Makefile.Content"
 
-src/vendor/cJSON.c: vendor/cJSON/cJSON.c | src/vendor
-	cp $< src/vendor
+Makefile.Desktop: src
+	$(NU) -c "use scripts/generate.nu; generate makefile desktop | save Makefile.Desktop"
 
-$(IMAGE_PNG): src/resources/build/%.png: content/aseprite/%.aseprite | src/resources/build
-	$(ASEPRITE) -b $< --save-as $@
+Makefile.Web: src
+	$(NU) -c "use scripts/generate.nu; generate makefile web | save Makefile.Web"
 
-$(LEVEL_JSON): src/resources/build/%.json: content/tiled/%.tmx | src/resources/build
-	$(TILED) --embed-tilesets --export-map json $< $@
-	$(PRETTIER) -w --use-tabs $@
+.PHONY: vendor
+vendor: Makefile.Vendor
+	$(MAKE) -f Makefile.Vendor vendor
 
-$(VENDOR):
-	git submodule update --init --recursive
+.PHONY: content
+content: Makefile.Content
+	$(MAKE) -f Makefile.Content content
 
 .PHONY: desktop
-desktop: $(DEPS)
-	$(MAKE) -f Makefile.Desktop release
+desktop: vendor content Makefile.Desktop
+	$(MAKE) -f Makefile.Desktop desktop
+	
+	if [ -d "build/desktop/content" ]; then rm -r build/desktop/content; fi
+	mkdir build/desktop/content
+	cp -R build/content/. build/desktop/content
 
 .PHONY: web
-web: $(DEPS)
-	$(MAKE) -f Makefile.Web release
+web: vendor content Makefile.Web
+	$(MAKE) -f Makefile.Web web
 
 .PHONY: dev
-dev: $(DEPS)
-	$(MAKE) -f Makefile.Desktop dev
+dev: desktop
+	cd build/desktop; ./ltlr
 
 .PHONY: format
 format:
@@ -65,13 +47,7 @@ format:
 
 .PHONY: clean
 clean:
-	if [ -d "src/resources/build" ]; then rm -rf src/resources/build; fi
-	if [ -d "build" ]; then rm -rf build; fi
-	if [ -d "bin" ]; then rm -rf bin; fi
-	@echo "Done"
-
-# TODO(thismarvin): We need to automate this somehow!
-.PHONY: test
-test:
-	gcc -Ivendor/raylib/src -o ./bin/debug/desktop/test src/unit_tests.c src/testing.c src/deque.c -Lbuild/vendor/raylib/desktop -DDO_TESTING
-	./bin/debug/desktop/test
+	if [ -f "Makefile.Content" ]; then rm Makefile.Content; fi
+	if [ -f "Makefile.Desktop" ]; then rm Makefile.Desktop; fi
+	if [ -f "Makefile.Web" ]; then rm Makefile.Web; fi
+	if [ -d "build" ]; then rm -r build; fi
