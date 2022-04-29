@@ -178,7 +178,11 @@ export def build [
 		TILED 'tiled'
 		PRETTIER 'prettier'
 	] {
-		builder content
+		if not $release {
+			builder content
+		} else {
+			builder content --release
+		}
 	}
 
 	# Build Binary.
