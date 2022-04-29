@@ -246,7 +246,7 @@ export def 'build web' [
 
 	# Build Content.
 	with-env [
-		OUT_DIR 'content/build'
+		OUT_DIR 'build/content'
 		ASEPRITE 'aseprite'
 		TILED 'tiled'
 		PRETTIER 'prettier'
@@ -261,7 +261,7 @@ export def 'build web' [
 		LDLIBS '-Llib/web -lraylib -lcJSON'
 		SHELL_FILE 'src/minshell.html'
 		TOTAL_MEMORY '33554432'
-		CONTENT_DIR 'content/build'
+		CONTENT_DIR 'build/content'
 	] {
 		builder web
 	}

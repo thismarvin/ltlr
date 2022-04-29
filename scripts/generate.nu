@@ -165,7 +165,7 @@ export def "makefile desktop" [
 ] {
 	let output-directory = (
 		if ($out-dir | empty?) {
-			'build'
+			'build/desktop'
 		} else {
 			$out-dir
 		}
@@ -385,7 +385,7 @@ all: clean web
 ($makefile-directory-rules)
 ($makefile-source-rules)
 ($output-directory)/index.html: $\(SOURCE_OUTPUT) | ($output-directory)
-	$\(EMCC) $\(CFLAGS) -o $@ $^ $\(LDLIBS) -s USE_GLFW=3 -s TOTAL_MEMORY=$\(TOTAL_MEMORY) --memory-init-file 0 --shell-file $\(SHELL_FILE) --preload-file content/build
+	$\(EMCC) $\(CFLAGS) -o $@ $^ $\(LDLIBS) -s USE_GLFW=3 -s TOTAL_MEMORY=$\(TOTAL_MEMORY) --memory-init-file 0 --shell-file $\(SHELL_FILE) --preload-file build/content
 
 .PHONY: web
 web: ($output-directory)/index.html
