@@ -4,8 +4,6 @@ AR := ar
 EMCC := emcc
 EMAR := emar
 
-OUT_DIR := lib
-
 RAYLIB_SOURCES := \
 	vendor/raylib/src/raudio.c \
 	vendor/raylib/src/rcore.c \
@@ -18,35 +16,35 @@ RAYLIB_SOURCES := \
 CJSON_SOURCES := \
 	vendor/cJSON/cJSON.c
 
-RAYLIB_WEB_OBJECTS := $(patsubst vendor/raylib/src/%.c,$(OUT_DIR)/web/raylib/%.o, $(RAYLIB_SOURCES))
+RAYLIB_WEB_OBJECTS := $(patsubst vendor/raylib/src/%.c,lib/web/raylib/%.o, $(RAYLIB_SOURCES))
 
-CJSON_DESKTOP_OBJECTS := $(patsubst vendor/cJSON/%.c,$(OUT_DIR)/desktop/cJSON/%.o, $(CJSON_SOURCES))
-CJSON_WEB_OBJECTS := $(patsubst vendor/cJSON/%.c,$(OUT_DIR)/web/cJSON/%.o, $(CJSON_SOURCES))
+CJSON_DESKTOP_OBJECTS := $(patsubst vendor/cJSON/%.c,lib/desktop/cJSON/%.o, $(CJSON_SOURCES))
+CJSON_WEB_OBJECTS := $(patsubst vendor/cJSON/%.c,lib/web/cJSON/%.o, $(CJSON_SOURCES))
 
 $(VERBOSE).SILENT:
 
 .PHONY: all
 all: clean vendor
 
-$(OUT_DIR):
+lib:
 	mkdir $@
 
-$(OUT_DIR)/desktop: | $(OUT_DIR)
+lib/desktop: | lib
 	mkdir $@
 
-$(OUT_DIR)/desktop/raylib: | $(OUT_DIR)/desktop
+lib/desktop/raylib: | lib/desktop
 	mkdir $@
 
-$(OUT_DIR)/desktop/cJSON: | $(OUT_DIR)/desktop
+lib/desktop/cJSON: | lib/desktop
 	mkdir $@
 
-$(OUT_DIR)/web: | $(OUT_DIR)
+lib/web: | lib
 	mkdir $@
 
-$(OUT_DIR)/web/raylib: | $(OUT_DIR)/web
+lib/web/raylib: | lib/web
 	mkdir $@
 
-$(OUT_DIR)/web/cJSON: | $(OUT_DIR)/web
+lib/web/cJSON: | lib/web
 	mkdir $@
 
 # raylib
@@ -54,24 +52,24 @@ $(OUT_DIR)/web/cJSON: | $(OUT_DIR)/web
 vendor/raylib/src/Makefile:
 	$(GIT) submodule update --init --recursive vendor/raylib
 
-$(OUT_DIR)/desktop/libraylib.a: vendor/raylib/src/Makefile | $(OUT_DIR)/desktop/raylib
+lib/desktop/libraylib.a: vendor/raylib/src/Makefile | lib/desktop/raylib
 	cd vendor/raylib/src; $(MAKE) PLATFORM=PLATFORM_DESKTOP CUSTOM_CFLAGS=-DSUPPORT_CUSTOM_FRAME_CONTROL
 
-	mv vendor/raylib/src/raudio.o $(OUT_DIR)/desktop/raylib
-	mv vendor/raylib/src/rcore.o $(OUT_DIR)/desktop/raylib
-	mv vendor/raylib/src/rglfw.o $(OUT_DIR)/desktop/raylib
-	mv vendor/raylib/src/rmodels.o $(OUT_DIR)/desktop/raylib
-	mv vendor/raylib/src/rshapes.o $(OUT_DIR)/desktop/raylib
-	mv vendor/raylib/src/rtext.o $(OUT_DIR)/desktop/raylib
-	mv vendor/raylib/src/rtextures.o $(OUT_DIR)/desktop/raylib
-	mv vendor/raylib/src/utils.o $(OUT_DIR)/desktop/raylib
+	mv vendor/raylib/src/raudio.o lib/desktop/raylib
+	mv vendor/raylib/src/rcore.o lib/desktop/raylib
+	mv vendor/raylib/src/rglfw.o lib/desktop/raylib
+	mv vendor/raylib/src/rmodels.o lib/desktop/raylib
+	mv vendor/raylib/src/rshapes.o lib/desktop/raylib
+	mv vendor/raylib/src/rtext.o lib/desktop/raylib
+	mv vendor/raylib/src/rtextures.o lib/desktop/raylib
+	mv vendor/raylib/src/utils.o lib/desktop/raylib
 
-	mv vendor/raylib/src/libraylib.a $(OUT_DIR)/desktop
+	mv vendor/raylib/src/libraylib.a lib/desktop
 
-$(RAYLIB_WEB_OBJECTS): $(OUT_DIR)/web/raylib/%.o: vendor/raylib/src/%.c | $(OUT_DIR)/web/raylib
+$(RAYLIB_WEB_OBJECTS): lib/web/raylib/%.o: vendor/raylib/src/%.c | lib/web/raylib
 	$(EMCC) -O1 -DPLATFORM_WEB -DGRAPHICS_API_OPENGL_ES2 -DSUPPORT_CUSTOM_FRAME_CONTROL -o $@ -c $<
 
-$(OUT_DIR)/web/libraylib.a: $(RAYLIB_WEB_OBJECTS) | $(OUT_DIR)/web
+lib/web/libraylib.a: $(RAYLIB_WEB_OBJECTS) | lib/web
 	$(EMAR) rcs $@ $^
 
 # cJSON
@@ -79,27 +77,27 @@ $(OUT_DIR)/web/libraylib.a: $(RAYLIB_WEB_OBJECTS) | $(OUT_DIR)/web
 vendor/cJSON/cJSON.c:
 	$(GIT) submodule update --init --recursive vendor/cJSON
 
-$(CJSON_DESKTOP_OBJECTS): $(CJSON_SOURCES) | $(OUT_DIR)/desktop/cJSON
+$(CJSON_DESKTOP_OBJECTS): $(CJSON_SOURCES) | lib/desktop/cJSON
 	$(CC) -std=c89 -O1 -o $@ -c $^
 
-$(OUT_DIR)/desktop/libcJSON.a: $(CJSON_DESKTOP_OBJECTS) | $(OUT_DIR)/desktop
+lib/desktop/libcJSON.a: $(CJSON_DESKTOP_OBJECTS) | lib/desktop
 	$(AR) rcs $@ $^
 
-$(CJSON_WEB_OBJECTS): $(CJSON_SOURCES) | $(OUT_DIR)/web/cJSON
+$(CJSON_WEB_OBJECTS): $(CJSON_SOURCES) | lib/web/cJSON
 	$(EMCC) -std=c89 -O1 -o $@ -c $^
 
-$(OUT_DIR)/web/libcJSON.a: $(CJSON_WEB_OBJECTS) | $(OUT_DIR)/web
+lib/web/libcJSON.a: $(CJSON_WEB_OBJECTS) | lib/web
 	$(EMAR) rcs $@ $^
 
 .PHONY: raylib
-raylib: $(OUT_DIR)/desktop/libraylib.a $(OUT_DIR)/web/libraylib.a
+raylib: lib/desktop/libraylib.a lib/web/libraylib.a
 
 .PHONY: cJSON
-cJSON: $(OUT_DIR)/desktop/libcJSON.a $(OUT_DIR)/web/libcJSON.a
+cJSON: lib/desktop/libcJSON.a lib/web/libcJSON.a
 
 .PHONY: vendor
 vendor: raylib cJSON
 
 .PHONY: clean
 clean:
-	if [ -d $(OUT_DIR) ]; then rm -r $(OUT_DIR); fi
+	if [ -d "lib" ]; then rm -r lib; fi
