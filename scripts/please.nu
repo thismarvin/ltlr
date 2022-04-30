@@ -32,6 +32,19 @@ export def "builder content" [
 		| merge { $level-output }
 	)
 
+	# Remove previous build artifacts.
+	do {
+		let _ = {
+			(ls $"($env.OUT_DIR)/**/*.png").name
+			| each { |it| rm -q $it }
+		}
+
+		let _ = {
+			(ls $"($env.OUT_DIR)/**/*.json").name
+			| each { |it| rm -q $it }
+		}
+	}
+
 	let _ = (
 		$images
 		| each { |it|
