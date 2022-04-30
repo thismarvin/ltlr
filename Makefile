@@ -1,6 +1,7 @@
 NU := nu
 ASTYLE := astyle
 PRETTIER := prettier
+GPROF := gprof
 
 $(VERBOSE).SILENT:
 
@@ -39,6 +40,7 @@ web: vendor content Makefile.Web
 .PHONY: dev
 dev: desktop
 	cd build/desktop; ./ltlr
+	$(GPROF) build/desktop/ltlr build/desktop/gmon.out > build/desktop/profile
 
 .PHONY: format
 format:
