@@ -34,17 +34,29 @@ export def "builder content" [
 
 	let _ = (
 		$images
-		| each { |it| ^$env.ASEPRITE -b $it.input --save-as $it.output }
+		| each { |it|
+			^$env.ASEPRITE -b $it.input --save-as $it.output
+			| complete
+			| if $in.exit_code != 0 { error make { msg: 'An error occurred during compilation!' }}
+		}
 	)
 	let _ = (
 		$levels
-		| each { |it| ^$env.TILED --embed-tilesets --export-map json $it.input $it.output }
+		| each { |it|
+			^$env.TILED --embed-tilesets --export-map json $it.input $it.output
+			| complete
+			| if $in.exit_code != 0 { error make { msg: 'An error occurred during compilation!' }}
+		}
 	)
 
 	if $release {
 		let _ = (
 			$levels
-			| each { |it| ^$env.PRETTIER -w --use-tabs $it.output }
+			| each { |it|
+				^$env.PRETTIER -w --use-tabs $it.output
+				| complete
+				| if $in.exit_code != 0 { error make { msg: 'An error occurred during compilation!' }}
+			}
 		)
 	}
 }
@@ -73,6 +85,8 @@ export def "builder desktop" [] {
 	)
 
 	^$env.CC $cflags -o $out $input $ldlibs
+	| complete
+	| if $in.exit_code != 0 { error make { msg: 'An error occurred during compilation!' }}
 }
 
 export def "builder web" [] {
@@ -100,6 +114,8 @@ export def "builder web" [] {
 	)
 
 	^$env.EMCC $cflags -o $out $input $ldlibs -s USE_GLFW=3 -s $total-memory --memory-init-file 0 --shell-file $env.SHELL_FILE --preload-file $env.CONTENT_DIR
+	| complete
+	| if $in.exit_code != 0 { error make { msg: 'An error occurred during compilation!' }}
 }
 
 # Compile ltlr
