@@ -571,7 +571,7 @@ static Rectangle SceneCalculateActionCameraBounds(const Scene* self, const usize
         cameraPosition.x = MIN(max, cameraPosition.x);
     }
 
-    // Camera y-axis collison.
+    // Camera y-axis collision.
     {
         f32 min = RectangleTop(self->bounds) + CTX_VIEWPORT_HEIGHT * 0.5;
         f32 max = RectangleBottom(self->bounds) - CTX_VIEWPORT_HEIGHT * 0.5;
