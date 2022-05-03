@@ -119,11 +119,11 @@ void CloudParticleDraw(const Scene* scene, const usize entity)
         return;
     }
 
-    const CPosition* position = SCENE_GET_COMPONENT_PTR(scene, entity, position);
-    const CColor* color = SCENE_GET_COMPONENT_PTR(scene, entity, color);
-    const CFleeting* fleeting = SCENE_GET_COMPONENT_PTR(scene, entity, fleeting);
-    const CDimension* dimension = SCENE_GET_COMPONENT_PTR(scene, entity, dimension);
-    const CSmooth* smooth = SCENE_GET_COMPONENT_PTR(scene, entity, smooth);
+    const CPosition* position = SCENE_GET_COMPONENT_PTR(scene, position, entity);
+    const CColor* color = SCENE_GET_COMPONENT_PTR(scene, color, entity);
+    const CFleeting* fleeting = SCENE_GET_COMPONENT_PTR(scene, fleeting, entity);
+    const CDimension* dimension = SCENE_GET_COMPONENT_PTR(scene, dimension, entity);
+    const CSmooth* smooth = SCENE_GET_COMPONENT_PTR(scene, smooth, entity);
 
     const f32 drawSize = dimension->width * (fleeting->lifetime - fleeting->age) / fleeting->lifetime;
 

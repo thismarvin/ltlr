@@ -212,10 +212,10 @@ void PlayerInputUpdate(Scene* scene, const usize entity)
         return;
     }
 
-    CPlayer* player = SCENE_GET_COMPONENT_PTR(scene, entity, player);
-    const CPosition* position = SCENE_GET_COMPONENT_PTR(scene, entity, position);
-    const CDimension* dimension = SCENE_GET_COMPONENT_PTR(scene, entity, dimension);
-    CKinetic* kinetic = SCENE_GET_COMPONENT_PTR(scene, entity, kinetic);
+    CPlayer* player = SCENE_GET_COMPONENT_PTR(scene, player, entity);
+    const CPosition* position = SCENE_GET_COMPONENT_PTR(scene, position, entity);
+    const CDimension* dimension = SCENE_GET_COMPONENT_PTR(scene, dimension, entity);
+    CKinetic* kinetic = SCENE_GET_COMPONENT_PTR(scene, kinetic, entity);
 
     if (player->dead)
     {
@@ -341,9 +341,9 @@ void PlayerPostCollisionUpdate(Scene* scene, const usize entity)
         return;
     }
 
-    CPlayer* player = SCENE_GET_COMPONENT_PTR(scene, entity, player);
-    CPosition* position = SCENE_GET_COMPONENT_PTR(scene, entity, position);
-    const CDimension* dimension = SCENE_GET_COMPONENT_PTR(scene, entity, dimension);
+    CPlayer* player = SCENE_GET_COMPONENT_PTR(scene, player, entity);
+    CPosition* position = SCENE_GET_COMPONENT_PTR(scene, position, entity);
+    const CDimension* dimension = SCENE_GET_COMPONENT_PTR(scene, dimension, entity);
 
     // General purpose player specific collision logic.
     {
@@ -367,7 +367,7 @@ void PlayerPostCollisionUpdate(Scene* scene, const usize entity)
 
 static void PlayerFlashingLogic(Scene* scene, const usize entity)
 {
-    CPlayer* player = SCENE_GET_COMPONENT_PTR(scene, entity, player);
+    CPlayer* player = SCENE_GET_COMPONENT_PTR(scene, player, entity);
 
     player->invulnerableTimer += CTX_DT;
 
@@ -403,10 +403,10 @@ void PlayerMortalUpdate(Scene* scene, const usize entity)
         return;
     }
 
-    CPlayer* player = SCENE_GET_COMPONENT_PTR(scene, entity, player);
-    const CMortal* mortal = SCENE_GET_COMPONENT_PTR(scene, entity, mortal);
-    const CPosition* position = SCENE_GET_COMPONENT_PTR(scene, entity, position);
-    CKinetic* kinetic = SCENE_GET_COMPONENT_PTR(scene, entity, kinetic);
+    CPlayer* player = SCENE_GET_COMPONENT_PTR(scene, player, entity);
+    const CMortal* mortal = SCENE_GET_COMPONENT_PTR(scene, mortal, entity);
+    const CPosition* position = SCENE_GET_COMPONENT_PTR(scene, position, entity);
+    CKinetic* kinetic = SCENE_GET_COMPONENT_PTR(scene, kinetic, entity);
 
     if (position->value.y > CTX_VIEWPORT_HEIGHT * 2)
     {

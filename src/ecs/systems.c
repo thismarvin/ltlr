@@ -9,7 +9,7 @@
 
 #define REQUIRE_DEPS(mDependencies) if ((scene->components.tags[entity] & (mDependencies)) != (mDependencies)) return
 #define ENTITY_HAS_DEPS(mEntity, mDependencies) ((scene->components.tags[mEntity] & (mDependencies)) == (mDependencies))
-#define GET_COMPONENT(mValue, mEntity) SCENE_GET_COMPONENT_PTR(scene, mEntity, mValue)
+#define GET_COMPONENT(mValue, mEntity) SCENE_GET_COMPONENT_PTR(scene, mValue, mEntity)
 
 void SSmoothUpdate(Scene* scene, const usize entity)
 {

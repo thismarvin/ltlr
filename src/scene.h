@@ -71,7 +71,7 @@ void SceneDraw(const Scene* self);
 void SceneReset(Scene* self);
 void SceneDestroy(Scene* self);
 
-#define SCENE_GET_COMPONENT(mScene, mEntity, mValue) _Generic((mValue), \
+#define SCENE_GET_COMPONENT(mScene, mValue, mEntity) _Generic((mValue), \
     CPosition: mScene->components.positions[mEntity], \
     CDimension: mScene->components.dimensions[mEntity], \
     CColor: mScene->components.colors[mEntity], \
@@ -84,7 +84,7 @@ void SceneDestroy(Scene* self);
     CDamage: mScene->components.damages[mEntity], \
     CFleeting: mScene->components.fleetings[mEntity])
 
-#define SCENE_GET_COMPONENT_PTR(mScene, mEntity, mValue) _Generic((mValue), \
+#define SCENE_GET_COMPONENT_PTR(mScene, mValue, mEntity) _Generic((mValue), \
     const CPosition*: &mScene->components.positions[mEntity], \
     CPosition*: &mScene->components.positions[mEntity], \
     const CDimension*: &mScene->components.dimensions[mEntity], \
@@ -109,4 +109,4 @@ void SceneDestroy(Scene* self);
     CFleeting*: &mScene->components.fleetings[mEntity])
 
 #define SCENE_SET_COMPONENT(mScene, mEntity, mValue) \
-    SCENE_GET_COMPONENT(mScene, mEntity, mValue) = mValue
+    SCENE_GET_COMPONENT(mScene, mValue, mEntity) = mValue
