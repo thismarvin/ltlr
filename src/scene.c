@@ -71,7 +71,7 @@ void SceneDeferDeallocateEntity(Scene* self, const usize entity)
     SceneSubmitCommand(self, CommandCreateDeallocateEntity(entity));
 }
 
-bool SceneEntityHasDependencies(Scene* self, usize entity, u64 dependencies)
+bool SceneEntityHasDependencies(const Scene* self, usize entity, u64 dependencies)
 {
     return (self->components.tags[entity] & dependencies) == dependencies;
 }
@@ -770,7 +770,7 @@ static void RenderForegroundLayer(const RenderFnParams* params)
 
     for (usize i = 0; i < SceneGetEntityCount(params->scene); ++i)
     {
-        SCloudParticleDraw(params->scene, i);
+        CloudParticleDraw(params->scene, i);
     }
 }
 
