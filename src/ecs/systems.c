@@ -346,29 +346,6 @@ void SFleetingUpdate(Scene* scene, const usize entity)
     }
 }
 
-void SCloudParticleDraw(const Scene* scene, const usize entity)
-{
-    REQUIRE_DEPS(TAG_POSITION | TAG_DIMENSION | TAG_FLEETING | TAG_COLOR | TAG_SMOOTH);
-
-    const CPosition* position = GET_COMPONENT(position, entity);
-    const CColor* color = GET_COMPONENT(color, entity);
-    const CFleeting* fleeting = GET_COMPONENT(fleeting, entity);
-    const CDimension* dimension = GET_COMPONENT(dimension, entity);
-    const CSmooth* smooth = GET_COMPONENT(smooth, entity);
-
-    const f32 drawSize = dimension->width * (fleeting->lifetime - fleeting->age) / fleeting->lifetime;
-
-    Vector2 interpolated = Vector2Lerp(smooth->previous, position->value, ContextGetAlpha());
-
-    Vector2 center = (Vector2)
-    {
-        .x = interpolated.x + dimension->width * 0.5f,
-        .y = interpolated.y + dimension->height * 0.5f,
-    };
-
-    DrawCircleV(center, drawSize * 0.5f, color->value);
-}
-
 void SSpriteDraw(const Scene* scene, const usize entity)
 {
     REQUIRE_DEPS(TAG_POSITION | TAG_COLOR | TAG_SPRITE);

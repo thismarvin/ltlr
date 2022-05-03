@@ -108,3 +108,32 @@ EntityBuilder CloudParticleCreate
         .components = components,
     };
 }
+
+void CloudParticleDraw(const Scene* scene, const usize entity)
+{
+    const u64 dependencies = TAG_POSITION | TAG_DIMENSION | TAG_FLEETING | TAG_COLOR | TAG_SMOOTH;
+
+    if (!SceneEntityHasDependencies((Scene*)scene, entity, dependencies))
+    {
+        return;
+    }
+
+    const CPosition* position = SCENE_GET_COMPONENT_PTR(scene, entity, position);
+    const CColor* color = SCENE_GET_COMPONENT_PTR(scene, entity, color);
+    const CFleeting* fleeting = SCENE_GET_COMPONENT_PTR(scene, entity, fleeting);
+    const CDimension* dimension = SCENE_GET_COMPONENT_PTR(scene, entity, dimension);
+    const CSmooth* smooth = SCENE_GET_COMPONENT_PTR(scene, entity, smooth);
+
+    const f32 drawSize = dimension->width * (fleeting->lifetime - fleeting->age) / fleeting->lifetime;
+
+    Vector2 interpolated = Vector2Lerp(smooth->previous, position->value, ContextGetAlpha());
+
+    Vector2 center = (Vector2)
+    {
+        .x = interpolated.x + dimension->width * 0.5f,
+        .y = interpolated.y + dimension->height * 0.5f,
+    };
+
+    DrawCircleV(center, drawSize * 0.5f, color->value);
+}
+
