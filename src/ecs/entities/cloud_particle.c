@@ -1,3 +1,4 @@
+#include "cloud_particle.h"
 #include "common.h"
 #include <raymath.h>
 

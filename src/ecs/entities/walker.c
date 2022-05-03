@@ -1,4 +1,5 @@
 #include "common.h"
+#include "walker.h"
 
 static OnCollisionResult WalkerOnCollision(const OnCollisionParams* params)
 {

@@ -1,3 +1,4 @@
+#include "block.h"
 #include "common.h"
 
 EntityBuilder BlockCreate(const f32 x, const f32 y, const f32 width, const f32 height)

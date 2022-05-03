@@ -1,5 +1,6 @@
 #include "../events.h"
 #include "common.h"
+#include "player.h"
 #include <math.h>
 #include <raymath.h>
 
