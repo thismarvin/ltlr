@@ -520,15 +520,14 @@ void SceneUpdate(Scene* self)
 
         SSmoothUpdate(self, i);
 
-        SPlayerInputUpdate(self, i);
+        PlayerInputUpdate(self, i);
 
         SKineticUpdate(self, i);
 
         SCollisionUpdate(self, i);
 
-        SPlayerPostCollisionUpdate(self, i);
-
-        SPlayerMortalUpdate(self, i);
+        PlayerPostCollisionUpdate(self, i);
+        PlayerMortalUpdate(self, i);
     }
 }
 

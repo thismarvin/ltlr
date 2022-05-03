@@ -1,5 +1,7 @@
+#include "../events.h"
 #include "common.h"
 #include <math.h>
+#include <raymath.h>
 
 static bool PlayerIsVulnerable(const CPlayer* player)
 {
@@ -198,4 +200,233 @@ EntityBuilder PlayerCreate(const f32 x, const f32 y)
         .tags = tags,
         .components = components,
     };
+}
+
+void PlayerInputUpdate(Scene* scene, const usize entity)
+{
+    u64 dependencies = TAG_PLAYER | TAG_POSITION | TAG_DIMENSION | TAG_KINETIC;
+
+    if (!SceneEntityHasDependencies(scene, entity, dependencies))
+    {
+        return;
+    }
+
+    CPlayer* player = SCENE_GET_COMPONENT_PTR(scene, entity, player);
+    const CPosition* position = SCENE_GET_COMPONENT_PTR(scene, entity, position);
+    const CDimension* dimension = SCENE_GET_COMPONENT_PTR(scene, entity, dimension);
+    CKinetic* kinetic = SCENE_GET_COMPONENT_PTR(scene, entity, kinetic);
+
+    if (player->dead)
+    {
+        return;
+    }
+
+    bool coyoteTimeActive = player->coyoteTimer < player->coyoteDuration;
+
+    // Maintenance.
+    {
+        player->groundedLastFrame = player->grounded;
+
+        if (player->grounded)
+        {
+            kinetic->velocity.y = 0;
+            player->jumping = false;
+        }
+
+        Vector2 gravityForce = Vector2Create(0, player->defaultGravity);
+
+        if (player->jumping && kinetic->velocity.y < player->jumpVelocity)
+        {
+            gravityForce.y = player->jumpGravity;
+        }
+
+        kinetic->acceleration = gravityForce;
+
+        if (coyoteTimeActive)
+        {
+            player->coyoteTimer += CTX_DT;
+        }
+    }
+
+    // Lateral Movement.
+    {
+        i8 strafe = 0;
+
+        if (InputHandlerPressing(&scene->input, "left"))
+        {
+            strafe = -1;
+        }
+
+        if (InputHandlerPressing(&scene->input, "right"))
+        {
+            strafe = 1;
+        }
+
+        kinetic->velocity.x = strafe * player->moveSpeed;
+    }
+
+    // Jumping.
+    {
+        if ((player->grounded || coyoteTimeActive) && !player->jumping
+                && InputHandlerPressed(&scene->input, "jump"))
+        {
+            InputHandlerConsume(&scene->input, "jump");
+
+            player->grounded = false;
+            player->jumping = true;
+            kinetic->velocity.y = -player->jumpVelocity;
+
+            // Spawn cloud particles.
+            {
+                const Vector2 bottomCenter = (Vector2)
+                {
+                    .x = position->value.x + dimension->width * 0.5f,
+                    .y = position->value.y + dimension->height
+                };
+
+                Vector2 anchorOffset = VECTOR2_ZERO;
+
+                if (kinetic->velocity.x > 0)
+                {
+                    anchorOffset.x = -dimension->width * 0.5f;
+                }
+
+                if (kinetic->velocity.x < 0)
+                {
+                    anchorOffset.x = dimension->width * 0.5f;
+                }
+
+                const Vector2 anchor = Vector2Add(bottomCenter, anchorOffset);
+
+                Vector2 direction = Vector2Normalize(kinetic->velocity);
+                direction.x *= -1;
+
+                const EventCloudParticleParams params = (EventCloudParticleParams)
+                {
+                    .scene = scene,
+                    .entity = entity,
+                    .anchor = anchor,
+                    .direction = direction,
+                    .spawnCount = GetRandomValue(10, 25),
+                    .spread = dimension->width,
+                };
+
+                SpawnCloudParticles(&params);
+            }
+        }
+
+        // Variable Jump Height.
+        if (InputHandlerReleased(&scene->input, "jump") && kinetic->velocity.y < 0)
+        {
+            InputHandlerConsume(&scene->input, "jump");
+
+            player->jumping = false;
+            kinetic->velocity.y = MAX(kinetic->velocity.y, -player->jumpVelocity * 0.5);
+        }
+    }
+
+    // Assume that the player is not grounded; prove that it is later.
+    player->grounded = false;
+
+    // TODO(thismarvin): Should grounded logic really be in Input?
+}
+
+void PlayerPostCollisionUpdate(Scene* scene, const usize entity)
+{
+    u64 dependencies = TAG_PLAYER | TAG_POSITION | TAG_DIMENSION;
+
+    if (!SceneEntityHasDependencies(scene, entity, dependencies))
+    {
+        return;
+    }
+
+    CPlayer* player = SCENE_GET_COMPONENT_PTR(scene, entity, player);
+    CPosition* position = SCENE_GET_COMPONENT_PTR(scene, entity, position);
+    const CDimension* dimension = SCENE_GET_COMPONENT_PTR(scene, entity, dimension);
+
+    // General purpose player specific collision logic.
+    {
+        // Keep the player's x within the scene's bounds.
+        if (position->value.x < scene->bounds.x)
+        {
+            position->value.x = scene->bounds.x;
+        }
+        else if (position->value.x + dimension->width > RectangleRight(scene->bounds))
+        {
+            position->value.x = RectangleRight(scene->bounds) - dimension->width;
+        }
+    }
+
+    // Enable "Coyote Time" if the player walked off an edge.
+    if (player->groundedLastFrame && !player->grounded)
+    {
+        player->coyoteTimer = 0;
+    }
+}
+
+static void PlayerFlashingLogic(Scene* scene, const usize entity)
+{
+    CPlayer* player = SCENE_GET_COMPONENT_PTR(scene, entity, player);
+
+    player->invulnerableTimer += CTX_DT;
+
+    const u32 totalFlashes = 5;
+    f32 timeSlice = player->invulnerableDuration / (totalFlashes * 2.0f);
+
+    if (!player->dead && !PlayerIsVulnerable(player))
+    {
+        u32 passedSlices = (u32)(player->invulnerableTimer / timeSlice);
+
+        if (passedSlices % 2 == 0)
+        {
+            SceneDeferDisableComponent(scene, entity, TAG_SPRITE);
+        }
+        else
+        {
+            SceneDeferEnableComponent(scene, entity, TAG_SPRITE);
+        }
+    }
+    else
+    {
+        // This is a pre-caution to make sure the last state isn't off.
+        SceneDeferEnableComponent(scene, entity, TAG_SPRITE);
+    }
+}
+
+void PlayerMortalUpdate(Scene* scene, const usize entity)
+{
+    u64 dependencies = TAG_PLAYER | TAG_MORTAL | TAG_POSITION | TAG_KINETIC;
+
+    if (!SceneEntityHasDependencies(scene, entity, dependencies))
+    {
+        return;
+    }
+
+    CPlayer* player = SCENE_GET_COMPONENT_PTR(scene, entity, player);
+    const CMortal* mortal = SCENE_GET_COMPONENT_PTR(scene, entity, mortal);
+    const CPosition* position = SCENE_GET_COMPONENT_PTR(scene, entity, position);
+    CKinetic* kinetic = SCENE_GET_COMPONENT_PTR(scene, entity, kinetic);
+
+    if (position->value.y > CTX_VIEWPORT_HEIGHT * 2)
+    {
+        // TODO(thismarvin): Defer resetting the Scene somehow...
+        SceneReset(scene);
+
+        return;
+    }
+
+    if (!player->dead && mortal->hp <= 0)
+    {
+        player->dead = true;
+
+        SceneDeferDisableComponent(scene, entity, TAG_COLLIDER);
+
+        kinetic->velocity = (Vector2)
+        {
+            .x = kinetic->velocity.x,
+            .y = -250,
+        };
+    }
+
+    PlayerFlashingLogic(scene, entity);
 }
