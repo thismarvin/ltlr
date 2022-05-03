@@ -1,7 +1,7 @@
+#include "./ecs/entities.h"
+#include "./ecs/systems.h"
+#include "./palette/p8.h"
 #include "context.h"
-#include "ecs/entities.h"
-#include "ecs/systems.h"
-#include "palette/p8.h"
 #include "scene.h"
 #include <assert.h>
 #include <raymath.h>

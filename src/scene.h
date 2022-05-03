@@ -1,10 +1,10 @@
 #pragma once
 
-#include "collections/deque.h"
+#include "./collections/deque.h"
+#include "./ecs/command.h"
+#include "./ecs/components.h"
+#include "./ecs/entities.h"
 #include "common.h"
-#include "ecs/command.h"
-#include "ecs/components.h"
-#include "ecs/entities.h"
 #include "input.h"
 #include "level_segment.h"
 
