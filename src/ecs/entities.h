@@ -4,5 +4,6 @@
 
 #include "./entities/block.h"
 #include "./entities/cloud_particle.h"
+#include "./entities/fog.h"
 #include "./entities/player.h"
 #include "./entities/walker.h"

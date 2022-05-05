@@ -15,6 +15,7 @@
 #define TAG_MORTAL ((u64)1 << 9)
 #define TAG_DAMAGE ((u64)1 << 10)
 #define TAG_FLEETING ((u64)1 << 11)
+#define TAG_FOG ((u64)1 << 12)
 
 #define RESOLVE_NONE ((u8)0)
 #define RESOLVE_UP ((u8)1 << 0)
