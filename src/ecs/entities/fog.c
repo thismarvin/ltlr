@@ -11,11 +11,6 @@
     .y = -(FOG_HEIGHT - CTX_VIEWPORT_HEIGHT) * 0.5f, \
 }
 
-static OnCollisionResult FogOnCollision()
-{
-    // decrease player health?
-}
-
 EntityBuilder FogCreate()
 {
     Deque components = DEQUE_OF(Component);
@@ -27,7 +22,6 @@ EntityBuilder FogCreate()
         | TAG_COLOR
         | TAG_KINETIC
         | TAG_SMOOTH
-        | TAG_COLLIDER
         | TAG_FOG;
 
     ADD_COMPONENT(CPosition, ((CPosition)
@@ -55,13 +49,6 @@ EntityBuilder FogCreate()
     ADD_COMPONENT(CSmooth, ((CSmooth)
     {
         .previous = FOG_INITIAL_POSITION,
-    }));
-
-    ADD_COMPONENT(CCollider, ((CCollider)
-    {
-        .layer = LAYER_ALL,
-        .mask = LAYER_NONE,
-        .onCollision = FogOnCollision,
     }));
 
     return (EntityBuilder)
