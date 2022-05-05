@@ -8,6 +8,11 @@ static OnResolutionResult WalkerOnResolution(const OnResolutionParams* params)
     const CPosition* position = GET_COMPONENT(position, params->entity);
     CKinetic* kinetic = GET_COMPONENT(kinetic, params->entity);
 
+    if (ENTITY_HAS_DEPS(params->otherEntity, TAG_FOG))
+    {
+        return ON_COLLISION_RESULT_NONE;
+    }
+
     // Resolve collision.
     Rectangle resolvedAabb = ApplyResolutionPerfectly(params->aabb, params->otherAabb,
                              params->resolution);

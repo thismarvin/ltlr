@@ -44,6 +44,11 @@ static OnResolutionResult PlayerOnResolution(const OnResolutionParams* params)
                 .aabb = params->aabb,
             };
         }
+
+        if (ENTITY_HAS_DEPS(params->otherEntity, TAG_FOG))
+        {
+            return ON_COLLISION_RESULT_NONE;
+        }
     }
 
     // Collision leeway.
