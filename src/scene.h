@@ -41,6 +41,7 @@ struct Scene
     EntityManager m_entityManager;
     bool debugging;
     usize player;
+    usize fog;
     Rectangle bounds;
     Texture2D atlas;
     LevelSegment* segments;

@@ -7,7 +7,7 @@
 #define FOG_HEIGHT CTX_VIEWPORT_HEIGHT * 2
 #define FOG_INITIAL_POSITION (Vector2) \
 { \
-    .x = 0, \
+    .x = -CTX_VIEWPORT_WIDTH, \
     .y = -(FOG_HEIGHT - CTX_VIEWPORT_HEIGHT) * 0.5f, \
 }
 
@@ -100,6 +100,9 @@ void FogDraw(const Scene* scene, const usize entity)
     const CSmooth* smooth = SCENE_GET_COMPONENT_PTR(scene, smooth, entity);
 
     const Vector2 interpolated = Vector2Lerp(smooth->previous, position->value, ContextGetAlpha());
+
+    DrawRectangle(interpolated.x - CTX_VIEWPORT_WIDTH * 2, interpolated.y, CTX_VIEWPORT_WIDTH * 2,
+                  dimension->height, color->value);
 
     Vector2 currentCenter = Vector2Create(interpolated.x + dimension->width * 0.5f, interpolated.y);
 

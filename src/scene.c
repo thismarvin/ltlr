@@ -487,6 +487,7 @@ static void SceneStart(Scene* self)
 
     // TODO(thismarvin): Put this into level.json somehow...
     self->player = SceneDeferAddEntity(self, PlayerCreate(16 * 1, 16 * -4));
+    self->fog = SceneDeferAddEntity(self, FogCreate());
 
     SceneDeferAddEntity(self, WalkerCreate(16 * 16, 16 * 6));
     SceneDeferAddEntity(self, WalkerCreate(16 * 16, 16 * 7));
@@ -505,6 +506,22 @@ void SceneInit(Scene* self)
     SceneStart(self);
 }
 
+static void SceneCheckEndCondition(Scene* self)
+{
+    assert(SceneEntityHasDependencies(self, self->player, TAG_POSITION));
+    assert(SceneEntityHasDependencies(self, self->fog, TAG_POSITION));
+
+    const CPosition* fogPosition = SCENE_GET_COMPONENT_PTR(self, fogPosition, self->fog);
+    const CPosition* playerPosition = SCENE_GET_COMPONENT_PTR(self, playerPosition, self->player);
+
+    const f32 distance = fogPosition->value.x - playerPosition->value.x;
+
+    if (distance > CTX_VIEWPORT_WIDTH * 0.5f)
+    {
+        SceneReset(self);
+    }
+}
+
 void SceneUpdate(Scene* self)
 {
     InputHandlerUpdate(&self->input);
@@ -515,6 +532,7 @@ void SceneUpdate(Scene* self)
     }
 
     SceneExecuteCommands(self);
+    SceneCheckEndCondition(self);
 
     for (usize i = 0; i < SceneGetEntityCount(self); ++i)
     {
