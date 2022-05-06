@@ -32,7 +32,7 @@ static OnCollisionResult PlayerOnCollision(const OnCollisionParams* params)
     assert(ENTITY_HAS_DEPS(params->entity, TAG_PLAYER | TAG_POSITION | TAG_KINETIC | TAG_MORTAL));
 
     CPlayer* player = GET_COMPONENT(player, params->entity);
-    CPosition* position = GET_COMPONENT(position, params->entity);
+    const CPosition* position = GET_COMPONENT(position, params->entity);
     CKinetic* kinetic = GET_COMPONENT(kinetic, params->entity);
     const CMortal* mortal = GET_COMPONENT(mortal, params->entity);
 
@@ -49,7 +49,11 @@ static OnCollisionResult PlayerOnCollision(const OnCollisionParams* params)
 
             mortal->onDamage(&onDamageParams);
 
-            return ON_COLLISION_RESULT_NONE;
+            return (OnCollisionResult)
+            {
+                .aabb = params->aabb,
+                .stop = false,
+            };
         }
     }
 
@@ -58,25 +62,28 @@ static OnCollisionResult PlayerOnCollision(const OnCollisionParams* params)
         // Check if the player hit its head on the bottom of a collider.
         if (params->resolution.y > 0 && fabsf(params->overlap.width) <= 4)
         {
+            Rectangle resolvedAabb = params->aabb;
+
             if (params->aabb.x < params->otherAabb.x)
             {
-                position->value.x = RectangleLeft(params->otherAabb) - params->aabb.width;
+                resolvedAabb.x = RectangleLeft(params->otherAabb) - params->aabb.width;
             }
             else
             {
-                position->value.x = RectangleRight(params->otherAabb);
+                resolvedAabb.x = RectangleRight(params->otherAabb);
             }
 
             return (OnCollisionResult)
             {
-                .xAxisResolved = true,
-                .yAxisResolved = false,
+                .aabb = resolvedAabb,
+                .stop = false,
             };
         }
     }
 
     // Resolve collision.
-    ApplyResolutionPerfectly(position, params->aabb, params->otherAabb, params->resolution);
+    Rectangle resolvedAabb = ApplyResolutionPerfectly(params->aabb, params->otherAabb,
+                             params->resolution);
 
     // Resolution specific player logic.
     {
@@ -100,8 +107,8 @@ static OnCollisionResult PlayerOnCollision(const OnCollisionParams* params)
 
     return (OnCollisionResult)
     {
-        .xAxisResolved = params->resolution.x != 0,
-        .yAxisResolved = params->resolution.y != 0,
+        .aabb = resolvedAabb,
+        .stop = true,
     };
 }
 

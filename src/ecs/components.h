@@ -38,11 +38,10 @@ typedef void (*OnDamage)(const OnDamageParams*);
 
 typedef struct
 {
-    bool xAxisResolved;
-    bool yAxisResolved;
+    Rectangle aabb;
+    // Whether or not the current collision axis pass should stop.
+    bool stop;
 } OnCollisionResult;
-
-#define ON_COLLISION_RESULT_NONE (OnCollisionResult) { false, false }
 
 typedef struct
 {

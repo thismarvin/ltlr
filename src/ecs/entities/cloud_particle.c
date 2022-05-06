@@ -7,23 +7,28 @@ static OnCollisionResult CloudParticleOnCollision(const OnCollisionParams* param
 {
     assert(ENTITY_HAS_DEPS(params->entity, TAG_POSITION));
 
-    CPosition* position = GET_COMPONENT(position, params->entity);
+    const CPosition* position = GET_COMPONENT(position, params->entity);
 
     // If the aabb is completely within another collider then remove it.
     if (params->overlap.width >= params->aabb.width && params->overlap.height >= params->aabb.height)
     {
         SceneDeferDeallocateEntity(params->scene, params->entity);
 
-        return ON_COLLISION_RESULT_NONE;
+        return (OnCollisionResult)
+        {
+            .aabb = params->aabb,
+            .stop = true,
+        };
     }
 
     // Resolve collision.
-    ApplyResolutionPerfectly(position, params->aabb, params->otherAabb, params->resolution);
+    Rectangle resolvedAabb = ApplyResolutionPerfectly(params->aabb, params->otherAabb,
+                             params->resolution);
 
     return (OnCollisionResult)
     {
-        .xAxisResolved = params->resolution.x != 0,
-        .yAxisResolved = params->resolution.y != 0,
+        .aabb = resolvedAabb,
+        .stop = true,
     };
 }
 

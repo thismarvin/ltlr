@@ -10,9 +10,8 @@
 #define ENTITY_HAS_DEPS(mEntity, mDependencies) ((params->scene->components.tags[mEntity] & (mDependencies)) == (mDependencies))
 #define GET_COMPONENT(mValue, mEntity) SCENE_GET_COMPONENT_PTR(params->scene, mValue, mEntity)
 
-void ApplyResolutionPerfectly
+Rectangle ApplyResolutionPerfectly
 (
-    CPosition* position,
     Rectangle aabb,
     Rectangle otherAabb,
     Vector2 resolution

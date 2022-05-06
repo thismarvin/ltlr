@@ -81,9 +81,11 @@ static Vector2 ExtractResolution(const Vector2 resolution, const u64 layers)
 
 static OnCollisionResult SimulateCollisionOnAxis
 (
-    Scene* scene,
+    const Scene* scene,
     const usize entity,
     const usize otherEntity,
+    const Rectangle aabb,
+    const Rectangle otherAabb,
     const Vector2 delta,
     const u8 step,
     const OnCollision onCollision
@@ -92,52 +94,24 @@ static OnCollisionResult SimulateCollisionOnAxis
     // It is important that `delta` only consists of one axis, not both.
     assert(delta.x == 0 || delta.y == 0);
 
-    assert(ENTITY_HAS_DEPS(entity, TAG_POSITION | TAG_DIMENSION));
-    assert(ENTITY_HAS_DEPS(otherEntity, TAG_POSITION | TAG_DIMENSION | TAG_COLLIDER));
+    Rectangle simulatedAabb = aabb;
 
-    const CPosition* positionPointer = GET_COMPONENT(positionPointer, entity);
+    assert(SceneEntityHasDependencies(scene, otherEntity, TAG_COLLIDER));
 
-    CPosition position = *positionPointer;
-    const CDimension* dimension = GET_COMPONENT(dimension, entity);
-
-    const CPosition* otherPosition = GET_COMPONENT(otherPosition, otherEntity);
-    const CDimension* otherDimensions = GET_COMPONENT(otherDimensions, otherEntity);
     const CCollider* otherCollider = GET_COMPONENT(otherCollider, otherEntity);
-
-    Rectangle aabb = (Rectangle)
-    {
-        .x = position.value.x,
-        .y = position.value.y,
-        .width = dimension->width,
-        .height = dimension->height,
-    };
-
-    Rectangle otherAabb = (Rectangle)
-    {
-        .x = otherPosition->value.x,
-        .y = otherPosition->value.y,
-        .width = otherDimensions->width,
-        .height = otherDimensions->height
-    };
 
     Vector2 direction = Vector2Create(sign(delta.x), sign(delta.y));
     Vector2 remainder = Vector2Create(fabsf(delta.x), fabsf(delta.y));
-
-    bool xAxisResolved = false;
-    bool yAxisResolved = false;
 
     while (remainder.x > 0 || remainder.y > 0)
     {
         remainder.x -= step * fabsf(direction.x);
         remainder.y -= step * fabsf(direction.y);
 
-        position.value.x += step * direction.x;
-        position.value.y += step * direction.y;
+        simulatedAabb.x += step * direction.x;
+        simulatedAabb.y += step * direction.y;
 
-        aabb.x = position.value.x;
-        aabb.y = position.value.y;
-
-        if (CheckCollisionRecs(aabb, otherAabb))
+        if (CheckCollisionRecs(simulatedAabb, otherAabb))
         {
             Vector2 rawResolution = Vector2Create(-direction.x, -direction.y);
             Vector2 resolution = ExtractResolution(rawResolution, otherCollider->layer);
@@ -148,7 +122,7 @@ static OnCollisionResult SimulateCollisionOnAxis
                 continue;
             }
 
-            Rectangle overlap = GetCollisionRec(aabb, otherAabb);
+            Rectangle overlap = GetCollisionRec(simulatedAabb, otherAabb);
 
             // Make sure that the resolution is part of the axis with the least overlap.
             {
@@ -165,18 +139,18 @@ static OnCollisionResult SimulateCollisionOnAxis
 
             // Make sure that the resolution points in the direction of the minimum offset.
             {
-                f32 left = RectangleLeft(aabb);
-                f32 top = RectangleTop(aabb);
+                f32 left = RectangleLeft(simulatedAabb);
+                f32 top = RectangleTop(simulatedAabb);
 
                 f32 otherLeft = RectangleLeft(otherAabb);
                 f32 otherRight = RectangleRight(otherAabb);
                 f32 otherTop = RectangleTop(otherAabb);
                 f32 otherBottom = RectangleBottom(otherAabb);
 
-                f32 offsetLeft = (otherLeft - aabb.width) - left;
+                f32 offsetLeft = (otherLeft - simulatedAabb.width) - left;
                 f32 offsetRight = otherRight - left;
                 f32 offsetDown = otherBottom - top;
-                f32 offsetUp = (otherTop - aabb.height) - top;
+                f32 offsetUp = (otherTop - simulatedAabb.height) - top;
 
                 if (resolution.x < 0 && fabsf(offsetLeft) > fabsf(offsetRight))
                 {
@@ -201,9 +175,9 @@ static OnCollisionResult SimulateCollisionOnAxis
 
             OnCollisionParams params = (OnCollisionParams)
             {
-                .scene = scene,
+                .scene = (Scene*)scene,
                 .entity = entity,
-                .aabb = aabb,
+                .aabb = simulatedAabb,
                 .otherEntity = otherEntity,
                 .otherAabb = otherAabb,
                 .overlap = overlap,
@@ -212,15 +186,16 @@ static OnCollisionResult SimulateCollisionOnAxis
 
             OnCollisionResult result = onCollision(&params);
 
-            xAxisResolved |= result.xAxisResolved;
-            yAxisResolved |= result.yAxisResolved;
+            // TODO(thismarvin): Can we just check if x/y changed here?
 
-            if ((direction.x != 0 && xAxisResolved) || (direction.y != 0 && yAxisResolved))
+            simulatedAabb = result.aabb;
+
+            if (result.stop)
             {
                 return (OnCollisionResult)
                 {
-                    .xAxisResolved = xAxisResolved,
-                    .yAxisResolved = yAxisResolved,
+                    .aabb = simulatedAabb,
+                    .stop = true,
                 };
             }
         }
@@ -228,67 +203,104 @@ static OnCollisionResult SimulateCollisionOnAxis
 
     return (OnCollisionResult)
     {
-        .xAxisResolved = xAxisResolved,
-        .yAxisResolved = yAxisResolved,
+        .aabb = aabb,
+        .stop = false,
     };
 }
 
-static void AdvancedCollision(Scene* scene, const usize entity, const usize otherEntity)
+static Rectangle AdvancedCollision
+(
+    const Scene* scene,
+    const usize entity,
+    const usize otherEntity,
+    const Rectangle aabb,
+    const Rectangle previousAabb,
+    const Rectangle otherAabb,
+    const OnCollision onCollision
+)
 {
-    const CSmooth* smooth = GET_COMPONENT(smooth, entity);
-    CPosition* position = GET_COMPONENT(position, entity);
-    const CCollider* collider = GET_COMPONENT(collider, entity);
-
-    // TODO(thismarvin): Look into integer based collision.
-    Vector2 current = position->value;
-    Vector2 previous = smooth->previous;
-
-    Vector2 delta = Vector2Subtract(current, previous);
-    i8 step = 1;
-
-    Vector2 original = position->value;
-    position->value = previous;
-
-    bool xAxisResolved = false;
-    bool yAxisResolved = false;
-
-    // Resolve collision in the x-axis.
+    Vector2 previousPosition = (Vector2)
     {
-        OnCollisionResult result = SimulateCollisionOnAxis(scene, entity, otherEntity,
-                                   Vector2Create(delta.x, 0), step, collider->onCollision);
+        .x = previousAabb.x,
+        .y = previousAabb.y,
+    };
+    Vector2 currentPosition = (Vector2)
+    {
+        .x = aabb.x,
+        .y = aabb.y,
+    };
 
-        xAxisResolved |= result.xAxisResolved;
-        yAxisResolved |= result.yAxisResolved;
+    Vector2 delta = Vector2Subtract(currentPosition, previousPosition);
 
-        if (!xAxisResolved)
-        {
-            position->value.x = original.x;
-        }
+    Vector2 dx = (Vector2)
+    {
+        .x = delta.x,
+        .y = 0,
+    };
+    Vector2 dy = (Vector2)
+    {
+        .x = 0,
+        .y = delta.y,
+    };
+
+    bool xMoved = false;
+    bool yMoved = false;
+
+    Rectangle simulatedAabb = previousAabb;
+
+    OnCollisionResult xAxisResult = SimulateCollisionOnAxis(scene, entity, otherEntity, simulatedAabb,
+                                    otherAabb,
+                                    dx, 1, onCollision);
+
+    xMoved |= xAxisResult.aabb.x != simulatedAabb.x;
+    yMoved |= xAxisResult.aabb.y != simulatedAabb.y;
+
+    simulatedAabb = xAxisResult.aabb;
+
+    if (!xAxisResult.stop)
+    {
+        simulatedAabb.x = aabb.x;
     }
 
-    // Resolve collision in the y-axis.
+    OnCollisionResult yAxisResult = SimulateCollisionOnAxis(scene, entity, otherEntity, simulatedAabb,
+                                    otherAabb,
+                                    dy, 1, onCollision);
+
+    xMoved |= yAxisResult.aabb.x != simulatedAabb.x;
+    yMoved |= yAxisResult.aabb.y != simulatedAabb.y;
+
+    simulatedAabb = yAxisResult.aabb;
+
+    if (!yAxisResult.stop)
     {
-        OnCollisionResult result = SimulateCollisionOnAxis(scene, entity, otherEntity,
-                                   Vector2Create(0, delta.y), step, collider->onCollision);
-
-        xAxisResolved |= result.xAxisResolved;
-        yAxisResolved |= result.yAxisResolved;
-
-        if (!yAxisResolved)
-        {
-            position->value.y = original.y;
-        }
+        simulatedAabb.y = aabb.y;
     }
+
+    if (xAxisResult.stop || yAxisResult.stop)
+    {
+        return simulatedAabb;
+    }
+
+    // Fallback to original aabb if there was no collision.
+    return aabb;
 }
 
 void SCollisionUpdate(Scene* scene, const usize entity)
 {
-    REQUIRE_DEPS(TAG_POSITION | TAG_DIMENSION | TAG_COLLIDER);
+    REQUIRE_DEPS(TAG_SMOOTH | TAG_POSITION | TAG_DIMENSION | TAG_COLLIDER);
 
-    const CPosition* position = GET_COMPONENT(position, entity);
+    const CSmooth* smooth = GET_COMPONENT(smooth, entity);
+    CPosition* position = GET_COMPONENT(position, entity);
     const CDimension* dimension = GET_COMPONENT(dimension, entity);
     const CCollider* collider = GET_COMPONENT(collider, entity);
 
+    Rectangle previousAabb = (Rectangle)
+    {
+        .x = smooth->previous.x,
+        .y = smooth->previous.y,
+        .width = dimension->width,
+        .height = dimension->height
+    };
     Rectangle aabb = (Rectangle)
     {
         .x = position->value.x,
@@ -323,13 +335,15 @@ void SCollisionUpdate(Scene* scene, const usize entity)
 
         if (CheckCollisionRecs(aabb, otherAabb))
         {
-            AdvancedCollision(scene, entity, i);
+            aabb = AdvancedCollision(scene, entity, i, aabb, previousAabb, otherAabb, collider->onCollision);
 
-            // TODO(thismarvin): Should we just assume that the entity was resolved?
-            aabb.x = position->value.x;
-            aabb.y = position->value.y;
+            // TODO(thismarvin):
+            // If this was resolved, do subsequent collision checks really need to use delta?
         }
     }
+
+    position->value.x = aabb.x;
+    position->value.y = aabb.y;
 }
 
 void SFleetingUpdate(Scene* scene, const usize entity)

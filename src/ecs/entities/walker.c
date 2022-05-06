@@ -5,11 +5,12 @@ static OnCollisionResult WalkerOnCollision(const OnCollisionParams* params)
 {
     assert(ENTITY_HAS_DEPS(params->entity, TAG_POSITION | TAG_KINETIC));
 
-    CPosition* position = GET_COMPONENT(position, params->entity);
+    const CPosition* position = GET_COMPONENT(position, params->entity);
     CKinetic* kinetic = GET_COMPONENT(kinetic, params->entity);
 
     // Resolve collision.
-    ApplyResolutionPerfectly(position, params->aabb, params->otherAabb, params->resolution);
+    Rectangle resolvedAabb = ApplyResolutionPerfectly(params->aabb, params->otherAabb,
+                             params->resolution);
 
     // Walk side to side.
     {
@@ -26,8 +27,8 @@ static OnCollisionResult WalkerOnCollision(const OnCollisionParams* params)
 
     return (OnCollisionResult)
     {
-        .xAxisResolved = params->resolution.x != 0,
-        .yAxisResolved = params->resolution.y != 0,
+        .aabb = resolvedAabb,
+        .stop = true,
     };
 }
 
