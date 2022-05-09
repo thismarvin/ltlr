@@ -28,7 +28,6 @@ static OnCollisionResult WalkerOnCollision(const OnCollisionParams* params)
     return (OnCollisionResult)
     {
         .aabb = resolvedAabb,
-        .stop = true,
     };
 }
 

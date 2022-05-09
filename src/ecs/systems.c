@@ -11,6 +11,13 @@
 #define ENTITY_HAS_DEPS(mEntity, mDependencies) ((scene->components.tags[mEntity] & (mDependencies)) == (mDependencies))
 #define GET_COMPONENT(mValue, mEntity) SCENE_GET_COMPONENT_PTR(scene, mValue, mEntity)
 
+typedef struct
+{
+    Rectangle simulatedAabb;
+    bool xModified;
+    bool yModified;
+} SimulateCollisionOnAxisResult;
+
 void SSmoothUpdate(Scene* scene, const usize entity)
 {
     REQUIRE_DEPS(TAG_POSITION | TAG_SMOOTH);
@@ -79,7 +86,7 @@ static Vector2 ExtractResolution(const Vector2 resolution, const u64 layers)
     return result;
 }
 
-static OnCollisionResult SimulateCollisionOnAxis
+static SimulateCollisionOnAxisResult SimulateCollisionOnAxis
 (
     const Scene* scene,
     const usize entity,
@@ -102,6 +109,9 @@ static OnCollisionResult SimulateCollisionOnAxis
 
     Vector2 direction = Vector2Create(sign(delta.x), sign(delta.y));
     Vector2 remainder = Vector2Create(fabsf(delta.x), fabsf(delta.y));
+
+    bool xModified = false;
+    bool yModified = false;
 
     while (remainder.x > 0 || remainder.y > 0)
     {
@@ -186,25 +196,23 @@ static OnCollisionResult SimulateCollisionOnAxis
 
             OnCollisionResult result = onCollision(&params);
 
-            // TODO(thismarvin): Can we just check if x/y changed here?
+            xModified |= result.aabb.x != simulatedAabb.x;
+            yModified |= result.aabb.y != simulatedAabb.y;
 
             simulatedAabb = result.aabb;
 
-            if (result.stop)
+            if ((direction.x != 0 && xModified) || (direction.y != 0 && yModified))
             {
-                return (OnCollisionResult)
-                {
-                    .aabb = simulatedAabb,
-                    .stop = true,
-                };
+                break;
             }
         }
     }
 
-    return (OnCollisionResult)
+    return (SimulateCollisionOnAxisResult)
     {
-        .aabb = aabb,
-        .stop = false,
+        .simulatedAabb = simulatedAabb,
+        .xModified = xModified,
+        .yModified = yModified,
     };
 }
 
@@ -232,57 +240,59 @@ static Rectangle AdvancedCollision
 
     Vector2 delta = Vector2Subtract(currentPosition, previousPosition);
 
-    Vector2 dx = (Vector2)
-    {
-        .x = delta.x,
-        .y = 0,
-    };
-    Vector2 dy = (Vector2)
-    {
-        .x = 0,
-        .y = delta.y,
-    };
-
-    bool xMoved = false;
-    bool yMoved = false;
-
     Rectangle simulatedAabb = previousAabb;
+    bool xModified = false;
+    bool yModified = false;
 
-    OnCollisionResult xAxisResult = SimulateCollisionOnAxis(scene, entity, otherEntity, simulatedAabb,
-                                    otherAabb,
-                                    dx, 1, onCollision);
-
-    xMoved |= xAxisResult.aabb.x != simulatedAabb.x;
-    yMoved |= xAxisResult.aabb.y != simulatedAabb.y;
-
-    simulatedAabb = xAxisResult.aabb;
-
-    if (!xAxisResult.stop)
+    // Simulate just the x-axis.
     {
-        simulatedAabb.x = aabb.x;
+        Vector2 direction = (Vector2)
+        {
+            .x = delta.x,
+            .y = 0,
+        };
+
+        SimulateCollisionOnAxisResult result = SimulateCollisionOnAxis(scene, entity, otherEntity,
+                                               simulatedAabb,
+                                               otherAabb,
+                                               direction, 1, onCollision);
+
+        simulatedAabb = result.simulatedAabb;
+        xModified |= result.xModified;
+        yModified |= result.yModified;
+
+        // If the aabb was not resolved then fallback to its original x-position.
+        if (!xModified)
+        {
+            simulatedAabb.x = aabb.x;
+        }
     }
 
-    OnCollisionResult yAxisResult = SimulateCollisionOnAxis(scene, entity, otherEntity, simulatedAabb,
-                                    otherAabb,
-                                    dy, 1, onCollision);
-
-    xMoved |= yAxisResult.aabb.x != simulatedAabb.x;
-    yMoved |= yAxisResult.aabb.y != simulatedAabb.y;
-
-    simulatedAabb = yAxisResult.aabb;
-
-    if (!yAxisResult.stop)
+    // Simulate just the y-axis.
     {
-        simulatedAabb.y = aabb.y;
+        Vector2 direction = (Vector2)
+        {
+            .x = 0,
+            .y = delta.y,
+        };
+
+        SimulateCollisionOnAxisResult result = SimulateCollisionOnAxis(scene, entity, otherEntity,
+                                               simulatedAabb,
+                                               otherAabb,
+                                               direction, 1, onCollision);
+
+        simulatedAabb = result.simulatedAabb;
+        xModified |= result.xModified;
+        yModified |= result.yModified;
+
+        // If the aabb was not resolved then fallback to its original y-position.
+        if (!yModified)
+        {
+            simulatedAabb.y = aabb.y;
+        }
     }
 
-    if (xAxisResult.stop || yAxisResult.stop)
-    {
-        return simulatedAabb;
-    }
-
-    // Fallback to original aabb if there was no collision.
-    return aabb;
+    return simulatedAabb;
 }
 
 void SCollisionUpdate(Scene* scene, const usize entity)

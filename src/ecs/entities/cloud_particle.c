@@ -17,7 +17,6 @@ static OnCollisionResult CloudParticleOnCollision(const OnCollisionParams* param
         return (OnCollisionResult)
         {
             .aabb = params->aabb,
-            .stop = true,
         };
     }
 
@@ -28,7 +27,6 @@ static OnCollisionResult CloudParticleOnCollision(const OnCollisionParams* param
     return (OnCollisionResult)
     {
         .aabb = resolvedAabb,
-        .stop = true,
     };
 }
 

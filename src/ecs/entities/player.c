@@ -52,7 +52,6 @@ static OnCollisionResult PlayerOnCollision(const OnCollisionParams* params)
             return (OnCollisionResult)
             {
                 .aabb = params->aabb,
-                .stop = false,
             };
         }
     }
@@ -76,7 +75,6 @@ static OnCollisionResult PlayerOnCollision(const OnCollisionParams* params)
             return (OnCollisionResult)
             {
                 .aabb = resolvedAabb,
-                .stop = false,
             };
         }
     }
@@ -108,7 +106,6 @@ static OnCollisionResult PlayerOnCollision(const OnCollisionParams* params)
     return (OnCollisionResult)
     {
         .aabb = resolvedAabb,
-        .stop = true,
     };
 }
 
