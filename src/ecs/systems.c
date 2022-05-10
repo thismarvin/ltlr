@@ -22,9 +22,8 @@ typedef struct
 {
     Scene* scene;
     usize entity;
-    usize otherEntity;
     Rectangle aabb;
-    Rectangle otherAabb;
+    CCollider* collider;
     Vector2 delta;
     u8 step;
     OnCollision onCollision;
@@ -34,10 +33,9 @@ typedef struct
 {
     Scene* scene;
     usize entity;
-    usize otherEntity;
-    Rectangle originalAabb;
+    Rectangle currentAabb;
     Rectangle previousAabb;
-    Rectangle otherAabb;
+    CCollider* collider;
     OnCollision onCollision;
 } AdvancedCollisionParams;
 
@@ -119,11 +117,6 @@ static SimulateCollisionOnAxisResult SimulateCollisionOnAxis
 
     Rectangle simulatedAabb = params->aabb;
 
-    assert(SceneEntityHasDependencies(params->scene, params->otherEntity, TAG_COLLIDER));
-
-    const CCollider* otherCollider = SCENE_GET_COMPONENT_PTR(params->scene, otherCollider,
-                                     params->otherEntity);
-
     Vector2 direction = Vector2Create(sign(params->delta.x), sign(params->delta.y));
     Vector2 remainder = Vector2Create(fabsf(params->delta.x), fabsf(params->delta.y));
 
@@ -138,90 +131,117 @@ static SimulateCollisionOnAxisResult SimulateCollisionOnAxis
         simulatedAabb.x += params->step * direction.x;
         simulatedAabb.y += params->step * direction.y;
 
-        if (CheckCollisionRecs(simulatedAabb, params->otherAabb))
+        for (usize i = 0; i < SceneGetEntityCount(params->scene); ++i)
         {
-            Vector2 rawResolution = Vector2Create(-direction.x, -direction.y);
-            Vector2 resolution = ExtractResolution(rawResolution, otherCollider->layer);
+            const u64 dependencies = TAG_POSITION | TAG_DIMENSION | TAG_COLLIDER;
 
-            // Check if extracting the resolution also invalidated the resolution.
-            if (resolution.x == 0 && resolution.y == 0)
+            if (i == params->entity || !SceneEntityHasDependencies(params->scene, i, dependencies))
             {
                 continue;
             }
 
-            Rectangle overlap = GetCollisionRec(simulatedAabb, params->otherAabb);
+            const CPosition* otherPosition = SCENE_GET_COMPONENT_PTR(params->scene, otherPosition, i);
+            const CDimension* otherDimension = SCENE_GET_COMPONENT_PTR(params->scene, otherDimension, i);
+            const CCollider* otherCollider = SCENE_GET_COMPONENT_PTR(params->scene, otherCollider, i);
 
-            // Make sure that the resolution is part of the axis with the least overlap.
+            if ((params->collider->mask & otherCollider->layer) == 0)
             {
-                if (resolution.x != 0 && overlap.width > overlap.height)
-                {
-                    continue;
-                }
-
-                if (resolution.y != 0 && overlap.height > overlap.width)
-                {
-                    continue;
-                }
+                continue;
             }
 
-            // Make sure that the resolution points in the direction of the minimum offset.
+            Rectangle otherAabb = (Rectangle)
             {
-                f32 left = RectangleLeft(simulatedAabb);
-                f32 top = RectangleTop(simulatedAabb);
-
-                f32 otherLeft = RectangleLeft(params->otherAabb);
-                f32 otherRight = RectangleRight(params->otherAabb);
-                f32 otherTop = RectangleTop(params->otherAabb);
-                f32 otherBottom = RectangleBottom(params->otherAabb);
-
-                f32 offsetLeft = (otherLeft - simulatedAabb.width) - left;
-                f32 offsetRight = otherRight - left;
-                f32 offsetDown = otherBottom - top;
-                f32 offsetUp = (otherTop - simulatedAabb.height) - top;
-
-                if (resolution.x < 0 && fabsf(offsetLeft) > fabsf(offsetRight))
-                {
-                    continue;
-                }
-
-                if (resolution.x > 0 && fabsf(offsetRight) > fabsf(offsetLeft))
-                {
-                    continue;
-                }
-
-                if (resolution.y < 0 && fabsf(offsetUp) > fabsf(offsetDown))
-                {
-                    continue;
-                }
-
-                if (resolution.y > 0 && fabsf(offsetDown) > fabsf(offsetUp))
-                {
-                    continue;
-                }
-            }
-
-            OnCollisionParams onCollisionParams = (OnCollisionParams)
-            {
-                .scene = params->scene,
-                .entity = params->entity,
-                .aabb = simulatedAabb,
-                .otherEntity = params->otherEntity,
-                .otherAabb = params->otherAabb,
-                .overlap = overlap,
-                .resolution = resolution,
+                .x = otherPosition->value.x,
+                .y = otherPosition->value.y,
+                .width = otherDimension->width,
+                .height = otherDimension->height
             };
 
-            OnCollisionResult result = params->onCollision(&onCollisionParams);
-
-            xModified |= result.aabb.x != simulatedAabb.x;
-            yModified |= result.aabb.y != simulatedAabb.y;
-
-            simulatedAabb = result.aabb;
-
-            if ((direction.x != 0 && xModified) || (direction.y != 0 && yModified))
+            if (CheckCollisionRecs(simulatedAabb, otherAabb))
             {
-                break;
+                Vector2 rawResolution = Vector2Create(-direction.x, -direction.y);
+                Vector2 resolution = ExtractResolution(rawResolution, otherCollider->layer);
+
+                // Check if extracting the resolution also invalidated the resolution.
+                if (resolution.x == 0 && resolution.y == 0)
+                {
+                    continue;
+                }
+
+                Rectangle overlap = GetCollisionRec(simulatedAabb, otherAabb);
+
+                // Make sure that the resolution is part of the axis with the least overlap.
+                {
+                    if (resolution.x != 0 && overlap.width > overlap.height)
+                    {
+                        continue;
+                    }
+
+                    if (resolution.y != 0 && overlap.height > overlap.width)
+                    {
+                        continue;
+                    }
+                }
+
+                // Make sure that the resolution points in the direction of the minimum offset.
+                {
+                    f32 left = RectangleLeft(simulatedAabb);
+                    f32 top = RectangleTop(simulatedAabb);
+
+                    f32 otherLeft = RectangleLeft(otherAabb);
+                    f32 otherRight = RectangleRight(otherAabb);
+                    f32 otherTop = RectangleTop(otherAabb);
+                    f32 otherBottom = RectangleBottom(otherAabb);
+
+                    f32 offsetLeft = (otherLeft - simulatedAabb.width) - left;
+                    f32 offsetRight = otherRight - left;
+                    f32 offsetDown = otherBottom - top;
+                    f32 offsetUp = (otherTop - simulatedAabb.height) - top;
+
+                    if (resolution.x < 0 && fabsf(offsetLeft) > fabsf(offsetRight))
+                    {
+                        continue;
+                    }
+
+                    if (resolution.x > 0 && fabsf(offsetRight) > fabsf(offsetLeft))
+                    {
+                        continue;
+                    }
+
+                    if (resolution.y < 0 && fabsf(offsetUp) > fabsf(offsetDown))
+                    {
+                        continue;
+                    }
+
+                    if (resolution.y > 0 && fabsf(offsetDown) > fabsf(offsetUp))
+                    {
+                        continue;
+                    }
+                }
+
+                OnCollisionParams onCollisionParams = (OnCollisionParams)
+                {
+                    .scene = params->scene,
+                    .entity = params->entity,
+                    .aabb = simulatedAabb,
+                    .otherEntity = i,
+                    .otherAabb = otherAabb,
+                    .overlap = overlap,
+                    .resolution = resolution,
+                };
+
+                OnCollisionResult result = params->onCollision(&onCollisionParams);
+
+                xModified |= result.aabb.x != simulatedAabb.x;
+                yModified |= result.aabb.y != simulatedAabb.y;
+
+                simulatedAabb = result.aabb;
             }
+        }
+
+        if ((direction.x != 0 && xModified) || (direction.y != 0 && yModified))
+        {
+            break;
         }
     }
 
@@ -242,8 +262,8 @@ static Rectangle AdvancedCollision(const AdvancedCollisionParams* params)
     };
     Vector2 currentPosition = (Vector2)
     {
-        .x = params->originalAabb.x,
-        .y = params->originalAabb.y,
+        .x = params->currentAabb.x,
+        .y = params->currentAabb.y,
     };
 
     Vector2 delta = Vector2Subtract(currentPosition, previousPosition);
@@ -256,7 +276,7 @@ static Rectangle AdvancedCollision(const AdvancedCollisionParams* params)
 
     // Simulate just the x-axis.
     {
-        Vector2 direction = (Vector2)
+        Vector2 xDelta = (Vector2)
         {
             .x = delta.x,
             .y = 0,
@@ -266,10 +286,9 @@ static Rectangle AdvancedCollision(const AdvancedCollisionParams* params)
         {
             .scene = (Scene*)params->scene,
             .entity = params->entity,
-            .otherEntity = params->otherEntity,
             .aabb = simulatedAabb,
-            .otherAabb = params->otherAabb,
-            .delta = direction,
+            .collider = params->collider,
+            .delta = xDelta,
             .step = step,
             .onCollision = params->onCollision,
         };
@@ -283,13 +302,13 @@ static Rectangle AdvancedCollision(const AdvancedCollisionParams* params)
         // If the aabb was not resolved then fallback to its original x-position.
         if (!xModified)
         {
-            simulatedAabb.x = params->originalAabb.x;
+            simulatedAabb.x = params->currentAabb.x;
         }
     }
 
     // Simulate just the y-axis.
     {
-        Vector2 direction = (Vector2)
+        Vector2 yDelta = (Vector2)
         {
             .x = 0,
             .y = delta.y,
@@ -299,10 +318,9 @@ static Rectangle AdvancedCollision(const AdvancedCollisionParams* params)
         {
             .scene = (Scene*)params->scene,
             .entity = params->entity,
-            .otherEntity = params->otherEntity,
             .aabb = simulatedAabb,
-            .otherAabb = params->otherAabb,
-            .delta = direction,
+            .collider = params->collider,
+            .delta = yDelta,
             .step = step,
             .onCollision = params->onCollision,
         };
@@ -316,7 +334,7 @@ static Rectangle AdvancedCollision(const AdvancedCollisionParams* params)
         // If the aabb was not resolved then fallback to its original y-position.
         if (!yModified)
         {
-            simulatedAabb.y = params->originalAabb.y;
+            simulatedAabb.y = params->currentAabb.y;
         }
     }
 
@@ -339,7 +357,7 @@ void SCollisionUpdate(Scene* scene, const usize entity)
         .width = dimension->width,
         .height = dimension->height
     };
-    Rectangle aabb = (Rectangle)
+    Rectangle currentAabb = (Rectangle)
     {
         .x = position->value.x,
         .y = position->value.y,
@@ -347,52 +365,20 @@ void SCollisionUpdate(Scene* scene, const usize entity)
         .height = dimension->height
     };
 
-    for (usize i = 0; i < SceneGetEntityCount(scene); ++i)
+    AdvancedCollisionParams params = (AdvancedCollisionParams)
     {
-        if (i == entity || !ENTITY_HAS_DEPS(i, TAG_POSITION | TAG_DIMENSION | TAG_COLLIDER))
-        {
-            continue;
-        }
+        .scene = scene,
+        .entity = entity,
+        .currentAabb = currentAabb,
+        .previousAabb = previousAabb,
+        .collider = (CCollider*)collider,
+        .onCollision = collider->onCollision
+    };
 
-        const CPosition* otherPosition = GET_COMPONENT(otherPosition, i);
-        const CDimension* otherDimensions = GET_COMPONENT(otherDimensions, i);
-        const CCollider* otherCollider = GET_COMPONENT(otherCollider, i);
+    Rectangle resolvedAabb = AdvancedCollision(&params);
 
-        if ((collider->mask & otherCollider->layer) == 0)
-        {
-            continue;
-        }
-
-        Rectangle otherAabb = (Rectangle)
-        {
-            .x = otherPosition->value.x,
-            .y = otherPosition->value.y,
-            .width = otherDimensions->width,
-            .height = otherDimensions->height
-        };
-
-        if (CheckCollisionRecs(aabb, otherAabb))
-        {
-            AdvancedCollisionParams params = (AdvancedCollisionParams)
-            {
-                .scene = scene,
-                .entity = entity,
-                .otherEntity = i,
-                .originalAabb = aabb,
-                .previousAabb = previousAabb,
-                .otherAabb = otherAabb,
-                .onCollision = collider->onCollision
-            };
-
-            aabb = AdvancedCollision(&params);
-
-            // TODO(thismarvin):
-            // If this was resolved, do subsequent collision checks really need to use delta?
-        }
-    }
-
-    position->value.x = aabb.x;
-    position->value.y = aabb.y;
+    position->value.x = resolvedAabb.x;
+    position->value.y = resolvedAabb.y;
 }
 
 void SFleetingUpdate(Scene* scene, const usize entity)
