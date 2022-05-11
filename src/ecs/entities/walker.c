@@ -86,8 +86,8 @@ EntityBuilder WalkerCreate(const f32 x, const f32 y)
 
     ADD_COMPONENT(CCollider, ((CCollider)
     {
-        .layer = LAYER_ALL,
-        .mask = LAYER_ALL,
+        .resolutionSchema = RESOLVE_ALL,
+        .mask = RESOLVE_ALL,
         .onResolution = WalkerOnResolution,
         .onCollision = WalkerOnCollision,
     }));

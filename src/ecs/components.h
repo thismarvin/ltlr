@@ -16,12 +16,12 @@
 #define TAG_DAMAGE ((u64)1 << 10)
 #define TAG_FLEETING ((u64)1 << 11)
 
-#define LAYER_NONE ((u64)0)
-#define LAYER_UP ((u64)1 << 0)
-#define LAYER_RIGHT ((u64)1 << 1)
-#define LAYER_DOWN ((u64)1 << 2)
-#define LAYER_LEFT ((u64)1 << 3)
-#define LAYER_ALL (LAYER_UP | LAYER_RIGHT | LAYER_DOWN | LAYER_LEFT)
+#define RESOLVE_NONE ((u8)0)
+#define RESOLVE_UP ((u8)1 << 0)
+#define RESOLVE_RIGHT ((u8)1 << 1)
+#define RESOLVE_DOWN ((u8)1 << 2)
+#define RESOLVE_LEFT ((u8)1 << 3)
+#define RESOLVE_ALL (RESOLVE_UP | RESOLVE_RIGHT | RESOLVE_DOWN | RESOLVE_LEFT)
 
 // TODO(thismarvin): Naming components is hard...
 
@@ -106,8 +106,8 @@ typedef struct
 
 typedef struct
 {
-    // Layers you exist on.
-    u64 layer;
+    // The directions other entities will resolve against.
+    u8 resolutionSchema;
     // Layers you collide with.
     u64 mask;
     OnResolution onResolution;

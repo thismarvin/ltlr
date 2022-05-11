@@ -176,8 +176,8 @@ EntityBuilder PlayerCreate(const f32 x, const f32 y)
 
     ADD_COMPONENT(CCollider, ((CCollider)
     {
-        .layer = LAYER_NONE,
-        .mask = LAYER_ALL,
+        .resolutionSchema = RESOLVE_NONE,
+        .mask = RESOLVE_ALL,
         .onResolution = PlayerOnResolution,
         .onCollision = PlayerOnCollision,
     }));

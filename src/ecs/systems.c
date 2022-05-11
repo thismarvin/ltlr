@@ -84,22 +84,22 @@ static Vector2 ExtractResolution(const Vector2 resolution, const u64 layers)
 {
     Vector2 result = VECTOR2_ZERO;
 
-    if ((layers & LAYER_LEFT) != 0 && resolution.x < 0)
+    if ((layers & RESOLVE_LEFT) != 0 && resolution.x < 0)
     {
         result.x = resolution.x;
     }
 
-    if ((layers & LAYER_RIGHT) != 0 && resolution.x > 0)
+    if ((layers & RESOLVE_RIGHT) != 0 && resolution.x > 0)
     {
         result.x = resolution.x;
     }
 
-    if ((layers & LAYER_UP) != 0 && resolution.y < 0)
+    if ((layers & RESOLVE_UP) != 0 && resolution.y < 0)
     {
         result.y = resolution.y;
     }
 
-    if ((layers & LAYER_DOWN) != 0 && resolution.y > 0)
+    if ((layers & RESOLVE_DOWN) != 0 && resolution.y > 0)
     {
         result.y = resolution.y;
     }
@@ -144,7 +144,7 @@ static SimulateCollisionOnAxisResult SimulateCollisionOnAxis
             const CDimension* otherDimension = SCENE_GET_COMPONENT_PTR(params->scene, otherDimension, i);
             const CCollider* otherCollider = SCENE_GET_COMPONENT_PTR(params->scene, otherCollider, i);
 
-            if ((params->collider->mask & otherCollider->layer) == 0)
+            if ((params->collider->mask & otherCollider->resolutionSchema) == 0)
             {
                 continue;
             }
@@ -160,7 +160,7 @@ static SimulateCollisionOnAxisResult SimulateCollisionOnAxis
             if (CheckCollisionRecs(simulatedAabb, otherAabb))
             {
                 Vector2 rawResolution = Vector2Create(-direction.x, -direction.y);
-                Vector2 resolution = ExtractResolution(rawResolution, otherCollider->layer);
+                Vector2 resolution = ExtractResolution(rawResolution, otherCollider->resolutionSchema);
 
                 // Check if extracting the resolution also invalidated the resolution.
                 if (resolution.x == 0 && resolution.y == 0)
@@ -393,7 +393,7 @@ void SCollisionUpdate(Scene* scene, const usize entity)
         const CDimension* otherDimension = SCENE_GET_COMPONENT_PTR(scene, otherDimension, i);
         const CCollider* otherCollider = SCENE_GET_COMPONENT_PTR(scene, otherCollider, i);
 
-        if ((collider->mask & otherCollider->layer) == 0)
+        if ((collider->mask & otherCollider->resolutionSchema) == 0)
         {
             continue;
         }

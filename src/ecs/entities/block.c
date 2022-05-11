@@ -26,8 +26,8 @@ EntityBuilder BlockCreate(const f32 x, const f32 y, const f32 width, const f32 h
 
     ADD_COMPONENT(CCollider, ((CCollider)
     {
-        .layer = LAYER_ALL,
-        .mask = LAYER_NONE,
+        .resolutionSchema = RESOLVE_ALL,
+        .mask = RESOLVE_NONE,
     }));
 
     return (EntityBuilder)
