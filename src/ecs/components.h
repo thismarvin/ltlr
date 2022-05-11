@@ -43,6 +43,11 @@ typedef struct
 
 typedef struct
 {
+    Rectangle aabb;
+} OnResolutionResult;
+
+typedef struct
+{
     Scene* scene;
     usize entity;
     Rectangle aabb;
@@ -50,9 +55,21 @@ typedef struct
     Rectangle otherAabb;
     Rectangle overlap;
     Vector2 resolution;
+} OnResolutionParams;
+
+typedef OnResolutionResult (*OnResolution)(const OnResolutionParams*);
+
+typedef struct
+{
+    Scene* scene;
+    usize entity;
+    Rectangle aabb;
+    usize otherEntity;
+    Rectangle otherAabb;
+    Rectangle overlap;
 } OnCollisionParams;
 
-typedef OnCollisionResult (*OnCollision)(const OnCollisionParams*);
+typedef void (*OnCollision)(const OnCollisionParams*);
 
 typedef struct
 {
@@ -93,6 +110,7 @@ typedef struct
     u64 layer;
     // Layers you collide with.
     u64 mask;
+    OnResolution onResolution;
     OnCollision onCollision;
 } CCollider;
 

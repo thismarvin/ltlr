@@ -26,7 +26,7 @@ typedef struct
     CCollider* collider;
     Vector2 delta;
     u8 step;
-    OnCollision onCollision;
+    OnResolution onResolution;
 } SimulateCollisionOnAxisParams;
 
 typedef struct
@@ -36,7 +36,7 @@ typedef struct
     Rectangle currentAabb;
     Rectangle previousAabb;
     CCollider* collider;
-    OnCollision onCollision;
+    OnResolution onResolution;
 } AdvancedCollisionParams;
 
 void SSmoothUpdate(Scene* scene, const usize entity)
@@ -219,7 +219,7 @@ static SimulateCollisionOnAxisResult SimulateCollisionOnAxis
                     }
                 }
 
-                OnCollisionParams onCollisionParams = (OnCollisionParams)
+                OnResolutionParams onResolutionParams = (OnResolutionParams)
                 {
                     .scene = params->scene,
                     .entity = params->entity,
@@ -230,7 +230,7 @@ static SimulateCollisionOnAxisResult SimulateCollisionOnAxis
                     .resolution = resolution,
                 };
 
-                OnCollisionResult result = params->onCollision(&onCollisionParams);
+                OnResolutionResult result = params->onResolution(&onResolutionParams);
 
                 xModified |= result.aabb.x != simulatedAabb.x;
                 yModified |= result.aabb.y != simulatedAabb.y;
@@ -290,7 +290,7 @@ static Rectangle AdvancedCollision(const AdvancedCollisionParams* params)
             .collider = params->collider,
             .delta = xDelta,
             .step = step,
-            .onCollision = params->onCollision,
+            .onResolution = params->onResolution,
         };
 
         SimulateCollisionOnAxisResult result = SimulateCollisionOnAxis(&onAxisParams);
@@ -322,7 +322,7 @@ static Rectangle AdvancedCollision(const AdvancedCollisionParams* params)
             .collider = params->collider,
             .delta = yDelta,
             .step = step,
-            .onCollision = params->onCollision,
+            .onResolution = params->onResolution,
         };
 
         SimulateCollisionOnAxisResult result = SimulateCollisionOnAxis(&onAxisParams);
@@ -372,13 +372,57 @@ void SCollisionUpdate(Scene* scene, const usize entity)
         .currentAabb = currentAabb,
         .previousAabb = previousAabb,
         .collider = (CCollider*)collider,
-        .onCollision = collider->onCollision
+        .onResolution = collider->onResolution
     };
 
     Rectangle resolvedAabb = AdvancedCollision(&params);
 
     position->value.x = resolvedAabb.x;
     position->value.y = resolvedAabb.y;
+
+    for (usize i = 0; i < SceneGetEntityCount(scene); ++i)
+    {
+        const u64 dependencies = TAG_POSITION | TAG_DIMENSION | TAG_COLLIDER;
+
+        if (i == entity || !SceneEntityHasDependencies(scene, i, dependencies))
+        {
+            continue;
+        }
+
+        const CPosition* otherPosition = SCENE_GET_COMPONENT_PTR(scene, otherPosition, i);
+        const CDimension* otherDimension = SCENE_GET_COMPONENT_PTR(scene, otherDimension, i);
+        const CCollider* otherCollider = SCENE_GET_COMPONENT_PTR(scene, otherCollider, i);
+
+        if ((collider->mask & otherCollider->layer) == 0)
+        {
+            continue;
+        }
+
+        Rectangle otherAabb = (Rectangle)
+        {
+            .x = otherPosition->value.x,
+            .y = otherPosition->value.y,
+            .width = otherDimension->width,
+            .height = otherDimension->height
+        };
+
+        if (CheckCollisionRecs(resolvedAabb, otherAabb))
+        {
+            Rectangle overlap = GetCollisionRec(resolvedAabb, otherAabb);
+
+            OnCollisionParams onCollisionParams = (OnCollisionParams)
+            {
+                .scene = scene,
+                .entity = entity,
+                .aabb = resolvedAabb,
+                .otherEntity = i,
+                .otherAabb = otherAabb,
+                .overlap = overlap,
+            };
+
+            collider->onCollision(&onCollisionParams);
+        }
+    }
 }
 
 void SFleetingUpdate(Scene* scene, const usize entity)

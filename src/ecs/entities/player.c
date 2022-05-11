@@ -27,29 +27,19 @@ static void PlayerOnDamage(const OnDamageParams* params)
     player->invulnerableTimer = 0;
 }
 
-static OnCollisionResult PlayerOnCollision(const OnCollisionParams* params)
+static OnResolutionResult PlayerOnResolution(const OnResolutionParams* params)
 {
-    assert(ENTITY_HAS_DEPS(params->entity, TAG_PLAYER | TAG_POSITION | TAG_KINETIC | TAG_MORTAL));
+    assert(ENTITY_HAS_DEPS(params->entity, TAG_PLAYER | TAG_POSITION | TAG_KINETIC));
 
     CPlayer* player = GET_COMPONENT(player, params->entity);
     const CPosition* position = GET_COMPONENT(position, params->entity);
     CKinetic* kinetic = GET_COMPONENT(kinetic, params->entity);
-    const CMortal* mortal = GET_COMPONENT(mortal, params->entity);
 
     // Collision specific logic that will not resolve the player.
     {
-        if (ENTITY_HAS_DEPS(params->otherEntity, TAG_WALKER | TAG_DAMAGE))
+        if (ENTITY_HAS_DEPS(params->otherEntity, TAG_WALKER))
         {
-            OnDamageParams onDamageParams = (OnDamageParams)
-            {
-                .scene = params->scene,
-                .entity = params->entity,
-                .otherEntity = params->otherEntity,
-            };
-
-            mortal->onDamage(&onDamageParams);
-
-            return (OnCollisionResult)
+            return (OnResolutionResult)
             {
                 .aabb = params->aabb,
             };
@@ -72,7 +62,7 @@ static OnCollisionResult PlayerOnCollision(const OnCollisionParams* params)
                 resolvedAabb.x = RectangleRight(params->otherAabb);
             }
 
-            return (OnCollisionResult)
+            return (OnResolutionResult)
             {
                 .aabb = resolvedAabb,
             };
@@ -103,10 +93,34 @@ static OnCollisionResult PlayerOnCollision(const OnCollisionParams* params)
         }
     }
 
-    return (OnCollisionResult)
+    return (OnResolutionResult)
     {
         .aabb = resolvedAabb,
     };
+}
+
+static void PlayerOnCollision(const OnCollisionParams* params)
+{
+    assert(ENTITY_HAS_DEPS(params->entity, TAG_PLAYER | TAG_MORTAL));
+
+    const CMortal* mortal = GET_COMPONENT(mortal, params->entity);
+
+    // Collision specific logic that will not resolve the player.
+    {
+        if (ENTITY_HAS_DEPS(params->otherEntity, TAG_WALKER | TAG_DAMAGE))
+        {
+            OnDamageParams onDamageParams = (OnDamageParams)
+            {
+                .scene = params->scene,
+                .entity = params->entity,
+                .otherEntity = params->otherEntity,
+            };
+
+            mortal->onDamage(&onDamageParams);
+
+            return;
+        }
+    }
 }
 
 EntityBuilder PlayerCreate(const f32 x, const f32 y)
@@ -164,6 +178,7 @@ EntityBuilder PlayerCreate(const f32 x, const f32 y)
     {
         .layer = LAYER_NONE,
         .mask = LAYER_ALL,
+        .onResolution = PlayerOnResolution,
         .onCollision = PlayerOnCollision,
     }));
 

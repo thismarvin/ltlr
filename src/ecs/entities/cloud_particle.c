@@ -3,7 +3,7 @@
 #include <raymath.h>
 
 // TODO(thismarvin): The collider no longer scales...
-static OnCollisionResult CloudParticleOnCollision(const OnCollisionParams* params)
+static OnResolutionResult CloudParticleOnResolution(const OnResolutionParams* params)
 {
     assert(ENTITY_HAS_DEPS(params->entity, TAG_POSITION));
 
@@ -14,7 +14,7 @@ static OnCollisionResult CloudParticleOnCollision(const OnCollisionParams* param
     {
         SceneDeferDeallocateEntity(params->scene, params->entity);
 
-        return (OnCollisionResult)
+        return (OnResolutionResult)
         {
             .aabb = params->aabb,
         };
@@ -24,11 +24,13 @@ static OnCollisionResult CloudParticleOnCollision(const OnCollisionParams* param
     Rectangle resolvedAabb = ApplyResolutionPerfectly(params->aabb, params->otherAabb,
                              params->resolution);
 
-    return (OnCollisionResult)
+    return (OnResolutionResult)
     {
         .aabb = resolvedAabb,
     };
 }
+
+static void CloudParticleOnCollision() {}
 
 EntityBuilder CloudParticleCreate
 (
@@ -95,6 +97,7 @@ EntityBuilder CloudParticleCreate
     {
         .layer = LAYER_NONE,
         .mask = LAYER_ALL,
+        .onResolution = CloudParticleOnResolution,
         .onCollision = CloudParticleOnCollision,
     }));
 

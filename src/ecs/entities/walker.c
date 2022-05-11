@@ -1,7 +1,7 @@
 #include "common.h"
 #include "walker.h"
 
-static OnCollisionResult WalkerOnCollision(const OnCollisionParams* params)
+static OnResolutionResult WalkerOnResolution(const OnResolutionParams* params)
 {
     assert(ENTITY_HAS_DEPS(params->entity, TAG_POSITION | TAG_KINETIC));
 
@@ -25,11 +25,13 @@ static OnCollisionResult WalkerOnCollision(const OnCollisionParams* params)
         }
     }
 
-    return (OnCollisionResult)
+    return (OnResolutionResult)
     {
         .aabb = resolvedAabb,
     };
 }
+
+static void WalkerOnCollision() {}
 
 EntityBuilder WalkerCreate(const f32 x, const f32 y)
 {
@@ -86,6 +88,7 @@ EntityBuilder WalkerCreate(const f32 x, const f32 y)
     {
         .layer = LAYER_ALL,
         .mask = LAYER_ALL,
+        .onResolution = WalkerOnResolution,
         .onCollision = WalkerOnCollision,
     }));
 
