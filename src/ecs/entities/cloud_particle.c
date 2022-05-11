@@ -96,7 +96,8 @@ EntityBuilder CloudParticleCreate
     ADD_COMPONENT(CCollider, ((CCollider)
     {
         .resolutionSchema = RESOLVE_NONE,
-        .mask = RESOLVE_ALL,
+        .layer = LAYER_NONE,
+        .mask = LAYER_TERRAIN,
         .onResolution = CloudParticleOnResolution,
         .onCollision = CloudParticleOnCollision,
     }));

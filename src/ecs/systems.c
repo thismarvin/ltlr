@@ -144,7 +144,7 @@ static SimulateCollisionOnAxisResult SimulateCollisionOnAxis
             const CDimension* otherDimension = SCENE_GET_COMPONENT_PTR(params->scene, otherDimension, i);
             const CCollider* otherCollider = SCENE_GET_COMPONENT_PTR(params->scene, otherCollider, i);
 
-            if ((params->collider->mask & otherCollider->resolutionSchema) == 0)
+            if ((params->collider->mask & otherCollider->layer) == 0)
             {
                 continue;
             }
@@ -393,7 +393,7 @@ void SCollisionUpdate(Scene* scene, const usize entity)
         const CDimension* otherDimension = SCENE_GET_COMPONENT_PTR(scene, otherDimension, i);
         const CCollider* otherCollider = SCENE_GET_COMPONENT_PTR(scene, otherCollider, i);
 
-        if ((collider->mask & otherCollider->resolutionSchema) == 0)
+        if ((collider->mask & otherCollider->layer) == 0)
         {
             continue;
         }

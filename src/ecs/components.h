@@ -23,6 +23,10 @@
 #define RESOLVE_LEFT ((u8)1 << 3)
 #define RESOLVE_ALL (RESOLVE_UP | RESOLVE_RIGHT | RESOLVE_DOWN | RESOLVE_LEFT)
 
+#define LAYER_NONE ((u64)0)
+#define LAYER_TERRAIN ((u64)1 << 0)
+#define LAYER_LETHAL ((u64)1 << 1)
+
 // TODO(thismarvin): Naming components is hard...
 
 typedef struct Scene Scene;
@@ -108,6 +112,8 @@ typedef struct
 {
     // The directions other entities will resolve against.
     u8 resolutionSchema;
+    // Layer you exist on.
+    u64 layer;
     // Layers you collide with.
     u64 mask;
     OnResolution onResolution;
