@@ -7,7 +7,7 @@ void LevelSegmentInit(LevelSegment* self, const char* path)
 
     cJSON* parentObj = cJSON_Parse(buffer);
 
-    // Get self->boundaries.
+    // Get level boundaries.
     {
         const cJSON* widthObj = cJSON_GetObjectItem(parentObj, "width");
         const cJSON* heightObj = cJSON_GetObjectItem(parentObj, "height");
@@ -45,15 +45,15 @@ void LevelSegmentInit(LevelSegment* self, const char* path)
     // Initialize sprites.
     {
         const cJSON* spritesObj = cJSON_GetArrayItem(layersArray, 0);
-        const cJSON* dataObj = cJSON_GetObjectItem(spritesObj, "data");
-        usize dataLength = cJSON_GetArraySize(dataObj);
+        const cJSON* dataArray = cJSON_GetObjectItem(spritesObj, "data");
+        usize dataLength = cJSON_GetArraySize(dataArray);
 
         self->sprites = malloc(sizeof(u16) * dataLength);
         self->spritesLength = dataLength;
 
         for (usize i = 0; i < dataLength; ++i)
         {
-            const cJSON* spriteObj = cJSON_GetArrayItem(dataObj, i);
+            const cJSON* spriteObj = cJSON_GetArrayItem(dataArray, i);
 
             u16 sprite = (u16)cJSON_GetNumberValue(spriteObj);
 
@@ -64,34 +64,52 @@ void LevelSegmentInit(LevelSegment* self, const char* path)
     // Initialize colliders.
     {
         const cJSON* collidersObj = cJSON_GetArrayItem(layersArray, 1);
-        const cJSON* objectsObj = cJSON_GetObjectItem(collidersObj, "objects");
-        usize objectsLength = cJSON_GetArraySize(objectsObj);
+        const cJSON* objectsArray = cJSON_GetObjectItem(collidersObj, "objects");
+        usize objectsLength = cJSON_GetArraySize(objectsArray);
 
-        self->colliders = malloc(sizeof(Rectangle) * objectsLength);
+        self->colliders = malloc(sizeof(LevelCollider) * objectsLength);
         self->collidersLength = objectsLength;
 
         for (usize i = 0; i < objectsLength; ++i)
         {
-            const cJSON* colliderObj = cJSON_GetArrayItem(objectsObj, i);
+            const cJSON* colliderObj = cJSON_GetArrayItem(objectsArray, i);
 
             const cJSON* xObj = cJSON_GetObjectItem(colliderObj, "x");
             const cJSON* yObj = cJSON_GetObjectItem(colliderObj, "y");
             const cJSON* widthObj = cJSON_GetObjectItem(colliderObj, "width");
             const cJSON* heightObj = cJSON_GetObjectItem(colliderObj, "height");
 
-            float x = (float)cJSON_GetNumberValue(xObj);
-            float y = (float)cJSON_GetNumberValue(yObj);
-            float width = (float)cJSON_GetNumberValue(widthObj);
-            float height = (float)cJSON_GetNumberValue(heightObj);
+            f32 x = (f32)cJSON_GetNumberValue(xObj);
+            f32 y = (f32)cJSON_GetNumberValue(yObj);
+            f32 width = (f32)cJSON_GetNumberValue(widthObj);
+            f32 height = (f32)cJSON_GetNumberValue(heightObj);
+
+            const cJSON* propertiesArray = cJSON_GetObjectItem(colliderObj, "properties");
+
+            const cJSON* layerPropObj = cJSON_GetArrayItem(propertiesArray, 0);
+            const cJSON* resolutionschemaPropObj = cJSON_GetArrayItem(propertiesArray, 1);
+
+            const cJSON* layerObj = cJSON_GetObjectItem(layerPropObj, "value");
+            const cJSON* resolutionschemaObj = cJSON_GetObjectItem(resolutionschemaPropObj, "value");
+
+            u64 layer = (u64)cJSON_GetNumberValue(layerObj);
+            u8 resolutionSchema = (u8)cJSON_GetNumberValue(resolutionschemaObj);
 
             // TODO(thismarvin): Support Polygons somehow...
 
-            self->colliders[i] = (Rectangle)
+            Rectangle aabb = (Rectangle)
             {
                 .x = x,
                 .y = y,
                 .width = width,
                 .height = height,
+            };
+
+            self->colliders[i] = (LevelCollider)
+            {
+                .aabb = aabb,
+                .resolutionSchema = resolutionSchema,
+                .layer = layer,
             };
         }
     }

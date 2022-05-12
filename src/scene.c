@@ -456,7 +456,7 @@ static void SceneStart(Scene* self)
         self->m_entityManager.m_recycledEntityIndices = DEQUE_WITH_CAPACITY(usize, MAX_ENTITIES);
     }
 
-    // Populate level
+    // Populate level.
     {
         Vector2 offset = VECTOR2_ZERO;
 
@@ -464,18 +464,20 @@ static void SceneStart(Scene* self)
         {
             for (usize j = 0; j < self->segments[i].collidersLength; ++j)
             {
-                Rectangle collider = self->segments[i].colliders[j];
+                LevelCollider collider = self->segments[i].colliders[j];
+
+                Rectangle aabb = (Rectangle)
+                {
+                    .x = collider.aabb.x + offset.x,
+                    .y = collider.aabb.y + offset.y,
+                    .width = collider.aabb.width,
+                    .height = collider.aabb.height,
+                };
 
                 SceneDeferAddEntity
                 (
                     self,
-                    BlockCreate
-                    (
-                        offset.x + collider.x,
-                        offset.y + collider.y,
-                        collider.width,
-                        collider.height
-                    )
+                    BlockCreate(aabb, collider.resolutionSchema, collider.layer)
                 );
             }
 
@@ -484,11 +486,11 @@ static void SceneStart(Scene* self)
     }
 
     // TODO(thismarvin): Put this into level.json somehow...
-    self->player = SceneDeferAddEntity(self, PlayerCreate(16 * 1, 16 * - 4));
+    self->player = SceneDeferAddEntity(self, PlayerCreate(16 * 1, 16 * -4));
 
-    SceneDeferAddEntity(self, WalkerCreate(16 * 16, 8 * 16));
-    SceneDeferAddEntity(self, WalkerCreate(16 * 16, 0 * 16));
-    SceneDeferAddEntity(self, WalkerCreate(16 * 16, 4 * 16));
+    SceneDeferAddEntity(self, WalkerCreate(16 * 16, 16 * 6));
+    SceneDeferAddEntity(self, WalkerCreate(16 * 16, 16 * 7));
+    SceneDeferAddEntity(self, WalkerCreate(16 * 16, 16 * 8));
 }
 
 void SceneInit(Scene* self)
