@@ -172,12 +172,12 @@ static SimulateCollisionOnAxisResult SimulateCollisionOnAxis
 
                 // Make sure that the resolution is part of the axis with the least overlap.
                 {
-                    if (resolution.x != 0 && overlap.width > overlap.height)
+                    if (resolution.x != 0 && overlap.width >= overlap.height)
                     {
                         continue;
                     }
 
-                    if (resolution.y != 0 && overlap.height > overlap.width)
+                    if (resolution.y != 0 && overlap.height >= overlap.width)
                     {
                         continue;
                     }
