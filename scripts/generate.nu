@@ -145,17 +145,17 @@ CONTENT := $\(IMAGES_OUTPUT) $\(LEVELS_OUTPUT)
 
 $\(VERBOSE).SILENT:
 
-.PHONY: all
-all: clean content
+.PHONY: @all
+@all: @clean @content
 
 ($makefile-directory-rules)
 ($makefile-image-rules)
 ($makefile-level-rules)
-.PHONY: content
-content: $\(CONTENT)
+.PHONY: @content
+@content: $\(CONTENT)
 
-.PHONY: clean
-clean:
+.PHONY: @clean
+@clean:
 	if [ -d \"($output-directory)\" ]; then rm -r ($output-directory); fi
 "
 }
@@ -259,19 +259,19 @@ SOURCE_OUTPUT := \\
 
 $\(VERBOSE).SILENT:
 
-.PHONY: all
-all: clean desktop
+.PHONY: @all
+@all: @clean @desktop
 
 ($makefile-directory-rules)
 ($makefile-source-rules)
 ($output-directory)/$\(BIN): $\(SOURCE_OUTPUT) | ($output-directory)
 	$\(CC) $\(CFLAGS) -o $@ $^ $\(LDLIBS)
 
-.PHONY: desktop
-desktop: ($output-directory)/$\(BIN)
+.PHONY: @desktop
+@desktop: ($output-directory)/$\(BIN)
 
-.PHONY: clean
-clean:
+.PHONY: @clean
+@clean:
 	if [ -d \"($output-directory)\" ]; then rm -r ($output-directory); fi
 "
 }
@@ -379,19 +379,19 @@ SOURCE_OUTPUT := \\
 
 $\(VERBOSE).SILENT:
 
-.PHONY: all
-all: clean web
+.PHONY: @all
+@all: @clean @web
 
 ($makefile-directory-rules)
 ($makefile-source-rules)
 ($output-directory)/index.html: $\(SOURCE_OUTPUT) | ($output-directory)
 	$\(EMCC) $\(CFLAGS) -o $@ $^ $\(LDLIBS) -s USE_GLFW=3 -s TOTAL_MEMORY=$\(TOTAL_MEMORY) --memory-init-file 0 --shell-file $\(SHELL_FILE) --preload-file build/content
 
-.PHONY: web
-web: ($output-directory)/index.html
+.PHONY: @web
+@web: ($output-directory)/index.html
 
-.PHONY: clean
-clean:
+.PHONY: @clean
+@clean:
 	if [ -d \"($output-directory)\" ]; then rm -r ($output-directory); fi
 "
 }

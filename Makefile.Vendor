@@ -33,8 +33,8 @@ CJSON_WEB_OBJECTS := \
 
 $(VERBOSE).SILENT:
 
-.PHONY: all
-all: clean vendor
+.PHONY: @all
+@all: @clean @vendor
 
 lib:
 	mkdir $@
@@ -99,15 +99,15 @@ $(CJSON_WEB_OBJECTS): $(CJSON_SOURCES) | lib/web/cJSON
 lib/web/libcJSON.a: $(CJSON_WEB_OBJECTS) | lib/web
 	$(EMAR) rcs $@ $^
 
-.PHONY: raylib
-raylib: lib/desktop/libraylib.a lib/web/libraylib.a
+.PHONY: @raylib
+@raylib: lib/desktop/libraylib.a lib/web/libraylib.a
 
-.PHONY: cJSON
-cJSON: lib/desktop/libcJSON.a lib/web/libcJSON.a
+.PHONY: @cJSON
+@cJSON: lib/desktop/libcJSON.a lib/web/libcJSON.a
 
-.PHONY: vendor
-vendor: raylib cJSON
+.PHONY: @vendor
+@vendor: @raylib @cJSON
 
-.PHONY: clean
-clean:
+.PHONY: @clean
+@clean:
 	if [ -d "lib" ]; then rm -r lib; fi
