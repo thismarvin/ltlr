@@ -11,15 +11,25 @@ RAYLIB_SOURCES := \
 	vendor/raylib/src/rshapes.c \
 	vendor/raylib/src/rtext.c \
 	vendor/raylib/src/rtextures.c \
-	vendor/raylib/src/utils.c
+	vendor/raylib/src/utils.c \
+
+RAYLIB_WEB_OBJECTS := \
+	lib/web/raylib/raudio.o \
+	lib/web/raylib/rcore.o \
+	lib/web/raylib/rmodels.o \
+	lib/web/raylib/rshapes.o \
+	lib/web/raylib/rtext.o \
+	lib/web/raylib/rtextures.o \
+	lib/web/raylib/utils.o \
 
 CJSON_SOURCES := \
-	vendor/cJSON/cJSON.c
+	vendor/cJSON/cJSON.c \
 
-RAYLIB_WEB_OBJECTS := $(patsubst vendor/raylib/src/%.c,lib/web/raylib/%.o, $(RAYLIB_SOURCES))
+CJSON_DESKTOP_OBJECTS := \
+	lib/desktop/cJSON/cJSON.o \
 
-CJSON_DESKTOP_OBJECTS := $(patsubst vendor/cJSON/%.c,lib/desktop/cJSON/%.o, $(CJSON_SOURCES))
-CJSON_WEB_OBJECTS := $(patsubst vendor/cJSON/%.c,lib/web/cJSON/%.o, $(CJSON_SOURCES))
+CJSON_WEB_OBJECTS := \
+	lib/web/cJSON/cJSON.o \
 
 $(VERBOSE).SILENT:
 
