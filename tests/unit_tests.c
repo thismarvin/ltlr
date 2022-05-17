@@ -3,7 +3,7 @@
 
 typedef int32_t i32;
 
-static bool DequeTestCreate()
+static bool DequeTestCreate(void)
 {
     Deque newDeque = DEQUE_OF(i32);
     usize size = DequeGetSize(&newDeque);
@@ -12,7 +12,7 @@ static bool DequeTestCreate()
     return size == 0;
 }
 
-static bool DequeTestPushFront1()
+static bool DequeTestPushFront1(void)
 {
     Deque deque = DEQUE_OF(i32);
     DEQUE_PUSH_FRONT(&deque, i32, 1);
@@ -23,7 +23,7 @@ static bool DequeTestPushFront1()
     return result;
 }
 
-static bool DequeTestPushFrontMultiple()
+static bool DequeTestPushFrontMultiple(void)
 {
     Deque deque = DEQUE_OF(i32);
     DEQUE_PUSH_FRONT(&deque, i32, 1);
@@ -54,7 +54,7 @@ static bool DequeTestPushBack1()
     return result;
 }
 
-static bool DequeTestPushBackMultiple()
+static bool DequeTestPushBackMultiple(void)
 {
     Deque deque = DEQUE_OF(i32);
     DEQUE_PUSH_BACK(&deque, i32, 1);
@@ -74,7 +74,7 @@ static bool DequeTestPushBackMultiple()
     return result;
 }
 
-static bool DequeTestPushFrontAndBack()
+static bool DequeTestPushFrontAndBack(void)
 {
     Deque deque = DEQUE_OF(i32);
     DEQUE_PUSH_FRONT(&deque, i32, 1);
@@ -97,7 +97,7 @@ static bool DequeTestPushFrontAndBack()
     return result;
 }
 
-static bool DequeTestPopFront()
+static bool DequeTestPopFront(void)
 {
     Deque deque = DEQUE_OF(i32);
     DEQUE_PUSH_FRONT(&deque, i32, 1);
@@ -110,7 +110,7 @@ static bool DequeTestPopFront()
     return result;
 }
 
-static bool DequeTestPopBack()
+static bool DequeTestPopBack(void)
 {
     Deque deque = DEQUE_OF(i32);
     DEQUE_PUSH_FRONT(&deque, i32, 1);
@@ -123,7 +123,7 @@ static bool DequeTestPopBack()
     return result;
 }
 
-static bool DequeTestClear()
+static bool DequeTestClear(void)
 {
     Deque deque = DEQUE_OF(i32);
     DEQUE_PUSH_FRONT(&deque, i32, 1);
@@ -143,7 +143,7 @@ static bool DequeTestClear()
     return result;
 }
 
-static bool DequeTestTailIsTail()
+static bool DequeTestTailIsTail(void)
 {
     Deque deque = DEQUE_OF(i32);
     DEQUE_PUSH_FRONT(&deque, i32, 1);
@@ -164,7 +164,7 @@ static bool DequeTestTailIsTail()
     return result;
 }
 
-static bool DequeTestHeadIsHead()
+static bool DequeTestHeadIsHead(void)
 {
     Deque deque = DEQUE_OF(i32);
     DEQUE_PUSH_BACK(&deque, i32, 1);
@@ -185,7 +185,7 @@ static bool DequeTestHeadIsHead()
     return result;
 }
 
-static bool DequeTestResize()
+static bool DequeTestResize(void)
 {
     Deque deque = DEQUE_WITH_CAPACITY(i32, 4);
     DEQUE_PUSH_FRONT(&deque, i32, 1);
@@ -210,7 +210,7 @@ static bool DequeTestResize()
     return result;
 }
 
-static bool ExecuteDequeTests()
+static bool ExecuteDequeTests(void)
 {
     TestSuite suite = TestSuiteCreate("Deque Tests");
 
@@ -230,7 +230,7 @@ static bool ExecuteDequeTests()
     return TestSuitePresentResults(&suite);
 }
 
-int main()
+int main(void)
 {
     bool allPass = true;
     allPass &= ExecuteDequeTests();
