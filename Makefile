@@ -42,9 +42,14 @@ Makefile.Web: src
 	cd build/desktop; ./ltlr
 	$(GPROF) build/desktop/ltlr build/desktop/gmon.out > build/desktop/profile
 
+.PHONY: @test
+@test: @vendor Makefile.Test
+	$(MAKE) -f Makefile.Test @test
+
 .PHONY: @format
 @format:
 	$(ASTYLE) -n --project=.astylerc --recursive "src/*.c,*.h"
+	$(ASTYLE) -n --project=.astylerc --recursive "tests/*.c,*.h"
 	$(PRETTIER) --write --use-tabs src/minshell.html
 
 .PHONY: @clean
