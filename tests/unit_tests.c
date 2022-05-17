@@ -1,4 +1,7 @@
-#include "./utils/testing.h"
+#include "testing.h"
+#include <stdint.h>
+
+typedef int32_t i32;
 
 static bool DequeTestCreate()
 {
@@ -227,7 +230,6 @@ static bool ExecuteDequeTests()
     return TestSuitePresentResults(&suite);
 }
 
-#if defined(DO_TESTING)
 int main()
 {
     bool allPass = true;
@@ -238,4 +240,3 @@ int main()
         return 1;
     }
 }
-#endif

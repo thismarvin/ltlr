@@ -1,7 +1,9 @@
 #pragma once
 
-#include "../collections/deque.h"
-#include "../common.h"
+#include "../src/collections/deque.h"
+#include <stdlib.h>
+
+typedef size_t usize;
 
 typedef bool (*TestFn)(void);
 
