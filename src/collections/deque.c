@@ -1,17 +1,18 @@
 #include "deque.h"
 #include <assert.h>
+#include <stdint.h>
 #include <string.h>
 
 #define DEQUE_RESIZE_FACTOR 2
 
 // An internal get: used for indexing the internal m_data array.
-static void* Get(const Deque* deque, const usize index)
+static void* Get(const Deque* deque, const size_t index)
 {
-    return (u8*)deque->m_data + deque->m_dataSize * index;
+    return (uint8_t*)deque->m_data + deque->m_dataSize * index;
 }
 
 // An internal set: used for indexing the internal m_data array.
-static void Set(Deque* deque, const usize index, const void* valuePointer)
+static void Set(Deque* deque, const size_t index, const void* valuePointer)
 {
     void* destination = Get(deque, index);
     memcpy(destination, valuePointer, deque->m_dataSize);
@@ -19,15 +20,15 @@ static void Set(Deque* deque, const usize index, const void* valuePointer)
 
 static void Resize(Deque* self)
 {
-    u8* oldData = self->m_data;
-    const usize oldCapacity = self->m_capacity;
+    uint8_t* oldData = self->m_data;
+    const size_t oldCapacity = self->m_capacity;
     const void* tailChunkStart = oldData + (self->m_tailIndex + 1) * self->m_dataSize;
-    const usize tailChunkSize = (self->m_capacity - (self->m_tailIndex + 1)) * self->m_dataSize;
+    const size_t tailChunkSize = (self->m_capacity - (self->m_tailIndex + 1)) * self->m_dataSize;
     const void* headChunkStart = oldData;
-    const usize headChunkSize = (self->m_tailIndex + 1) * self->m_dataSize;
+    const size_t headChunkSize = (self->m_tailIndex + 1) * self->m_dataSize;
 
-    const usize newCapacity = (usize)(self->m_capacity * DEQUE_RESIZE_FACTOR);
-    u8* newData = malloc(self->m_dataSize * newCapacity);
+    const size_t newCapacity = (size_t)(self->m_capacity * DEQUE_RESIZE_FACTOR);
+    uint8_t* newData = malloc(self->m_dataSize * newCapacity);
 
     self->m_data = newData;
     self->m_capacity = newCapacity;
@@ -41,7 +42,7 @@ static void Resize(Deque* self)
     free(oldData);
 }
 
-Deque DequeCreate(const usize dataSize, const usize initialCapacity)
+Deque DequeCreate(const size_t dataSize, const size_t initialCapacity)
 {
     void* data = malloc(dataSize * initialCapacity);
 
@@ -141,24 +142,24 @@ void* DequePeekBack(const Deque* self)
     return Get(self, (self->m_tailIndex + 1) % self->m_capacity);
 }
 
-void* DequeGetUnchecked(const Deque* self, const usize index)
+void* DequeGetUnchecked(const Deque* self, const size_t index)
 {
     return Get(self, (self->m_tailIndex + 1 + index) % self->m_capacity);
 }
 
-void* DequeGet(const Deque* self, const usize index)
+void* DequeGet(const Deque* self, const size_t index)
 {
     assert(index < DequeGetSize(self));
 
     return DequeGetUnchecked(self, index);
 }
 
-void DequeSetUnchecked(Deque* self, const usize index, const void* valuePointer)
+void DequeSetUnchecked(Deque* self, const size_t index, const void* valuePointer)
 {
     Set(self, (self->m_tailIndex + 1 + index) % self->m_capacity, valuePointer);
 }
 
-void DequeSet(Deque* self, const usize index, const void* valuePointer)
+void DequeSet(Deque* self, const size_t index, const void* valuePointer)
 {
     assert(index < DequeGetSize(self));
 
@@ -171,7 +172,7 @@ void DequeClear(Deque* self)
     self->m_tailIndex = self->m_capacity - 1;
 }
 
-usize DequeGetSize(const Deque* self)
+size_t DequeGetSize(const Deque* self)
 {
     if (self->m_needsResize)
     {
