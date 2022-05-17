@@ -1,0 +1,33 @@
+CC := gcc
+GPROF := gprof
+
+BIN := ltlr
+CFLAGS := -std=c17 -Wall -Wextra -Wpedantic -g -pg -O0 -Ivendor/raylib/src -Ivendor/cJSON -DPLATFORM_DESKTOP
+LDLIBS := -lm -lpthread -ldl -Llib/desktop -lraylib -lcJSON
+
+DEPS := \
+	src/collections/deque.c \
+	tests/testing.c \
+
+$(VERBOSE).SILENT:
+
+.PHONY: @all
+@all: @clean build/tests/unit_tests
+
+build:
+	mkdir $@
+
+build/tests:
+	mkdir $@
+
+build/tests/unit_tests: tests/unit_tests.c $(DEPS) | build/tests
+	$(CC) $(CFLAGS) -o $@ $^ $(LDLIBS)
+
+.PHONY: @test
+@test: build/tests/unit_tests | build/tests
+	cd build/tests; ./unit_tests
+	$(GPROF) build/tests/unit_tests build/tests/gmon.out > build/tests/profile
+
+.PHONY: @clean
+@clean:
+	if [ -d "build/tests" ]; then rm -r build/tests; fi
