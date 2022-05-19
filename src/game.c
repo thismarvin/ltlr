@@ -7,6 +7,8 @@
     #include <emscripten/emscripten.h>
 #endif
 
+#define MAX_FRAMERATE_SAMPLES 300
+
 static void Initialize(void);
 static void Update(void);
 static void Draw(void);
@@ -17,6 +19,11 @@ static const f32 maxDeltaTime = maxFrameSkip * targetFrameTime;
 static f32 accumulator = 0.0;
 static f64 previousTime = 0.0;
 
+static f64 framerateSamples[MAX_FRAMERATE_SAMPLES];
+static usize framerateSamplesHead;
+static bool collectedEnoughSamples;
+static f64 averageFps;
+
 static Scene scene;
 
 static void Timestep(void)
@@ -24,6 +31,27 @@ static void Timestep(void)
     f64 currentTime = GetTime();
 
     f32 deltaTime = currentTime - previousTime;
+
+    // Calculate the average frames per second.
+    {
+        framerateSamples[framerateSamplesHead] = 1 / deltaTime;
+        framerateSamplesHead += 1;
+
+        if (framerateSamplesHead >= MAX_FRAMERATE_SAMPLES)
+        {
+            collectedEnoughSamples = true;
+            framerateSamplesHead = 0;
+        }
+
+        averageFps = 0.0f;
+
+        for (usize i = 0; i < MAX_FRAMERATE_SAMPLES; ++i)
+        {
+            averageFps += framerateSamples[i];
+        }
+
+        averageFps /= MAX_FRAMERATE_SAMPLES;
+    }
 
     // Set a maximum delta time in order to avoid a "spiral of death."
     if (deltaTime > maxDeltaTime)
