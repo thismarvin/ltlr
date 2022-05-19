@@ -24,6 +24,8 @@ static usize framerateSamplesHead;
 static bool collectedEnoughSamples;
 static f64 averageFps;
 
+static bool debugging;
+
 static Scene scene;
 
 static void Timestep(void)
@@ -119,10 +121,72 @@ static void Initialize(void)
 
 static void Update(void)
 {
+    if (IsKeyPressed(KEY_EQUAL))
+    {
+        debugging = !debugging;
+    }
+
     SceneUpdate(&scene);
+}
+
+static void DrawDebugInformation(void)
+{
+    if (!debugging)
+    {
+        return;
+    }
+
+    f32 screenWidth = GetScreenWidth();
+    f32 screenHeight = GetScreenHeight();
+
+    // Assume we need letterboxing.
+    f32 zoom = screenWidth / CTX_VIEWPORT_WIDTH;
+
+    // Check if pillarboxing is more appropriate.
+    if (CTX_VIEWPORT_HEIGHT * zoom > screenHeight)
+    {
+        zoom = screenHeight / CTX_VIEWPORT_HEIGHT;
+    }
+
+    zoom = floor(zoom);
+
+    Camera2D camera = (Camera2D)
+    {
+        .offset = VECTOR2_ZERO,
+        .target = VECTOR2_ZERO,
+        .rotation = 0.0f,
+        .zoom = zoom * 0.5f,
+    };
+
+    BeginMode2D(camera);
+    {
+        const char* text = "Sampling Framerate...";
+
+        if (collectedEnoughSamples)
+        {
+            text = TextFormat("%.f FPS", averageFps);
+        }
+
+        const usize fontSize = 20;
+        const usize textWidth = MeasureText(text, fontSize);
+        const f32 x = 0;
+        const f32 y = 0;
+        const usize xPadding = 8;
+        const usize yPadding = 8;
+
+        DrawRectangle(x, y, textWidth + xPadding * 2, fontSize + yPadding * 2 - 1, (Color)
+        {
+            0, 0, 0, 150
+        });
+        DrawText(text, x + xPadding + 2, y + yPadding + 2, fontSize, COLOR_BLACK);
+        DrawText(text, x + xPadding, y + yPadding, fontSize, COLOR_WHITE);
+    }
+    EndMode2D();
 }
 
 static void Draw(void)
 {
     SceneDraw(&scene);
+
+    DrawDebugInformation();
 }
