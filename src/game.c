@@ -36,7 +36,7 @@ static void Timestep(void)
 
     // Calculate the average frames per second.
     {
-        framerateSamples[framerateSamplesHead] = 1 / deltaTime;
+        framerateSamples[framerateSamplesHead] = deltaTime;
         framerateSamplesHead += 1;
 
         if (framerateSamplesHead >= MAX_FRAMERATE_SAMPLES)
@@ -52,7 +52,7 @@ static void Timestep(void)
             averageFps += framerateSamples[i];
         }
 
-        averageFps /= MAX_FRAMERATE_SAMPLES;
+        averageFps = 1 / (averageFps / MAX_FRAMERATE_SAMPLES);
     }
 
     // Set a maximum delta time in order to avoid a "spiral of death."
