@@ -7,7 +7,7 @@
     #include <emscripten/emscripten.h>
 #endif
 
-#define MAX_FRAMERATE_SAMPLES 300
+#define FRAMERATE_SAMPLING_FREQUENCY 0.1f
 
 static void Initialize(void);
 static void Update(void);
@@ -19,9 +19,9 @@ static const f32 maxDeltaTime = maxFrameSkip * targetFrameTime;
 static f32 accumulator = 0.0;
 static f64 previousTime = 0.0;
 
-static f64 framerateSamples[MAX_FRAMERATE_SAMPLES];
-static usize framerateSamplesHead;
-static bool collectedEnoughSamples;
+static usize currentFrame;
+static f64 sampleTime;
+static usize sampleFrame;
 static f64 averageFps;
 
 static bool debugging;
@@ -36,23 +36,15 @@ static void Timestep(void)
 
     // Calculate the average frames per second.
     {
-        framerateSamples[framerateSamplesHead] = deltaTime;
-        framerateSamplesHead += 1;
+        currentFrame += 1;
 
-        if (framerateSamplesHead >= MAX_FRAMERATE_SAMPLES)
+        if ((currentTime - sampleTime) >= FRAMERATE_SAMPLING_FREQUENCY)
         {
-            collectedEnoughSamples = true;
-            framerateSamplesHead = 0;
+            averageFps = (currentFrame - sampleFrame) / (currentTime - sampleTime);
+
+            sampleFrame = currentFrame;
+            sampleTime = currentTime;
         }
-
-        averageFps = 0.0f;
-
-        for (usize i = 0; i < MAX_FRAMERATE_SAMPLES; ++i)
-        {
-            averageFps += framerateSamples[i];
-        }
-
-        averageFps = 1 / (averageFps / MAX_FRAMERATE_SAMPLES);
     }
 
     // Set a maximum delta time in order to avoid a "spiral of death."
@@ -160,12 +152,7 @@ static void DrawDebugInformation(void)
 
     BeginMode2D(camera);
     {
-        const char* text = "Sampling Framerate...";
-
-        if (collectedEnoughSamples)
-        {
-            text = TextFormat("%.f FPS", averageFps);
-        }
+        const char* text = TextFormat("%.f FPS", averageFps);
 
         const usize fontSize = 20;
         const usize textWidth = MeasureText(text, fontSize);
