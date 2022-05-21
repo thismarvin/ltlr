@@ -99,14 +99,14 @@ $(CJSON_WEB_OBJECTS): $(CJSON_SOURCES) | lib/web/cJSON
 lib/web/libcJSON.a: $(CJSON_WEB_OBJECTS) | lib/web
 	$(EMAR) rcs $@ $^
 
-.PHONY: @raylib
-@raylib: lib/desktop/libraylib.a lib/web/libraylib.a
+.PHONY: @desktop
+@desktop: lib/desktop/libraylib.a lib/desktop/libcJSON.a
 
-.PHONY: @cJSON
-@cJSON: lib/desktop/libcJSON.a lib/web/libcJSON.a
+.PHONY: @web
+@web: lib/web/libraylib.a lib/web/libcJSON.a
 
 .PHONY: @vendor
-@vendor: @raylib @cJSON
+@vendor: @desktop @web
 
 .PHONY: @clean
 @clean:
