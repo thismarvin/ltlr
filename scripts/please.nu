@@ -190,7 +190,7 @@ export def build [
 
 	let ldlibs = (
 		if $target == 'linux' {
-			'-lm -lpthread -ldl -Llib/desktop -lraylib -lcJSON'
+			'-Llib/desktop -lraylib -lGL -lm -lpthread -ldl -lrt -lX11 -lcJSON'
 		} else if $target == 'windows' {
 			'-Llib/desktop -static -lraylib -lcJSON -lopengl32 -lgdi32 -lwinmm'
 		} else {

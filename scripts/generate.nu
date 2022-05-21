@@ -246,7 +246,7 @@ CC := gcc
 
 BIN := ltlr
 CFLAGS := -std=c17 -Wall -Wextra -Wpedantic -g -pg -O0 -Ivendor/raylib/src -Ivendor/cJSON -DPLATFORM_DESKTOP
-LDLIBS := -lm -lpthread -ldl -Llib/desktop -lraylib -lcJSON
+LDLIBS := -Llib/desktop -lraylib -lGL -lm -lpthread -ldl -lrt -lX11 -lcJSON
 
 SOURCE_HEADERS := \\
 ($makefile-source-headers)
