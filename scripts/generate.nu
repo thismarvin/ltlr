@@ -245,7 +245,10 @@ $"# This file is auto-generated; any changes you make may be overwritten.
 CC := gcc
 
 BIN := ltlr
-CFLAGS := -std=c17 -Wall -Wextra -Wpedantic -g -pg -O0 -Ivendor/raylib/src -Ivendor/cJSON -DPLATFORM_DESKTOP
+BUILD := debug
+cflags.debug := -g -pg -Og
+cflags.release := -g -O2
+CFLAGS := -std=c17 -Wall -Wextra -Wpedantic $\(cflags.$\(BUILD)) -Ivendor/raylib/src -Ivendor/cJSON -DPLATFORM_DESKTOP
 LDLIBS := -Llib/desktop -lraylib -lGL -lm -lpthread -ldl -lrt -lX11 -lcJSON
 
 SOURCE_HEADERS := \\
