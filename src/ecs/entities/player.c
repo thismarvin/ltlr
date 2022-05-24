@@ -27,6 +27,30 @@ static void PlayerOnDamage(const OnDamageParams* params)
     player->invulnerableTimer = 0;
 }
 
+static void PlayerOnCollision(const OnCollisionParams* params)
+{
+    assert(ENTITY_HAS_DEPS(params->entity, TAG_PLAYER | TAG_MORTAL));
+
+    const CMortal* mortal = GET_COMPONENT(mortal, params->entity);
+
+    // Collision specific logic that will not resolve the player.
+    {
+        if (ENTITY_HAS_DEPS(params->otherEntity, TAG_WALKER | TAG_DAMAGE))
+        {
+            OnDamageParams onDamageParams = (OnDamageParams)
+            {
+                .scene = params->scene,
+                .entity = params->entity,
+                .otherEntity = params->otherEntity,
+            };
+
+            mortal->onDamage(&onDamageParams);
+
+            return;
+        }
+    }
+}
+
 static OnResolutionResult PlayerOnResolution(const OnResolutionParams* params)
 {
     assert(ENTITY_HAS_DEPS(params->entity, TAG_PLAYER | TAG_POSITION | TAG_KINETIC));
@@ -99,30 +123,6 @@ static OnResolutionResult PlayerOnResolution(const OnResolutionParams* params)
     };
 }
 
-static void PlayerOnCollision(const OnCollisionParams* params)
-{
-    assert(ENTITY_HAS_DEPS(params->entity, TAG_PLAYER | TAG_MORTAL));
-
-    const CMortal* mortal = GET_COMPONENT(mortal, params->entity);
-
-    // Collision specific logic that will not resolve the player.
-    {
-        if (ENTITY_HAS_DEPS(params->otherEntity, TAG_WALKER | TAG_DAMAGE))
-        {
-            OnDamageParams onDamageParams = (OnDamageParams)
-            {
-                .scene = params->scene,
-                .entity = params->entity,
-                .otherEntity = params->otherEntity,
-            };
-
-            mortal->onDamage(&onDamageParams);
-
-            return;
-        }
-    }
-}
-
 EntityBuilder PlayerCreate(const f32 x, const f32 y)
 {
     Deque components = DEQUE_OF(Component);
@@ -179,8 +179,8 @@ EntityBuilder PlayerCreate(const f32 x, const f32 y)
         .resolutionSchema = RESOLVE_NONE,
         .layer = LAYER_NONE,
         .mask = LAYER_TERRAIN | LAYER_LETHAL,
-        .onResolution = PlayerOnResolution,
         .onCollision = PlayerOnCollision,
+        .onResolution = PlayerOnResolution,
     }));
 
     ADD_COMPONENT(CMortal, ((CMortal)

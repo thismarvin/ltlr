@@ -1,6 +1,8 @@
 #include "common.h"
 #include "walker.h"
 
+static void WalkerOnCollision() {}
+
 static OnResolutionResult WalkerOnResolution(const OnResolutionParams* params)
 {
     assert(ENTITY_HAS_DEPS(params->entity, TAG_POSITION | TAG_KINETIC));
@@ -30,8 +32,6 @@ static OnResolutionResult WalkerOnResolution(const OnResolutionParams* params)
         .aabb = resolvedAabb,
     };
 }
-
-static void WalkerOnCollision() {}
 
 EntityBuilder WalkerCreate(const f32 x, const f32 y)
 {
@@ -89,8 +89,8 @@ EntityBuilder WalkerCreate(const f32 x, const f32 y)
         .resolutionSchema = RESOLVE_ALL,
         .layer = LAYER_LETHAL,
         .mask = LAYER_TERRAIN | LAYER_LETHAL,
-        .onResolution = WalkerOnResolution,
         .onCollision = WalkerOnCollision,
+        .onResolution = WalkerOnResolution,
     }));
 
     ADD_COMPONENT(CDamage, ((CDamage)
@@ -104,4 +104,3 @@ EntityBuilder WalkerCreate(const f32 x, const f32 y)
         .components = components,
     };
 }
-

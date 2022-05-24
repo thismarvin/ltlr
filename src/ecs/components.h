@@ -43,8 +43,15 @@ typedef void (*OnDamage)(const OnDamageParams*);
 
 typedef struct
 {
+    Scene* scene;
+    usize entity;
     Rectangle aabb;
-} OnCollisionResult;
+    usize otherEntity;
+    Rectangle otherAabb;
+    Rectangle overlap;
+} OnCollisionParams;
+
+typedef void (*OnCollision)(const OnCollisionParams*);
 
 typedef struct
 {
@@ -63,18 +70,6 @@ typedef struct
 } OnResolutionParams;
 
 typedef OnResolutionResult (*OnResolution)(const OnResolutionParams*);
-
-typedef struct
-{
-    Scene* scene;
-    usize entity;
-    Rectangle aabb;
-    usize otherEntity;
-    Rectangle otherAabb;
-    Rectangle overlap;
-} OnCollisionParams;
-
-typedef void (*OnCollision)(const OnCollisionParams*);
 
 typedef struct
 {
@@ -117,8 +112,8 @@ typedef struct
     u64 layer;
     // Layers you collide with.
     u64 mask;
-    OnResolution onResolution;
     OnCollision onCollision;
+    OnResolution onResolution;
 } CCollider;
 
 // TODO(thismarvin): Should this be in some sort of Singleton?

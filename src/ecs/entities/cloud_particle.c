@@ -2,6 +2,8 @@
 #include "common.h"
 #include <raymath.h>
 
+static void CloudParticleOnCollision() {}
+
 // TODO(thismarvin): The collider no longer scales...
 static OnResolutionResult CloudParticleOnResolution(const OnResolutionParams* params)
 {
@@ -29,8 +31,6 @@ static OnResolutionResult CloudParticleOnResolution(const OnResolutionParams* pa
         .aabb = resolvedAabb,
     };
 }
-
-static void CloudParticleOnCollision() {}
 
 EntityBuilder CloudParticleCreate
 (
@@ -98,8 +98,8 @@ EntityBuilder CloudParticleCreate
         .resolutionSchema = RESOLVE_NONE,
         .layer = LAYER_NONE,
         .mask = LAYER_TERRAIN,
-        .onResolution = CloudParticleOnResolution,
         .onCollision = CloudParticleOnCollision,
+        .onResolution = CloudParticleOnResolution,
     }));
 
     f32 lifetime = MIN(1.0f, (f32)GetRandomValue(1, 100) * 0.03f);
