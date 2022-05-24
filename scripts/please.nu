@@ -182,9 +182,9 @@ export def build [
 	)
 	let optimization-flags = (
 		if not $release {
-			'-g -pg -O0'
+			'-g -pg -Og'
 		} else {
-			'-O2'
+			'-g -O2'
 		}
 	)
 
@@ -286,7 +286,7 @@ export def 'build web' [
 	with-env [
 		OUT_DIR $output-directory
 		EMCC 'emcc'
-		CFLAGS '-std=c17 -Wall -Wextra -Wpedantic -O2 -Ivendor/raylib/src -Ivendor/cJSON -DPLATFORM_WEB'
+		CFLAGS '-std=c17 -Wall -Wextra -Wpedantic -g -O2 -Ivendor/raylib/src -Ivendor/cJSON -DPLATFORM_WEB'
 		LDLIBS '-Llib/web -lraylib -lcJSON'
 		SHELL_FILE 'src/minshell.html'
 		TOTAL_MEMORY '33554432'

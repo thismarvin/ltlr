@@ -365,7 +365,7 @@ $"# This file is auto-generated; any changes you make may be overwritten.
 
 EMCC := emcc
 
-CFLAGS := -std=c17 -Wall -Wextra -Wpedantic -O3 -Ivendor/raylib/src -Ivendor/cJSON -DPLATFORM_WEB
+CFLAGS := -std=c17 -Wall -Wextra -Wpedantic -g -O2 -Ivendor/raylib/src -Ivendor/cJSON -DPLATFORM_WEB
 LDLIBS := -Llib/web -lraylib -lcJSON
 
 TOTAL_MEMORY := 33554432
