@@ -16,6 +16,8 @@ typedef size_t usize;
 typedef float f32;
 typedef double f64;
 
+#define UNUSED __attribute__((unused))
+
 #define MAX(mA,mB) (((mA)>(mB))?(mA):(mB))
 #define MIN(mA,mB) (((mA)<(mB))?(mA):(mB))
 
