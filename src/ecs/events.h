@@ -10,7 +10,7 @@ typedef struct
     Deque listeners;
 } EventHandler;
 
-EventHandler EventHandlerCreate();
+EventHandler EventHandlerCreate(void);
 void EventHandlerSubscribe(EventHandler* self, OnRaise onRaise);
 void EventHandlerRaise(const EventHandler* self, const void* arguments);
 void EventHandlerDestroy(EventHandler* self);

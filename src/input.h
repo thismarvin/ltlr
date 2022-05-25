@@ -89,7 +89,7 @@ void InputProfileAddGamepadBinding(InputProfile* self, GamepadBinding binding);
 void InputProfileAddMouseBinding(InputProfile* self, MouseBinding binding);
 void InputProfileAddAxisBinding(InputProfile* self, AxisBinding binding);
 
-InputHandler InputHandlerCreate();
+InputHandler InputHandlerCreate(usize gamepad);
 void InputHandlerSetProfile(InputHandler* self, InputProfile profile);
 void InputHandlerUpdate(InputHandler* self);
 // TODO(thismarvin): Return the active bindings somehow...

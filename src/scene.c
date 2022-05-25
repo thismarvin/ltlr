@@ -757,12 +757,12 @@ static void SceneDrawLayers(const Scene* self)
     EndDrawing();
 }
 
-static void RenderRootLayer()
+static void RenderRootLayer(UNUSED const RenderFnParams* params)
 {
     ClearBackground(P8_BLUE);
 }
 
-static void RenderBackgroundLayer()
+static void RenderBackgroundLayer(UNUSED const RenderFnParams* params)
 {
     ClearBackground(COLOR_TRANSPARENT);
 

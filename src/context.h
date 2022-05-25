@@ -11,8 +11,8 @@
 // Target (fixed) delta time.
 #define CTX_DT (1.0 / 60.0)
 
-// f32 ContextGetDeltaTime();
-f64 ContextGetTotalTime();
+// f32 ContextGetDeltaTime(void);
+f64 ContextGetTotalTime(void);
 void ContextSetTotalTime(f64 value);
-f32 ContextGetAlpha();
+f32 ContextGetAlpha(void);
 void ContextSetAlpha(f32 value);

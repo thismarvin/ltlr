@@ -11,7 +11,7 @@
     .y = -(FOG_HEIGHT - CTX_VIEWPORT_HEIGHT) * 0.5f, \
 }
 
-EntityBuilder FogCreate()
+EntityBuilder FogCreate(void)
 {
     Deque components = DEQUE_OF(Component);
 

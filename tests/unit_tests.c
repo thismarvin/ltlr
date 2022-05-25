@@ -43,7 +43,7 @@ static bool DequeTestPushFrontMultiple(void)
     return result;
 }
 
-static bool DequeTestPushBack1()
+static bool DequeTestPushBack1(void)
 {
     Deque deque = DEQUE_OF(i32);
     DEQUE_PUSH_BACK(&deque, i32, 1);

@@ -2,7 +2,7 @@
 #include "events.h"
 #include <raymath.h>
 
-EventHandler EventHandlerCreate()
+EventHandler EventHandlerCreate(void)
 {
     return (EventHandler)
     {
