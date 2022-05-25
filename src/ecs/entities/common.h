@@ -16,3 +16,6 @@ Rectangle ApplyResolutionPerfectly
     Rectangle otherAabb,
     Vector2 resolution
 );
+
+void OnCollisionNoop(const OnCollisionParams* params);
+OnResolutionResult OnResolutionNoop(const OnResolutionParams* params);

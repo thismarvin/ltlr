@@ -30,3 +30,12 @@ Rectangle ApplyResolutionPerfectly
     return result;
 }
 
+void OnCollisionNoop(UNUSED const OnCollisionParams* params) {}
+
+OnResolutionResult OnResolutionNoop(const OnResolutionParams* params)
+{
+    return (OnResolutionResult)
+    {
+        .aabb = params->aabb,
+    };
+}

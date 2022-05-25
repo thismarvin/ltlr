@@ -1,16 +1,6 @@
 #include "block.h"
 #include "common.h"
 
-static void BlockOnCollision() {}
-
-static OnResolutionResult BlockOnResolution(const OnResolutionParams* params)
-{
-    return (OnResolutionResult)
-    {
-        .aabb = params->aabb,
-    };
-}
-
 EntityBuilder BlockCreate(const Rectangle aabb, const u8 resolutionSchema, const u64 layer)
 {
     Deque components = DEQUE_OF(Component);
@@ -39,8 +29,8 @@ EntityBuilder BlockCreate(const Rectangle aabb, const u8 resolutionSchema, const
         .resolutionSchema = resolutionSchema,
         .layer = layer,
         .mask = LAYER_NONE,
-        .onCollision = BlockOnCollision,
-        .onResolution = BlockOnResolution,
+        .onCollision = OnCollisionNoop,
+        .onResolution = OnResolutionNoop,
     }));
 
     return (EntityBuilder)
