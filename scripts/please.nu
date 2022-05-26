@@ -36,12 +36,12 @@ export def "builder content" [
 	do {
 		let _ = {
 			(ls $"($env.OUT_DIR)/**/*.png").name
-			| each { |it| rm -q $it }
+			| each { |it| rm $it }
 		}
 
 		let _ = {
 			(ls $"($env.OUT_DIR)/**/*.json").name
-			| each { |it| rm -q $it }
+			| each { |it| rm $it }
 		}
 	}
 
