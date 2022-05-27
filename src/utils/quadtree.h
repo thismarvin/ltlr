@@ -25,7 +25,7 @@ struct Quadtree
 
 typedef struct Quadtree Quadtree;
 
-Quadtree QuadtreeCreate(Rectangle region);
+Quadtree* QuadtreeNew(Rectangle region);
 bool QuadtreeAdd(Quadtree* self, usize entity, Rectangle aabb);
 Deque QuadtreeQuery(const Quadtree* self, Rectangle region);
 void QuadtreeClear(Quadtree* self);

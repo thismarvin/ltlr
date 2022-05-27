@@ -1,16 +1,17 @@
 #include "quadtree.h"
 
-Quadtree QuadtreeCreate(const Rectangle region)
+Quadtree* QuadtreeNew(Rectangle region)
 {
-    return (Quadtree)
-    {
-        .region = region,
-        .headIndex = 0,
-        .topLeft = NULL,
-        .topRight = NULL,
-        .bottomLeft = NULL,
-        .bottomRight = NULL,
-    };
+    Quadtree* quadtree = malloc(sizeof(Quadtree));
+
+    quadtree->region = region;
+    quadtree->headIndex = 0;
+    quadtree->topLeft = NULL;
+    quadtree->topRight = NULL;
+    quadtree->bottomLeft = NULL;
+    quadtree->bottomRight = NULL;
+
+    return quadtree;
 }
 
 static bool QuadtreeHasDivided(const Quadtree* self)
@@ -58,17 +59,10 @@ static void QuadtreeSubdivide(Quadtree* self)
         .height = height,
     };
 
-    self->topLeft = (Quadtree*)malloc(sizeof(Quadtree));
-    *self->topLeft = QuadtreeCreate(topLeft);
-
-    self->topRight = (Quadtree*)malloc(sizeof(Quadtree));
-    *self->topRight = QuadtreeCreate(topRight);
-
-    self->bottomLeft = (Quadtree*)malloc(sizeof(Quadtree));
-    *self->bottomLeft = QuadtreeCreate(bottomLeft);
-
-    self->bottomRight = (Quadtree*)malloc(sizeof(Quadtree));
-    *self->bottomRight = QuadtreeCreate(bottomRight);
+    self->topLeft = QuadtreeNew(topLeft);
+    self->topRight = QuadtreeNew(topRight);
+    self->bottomLeft = QuadtreeNew(bottomLeft);
+    self->bottomRight = QuadtreeNew(bottomRight);
 }
 
 bool QuadtreeAdd(Quadtree* self, const usize entity, const Rectangle aabb)
