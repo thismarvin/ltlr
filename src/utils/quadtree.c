@@ -127,16 +127,17 @@ Deque QuadtreeQuery(const Quadtree* self, const Rectangle region)
 
 void QuadtreeClear(Quadtree* self)
 {
-    QuadtreeDestroy(self->topLeft);
-    QuadtreeDestroy(self->topRight);
-    QuadtreeDestroy(self->bottomRight);
-    QuadtreeDestroy(self->bottomLeft);
+    if (self == NULL)
+    {
+        return;
+    }
+
+    QuadtreeClear(self->topLeft);
+    QuadtreeClear(self->topRight);
+    QuadtreeClear(self->bottomRight);
+    QuadtreeClear(self->bottomLeft);
 
     self->headIndex = 0;
-    self->topLeft = NULL;
-    self->topRight = NULL;
-    self->bottomRight = NULL;
-    self->bottomLeft = NULL;
 }
 
 void QuadtreeDestroy(Quadtree* self)
