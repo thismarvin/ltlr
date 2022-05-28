@@ -93,6 +93,22 @@ static OnResolutionResult PlayerOnResolution(const OnResolutionParams* params)
         }
     }
 
+    // Make sure that landing on top of a one-way platform does not noticeably teleport the player.
+    {
+        if (kinetic->velocity.y > 0 && params->resolution.y < 0)
+        {
+            const f32 difference = fabsf(RectangleTop(params->otherAabb) - RectangleBottom(params->aabb));
+
+            if (difference > 3.0f)
+            {
+                return (OnResolutionResult)
+                {
+                    .aabb = params->aabb,
+                };
+            }
+        }
+    }
+
     // Resolve collision.
     Rectangle resolvedAabb = ApplyResolutionPerfectly(params->aabb, params->otherAabb,
                              params->resolution);
