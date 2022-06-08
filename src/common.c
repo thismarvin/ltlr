@@ -9,22 +9,22 @@ Vector2 Vector2Create(const f32 x, const f32 y)
     };
 }
 
-f32 RectangleLeft(const Rectangle rectangle)
+f32 RectangleLeft(const Rectangle self)
 {
-    return rectangle.x;
+    return self.x;
 }
 
-f32 RectangleRight(const Rectangle rectangle)
+f32 RectangleRight(const Rectangle self)
 {
-    return rectangle.x + rectangle.width;
+    return self.x + self.width;
 }
 
-f32 RectangleBottom(const Rectangle rectangle)
+f32 RectangleBottom(const Rectangle self)
 {
-    return rectangle.y + rectangle.height;
+    return self.y + self.height;
 }
 
-f32 RectangleTop(const Rectangle rectangle)
+f32 RectangleTop(const Rectangle self)
 {
-    return rectangle.y;
+    return self.y;
 }

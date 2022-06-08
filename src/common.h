@@ -41,7 +41,7 @@ typedef enum
 
 Vector2 Vector2Create(f32 x, f32 y);
 
-f32 RectangleLeft(Rectangle rectangle);
-f32 RectangleRight(Rectangle rectangle);
-f32 RectangleBottom(Rectangle rectangle);
-f32 RectangleTop(Rectangle rectangle);
+f32 RectangleLeft(Rectangle self);
+f32 RectangleRight(Rectangle self);
+f32 RectangleBottom(Rectangle self);
+f32 RectangleTop(Rectangle self);
