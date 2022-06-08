@@ -28,3 +28,11 @@ f32 RectangleTop(const Rectangle self)
 {
     return self.y;
 }
+
+bool RectangleContains(const Rectangle self, const Rectangle other)
+{
+    return RectangleLeft(other) >= RectangleLeft(self)
+           && RectangleRight(other) <= RectangleRight(self)
+           && RectangleTop(other) >= RectangleTop(self)
+           && RectangleBottom(other) <= RectangleBottom(self);
+}
