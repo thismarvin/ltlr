@@ -242,7 +242,7 @@ EntityBuilder PlayerCreate(const f32 x, const f32 y)
 
 void PlayerInputUpdate(Scene* scene, const usize entity)
 {
-    u64 dependencies = TAG_PLAYER | TAG_POSITION | TAG_DIMENSION | TAG_KINETIC;
+    const u64 dependencies = TAG_PLAYER | TAG_POSITION | TAG_DIMENSION | TAG_KINETIC;
 
     if (!SceneEntityHasDependencies(scene, entity, dependencies))
     {
@@ -259,7 +259,7 @@ void PlayerInputUpdate(Scene* scene, const usize entity)
         return;
     }
 
-    bool coyoteTimeActive = player->coyoteTimer < player->coyoteDuration;
+    const bool coyoteTimeActive = player->coyoteTimer < player->coyoteDuration;
 
     // Maintenance.
     {
@@ -288,14 +288,28 @@ void PlayerInputUpdate(Scene* scene, const usize entity)
 
     // Lateral Movement.
     {
+        static const u8 left = 1;
+        static const u8 right = 2;
+
         i8 strafe = 0;
 
-        if (InputHandlerPressing(&scene->input, "left"))
+        if (!InputHandlerPressing(&scene->input, "right")
+                && InputHandlerPressing(&scene->input, "left"))
+        {
+            player->initialDirection = left;
+            strafe = -1;
+        }
+        else if (!InputHandlerPressing(&scene->input, "left")
+                 && InputHandlerPressing(&scene->input, "right"))
+        {
+            player->initialDirection = right;
+            strafe = 1;
+        }
+        else if (player->initialDirection == right && InputHandlerPressing(&scene->input, "left"))
         {
             strafe = -1;
         }
-
-        if (InputHandlerPressing(&scene->input, "right"))
+        else if (player->initialDirection == left && InputHandlerPressing(&scene->input, "right"))
         {
             strafe = 1;
         }

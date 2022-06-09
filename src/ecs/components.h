@@ -141,6 +141,7 @@ typedef struct
     f32 defaultGravity;
     f32 invulnerableTimer;
     f32 invulnerableDuration;
+    u8 initialDirection;
 } CPlayer;
 
 typedef struct
