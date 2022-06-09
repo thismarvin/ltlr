@@ -7,6 +7,8 @@ LDLIBS := -Llib/desktop -lraylib -lGL -lm -lpthread -ldl -lrt -lX11 -lcJSON
 
 DEPS := \
 	src/collections/deque.c \
+	src/common.c \
+	src/utils/quadtree.c \
 	tests/testing.c \
 
 $(VERBOSE).SILENT:
