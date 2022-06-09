@@ -3,20 +3,12 @@
 #include "../collections/deque.h"
 #include "../common.h"
 
-#define QUADTREE_CAPACITY 4
-
-typedef struct
-{
-    Rectangle region;
-    usize entity;
-} QuadtreeEntry;
-
 struct Quadtree
 {
     Rectangle region;
-    QuadtreeEntry entries[QUADTREE_CAPACITY];
-    usize headIndex;
-
+    u8 maxDepth;
+    u8 depth;
+    Deque entries;
     struct Quadtree* topLeft;
     struct Quadtree* topRight;
     struct Quadtree* bottomLeft;
@@ -25,8 +17,8 @@ struct Quadtree
 
 typedef struct Quadtree Quadtree;
 
-Quadtree* QuadtreeNew(Rectangle region);
-bool QuadtreeAdd(Quadtree* self, usize entity, Rectangle aabb);
+Quadtree* QuadtreeNew(Rectangle region, u8 maxDepth);
+bool QuadtreeAdd(Quadtree* self, usize id, Rectangle aabb);
 Deque QuadtreeQuery(const Quadtree* self, Rectangle region);
 void QuadtreeClear(Quadtree* self);
 void QuadtreeDestroy(Quadtree* self);

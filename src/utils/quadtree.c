@@ -1,11 +1,19 @@
 #include "quadtree.h"
 
-Quadtree* QuadtreeNew(Rectangle region)
+typedef struct
+{
+    Rectangle aabb;
+    usize id;
+} QuadtreeEntry;
+
+static Quadtree* New(const Rectangle region, const u8 maxDepth, const u8 depth)
 {
     Quadtree* quadtree = malloc(sizeof(Quadtree));
 
     quadtree->region = region;
-    quadtree->headIndex = 0;
+    quadtree->maxDepth = maxDepth;
+    quadtree->depth = depth;
+    quadtree->entries = DEQUE_OF(QuadtreeEntry);
     quadtree->topLeft = NULL;
     quadtree->topRight = NULL;
     quadtree->bottomLeft = NULL;
@@ -14,16 +22,15 @@ Quadtree* QuadtreeNew(Rectangle region)
     return quadtree;
 }
 
-static bool QuadtreeHasDivided(const Quadtree* self)
-{
-    return self->topLeft != NULL
-           || self->topRight != NULL
-           || self->bottomLeft != NULL
-           || self->bottomRight != NULL;
-}
-
 static void QuadtreeSubdivide(Quadtree* self)
 {
+    if (self->depth == self->maxDepth)
+    {
+        return;
+    }
+
+    const u8 depth = self->depth + 1;
+
     const f32 width = self->region.width * 0.5f;
     const f32 height = self->region.height * 0.5f;
 
@@ -34,7 +41,6 @@ static void QuadtreeSubdivide(Quadtree* self)
         .width = width,
         .height = height,
     };
-
     const Rectangle topRight = (Rectangle)
     {
         .x = self->region.x + width,
@@ -42,7 +48,6 @@ static void QuadtreeSubdivide(Quadtree* self)
         .width = width,
         .height = height,
     };
-
     const Rectangle bottomLeft = (Rectangle)
     {
         .x = self->region.x,
@@ -50,7 +55,6 @@ static void QuadtreeSubdivide(Quadtree* self)
         .width = width,
         .height = height,
     };
-
     const Rectangle bottomRight = (Rectangle)
     {
         .x = self->region.x + width,
@@ -59,55 +63,98 @@ static void QuadtreeSubdivide(Quadtree* self)
         .height = height,
     };
 
-    self->topLeft = QuadtreeNew(topLeft);
-    self->topRight = QuadtreeNew(topRight);
-    self->bottomLeft = QuadtreeNew(bottomLeft);
-    self->bottomRight = QuadtreeNew(bottomRight);
+    self->topLeft = New(topLeft, self->maxDepth, depth);
+    self->topRight = New(topRight, self->maxDepth, depth);
+    self->bottomLeft = New(bottomLeft, self->maxDepth, depth);
+    self->bottomRight = New(bottomRight, self->maxDepth, depth);
+
+    QuadtreeSubdivide(self->topLeft);
+    QuadtreeSubdivide(self->topRight);
+    QuadtreeSubdivide(self->bottomLeft);
+    QuadtreeSubdivide(self->bottomRight);
 }
 
-bool QuadtreeAdd(Quadtree* self, const usize entity, const Rectangle aabb)
+Quadtree* QuadtreeNew(const Rectangle region, const u8 maxDepth)
 {
-    if (!CheckCollisionRecs(self->region, aabb))
+    Quadtree* quadtree = New(region, maxDepth, 0);
+    QuadtreeSubdivide(quadtree);
+
+    return quadtree;
+}
+
+static bool QuadtreeIsLeaf(const Quadtree* self)
+{
+    return self->depth == self->maxDepth;
+}
+
+bool QuadtreeAdd(Quadtree* self, const usize id, const Rectangle aabb)
+{
+    if (!RectangleContains(self->region, aabb))
     {
         return false;
     }
 
-    if (self->headIndex < QUADTREE_CAPACITY)
+    if (QuadtreeIsLeaf(self))
     {
-        self->entries[self->headIndex++] = (QuadtreeEntry)
+        QuadtreeEntry entry = (QuadtreeEntry)
         {
-            .entity = entity,
-            .region = aabb,
+            .id = id,
+            .aabb = aabb,
         };
+        DequePushBack(&self->entries, &entry);
+
         return true;
     }
 
-    if (!QuadtreeHasDivided(self))
+    if (QuadtreeAdd(self->topLeft, id, aabb)
+            || QuadtreeAdd(self->topRight, id, aabb)
+            || QuadtreeAdd(self->bottomRight, id, aabb)
+            || QuadtreeAdd(self->bottomLeft, id, aabb))
     {
-        QuadtreeSubdivide(self);
+        return true;
     }
 
-    return QuadtreeAdd(self->topLeft, entity, aabb)
-           || QuadtreeAdd(self->topRight, entity, aabb)
-           || QuadtreeAdd(self->bottomRight, entity, aabb)
-           || QuadtreeAdd(self->bottomLeft, entity, aabb);
+    QuadtreeEntry entry = (QuadtreeEntry)
+    {
+        .id = id,
+        .aabb = aabb,
+    };
+    DequePushBack(&self->entries, &entry);
+
+    return true;
 }
 
 static void QuadtreeQueryHelper(const Quadtree* current, const Rectangle region, Deque* result)
 {
-    if (current == NULL || !CheckCollisionRecs(current->region, region))
+    if (!CheckCollisionRecs(current->region, region))
     {
         return;
     }
 
-    for (usize i = 0; i < current->headIndex; ++i)
+    if (RectangleContains(region, current->region))
     {
-        const QuadtreeEntry* entry = &current->entries[i];
-
-        if (CheckCollisionRecs(entry->region, region))
+        for (usize i = 0; i < DequeGetSize(&current->entries); ++i)
         {
-            DequePushBack(result, &entry->entity);
+            QuadtreeEntry* entry = &DEQUE_GET_UNCHECKED(&current->entries, QuadtreeEntry, i);
+            DequePushBack(result, &entry->id);
         }
+    }
+    else
+    {
+        for (usize i = 0; i < DequeGetSize(&current->entries); ++i)
+        {
+            QuadtreeEntry* entry = &DEQUE_GET_UNCHECKED(&current->entries, QuadtreeEntry, i);
+
+            if (CheckCollisionRecs(entry->aabb, region))
+            {
+                DequePushBack(result, &entry->id);
+            }
+        }
+    }
+
+    if (QuadtreeIsLeaf(current))
+    {
+        return;
     }
 
     QuadtreeQueryHelper(current->topLeft, region, result);
@@ -119,7 +166,6 @@ static void QuadtreeQueryHelper(const Quadtree* current, const Rectangle region,
 Deque QuadtreeQuery(const Quadtree* self, const Rectangle region)
 {
     Deque result = DEQUE_OF(usize);
-
     QuadtreeQueryHelper(self, region, &result);
 
     return result;
@@ -127,30 +173,28 @@ Deque QuadtreeQuery(const Quadtree* self, const Rectangle region)
 
 void QuadtreeClear(Quadtree* self)
 {
-    if (self == NULL)
+    DequeClear(&self->entries);
+
+    if (!QuadtreeIsLeaf(self))
     {
-        return;
+        QuadtreeClear(self->topLeft);
+        QuadtreeClear(self->topRight);
+        QuadtreeClear(self->bottomRight);
+        QuadtreeClear(self->bottomLeft);
     }
-
-    QuadtreeClear(self->topLeft);
-    QuadtreeClear(self->topRight);
-    QuadtreeClear(self->bottomRight);
-    QuadtreeClear(self->bottomLeft);
-
-    self->headIndex = 0;
 }
 
 void QuadtreeDestroy(Quadtree* self)
 {
-    if (self == NULL)
-    {
-        return;
-    }
+    DequeDestroy(&self->entries);
 
-    QuadtreeDestroy(self->topLeft);
-    QuadtreeDestroy(self->topRight);
-    QuadtreeDestroy(self->bottomRight);
-    QuadtreeDestroy(self->bottomLeft);
+    if (!QuadtreeIsLeaf(self))
+    {
+        QuadtreeDestroy(self->topLeft);
+        QuadtreeDestroy(self->topRight);
+        QuadtreeDestroy(self->bottomRight);
+        QuadtreeDestroy(self->bottomLeft);
+    }
 
     free(self);
 }
