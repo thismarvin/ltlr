@@ -30,6 +30,15 @@ typedef double f64;
 #define COLOR_GREEN (Color) { 0, 255, 0, 255 }
 #define COLOR_BLUE (Color) { 0, 0, 255, 255 }
 
+typedef enum
+{
+    DIR_NONE = 0,
+    DIR_LEFT = 1 << 0,
+    DIR_UP = 1 << 1,
+    DIR_RIGHT = 1 << 2,
+    DIR_DOWN = 1 << 3,
+} Direction;
+
 Vector2 Vector2Create(f32 x, f32 y);
 
 f32 RectangleLeft(Rectangle rectangle);
