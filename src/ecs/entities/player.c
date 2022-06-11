@@ -4,6 +4,18 @@
 #include <math.h>
 #include <raymath.h>
 
+static const f32 timeToSprint = CTX_DT * 6;
+static const f32 timeToStop = CTX_DT * 6;
+
+static void PlayerStandstill(CPlayer* player, CKinetic* kinetic)
+{
+    player->sprintTimer = 0;
+    player->sprintState = SPRINT_STATE_NONE;
+    player->sprintForce.x = 0;
+    player->sprintDirection = DIR_NONE;
+    kinetic->velocity.x = 0;
+}
+
 static bool PlayerIsVulnerable(const CPlayer* player)
 {
     return player->invulnerableTimer >= player->invulnerableDuration;
@@ -118,7 +130,7 @@ static OnResolutionResult PlayerOnResolution(const OnResolutionParams* params)
         if ((params->resolution.x < 0 && kinetic->velocity.x > 0)
                 || (params->resolution.x > 0 && kinetic->velocity.x < 0))
         {
-            kinetic->velocity.x = 0;
+            PlayerStandstill(player, kinetic);
         }
 
         if ((params->resolution.y < 0 && kinetic->velocity.y > 0)
@@ -183,7 +195,7 @@ EntityBuilder PlayerCreate(const f32 x, const f32 y)
     ADD_COMPONENT(CKinetic, ((CKinetic)
     {
         .velocity = VECTOR2_ZERO,
-        .acceleration = Vector2Create(0, 1000),
+        .acceleration = VECTOR2_ZERO,
     }));
 
     ADD_COMPONENT(CSmooth, ((CSmooth)
@@ -229,8 +241,15 @@ EntityBuilder PlayerCreate(const f32 x, const f32 y)
         .jumpVelocity = jumpVelocity,
         .jumpGravity = jumpGravity,
         .defaultGravity = defaultGravity,
+        .gravityForce = VECTOR2_ZERO,
         .invulnerableTimer = invulnerableDuration,
         .invulnerableDuration = invulnerableDuration,
+        .initialDirection = DIR_NONE,
+        .sprintDirection = DIR_NONE,
+        .sprintState = SPRINT_STATE_NONE,
+        .sprintTimer = 0,
+        .sprintDuration = 0,
+        .sprintForce = VECTOR2_ZERO,
     }));
 
     return (EntityBuilder)
@@ -238,6 +257,188 @@ EntityBuilder PlayerCreate(const f32 x, const f32 y)
         .tags = tags,
         .components = components,
     };
+}
+
+static void PlayerDecelerate(CPlayer* player, const CKinetic* kinetic)
+{
+    if (kinetic->velocity.x == 0)
+    {
+        player->sprintTimer = 0;
+        player->sprintState = SPRINT_STATE_NONE;
+        player->sprintForce.x = 0;
+        player->sprintDirection = DIR_NONE;
+
+        return;
+    }
+
+    const f32 delta = fabsf(kinetic->velocity.x);
+
+    const f32 vf = 0;
+    const f32 vo = kinetic->velocity.x;
+    const f32 t = delta * timeToStop / player->moveSpeed;
+
+    player->sprintTimer = 0;
+    player->sprintDuration = t;
+    player->sprintState = SPRINT_STATE_DECELERATING;
+    // vf = vo + a * t
+    // a = (vf - vo) / t
+    player->sprintForce.x = (vf - vo) / t;
+    player->sprintDirection = DIR_NONE;
+}
+
+static void PlayerAccelerate(CPlayer* player, const CKinetic* kinetic, const Direction direction)
+{
+    if ((direction == DIR_LEFT && kinetic->velocity.x <= -player->moveSpeed)
+            || (direction == DIR_RIGHT && kinetic->velocity.x >= player->moveSpeed))
+    {
+        player->sprintTimer = 0;
+        player->sprintState = SPRINT_STATE_TERMINAL;
+        player->sprintForce.x = 0;
+        player->sprintDirection = direction;
+
+        return;
+    }
+
+    f32 delta = player->moveSpeed;
+
+    if ((direction == DIR_LEFT && kinetic->velocity.x < 0)
+            || (direction == DIR_RIGHT && kinetic->velocity.x > 0))
+    {
+        delta -= fabsf(kinetic->velocity.x);
+    }
+    else if ((direction == DIR_LEFT && kinetic->velocity.x > 0)
+             || (direction == DIR_RIGHT && kinetic->velocity.x < 0))
+    {
+        delta += fabsf(kinetic->velocity.x);
+    }
+
+    const i8 sign = direction == DIR_LEFT ? -1 : 1;
+
+    const f32 vf = player->moveSpeed * sign;
+    const f32 vo = kinetic->velocity.x;
+    const f32 t = delta * timeToSprint / player->moveSpeed;
+
+    player->sprintTimer = 0;
+    player->sprintDuration = t;
+    player->sprintState = SPRINT_STATE_ACCELERATING;
+    // vf = vo + a * t
+    // a = (vf - vo) / t
+    player->sprintForce.x = (vf - vo) / t;
+    player->sprintDirection = direction;
+}
+
+static void PlayerLateralMovementLogic(const Scene* scene, CPlayer* player, CKinetic* kinetic)
+{
+    Direction strafe = DIR_NONE;
+
+    // Input.
+    if (!InputHandlerPressing(&scene->input, "right")
+            && InputHandlerPressing(&scene->input, "left"))
+    {
+        player->initialDirection = DIR_LEFT;
+        strafe = DIR_LEFT;
+    }
+    else if (!InputHandlerPressing(&scene->input, "left")
+             && InputHandlerPressing(&scene->input, "right"))
+    {
+        player->initialDirection = DIR_RIGHT;
+        strafe = DIR_RIGHT;
+    }
+    else if (player->initialDirection == DIR_RIGHT && InputHandlerPressing(&scene->input, "left"))
+    {
+        strafe = DIR_LEFT;
+    }
+    else if (player->initialDirection == DIR_LEFT && InputHandlerPressing(&scene->input, "right"))
+    {
+        strafe = DIR_RIGHT;
+    }
+
+    // Handle sprint state.
+    switch (player->sprintState)
+    {
+        case SPRINT_STATE_NONE:
+        {
+            if (strafe == DIR_NONE)
+            {
+                player->sprintForce.x = 0;
+
+                break;
+            }
+
+            PlayerAccelerate(player, kinetic, strafe);
+
+            break;
+        }
+
+        case SPRINT_STATE_ACCELERATING:
+        {
+            if (strafe == DIR_NONE)
+            {
+                PlayerDecelerate(player, kinetic);
+
+                break;
+            }
+
+            if ((player->sprintDirection == DIR_LEFT && strafe == DIR_RIGHT)
+                    || (player->sprintDirection == DIR_RIGHT && strafe == DIR_LEFT))
+            {
+                PlayerAccelerate(player, kinetic, strafe);
+
+                break;
+            }
+
+            player->sprintTimer += CTX_DT;
+
+            if (player->sprintTimer >= player->sprintDuration)
+            {
+                player->sprintTimer = 0;
+                player->sprintState = SPRINT_STATE_TERMINAL;
+                player->sprintForce.x = 0;
+
+                // const i8 sign = strafe == DIR_RIGHT ? 1 : -1;
+                // kinetic->velocity.x = player->moveSpeed * sign;
+            }
+
+            break;
+        }
+
+        case SPRINT_STATE_TERMINAL:
+        {
+            if ((player->sprintDirection == DIR_LEFT && strafe == DIR_RIGHT)
+                    || (player->sprintDirection == DIR_RIGHT && strafe == DIR_LEFT))
+            {
+                PlayerAccelerate(player, kinetic, strafe);
+
+                break;
+            }
+
+            if (strafe == DIR_NONE)
+            {
+                PlayerDecelerate(player, kinetic);
+            }
+
+            break;
+        }
+
+        case SPRINT_STATE_DECELERATING:
+        {
+            if (strafe != DIR_NONE)
+            {
+                PlayerAccelerate(player, kinetic, strafe);
+
+                break;
+            }
+
+            player->sprintTimer += CTX_DT;
+
+            if (player->sprintTimer > player->sprintDuration)
+            {
+                PlayerStandstill(player, kinetic);
+            }
+
+            break;
+        }
+    }
 }
 
 void PlayerInputUpdate(Scene* scene, const usize entity)
@@ -271,14 +472,12 @@ void PlayerInputUpdate(Scene* scene, const usize entity)
             player->jumping = false;
         }
 
-        Vector2 gravityForce = Vector2Create(0, player->defaultGravity);
+        player->gravityForce.y = player->defaultGravity;
 
         if (player->jumping && kinetic->velocity.y < player->jumpVelocity)
         {
-            gravityForce.y = player->jumpGravity;
+            player->gravityForce.y = player->jumpGravity;
         }
-
-        kinetic->acceleration = gravityForce;
 
         if (coyoteTimeActive)
         {
@@ -286,36 +485,7 @@ void PlayerInputUpdate(Scene* scene, const usize entity)
         }
     }
 
-    // Lateral Movement.
-    {
-        static const u8 left = 1;
-        static const u8 right = 2;
-
-        i8 strafe = 0;
-
-        if (!InputHandlerPressing(&scene->input, "right")
-                && InputHandlerPressing(&scene->input, "left"))
-        {
-            player->initialDirection = left;
-            strafe = -1;
-        }
-        else if (!InputHandlerPressing(&scene->input, "left")
-                 && InputHandlerPressing(&scene->input, "right"))
-        {
-            player->initialDirection = right;
-            strafe = 1;
-        }
-        else if (player->initialDirection == right && InputHandlerPressing(&scene->input, "left"))
-        {
-            strafe = -1;
-        }
-        else if (player->initialDirection == left && InputHandlerPressing(&scene->input, "right"))
-        {
-            strafe = 1;
-        }
-
-        kinetic->velocity.x = strafe * player->moveSpeed;
-    }
+    PlayerLateralMovementLogic(scene, player, kinetic);
 
     // Jumping.
     {
@@ -381,11 +551,20 @@ void PlayerInputUpdate(Scene* scene, const usize entity)
     player->grounded = false;
 
     // TODO(thismarvin): Should grounded logic really be in Input?
+
+    // Calculate Net Force.
+    {
+        kinetic->acceleration = (Vector2)
+        {
+            .x = player->gravityForce.x + player->sprintForce.x,
+            .y = player->gravityForce.y + player->sprintForce.y,
+        };
+    }
 }
 
 void PlayerPostCollisionUpdate(Scene* scene, const usize entity)
 {
-    u64 dependencies = TAG_PLAYER | TAG_POSITION | TAG_DIMENSION;
+    const u64 dependencies = TAG_PLAYER | TAG_POSITION | TAG_DIMENSION | TAG_KINETIC;
 
     if (!SceneEntityHasDependencies(scene, entity, dependencies))
     {
@@ -395,6 +574,7 @@ void PlayerPostCollisionUpdate(Scene* scene, const usize entity)
     CPlayer* player = SCENE_GET_COMPONENT_PTR(scene, player, entity);
     CPosition* position = SCENE_GET_COMPONENT_PTR(scene, position, entity);
     const CDimension* dimension = SCENE_GET_COMPONENT_PTR(scene, dimension, entity);
+    CKinetic* kinetic = SCENE_GET_COMPONENT_PTR(scene, kinetic, entity);
 
     // General purpose player specific collision logic.
     {
@@ -402,10 +582,12 @@ void PlayerPostCollisionUpdate(Scene* scene, const usize entity)
         if (position->value.x < scene->bounds.x)
         {
             position->value.x = scene->bounds.x;
+            PlayerStandstill(player, kinetic);
         }
         else if (position->value.x + dimension->width > RectangleRight(scene->bounds))
         {
             position->value.x = RectangleRight(scene->bounds) - dimension->width;
+            PlayerStandstill(player, kinetic);
         }
     }
 

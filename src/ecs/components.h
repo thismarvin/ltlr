@@ -41,6 +41,14 @@ typedef enum
     FLIP_VERTICAL = 1 << 1,
 } SpriteMirroring;
 
+typedef enum
+{
+    SPRINT_STATE_NONE,
+    SPRINT_STATE_ACCELERATING,
+    SPRINT_STATE_TERMINAL,
+    SPRINT_STATE_DECELERATING,
+} SprintState;
+
 typedef struct
 {
     Scene* scene;
@@ -139,9 +147,15 @@ typedef struct
     f32 jumpVelocity;
     f32 jumpGravity;
     f32 defaultGravity;
+    Vector2 gravityForce;
     f32 invulnerableTimer;
     f32 invulnerableDuration;
-    u8 initialDirection;
+    Direction initialDirection;
+    Direction sprintDirection;
+    SprintState sprintState;
+    f32 sprintTimer;
+    f32 sprintDuration;
+    Vector2 sprintForce;
 } CPlayer;
 
 typedef struct
