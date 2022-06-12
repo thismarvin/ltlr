@@ -447,21 +447,28 @@ void SSpriteDraw(const Scene* scene, const usize entity)
     const CColor* color = GET_COMPONENT(color, entity);
     const CSprite* sprite = GET_COMPONENT(sprite, entity);
 
+    Vector2 drawPosition = Vector2Add(position->value, sprite->offset);
+    Rectangle source = sprite->source;
+
     if (ENTITY_HAS_DEPS(entity, TAG_SMOOTH))
     {
         const CSmooth* smooth = GET_COMPONENT(smooth, entity);
 
-        Vector2 interpolated = Vector2Lerp(smooth->previous, position->value, ContextGetAlpha());
-        Vector2 drawPosition = Vector2Add(interpolated, sprite->offset);
-
-        DrawTextureRec(scene->atlas, sprite->source, drawPosition, color->value);
+        const Vector2 interpolated = Vector2Lerp(smooth->previous, position->value, ContextGetAlpha());
+        drawPosition = Vector2Add(interpolated, sprite->offset);
     }
-    else
+
+    if ((sprite->mirroring & FLIP_HORIZONTAL) != 0)
     {
-        Vector2 drawPosition = Vector2Add(position->value, sprite->offset);
-
-        DrawTextureRec(scene->atlas, sprite->source, drawPosition, color->value);
+        source.width = -sprite->source.width;
     }
+
+    if ((sprite->mirroring & FLIP_VERTICAL) != 0)
+    {
+        source.height = -sprite->source.height;
+    }
+
+    DrawTextureRec(scene->atlas, source, drawPosition, color->value);
 }
 
 void SDebugDraw(const Scene* scene, const usize entity)

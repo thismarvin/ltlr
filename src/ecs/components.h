@@ -32,6 +32,15 @@
 
 typedef struct Scene Scene;
 
+typedef enum
+{
+    FLIP_NONE = 0,
+    // Reverse the x-axis of the sprite.
+    FLIP_HORIZONTAL = 1 << 0,
+    // Reverse the y-axis of the sprite.
+    FLIP_VERTICAL = 1 << 1,
+} SpriteMirroring;
+
 typedef struct
 {
     Scene* scene;
@@ -91,6 +100,7 @@ typedef struct
 {
     Rectangle source;
     Vector2 offset;
+    SpriteMirroring mirroring;
 } CSprite;
 
 typedef struct
