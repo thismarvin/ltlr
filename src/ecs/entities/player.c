@@ -4,6 +4,12 @@
 #include <math.h>
 #include <raymath.h>
 
+static const f32 moveSpeed = 200;
+static const f32 jumpHeight = 16 * 3 + 6;
+static const f32 jumpDuration = 0.4;
+static const f32 jumpGravity = (2 * jumpHeight) / (jumpDuration* jumpDuration);
+static const f32 defaultGravity = jumpGravity * 1.5;
+static const f32 jumpVelocity = jumpGravity * jumpDuration;
 static const f32 timeToSprint = CTX_DT * 6;
 static const f32 timeToStop = CTX_DT * 6;
 
@@ -218,14 +224,6 @@ EntityBuilder PlayerCreate(const f32 x, const f32 y)
         .onDamage = PlayerOnDamage,
     }));
 
-    f32 jumpHeight = 16 * 3 + 6;
-    f32 jumpDuration = 0.4;
-
-    f32 jumpGravity = (2 * jumpHeight) / (jumpDuration * jumpDuration);
-    f32 defaultGravity = jumpGravity * 1.5;
-
-    f32 jumpVelocity = jumpGravity * jumpDuration;
-
     f32 coyoteDuration = CTX_DT * 6;
     f32 invulnerableDuration = 1.5f;
 
@@ -235,12 +233,8 @@ EntityBuilder PlayerCreate(const f32 x, const f32 y)
         .grounded = false,
         .coyoteTimer = coyoteDuration,
         .coyoteDuration = coyoteDuration,
-        .moveSpeed = 200,
         .jumping = false,
         .dead = false,
-        .jumpVelocity = jumpVelocity,
-        .jumpGravity = jumpGravity,
-        .defaultGravity = defaultGravity,
         .gravityForce = VECTOR2_ZERO,
         .invulnerableTimer = invulnerableDuration,
         .invulnerableDuration = invulnerableDuration,
@@ -275,7 +269,7 @@ static void PlayerDecelerate(CPlayer* player, const CKinetic* kinetic)
 
     const f32 vf = 0;
     const f32 vo = kinetic->velocity.x;
-    const f32 t = delta * timeToStop / player->moveSpeed;
+    const f32 t = delta * timeToStop / moveSpeed;
 
     player->sprintTimer = 0;
     player->sprintDuration = t;
@@ -288,8 +282,8 @@ static void PlayerDecelerate(CPlayer* player, const CKinetic* kinetic)
 
 static void PlayerAccelerate(CPlayer* player, const CKinetic* kinetic, const Direction direction)
 {
-    if ((direction == DIR_LEFT && kinetic->velocity.x <= -player->moveSpeed)
-            || (direction == DIR_RIGHT && kinetic->velocity.x >= player->moveSpeed))
+    if ((direction == DIR_LEFT && kinetic->velocity.x <= -moveSpeed)
+            || (direction == DIR_RIGHT && kinetic->velocity.x >= moveSpeed))
     {
         player->sprintTimer = 0;
         player->sprintState = SPRINT_STATE_TERMINAL;
@@ -299,7 +293,7 @@ static void PlayerAccelerate(CPlayer* player, const CKinetic* kinetic, const Dir
         return;
     }
 
-    f32 delta = player->moveSpeed;
+    f32 delta = moveSpeed;
 
     if ((direction == DIR_LEFT && kinetic->velocity.x < 0)
             || (direction == DIR_RIGHT && kinetic->velocity.x > 0))
@@ -314,9 +308,9 @@ static void PlayerAccelerate(CPlayer* player, const CKinetic* kinetic, const Dir
 
     const i8 sign = direction == DIR_LEFT ? -1 : 1;
 
-    const f32 vf = player->moveSpeed * sign;
+    const f32 vf = moveSpeed * sign;
     const f32 vo = kinetic->velocity.x;
-    const f32 t = delta * timeToSprint / player->moveSpeed;
+    const f32 t = delta * timeToSprint / moveSpeed;
 
     player->sprintTimer = 0;
     player->sprintDuration = t;
@@ -472,11 +466,11 @@ void PlayerInputUpdate(Scene* scene, const usize entity)
             player->jumping = false;
         }
 
-        player->gravityForce.y = player->defaultGravity;
+        player->gravityForce.y = defaultGravity;
 
-        if (player->jumping && kinetic->velocity.y < player->jumpVelocity)
+        if (player->jumping && kinetic->velocity.y < jumpVelocity)
         {
-            player->gravityForce.y = player->jumpGravity;
+            player->gravityForce.y = jumpGravity;
         }
 
         if (coyoteTimeActive)
@@ -496,7 +490,7 @@ void PlayerInputUpdate(Scene* scene, const usize entity)
 
             player->grounded = false;
             player->jumping = true;
-            kinetic->velocity.y = -player->jumpVelocity;
+            kinetic->velocity.y = -jumpVelocity;
 
             // Spawn cloud particles.
             {
@@ -543,7 +537,7 @@ void PlayerInputUpdate(Scene* scene, const usize entity)
             InputHandlerConsume(&scene->input, "jump");
 
             player->jumping = false;
-            kinetic->velocity.y = MAX(kinetic->velocity.y, -player->jumpVelocity * 0.5);
+            kinetic->velocity.y = MAX(kinetic->velocity.y, -jumpVelocity * 0.5);
         }
     }
 

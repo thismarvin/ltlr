@@ -143,10 +143,6 @@ typedef struct
     f32 coyoteDuration;
     bool jumping;
     bool dead;
-    f32 moveSpeed;
-    f32 jumpVelocity;
-    f32 jumpGravity;
-    f32 defaultGravity;
     Vector2 gravityForce;
     f32 invulnerableTimer;
     f32 invulnerableDuration;
