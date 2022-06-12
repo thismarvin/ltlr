@@ -69,6 +69,7 @@ EntityBuilder WalkerCreate(const f32 x, const f32 y)
     {
         .source = (Rectangle) { 3 * 16, 5 * 16, 16, 16 },
         .offset = VECTOR2_ZERO,
+        .mirroring = FLIP_NONE,
     }));
 
     ADD_COMPONENT(CKinetic, ((CKinetic)

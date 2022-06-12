@@ -161,6 +161,7 @@ EntityBuilder PlayerCreate(const f32 x, const f32 y)
     {
         .source = (Rectangle) { 16, 0, 32, 48 },
         .offset = Vector2Create(-8, -13),
+        .mirroring = FLIP_NONE,
     }));
 
     ADD_COMPONENT(CKinetic, ((CKinetic)
