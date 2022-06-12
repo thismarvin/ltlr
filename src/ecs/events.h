@@ -14,17 +14,3 @@ EventHandler EventHandlerCreate(void);
 void EventHandlerSubscribe(EventHandler* self, OnRaise onRaise);
 void EventHandlerRaise(const EventHandler* self, const void* arguments);
 void EventHandlerDestroy(EventHandler* self);
-
-typedef struct Scene Scene;
-
-typedef struct
-{
-    Scene* scene;
-    usize entity;
-    Vector2 anchor;
-    Vector2 direction;
-    usize spawnCount;
-    usize spread;
-} EventCloudParticleParams;
-
-void SpawnCloudParticles(const EventCloudParticleParams* params);

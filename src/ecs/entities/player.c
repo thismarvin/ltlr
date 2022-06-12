@@ -491,44 +491,6 @@ void PlayerInputUpdate(Scene* scene, const usize entity)
             player->grounded = false;
             player->jumping = true;
             kinetic->velocity.y = -jumpVelocity;
-
-            // Spawn cloud particles.
-            {
-                const Vector2 bottomCenter = (Vector2)
-                {
-                    .x = position->value.x + dimension->width * 0.5f,
-                    .y = position->value.y + dimension->height
-                };
-
-                Vector2 anchorOffset = VECTOR2_ZERO;
-
-                if (kinetic->velocity.x > 0)
-                {
-                    anchorOffset.x = -dimension->width * 0.5f;
-                }
-
-                if (kinetic->velocity.x < 0)
-                {
-                    anchorOffset.x = dimension->width * 0.5f;
-                }
-
-                const Vector2 anchor = Vector2Add(bottomCenter, anchorOffset);
-
-                Vector2 direction = Vector2Normalize(kinetic->velocity);
-                direction.x *= -1;
-
-                const EventCloudParticleParams params = (EventCloudParticleParams)
-                {
-                    .scene = scene,
-                    .entity = entity,
-                    .anchor = anchor,
-                    .direction = direction,
-                    .spawnCount = GetRandomValue(10, 25),
-                    .spread = dimension->width,
-                };
-
-                SpawnCloudParticles(&params);
-            }
         }
 
         // Variable Jump Height.
