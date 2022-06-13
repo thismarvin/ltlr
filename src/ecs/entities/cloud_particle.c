@@ -32,9 +32,10 @@ static OnResolutionResult CloudParticleOnResolution(const OnResolutionParams* pa
 
 EntityBuilder CloudParticleCreate
 (
-    const f32 centerX,
-    const f32 centerY,
-    const Vector2 direction
+    const Vector2 position,
+    const f32 radius,
+    const Vector2 initialVelocity,
+    const Vector2 acceleration
 )
 {
     Deque components = DEQUE_OF(Component);
@@ -48,19 +49,6 @@ EntityBuilder CloudParticleCreate
         | TAG_SMOOTH
         | TAG_COLLIDER
         | TAG_FLEETING;
-
-    f32 radius = 1;
-
-    if (GetRandomValue(1, 100) < 25)
-    {
-        radius = (f32) GetRandomValue(4, 5);
-    }
-    else
-    {
-        radius = (f32)GetRandomValue(1, 3);
-    }
-
-    Vector2 position = Vector2Create(centerX - radius, centerY - radius);
 
     ADD_COMPONENT(CPosition, ((CPosition)
     {
@@ -78,12 +66,10 @@ EntityBuilder CloudParticleCreate
         .value = COLOR_WHITE,
     }));
 
-    f32 speed = (f32)GetRandomValue(5, 15);
-
     ADD_COMPONENT(CKinetic, ((CKinetic)
     {
-        .velocity = Vector2Scale(direction, speed),
-        .acceleration = Vector2Create(0, 15),
+        .velocity = initialVelocity,
+        .acceleration = acceleration,
     }));
 
     ADD_COMPONENT(CSmooth, ((CSmooth)
