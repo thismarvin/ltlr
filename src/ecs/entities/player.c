@@ -431,7 +431,7 @@ static void PlayerLateralMovementLogic(const Scene* scene, CPlayer* player, CKin
 
             player->sprintTimer += CTX_DT;
 
-            if (player->sprintTimer > player->sprintDuration)
+            if (player->sprintTimer >= player->sprintDuration)
             {
                 PlayerStandstill(player, kinetic);
             }
