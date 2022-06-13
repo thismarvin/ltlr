@@ -10,6 +10,7 @@ static const f32 jumpDuration = 0.4;
 static const f32 jumpGravity = (2 * jumpHeight) / (jumpDuration* jumpDuration);
 static const f32 defaultGravity = jumpGravity * 1.5;
 static const f32 jumpVelocity = jumpGravity * jumpDuration;
+static const f32 terminalVelocity = 500;
 static const f32 timeToSprint = CTX_DT * 6;
 static const f32 timeToStop = CTX_DT * 6;
 
@@ -25,6 +26,96 @@ static void PlayerStandstill(CPlayer* player, CKinetic* kinetic)
 static bool PlayerIsVulnerable(const CPlayer* player)
 {
     return player->invulnerableTimer >= player->invulnerableDuration;
+}
+
+static void PlayerSpawnImpactParticles(Scene* scene, const usize entity, const f32 groundY)
+{
+    assert(SceneEntityHasDependencies(scene, entity, TAG_POSITION | TAG_DIMENSION | TAG_KINETIC));
+
+    const CPosition* position = &scene->components.positions[entity];
+    const CDimension* dimension = &scene->components.dimensions[entity];
+    const CKinetic* kinetic = &scene->components.kinetics[entity];
+
+    const usize spawnCount = GetRandomValue(20, 40);
+    const f32 angleIncrement = (DEG2RAD * 25) / (spawnCount * 0.5);
+    const f32 leftMultiplier = kinetic->velocity.x == 0 ? 0.5 : kinetic->velocity.x < 0 ? 0.25 : 0.75;
+    const f32 rightMultiplier = 1 - leftMultiplier;
+    const f32 spread = dimension->width * 0.25;
+
+    const f32 anchorOffset = dimension->width * 0.3;
+    const Vector2 anchor = (Vector2)
+    {
+        .x = position->value.x + dimension->width * 0.5,
+        .y = groundY,
+    };
+    const Vector2 leftAnchor = (Vector2)
+    {
+        .x = anchor.x - anchorOffset,
+        .y = anchor.y,
+    };
+    const Vector2 rightAnchor = (Vector2)
+    {
+        .x = anchor.x + anchorOffset,
+        .y = anchor.y,
+    };
+
+    static const f32 minimumRadius = 1;
+    static const usize radiusVariance = 4;
+    static const f32 minimumSpeed = 10.0f;
+    static const usize speedVariance = 30;
+    static const f32 gravity = 9.8f;
+
+    // Left pocket.
+    for (usize i = 0; i < spawnCount * leftMultiplier; ++i)
+    {
+        const f32 radius = minimumRadius + GetRandomValue(0, radiusVariance);
+        const Vector2 cloudPosition = (Vector2)
+        {
+            .x = leftAnchor.x - GetRandomValue(0, spread),
+            .y = leftAnchor.y - radius * 2,
+        };
+        const f32 rotation = PI + angleIncrement * i;
+        const Vector2 direction = (Vector2)
+        {
+            .x = cosf(rotation),
+            .y = sinf(rotation),
+        };
+        const f32 speed = minimumSpeed + GetRandomValue(0, speedVariance);
+        const Vector2 vo = Vector2Scale(direction, speed);
+        const Vector2 ao = (Vector2)
+        {
+            .x = direction.x * -speed * 0.5,
+            .y = direction.y * -speed * 0.5 + gravity,
+        };
+
+        SceneDeferAddEntity(scene, CloudParticleCreate(cloudPosition, radius, vo, ao));
+    }
+
+    // Right pocket.
+    for (usize i = 0; i < spawnCount * rightMultiplier; ++i)
+    {
+        const f32 radius = minimumRadius + GetRandomValue(0, radiusVariance);
+        const Vector2 cloudPosition = (Vector2)
+        {
+            .x = rightAnchor.x - GetRandomValue(0, spread),
+            .y = rightAnchor.y - radius * 2,
+        };
+        const f32 rotation = 0 - angleIncrement * i;
+        const Vector2 direction = (Vector2)
+        {
+            .x = cosf(rotation),
+            .y = sinf(rotation),
+        };
+        const f32 speed = minimumSpeed + GetRandomValue(0, speedVariance);
+        const Vector2 vo = Vector2Scale(direction, speed);
+        const Vector2 ao = (Vector2)
+        {
+            .x = direction.x * -speed * 0.5,
+            .y = direction.y * -speed * 0.5 + gravity,
+        };
+
+        SceneDeferAddEntity(scene, CloudParticleCreate(cloudPosition, radius, vo, ao));
+    }
 }
 
 static void PlayerOnDamage(const OnDamageParams* params)
@@ -139,15 +230,20 @@ static OnResolutionResult PlayerOnResolution(const OnResolutionParams* params)
             PlayerStandstill(player, kinetic);
         }
 
+        if (params->resolution.y < 0)
+        {
+            player->grounded = true;
+
+            if (kinetic->velocity.y > terminalVelocity * 0.75)
+            {
+                PlayerSpawnImpactParticles(params->scene, params->entity, RectangleTop(params->otherAabb));
+            }
+        }
+
         if ((params->resolution.y < 0 && kinetic->velocity.y > 0)
                 || (params->resolution.y > 0 && kinetic->velocity.y < 0))
         {
             kinetic->velocity.y = 0;
-        }
-
-        if (params->resolution.y < 0)
-        {
-            player->grounded = true;
         }
     }
 
