@@ -36,85 +36,139 @@ static void PlayerSpawnImpactParticles(Scene* scene, const usize entity, const f
     const CDimension* dimension = &scene->components.dimensions[entity];
     const CKinetic* kinetic = &scene->components.kinetics[entity];
 
-    const usize spawnCount = GetRandomValue(20, 40);
-    const f32 angleIncrement = (DEG2RAD * 25) / (spawnCount * 0.5);
-    const f32 leftMultiplier = kinetic->velocity.x == 0 ? 0.5 : kinetic->velocity.x < 0 ? 0.25 : 0.75;
-    const f32 rightMultiplier = 1 - leftMultiplier;
+    static const f32 gravity = 9.8f;
+    const usize spawnCount = GetRandomValue(10, 20);
     const f32 spread = dimension->width * 0.25;
-
-    const f32 anchorOffset = dimension->width * 0.3;
-    const Vector2 anchor = (Vector2)
-    {
-        .x = position->value.x + dimension->width * 0.5,
-        .y = groundY,
-    };
     const Vector2 leftAnchor = (Vector2)
     {
-        .x = anchor.x - anchorOffset,
-        .y = anchor.y,
+        .x = position->value.x,
+        .y = groundY,
     };
     const Vector2 rightAnchor = (Vector2)
     {
-        .x = anchor.x + anchorOffset,
-        .y = anchor.y,
+        .x = position->value.x + dimension->width,
+        .y = groundY,
     };
 
-    static const f32 minimumRadius = 1;
-    static const usize radiusVariance = 4;
-    static const f32 minimumSpeed = 10.0f;
-    static const usize speedVariance = 30;
-    static const f32 gravity = 9.8f;
-
-    // Left pocket.
-    for (usize i = 0; i < spawnCount * leftMultiplier; ++i)
+    // Lateral pockets.
     {
-        const f32 radius = minimumRadius + GetRandomValue(0, radiusVariance);
-        const Vector2 cloudPosition = (Vector2)
-        {
-            .x = leftAnchor.x - GetRandomValue(0, spread),
-            .y = leftAnchor.y - radius * 2,
-        };
-        const f32 rotation = PI + angleIncrement * i;
-        const Vector2 direction = (Vector2)
-        {
-            .x = cosf(rotation),
-            .y = sinf(rotation),
-        };
-        const f32 speed = minimumSpeed + GetRandomValue(0, speedVariance);
-        const Vector2 vo = Vector2Scale(direction, speed);
-        const Vector2 ao = (Vector2)
-        {
-            .x = direction.x * -speed * 0.5,
-            .y = direction.y * -speed * 0.5 + gravity,
-        };
+        const f32 angleIncrement = (DEG2RAD * 25) / spawnCount;
 
-        SceneDeferAddEntity(scene, CloudParticleCreate(cloudPosition, radius, vo, ao));
+        for (usize i = 0; i < spawnCount; ++i)
+        {
+            const f32 radius = GetRandomValue(1, 4);
+            const f32 offset = GetRandomValue(0, spread);
+            const f32 speed = GetRandomValue(10, 30);
+
+            // Left pocket.
+            {
+                const Vector2 cloudPosition = (Vector2)
+                {
+                    .x = leftAnchor.x - offset - radius * 2,
+                    .y = leftAnchor.y - radius * 2,
+                };
+                const f32 rotation = (DEG2RAD * 180) + angleIncrement * i;
+                const Vector2 direction = (Vector2)
+                {
+                    .x = cosf(rotation),
+                    .y = sinf(rotation),
+                };
+                const Vector2 vo = Vector2Scale(direction, speed);
+                const Vector2 ao = (Vector2)
+                {
+                    .x = direction.x * -speed * 0.5,
+                    .y = direction.y * -speed * 0.5 + gravity,
+                };
+
+                SceneDeferAddEntity(scene, CloudParticleCreate(cloudPosition, radius, vo, ao));
+            }
+
+            // Right pocket.
+            {
+                const Vector2 cloudPosition = (Vector2)
+                {
+                    .x = rightAnchor.x + offset,
+                    .y = rightAnchor.y - radius * 2,
+                };
+                const f32 rotation = 0 - angleIncrement * i;
+                const Vector2 direction = (Vector2)
+                {
+                    .x = cosf(rotation),
+                    .y = sinf(rotation),
+                };
+                const Vector2 vo = Vector2Scale(direction, speed);
+                const Vector2 ao = (Vector2)
+                {
+                    .x = direction.x * -speed * 0.5,
+                    .y = direction.y * -speed * 0.5 + gravity,
+                };
+
+                SceneDeferAddEntity(scene, CloudParticleCreate(cloudPosition, radius, vo, ao));
+            }
+        }
     }
 
-    // Right pocket.
-    for (usize i = 0; i < spawnCount * rightMultiplier; ++i)
+    if (kinetic->velocity.x == 0)
     {
-        const f32 radius = minimumRadius + GetRandomValue(0, radiusVariance);
-        const Vector2 cloudPosition = (Vector2)
-        {
-            .x = rightAnchor.x - GetRandomValue(0, spread),
-            .y = rightAnchor.y - radius * 2,
-        };
-        const f32 rotation = 0 - angleIncrement * i;
-        const Vector2 direction = (Vector2)
-        {
-            .x = cosf(rotation),
-            .y = sinf(rotation),
-        };
-        const f32 speed = minimumSpeed + GetRandomValue(0, speedVariance);
-        const Vector2 vo = Vector2Scale(direction, speed);
-        const Vector2 ao = (Vector2)
-        {
-            .x = direction.x * -speed * 0.5,
-            .y = direction.y * -speed * 0.5 + gravity,
-        };
+        return;
+    }
 
-        SceneDeferAddEntity(scene, CloudParticleCreate(cloudPosition, radius, vo, ao));
+    // Spawn extra cloud particles in the direction opposite of velocity.
+    {
+        const usize total = spawnCount * 0.5;
+        const f32 angleIncrement = (DEG2RAD * 20) / total;
+
+        for (usize i = 0; i < total; ++i)
+        {
+            const f32 radius = GetRandomValue(1, 3);
+            const f32 offset = GetRandomValue(0, spread);
+            const f32 speed = GetRandomValue(20, 35);
+
+            if (kinetic->velocity.x > 0)
+            {
+                const Vector2 cloudPosition = (Vector2)
+                {
+                    .x = leftAnchor.x + dimension->width * 0.25 - offset - radius * 2,
+                    .y = leftAnchor.y - radius * 2,
+                };
+                const f32 rotation = (DEG2RAD * (180 + 25)) + angleIncrement * i;
+                const Vector2 direction = (Vector2)
+                {
+                    .x = cosf(rotation),
+                    .y = sinf(rotation),
+                };
+                const Vector2 vo = Vector2Scale(direction, speed);
+                const Vector2 ao = (Vector2)
+                {
+                    .x = direction.x * -speed * 0.5,
+                    .y = direction.y * -speed * 0.5 + gravity * 0.75,
+                };
+
+                SceneDeferAddEntity(scene, CloudParticleCreate(cloudPosition, radius, vo, ao));
+            }
+            else
+            {
+                const Vector2 cloudPosition = (Vector2)
+                {
+                    .x = rightAnchor.x - dimension->width * 0.25 + offset,
+                    .y = rightAnchor.y - radius * 2,
+                };
+                const f32 rotation = (DEG2RAD * (0 - 25)) - angleIncrement * i;
+                const Vector2 direction = (Vector2)
+                {
+                    .x = cosf(rotation),
+                    .y = sinf(rotation),
+                };
+                const Vector2 vo = Vector2Scale(direction, speed);
+                const Vector2 ao = (Vector2)
+                {
+                    .x = direction.x * -speed * 0.5,
+                    .y = direction.y * -speed * 0.5 + gravity * 0.75,
+                };
+
+                SceneDeferAddEntity(scene, CloudParticleCreate(cloudPosition, radius, vo, ao));
+            }
+        }
     }
 }
 
