@@ -172,6 +172,122 @@ static void PlayerSpawnImpactParticles(Scene* scene, const usize entity, const f
     }
 }
 
+static void PlayerSpawnJumpParticles(Scene* scene, const usize entity)
+{
+    assert(SceneEntityHasDependencies(scene, entity, TAG_POSITION | TAG_DIMENSION | TAG_KINETIC));
+
+    const CPosition* position = &scene->components.positions[entity];
+    const CDimension* dimension = &scene->components.dimensions[entity];
+    const CKinetic* kinetic = &scene->components.kinetics[entity];
+
+    static const f32 gravity = 9.8f;
+    const usize spawnCount = GetRandomValue(10, 30);
+    const Vector2 anchor = (Vector2)
+    {
+        .x = position->value.x + dimension->width * 0.5,
+        .y = position->value.y + dimension->height,
+    };
+
+    // Lateral pockets.
+    {
+        const f32 angleIncrement = (DEG2RAD * 30) / spawnCount;
+
+        for (usize i = 0; i < spawnCount; ++i)
+        {
+            const f32 radius = GetRandomValue(1, 3);
+            const f32 speed = GetRandomValue(5, 20);
+
+            // Left pocket.
+            {
+                const Vector2 cloudPosition = (Vector2)
+                {
+                    .x = anchor.x - radius * 2,
+                    .y = anchor.y - radius * 2,
+                };
+                const f32 rotation = (DEG2RAD * 180) + angleIncrement * i;
+                const Vector2 direction = (Vector2)
+                {
+                    .x = cosf(rotation),
+                    .y = sinf(rotation),
+                };
+                const Vector2 vo = Vector2Scale(direction, speed);
+                const Vector2 ao = (Vector2)
+                {
+                    .x = direction.x * -speed * 0.5,
+                    .y = direction.y * -speed * 0.5 + gravity,
+                };
+
+                SceneDeferAddEntity(scene, CloudParticleCreate(cloudPosition, radius, vo, ao));
+            }
+
+            // Right pocket.
+            {
+                const Vector2 cloudPosition = (Vector2)
+                {
+                    .x = anchor.x,
+                    .y = anchor.y - radius * 2,
+                };
+                const f32 rotation = 0 - angleIncrement * i;
+                const Vector2 direction = (Vector2)
+                {
+                    .x = cosf(rotation),
+                    .y = sinf(rotation),
+                };
+                const Vector2 vo = Vector2Scale(direction, speed);
+                const Vector2 ao = (Vector2)
+                {
+                    .x = direction.x * -speed * 0.5,
+                    .y = direction.y * -speed * 0.5 + gravity,
+                };
+
+                SceneDeferAddEntity(scene, CloudParticleCreate(cloudPosition, radius, vo, ao));
+            }
+        }
+    }
+
+    // Middle pocket.
+    {
+        Vector2 direction = Vector2Normalize(kinetic->velocity);
+        direction.x *= -1;
+        const usize theta = 30;
+        const f32 angle = atan2f(direction.y, direction.x) - (DEG2RAD * theta * 0.5);
+        const usize total = spawnCount * 0.5;
+        const f32 angleIncrement = (DEG2RAD * theta) / total;
+
+        for (usize i = 0; i < total; ++i)
+        {
+            const f32 radius = GetRandomValue(2, 3);
+            const Vector2 cloudPosition = (Vector2)
+            {
+                .x = anchor.x - radius,
+                .y = anchor.y - radius * 2,
+            };
+            const f32 rotation = angle + angleIncrement * i;
+            const Vector2 directionTmp = (Vector2)
+            {
+                .x = cosf(rotation),
+                .y = sinf(rotation),
+            };
+
+            f32 speed = GetRandomValue(10, 15);
+
+            if (kinetic->velocity.x != 0)
+            {
+                speed *= 1.5;
+            }
+
+            const Vector2 vo = Vector2Scale(directionTmp, speed);
+            const Vector2 ao = (Vector2)
+            {
+                .x = direction.x * -speed * 0.5,
+                .y = direction.y * -speed * 0.5 + gravity * 5,
+            };
+
+            SceneDeferAddEntity(scene, CloudParticleCreate(cloudPosition, radius, vo, ao));
+        }
+    }
+}
+
 static void PlayerOnDamage(const OnDamageParams* params)
 {
     assert(ENTITY_HAS_DEPS(params->entity, TAG_PLAYER | TAG_MORTAL));
@@ -641,6 +757,8 @@ void PlayerInputUpdate(Scene* scene, const usize entity)
             player->grounded = false;
             player->jumping = true;
             kinetic->velocity.y = -jumpVelocity;
+
+            PlayerSpawnJumpParticles(scene, entity);
         }
 
         // Variable Jump Height.
