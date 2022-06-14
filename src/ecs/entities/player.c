@@ -899,8 +899,7 @@ void PlayerMortalUpdate(Scene* scene, const usize entity)
 
     if (position->value.y > CTX_VIEWPORT_HEIGHT * 2)
     {
-        // TODO(thismarvin): Defer resetting the Scene somehow...
-        SceneReset(scene);
+        SceneDeferReset(scene);
 
         return;
     }

@@ -494,6 +494,16 @@ static void SceneStart(Scene* self)
     SceneDeferAddEntity(self, WalkerCreate(16 * 16, 16 * 8));
 }
 
+static void SceneReset(Scene* self)
+{
+    DequeDestroy(&self->commands);
+    DequeDestroy(&self->m_entityManager.m_recycledEntityIndices);
+
+    SceneStart(self);
+
+    self->resetRequested = false;
+}
+
 void SceneInit(Scene* self)
 {
     SceneSetupContent(self);
@@ -518,7 +528,7 @@ static void SceneCheckEndCondition(Scene* self)
 
     if (distance > CTX_VIEWPORT_WIDTH * 0.5f)
     {
-        SceneReset(self);
+        SceneDeferReset(self);
     }
 }
 
@@ -529,6 +539,11 @@ void SceneUpdate(Scene* self)
     if (IsKeyPressed(KEY_EQUAL))
     {
         self->debugging = !self->debugging;
+    }
+
+    if (self->resetRequested)
+    {
+        SceneReset(self);
     }
 
     SceneExecuteCommands(self);
@@ -819,12 +834,9 @@ void SceneDraw(const Scene* self)
     SceneDrawLayers(self);
 }
 
-void SceneReset(Scene* self)
+void SceneDeferReset(Scene* self)
 {
-    DequeDestroy(&self->commands);
-    DequeDestroy(&self->m_entityManager.m_recycledEntityIndices);
-
-    SceneStart(self);
+    self->resetRequested = true;
 }
 
 void SceneDestroy(Scene* self)
