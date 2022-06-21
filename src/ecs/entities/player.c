@@ -52,13 +52,15 @@ static void PlayerSpawnImpactParticles(Scene* scene, const usize entity, const f
 
     // Lateral pockets.
     {
-        const f32 angleIncrement = (DEG2RAD * 25) / spawnCount;
+        static const f32 theta = 25;
+        const f32 angleIncrement = (DEG2RAD * theta) / spawnCount;
 
         for (usize i = 0; i < spawnCount; ++i)
         {
             const f32 radius = GetRandomValue(1, 4);
             const f32 offset = GetRandomValue(0, spread);
             const f32 speed = GetRandomValue(10, 30);
+            const f32 lifetime = 1 + 0.5 * GetRandomValue(0, 4);
 
             // Left pocket.
             {
@@ -76,8 +78,9 @@ static void PlayerSpawnImpactParticles(Scene* scene, const usize entity, const f
                 const Vector2 vo = Vector2Scale(direction, speed);
                 const Vector2 ao = (Vector2)
                 {
-                    .x = direction.x * -speed * 0.5,
-                    .y = direction.y * -speed * 0.5 + gravity,
+                    // a = (vf - vo) / t
+                    .x = (0 - vo.x) / lifetime,
+                    .y = gravity,
                 };
 
                 SceneDeferAddEntity(scene, CloudParticleCreate(cloudPosition, radius, vo, ao));
@@ -99,8 +102,9 @@ static void PlayerSpawnImpactParticles(Scene* scene, const usize entity, const f
                 const Vector2 vo = Vector2Scale(direction, speed);
                 const Vector2 ao = (Vector2)
                 {
-                    .x = direction.x * -speed * 0.5,
-                    .y = direction.y * -speed * 0.5 + gravity,
+                    // a = (vf - vo) / t
+                    .x = (0 - vo.x) / lifetime,
+                    .y = gravity,
                 };
 
                 SceneDeferAddEntity(scene, CloudParticleCreate(cloudPosition, radius, vo, ao));
@@ -115,23 +119,27 @@ static void PlayerSpawnImpactParticles(Scene* scene, const usize entity, const f
 
     // Spawn extra cloud particles in the direction opposite of velocity.
     {
+        static const f32 reflection = 30;
+        static const f32 theta = 20;
+        const f32 anchorOffset = dimension->width * 0.25;
         const usize total = spawnCount * 0.5;
-        const f32 angleIncrement = (DEG2RAD * 20) / total;
+        const f32 angleIncrement = (DEG2RAD * theta) / total;
 
         for (usize i = 0; i < total; ++i)
         {
             const f32 radius = GetRandomValue(1, 3);
             const f32 offset = GetRandomValue(0, spread);
             const f32 speed = GetRandomValue(20, 35);
+            const f32 lifetime = 0.5 + 0.5 * GetRandomValue(0, 4);
 
             if (kinetic->velocity.x > 0)
             {
                 const Vector2 cloudPosition = (Vector2)
                 {
-                    .x = leftAnchor.x + dimension->width * 0.25 - offset - radius * 2,
+                    .x = leftAnchor.x + anchorOffset - offset - radius * 2,
                     .y = leftAnchor.y - radius * 2,
                 };
-                const f32 rotation = (DEG2RAD * (180 + 25)) + angleIncrement * i;
+                const f32 rotation = (DEG2RAD * (180 + reflection - theta * 0.5)) + angleIncrement * i;
                 const Vector2 direction = (Vector2)
                 {
                     .x = cosf(rotation),
@@ -140,8 +148,9 @@ static void PlayerSpawnImpactParticles(Scene* scene, const usize entity, const f
                 const Vector2 vo = Vector2Scale(direction, speed);
                 const Vector2 ao = (Vector2)
                 {
-                    .x = direction.x * -speed * 0.5,
-                    .y = direction.y * -speed * 0.5 + gravity * 0.75,
+                    // a = (vf - vo) / t
+                    .x = (0 - vo.x) / lifetime,
+                    .y = gravity,
                 };
 
                 SceneDeferAddEntity(scene, CloudParticleCreate(cloudPosition, radius, vo, ao));
@@ -150,10 +159,10 @@ static void PlayerSpawnImpactParticles(Scene* scene, const usize entity, const f
             {
                 const Vector2 cloudPosition = (Vector2)
                 {
-                    .x = rightAnchor.x - dimension->width * 0.25 + offset,
+                    .x = rightAnchor.x - anchorOffset + offset,
                     .y = rightAnchor.y - radius * 2,
                 };
-                const f32 rotation = (DEG2RAD * (0 - 25)) - angleIncrement * i;
+                const f32 rotation = (DEG2RAD * (0 - reflection + theta * 0.5)) - angleIncrement * i;
                 const Vector2 direction = (Vector2)
                 {
                     .x = cosf(rotation),
@@ -162,8 +171,9 @@ static void PlayerSpawnImpactParticles(Scene* scene, const usize entity, const f
                 const Vector2 vo = Vector2Scale(direction, speed);
                 const Vector2 ao = (Vector2)
                 {
-                    .x = direction.x * -speed * 0.5,
-                    .y = direction.y * -speed * 0.5 + gravity * 0.75,
+                    // a = (vf - vo) / t
+                    .x = (0 - vo.x) / lifetime,
+                    .y = gravity,
                 };
 
                 SceneDeferAddEntity(scene, CloudParticleCreate(cloudPosition, radius, vo, ao));
@@ -190,12 +200,14 @@ static void PlayerSpawnJumpParticles(Scene* scene, const usize entity)
 
     // Lateral pockets.
     {
-        const f32 angleIncrement = (DEG2RAD * 30) / spawnCount;
+        static const f32 theta = 30;
+        const f32 angleIncrement = (DEG2RAD * theta) / spawnCount;
 
         for (usize i = 0; i < spawnCount; ++i)
         {
             const f32 radius = GetRandomValue(1, 3);
-            const f32 speed = GetRandomValue(5, 20);
+            const f32 speed = GetRandomValue(10, 15);
+            const f32 lifetime = 0.5 + 0.5 * GetRandomValue(0, 3);
 
             // Left pocket.
             {
@@ -213,8 +225,9 @@ static void PlayerSpawnJumpParticles(Scene* scene, const usize entity)
                 const Vector2 vo = Vector2Scale(direction, speed);
                 const Vector2 ao = (Vector2)
                 {
-                    .x = direction.x * -speed * 0.5,
-                    .y = direction.y * -speed * 0.5 + gravity,
+                    // a = (vf - vo) / t
+                    .x = (0 - vo.x) / lifetime,
+                    .y = gravity,
                 };
 
                 SceneDeferAddEntity(scene, CloudParticleCreate(cloudPosition, radius, vo, ao));
@@ -236,8 +249,9 @@ static void PlayerSpawnJumpParticles(Scene* scene, const usize entity)
                 const Vector2 vo = Vector2Scale(direction, speed);
                 const Vector2 ao = (Vector2)
                 {
-                    .x = direction.x * -speed * 0.5,
-                    .y = direction.y * -speed * 0.5 + gravity,
+                    // a = (vf - vo) / t
+                    .x = (0 - vo.x) / lifetime,
+                    .y = gravity,
                 };
 
                 SceneDeferAddEntity(scene, CloudParticleCreate(cloudPosition, radius, vo, ao));
@@ -247,16 +261,33 @@ static void PlayerSpawnJumpParticles(Scene* scene, const usize entity)
 
     // Middle pocket.
     {
-        Vector2 direction = Vector2Normalize(kinetic->velocity);
-        direction.x *= -1;
-        const usize theta = 30;
-        const f32 angle = atan2f(direction.y, direction.x) - (DEG2RAD * theta * 0.5);
+        static const f32 reflection = 20;
+        static const f32 theta = 20;
+        static const f32 lateralMultiplier = 1.75;
+
+        const i8 sign = SIGN(kinetic->velocity.x);
+        f32 angle = -90;
+
+        if (sign < 0)
+        {
+            angle = -reflection;
+        }
+        else if (sign > 0)
+        {
+            angle = -180 + reflection;
+        }
+
+        angle -= theta * 0.5;
+        angle *= DEG2RAD;
+
         const usize total = spawnCount * 0.5;
         const f32 angleIncrement = (DEG2RAD * theta) / total;
 
         for (usize i = 0; i < total; ++i)
         {
             const f32 radius = GetRandomValue(2, 3);
+            const f32 lifetime = 0.5 + 0.5 * GetRandomValue(0, 4);
+
             const Vector2 cloudPosition = (Vector2)
             {
                 .x = anchor.x - radius,
@@ -273,14 +304,15 @@ static void PlayerSpawnJumpParticles(Scene* scene, const usize entity)
 
             if (kinetic->velocity.x != 0)
             {
-                speed *= 1.5;
+                speed *= lateralMultiplier;
             }
 
             const Vector2 vo = Vector2Scale(directionTmp, speed);
             const Vector2 ao = (Vector2)
             {
-                .x = direction.x * -speed * 0.5,
-                .y = direction.y * -speed * 0.5 + gravity * 5,
+                // a = (vf - vo) / t
+                .x = (0 - vo.x) / lifetime,
+                .y = gravity,
             };
 
             SceneDeferAddEntity(scene, CloudParticleCreate(cloudPosition, radius, vo, ao));
