@@ -63,21 +63,6 @@ void SKineticUpdate(Scene* scene, const usize entity)
     position->value.y += kinetic->velocity.y * CTX_DT;
 }
 
-static i8 sign(const f32 value)
-{
-    if (value < 0)
-    {
-        return -1;
-    }
-
-    if (value > 0)
-    {
-        return 1;
-    }
-
-    return 0;
-}
-
 // TODO(thismarvin): This following static collision stuff needs a better home...
 
 static Vector2 ExtractResolution(const Vector2 resolution, const u64 layers)
@@ -117,7 +102,7 @@ static SimulateCollisionOnAxisResult SimulateCollisionOnAxis
 
     Rectangle simulatedAabb = params->aabb;
 
-    Vector2 direction = Vector2Create(sign(params->delta.x), sign(params->delta.y));
+    Vector2 direction = Vector2Create(SIGN(params->delta.x), SIGN(params->delta.y));
     Vector2 remainder = Vector2Create(fabsf(params->delta.x), fabsf(params->delta.y));
 
     bool xModified = false;
