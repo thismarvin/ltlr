@@ -35,7 +35,8 @@ EntityBuilder CloudParticleCreate
     const Vector2 position,
     const f32 radius,
     const Vector2 initialVelocity,
-    const Vector2 acceleration
+    const Vector2 acceleration,
+    const f32 lifetime
 )
 {
     Deque components = DEQUE_OF(Component);
@@ -85,8 +86,6 @@ EntityBuilder CloudParticleCreate
         .onCollision = OnCollisionNoop,
         .onResolution = CloudParticleOnResolution,
     }));
-
-    f32 lifetime = MIN(1.0f, (f32)GetRandomValue(1, 100) * 0.03f);
 
     ADD_COMPONENT(CFleeting, ((CFleeting)
     {

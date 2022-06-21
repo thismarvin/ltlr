@@ -83,7 +83,7 @@ static void PlayerSpawnImpactParticles(Scene* scene, const usize entity, const f
                     .y = gravity,
                 };
 
-                SceneDeferAddEntity(scene, CloudParticleCreate(cloudPosition, radius, vo, ao));
+                SceneDeferAddEntity(scene, CloudParticleCreate(cloudPosition, radius, vo, ao, lifetime));
             }
 
             // Right pocket.
@@ -107,7 +107,7 @@ static void PlayerSpawnImpactParticles(Scene* scene, const usize entity, const f
                     .y = gravity,
                 };
 
-                SceneDeferAddEntity(scene, CloudParticleCreate(cloudPosition, radius, vo, ao));
+                SceneDeferAddEntity(scene, CloudParticleCreate(cloudPosition, radius, vo, ao, lifetime));
             }
         }
     }
@@ -153,7 +153,7 @@ static void PlayerSpawnImpactParticles(Scene* scene, const usize entity, const f
                     .y = gravity,
                 };
 
-                SceneDeferAddEntity(scene, CloudParticleCreate(cloudPosition, radius, vo, ao));
+                SceneDeferAddEntity(scene, CloudParticleCreate(cloudPosition, radius, vo, ao, lifetime));
             }
             else
             {
@@ -176,7 +176,7 @@ static void PlayerSpawnImpactParticles(Scene* scene, const usize entity, const f
                     .y = gravity,
                 };
 
-                SceneDeferAddEntity(scene, CloudParticleCreate(cloudPosition, radius, vo, ao));
+                SceneDeferAddEntity(scene, CloudParticleCreate(cloudPosition, radius, vo, ao, lifetime));
             }
         }
     }
@@ -230,7 +230,7 @@ static void PlayerSpawnJumpParticles(Scene* scene, const usize entity)
                     .y = gravity,
                 };
 
-                SceneDeferAddEntity(scene, CloudParticleCreate(cloudPosition, radius, vo, ao));
+                SceneDeferAddEntity(scene, CloudParticleCreate(cloudPosition, radius, vo, ao, lifetime));
             }
 
             // Right pocket.
@@ -254,7 +254,7 @@ static void PlayerSpawnJumpParticles(Scene* scene, const usize entity)
                     .y = gravity,
                 };
 
-                SceneDeferAddEntity(scene, CloudParticleCreate(cloudPosition, radius, vo, ao));
+                SceneDeferAddEntity(scene, CloudParticleCreate(cloudPosition, radius, vo, ao, lifetime));
             }
         }
     }
@@ -315,7 +315,7 @@ static void PlayerSpawnJumpParticles(Scene* scene, const usize entity)
                 .y = gravity,
             };
 
-            SceneDeferAddEntity(scene, CloudParticleCreate(cloudPosition, radius, vo, ao));
+            SceneDeferAddEntity(scene, CloudParticleCreate(cloudPosition, radius, vo, ao, lifetime));
         }
     }
 }
