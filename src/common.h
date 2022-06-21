@@ -20,6 +20,7 @@ typedef double f64;
 
 #define MAX(mA,mB) (((mA)>(mB))?(mA):(mB))
 #define MIN(mA,mB) (((mA)<(mB))?(mA):(mB))
+#define SIGN(mA) ((mA) == 0 ? 0 : (mA) < 0 ? -1 : 1)
 
 #define VECTOR2_ZERO (Vector2) { .x = 0, .y = 0 }
 
