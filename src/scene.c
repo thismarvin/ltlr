@@ -547,7 +547,6 @@ void SceneUpdate(Scene* self)
     }
 
     SceneExecuteCommands(self);
-    SceneCheckEndCondition(self);
 
     for (usize i = 0; i < SceneGetEntityCount(self); ++i)
     {
@@ -566,6 +565,8 @@ void SceneUpdate(Scene* self)
 
         FogUpdate(self, i);
     }
+
+    SceneCheckEndCondition(self);
 }
 
 // Return a Rectangle that is within the scene's bounds and centered on a given entity.
