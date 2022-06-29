@@ -12,6 +12,9 @@
 }
 
 static const f32 fogMoveSpeed = 50;
+// TODO(austin0209): move this somewhere else maybe?
+static f32 particleSpawnTimer = 0;
+static f32 particleSpawnDuration = 3;
 
 EntityBuilder FogCreate(void)
 {
@@ -86,6 +89,27 @@ void FogUpdate(Scene* scene, const usize entity)
         .x = fogMoveSpeed,
         .y = cosf(position->value.x * CTX_DT) * 32,
     };
+
+    particleSpawnTimer += CTX_DT;
+
+    if (particleSpawnTimer >= particleSpawnDuration)
+    {
+        static const i32 spawnCount = 10;
+
+        for (i32 i = 0; i < spawnCount; i++)
+        {
+            const Vector2 spawnPosition = (Vector2)
+            {
+                .x = position->value.x + GetRandomValue(-12, 12),
+                .y = (i / spawnCount) * FOG_HEIGHT + GetRandomValue(-12, 12),
+            };
+
+            SceneDeferAddEntity(scene, FogBreathingParticleCreate(spawnPosition, GetRandomValue(24, 48),
+                                GetRandomValue(2, 5)));
+        }
+
+        particleSpawnTimer = 0;
+    }
 }
 
 void FogDraw(const Scene* scene, const usize entity)

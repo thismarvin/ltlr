@@ -16,6 +16,8 @@
 #define TAG_DAMAGE ((u64)1 << 10)
 #define TAG_FLEETING ((u64)1 << 11)
 #define TAG_FOG ((u64)1 << 12)
+#define TAG_FOG_PARTICLE ((u64)1 << 13)
+#define TAG_CLOUD_PARTICLE ((u64)1 << 14)
 
 #define RESOLVE_NONE ((u8)0)
 #define RESOLVE_UP ((u8)1 << 0)
