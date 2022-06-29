@@ -81,9 +81,11 @@ void FogUpdate(Scene* scene, const usize entity)
         return;
     }
 
-    kinetic->velocity.x = fogMoveSpeed;
-
-    position->value.y = sinf(position->value.x * CTX_DT) * 48 + FOG_INITIAL_POSITION.y;
+    kinetic->velocity = (Vector2)
+    {
+        .x = fogMoveSpeed,
+        .y = cosf(position->value.x * CTX_DT) * 32,
+    };
 }
 
 void FogDraw(const Scene* scene, const usize entity)
