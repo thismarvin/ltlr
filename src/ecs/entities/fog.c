@@ -11,6 +11,8 @@
     .y = -(FOG_HEIGHT - CTX_VIEWPORT_HEIGHT) * 0.5f, \
 }
 
+static const f32 fogMoveSpeed = 50;
+
 EntityBuilder FogCreate(void)
 {
     Deque components = DEQUE_OF(Component);
@@ -42,7 +44,7 @@ EntityBuilder FogCreate(void)
 
     ADD_COMPONENT(CKinetic, ((CKinetic)
     {
-        .velocity = Vector2Create(50, 0),
+        .velocity = Vector2Create(fogMoveSpeed, 0),
         .acceleration = VECTOR2_ZERO,
     }));
 
@@ -60,14 +62,26 @@ EntityBuilder FogCreate(void)
 
 void FogUpdate(Scene* scene, const usize entity)
 {
-    const u64 dependencies = TAG_FOG | TAG_POSITION;
+    const u64 dependencies = TAG_FOG | TAG_POSITION | TAG_KINETIC;
 
     if (!SceneEntityHasDependencies(scene, entity, dependencies))
     {
         return;
     }
 
+    assert(SceneEntityHasDependencies(scene, scene->player, TAG_POSITION));
+
+    const CPosition* playerPosition = SCENE_GET_COMPONENT_PTR(scene, playerPosition, scene->player);
     CPosition* position = SCENE_GET_COMPONENT_PTR(scene, position, entity);
+    CKinetic* kinetic = SCENE_GET_COMPONENT_PTR(scene, kinetic, entity);
+
+    if (position->value.x < 0 && playerPosition->value.x < CTX_VIEWPORT_WIDTH)
+    {
+        kinetic->velocity.x = 0;
+        return;
+    }
+
+    kinetic->velocity.x = fogMoveSpeed;
 
     position->value.y = sinf(position->value.x * CTX_DT) * 48 + FOG_INITIAL_POSITION.y;
 }
