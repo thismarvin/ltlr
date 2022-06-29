@@ -111,7 +111,7 @@ void FogDraw(const Scene* scene, const usize entity)
 
     while (currentCenter.y <= position->value.y + dimension->height)
     {
-        DrawCircle(currentCenter.x, currentCenter.y, radius, color->value);
+        DrawCircleV(currentCenter, radius, color->value);
         currentCenter.y += radius * 1.5f;
     }
 }
