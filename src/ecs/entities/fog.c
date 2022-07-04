@@ -101,7 +101,7 @@ void FogUpdate(Scene* scene, const usize entity)
             const Vector2 spawnPosition = (Vector2)
             {
                 .x = position->value.x + GetRandomValue(-12, 12),
-                .y = (i / spawnCount) * FOG_HEIGHT + GetRandomValue(-12, 12),
+                .y = (1.0f * i / spawnCount) * FOG_HEIGHT + GetRandomValue(-12, 12),
             };
 
             SceneDeferAddEntity(scene, FogBreathingParticleCreate(spawnPosition, GetRandomValue(24, 48),
