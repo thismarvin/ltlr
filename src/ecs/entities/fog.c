@@ -94,18 +94,31 @@ void FogUpdate(Scene* scene, const usize entity)
 
     if (particleSpawnTimer >= particleSpawnDuration)
     {
-        static const i32 spawnCount = 10;
+        static const i32 spawnCount = 32;
+        static const i32 spawnDomain = 6;
+        static const i32 spawnRange = 12;
+
+        static const i32 minSize = 16;
+        static const i32 maxSize = 32;
+
+        static const i32 minLifetime = 2;
+        static const i32 maxLifetime = 12;
 
         for (i32 i = 0; i < spawnCount; i++)
         {
             const Vector2 spawnPosition = (Vector2)
             {
-                .x = position->value.x + GetRandomValue(-12, 12),
-                .y = (1.0f * i / spawnCount) * FOG_HEIGHT + GetRandomValue(-12, 12),
+                .x = position->value.x + GetRandomValue(0, spawnDomain),
+                .y = (1.0f * i / spawnCount) * FOG_HEIGHT +
+                     GetRandomValue(-spawnRange, spawnRange),
             };
 
-            SceneDeferAddEntity(scene, FogBreathingParticleCreate(spawnPosition, GetRandomValue(24, 48),
-                                GetRandomValue(2, 5)));
+            const EntityBuilder particleBuilder = FogBreathingParticleCreate(
+                    spawnPosition,
+                    GetRandomValue(minSize, maxSize),
+                    GetRandomValue(minLifetime, maxLifetime));
+
+            SceneDeferAddEntity(scene, particleBuilder);
         }
 
         particleSpawnTimer = 0;
