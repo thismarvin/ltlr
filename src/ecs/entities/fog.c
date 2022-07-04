@@ -80,7 +80,7 @@ void FogUpdate(Scene* scene, const usize entity)
 
     if (position->value.x < 0 && playerPosition->value.x < CTX_VIEWPORT_WIDTH)
     {
-        kinetic->velocity.x = 0;
+        kinetic->velocity = VECTOR2_ZERO;
         return;
     }
 
