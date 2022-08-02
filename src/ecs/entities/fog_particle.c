@@ -2,11 +2,13 @@
 #include "common.h"
 #include <raymath.h>
 
-EntityBuilder FogBreathingParticleCreate
+static EntityBuilder FogBaseParticleCreate
 (
     const Vector2 position,
     const f32 radius,
-    const f32 lifetime
+    const f32 lifetime,
+    const Color color,
+    const Vector2 velocity
 )
 {
     Deque components = DEQUE_OF(Component);
@@ -34,12 +36,12 @@ EntityBuilder FogBreathingParticleCreate
 
     ADD_COMPONENT(CColor, ((CColor)
     {
-        .value = COLOR_BLACK,
+        .value = color,
     }));
 
     ADD_COMPONENT(CKinetic, ((CKinetic)
     {
-        .velocity = VECTOR2_ZERO,
+        .velocity = velocity,
         .acceleration = VECTOR2_ZERO,
     }));
 
@@ -61,6 +63,24 @@ EntityBuilder FogBreathingParticleCreate
     };
 }
 
+EntityBuilder FogBreathingParticleCreate(Vector2 position, f32 radius, f32 lifetime)
+{
+    EntityBuilder result = FogBaseParticleCreate(position, radius, lifetime, COLOR_BLACK, VECTOR2_ZERO);
+
+    result.tags |= TAG_FOG_BREATHING;
+
+    return result;
+}
+
+EntityBuilder FogMovingParticleCreate(Vector2 position, Vector2 velocity, f32 radius, f32 lifetime)
+{
+    EntityBuilder result = FogBaseParticleCreate(position, radius, lifetime, COLOR_BLACK, velocity);
+
+    result.tags |= TAG_FOG_MOVING;
+
+    return result;
+}
+
 void FogParticleUpdate(Scene* scene, const usize entity)
 {
     const u64 dependencies = TAG_FOG_PARTICLE | TAG_KINETIC;
@@ -73,7 +93,13 @@ void FogParticleUpdate(Scene* scene, const usize entity)
     assert(SceneEntityHasDependencies(scene, scene->fog, TAG_KINETIC));
 
     const CKinetic* fogKinetic = SCENE_GET_COMPONENT_PTR(scene, fogKinetic, scene->fog);
+
     CKinetic* kinetic = SCENE_GET_COMPONENT_PTR(scene, kinetic, entity);
+
+    if (SceneEntityHasDependencies(scene, entity, TAG_FOG_MOVING))
+    {
+        return;
+    }
 
     kinetic->velocity = fogKinetic->velocity;
 }
@@ -99,7 +125,6 @@ void FogParticleDraw(const Scene* scene, const usize entity)
     const CFleeting* fleeting = SCENE_GET_COMPONENT_PTR(scene, fleeting, entity);
     const CDimension* dimension = SCENE_GET_COMPONENT_PTR(scene, dimension, entity);
     const CSmooth* smooth = SCENE_GET_COMPONENT_PTR(scene, smooth, entity);
-
 
     const f32 progress = fleeting->age / fleeting->lifetime;
     const f32 scale = -4 * (progress * progress - progress);

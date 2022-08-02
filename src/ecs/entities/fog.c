@@ -13,8 +13,10 @@
 
 static const f32 fogMoveSpeed = 50;
 // TODO(austin0209): move this somewhere else maybe?
-static f32 particleSpawnTimer = 0;
-static f32 particleSpawnDuration = 3;
+static f32 breathingParticleSpawnTimer = 0;
+static f32 breathingParticleSpawnDuration = 3;
+static f32 movingParticleSpawnTimer = 0;
+static f32 movingParticleSpawnDuration = 0.3f;
 
 EntityBuilder FogCreate(void)
 {
@@ -63,6 +65,78 @@ EntityBuilder FogCreate(void)
     };
 }
 
+static void SpawnBreathingParticles(Scene* scene, const CPosition* position)
+{
+    if (breathingParticleSpawnTimer >= breathingParticleSpawnDuration)
+    {
+        static const i32 spawnDomain = 6;
+        static const i32 spawnRange = 12;
+
+        static const i32 minSize = 16;
+        static const i32 maxSize = 32;
+
+        static const i32 minLifetime = 2;
+        static const i32 maxLifetime = 12;
+
+        const i32 spawnCount = GetRandomValue(16, 48);
+
+        for (i32 i = 0; i < spawnCount; i++)
+        {
+            const Vector2 spawnPosition = (Vector2)
+            {
+                .x = position->value.x + GetRandomValue(0, spawnDomain),
+                .y = (1.0f * i / spawnCount) * FOG_HEIGHT +
+                     GetRandomValue(-spawnRange, spawnRange),
+            };
+
+            const EntityBuilder particleBuilder = FogBreathingParticleCreate(
+                    spawnPosition,
+                    GetRandomValue(minSize, maxSize),
+                    GetRandomValue(minLifetime, maxLifetime));
+
+            SceneDeferAddEntity(scene, particleBuilder);
+        }
+
+        breathingParticleSpawnTimer = 0;
+    }
+}
+
+static void SpawnMovingParticles(Scene* scene, const CPosition* position)
+{
+    if (movingParticleSpawnTimer >= movingParticleSpawnDuration)
+    {
+        if (GetRandomValue(0, 2) == 0)
+        {
+            static const i32 minSize = 5;
+            static const i32 maxSize = 10;
+
+            static const i32 minXSpeed = 20;
+            static const i32 maxXSpeed = 30;
+
+            static const i32 minYSpeed = -10;
+            static const i32 maxYSpeed = 10;
+
+            static const i32 minLifetime = 1;
+            static const i32 maxLifetime = 3;
+
+            const Vector2 spawnPosition = (Vector2)
+            {
+                .x = position->value.x,
+                .y = GetRandomValue(0, CTX_VIEWPORT_HEIGHT),
+            };
+
+            const EntityBuilder movingBuilder = FogMovingParticleCreate(
+                                                    spawnPosition,
+                                                    Vector2Create(fogMoveSpeed + GetRandomValue(minXSpeed, maxXSpeed), GetRandomValue(minYSpeed,
+                                                            maxYSpeed)),
+                                                    GetRandomValue(minSize, maxSize),
+                                                    GetRandomValue(minLifetime, maxLifetime));
+
+            SceneDeferAddEntity(scene, movingBuilder);
+        }
+    }
+}
+
 void FogUpdate(Scene* scene, const usize entity)
 {
     const u64 dependencies = TAG_FOG | TAG_POSITION | TAG_KINETIC;
@@ -90,39 +164,11 @@ void FogUpdate(Scene* scene, const usize entity)
         .y = cosf(position->value.x * CTX_DT) * 32,
     };
 
-    particleSpawnTimer += CTX_DT;
+    breathingParticleSpawnTimer += CTX_DT;
+    movingParticleSpawnTimer += CTX_DT;
 
-    if (particleSpawnTimer >= particleSpawnDuration)
-    {
-        static const i32 spawnCount = 32;
-        static const i32 spawnDomain = 6;
-        static const i32 spawnRange = 12;
-
-        static const i32 minSize = 16;
-        static const i32 maxSize = 32;
-
-        static const i32 minLifetime = 2;
-        static const i32 maxLifetime = 12;
-
-        for (i32 i = 0; i < spawnCount; i++)
-        {
-            const Vector2 spawnPosition = (Vector2)
-            {
-                .x = position->value.x + GetRandomValue(0, spawnDomain),
-                .y = (1.0f * i / spawnCount) * FOG_HEIGHT +
-                     GetRandomValue(-spawnRange, spawnRange),
-            };
-
-            const EntityBuilder particleBuilder = FogBreathingParticleCreate(
-                    spawnPosition,
-                    GetRandomValue(minSize, maxSize),
-                    GetRandomValue(minLifetime, maxLifetime));
-
-            SceneDeferAddEntity(scene, particleBuilder);
-        }
-
-        particleSpawnTimer = 0;
-    }
+    SpawnBreathingParticles(scene, position);
+    SpawnMovingParticles(scene, position);
 }
 
 void FogDraw(const Scene* scene, const usize entity)
