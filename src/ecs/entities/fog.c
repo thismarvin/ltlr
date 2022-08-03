@@ -12,7 +12,6 @@
 }
 
 static const f32 fogMoveSpeed = 50;
-// TODO(austin0209): move this somewhere else maybe?
 static f32 breathingParticleSpawnTimer = 0;
 static f32 breathingParticleSpawnDuration = 3;
 static f32 movingParticleSpawnTimer = 0;
