@@ -4,3 +4,4 @@
 [submodule "vendor/cJSON"]
 	path = vendor/cJSON
 	url = https://github.com/DaveGamble/cJSON
+	branch = v1.7.15
