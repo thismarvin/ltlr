@@ -1,7 +1,0 @@
-[submodule "vendor/raylib"]
-	path = vendor/raylib
-	url = https://github.com/raysan5/raylib.git
-[submodule "vendor/cJSON"]
-	path = vendor/cJSON
-	url = https://github.com/DaveGamble/cJSON
-	branch = v1.7.15
