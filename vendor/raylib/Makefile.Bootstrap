@@ -1,0 +1,26 @@
+GIT := git
+NU := nu
+
+TAG := 4.0.0
+
+$(VERBOSE).SILENT:
+
+.PHONY: @all
+@all: @clean @raylib
+
+src/raylib.h:
+	$(GIT) clone --depth 1 --branch $(TAG) https://github.com/raysan5/raylib
+	mv raylib/.gitignore .
+	mv raylib/LICENSE .
+	mv raylib/src .
+	$(NU) patch.nu
+	rm -rf raylib
+
+.PHONY: @raylib
+@raylib: src/raylib.h
+
+.PHONY: @clean
+@clean:
+	if [ -f ".gitignore" ]; then rm .gitignore; fi
+	if [ -f "LICENSE" ]; then rm LICENSE; fi
+	if [ -d "src" ]; then rm -r src; fi

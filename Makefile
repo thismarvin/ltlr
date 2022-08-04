@@ -18,19 +18,19 @@ Makefile.Web: src
 	$(NU) -c "use scripts/generate.nu; generate makefile web | save Makefile.Web"
 
 .PHONY: @vendor/desktop
-@vendor/desktop:
-	$(MAKE) -f Makefile.Vendor @desktop
+@vendor/desktop: Makefile.Vendor
+	$(MAKE) -f $< @vendor/desktop
 
 .PHONY: @vendor/web
-@vendor/web:
-	$(MAKE) -f Makefile.Vendor @web
+@vendor/web: Makefile.Vendor
+	$(MAKE) -f $< @vendor/web
 
 .PHONY: @vendor
 @vendor: @vendor/desktop @vendor/web
 
 .PHONY: @content
 @content: Makefile.Content
-	$(MAKE) -f Makefile.Content @content
+	$(MAKE) -f $< @content
 
 .PHONY: @desktop
 @desktop: @vendor/desktop @content Makefile.Desktop

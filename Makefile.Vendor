@@ -1,112 +1,40 @@
-GIT := git
-CC := gcc
-AR := ar
-EMCC := emcc
-EMAR := emar
-
-RAYLIB_SOURCES := \
-	vendor/raylib/src/raudio.c \
-	vendor/raylib/src/rcore.c \
-	vendor/raylib/src/rmodels.c \
-	vendor/raylib/src/rshapes.c \
-	vendor/raylib/src/rtext.c \
-	vendor/raylib/src/rtextures.c \
-	vendor/raylib/src/utils.c \
-
-RAYLIB_WEB_OBJECTS := \
-	lib/web/raylib/raudio.o \
-	lib/web/raylib/rcore.o \
-	lib/web/raylib/rmodels.o \
-	lib/web/raylib/rshapes.o \
-	lib/web/raylib/rtext.o \
-	lib/web/raylib/rtextures.o \
-	lib/web/raylib/utils.o \
-
-CJSON_SOURCES := \
-	vendor/cJSON/cJSON.c \
-
-CJSON_DESKTOP_OBJECTS := \
-	lib/desktop/cJSON/cJSON.o \
-
-CJSON_WEB_OBJECTS := \
-	lib/web/cJSON/cJSON.o \
-
 $(VERBOSE).SILENT:
 
 .PHONY: @all
 @all: @clean @vendor
 
-lib:
-	mkdir $@
+.PHONY: @vendor/desktop/cJSON
+@vendor/desktop/cJSON: vendor/cJSON/Makefile.Desktop
+	$(MAKE) -C vendor/cJSON -f Makefile.Desktop @lib DESTDIR=../..
 
-lib/desktop: | lib
-	mkdir $@
+.PHONY: @vendor/desktop/raylib
+@vendor/desktop/raylib: vendor/raylib/Makefile.Desktop
+	$(MAKE) -C vendor/raylib -f Makefile.Desktop @lib DESTDIR=../..
 
-lib/desktop/raylib: | lib/desktop
-	mkdir $@
+.PHONY: @vendor/desktop
+@vendor/desktop: @vendor/desktop/cJSON @vendor/desktop/raylib
 
-lib/desktop/cJSON: | lib/desktop
-	mkdir $@
+.PHONY: @vendor/web/cJSON
+@vendor/web/cJSON: vendor/cJSON/Makefile.Web
+	$(MAKE) -C vendor/cJSON -f Makefile.Web @lib DESTDIR=../..
 
-lib/web: | lib
-	mkdir $@
+.PHONY: @vendor/web/raylib
+@vendor/web/raylib: vendor/raylib/Makefile.Web
+	$(MAKE) -C vendor/raylib -f Makefile.Web @lib DESTDIR=../..
 
-lib/web/raylib: | lib/web
-	mkdir $@
-
-lib/web/cJSON: | lib/web
-	mkdir $@
-
-# raylib
-
-vendor/raylib/src/Makefile:
-	$(GIT) submodule update --init --recursive vendor/raylib
-
-lib/desktop/libraylib.a: vendor/raylib/src/Makefile | lib/desktop/raylib
-	cd vendor/raylib/src; $(MAKE) PLATFORM=PLATFORM_DESKTOP CUSTOM_CFLAGS=-DSUPPORT_CUSTOM_FRAME_CONTROL
-
-	mv vendor/raylib/src/raudio.o lib/desktop/raylib
-	mv vendor/raylib/src/rcore.o lib/desktop/raylib
-	mv vendor/raylib/src/rglfw.o lib/desktop/raylib
-	mv vendor/raylib/src/rmodels.o lib/desktop/raylib
-	mv vendor/raylib/src/rshapes.o lib/desktop/raylib
-	mv vendor/raylib/src/rtext.o lib/desktop/raylib
-	mv vendor/raylib/src/rtextures.o lib/desktop/raylib
-	mv vendor/raylib/src/utils.o lib/desktop/raylib
-
-	mv vendor/raylib/src/libraylib.a lib/desktop
-
-$(RAYLIB_WEB_OBJECTS): lib/web/raylib/%.o: vendor/raylib/src/%.c | lib/web/raylib
-	$(EMCC) -O1 -DPLATFORM_WEB -DGRAPHICS_API_OPENGL_ES2 -DSUPPORT_CUSTOM_FRAME_CONTROL -o $@ -c $<
-
-lib/web/libraylib.a: $(RAYLIB_WEB_OBJECTS) | lib/web
-	$(EMAR) rcs $@ $^
-
-# cJSON
-
-vendor/cJSON/cJSON.c:
-	$(GIT) submodule update --init --recursive vendor/cJSON
-
-$(CJSON_DESKTOP_OBJECTS): $(CJSON_SOURCES) | lib/desktop/cJSON
-	$(CC) -std=c89 -O1 -o $@ -c $^
-
-lib/desktop/libcJSON.a: $(CJSON_DESKTOP_OBJECTS) | lib/desktop
-	$(AR) rcs $@ $^
-
-$(CJSON_WEB_OBJECTS): $(CJSON_SOURCES) | lib/web/cJSON
-	$(EMCC) -std=c89 -O1 -o $@ -c $^
-
-lib/web/libcJSON.a: $(CJSON_WEB_OBJECTS) | lib/web
-	$(EMAR) rcs $@ $^
-
-.PHONY: @desktop
-@desktop: lib/desktop/libraylib.a lib/desktop/libcJSON.a
-
-.PHONY: @web
-@web: lib/web/libraylib.a lib/web/libcJSON.a
+.PHONY: @vendor/web
+@vendor/web: @vendor/web/cJSON @vendor/web/raylib
 
 .PHONY: @vendor
-@vendor: @desktop @web
+@vendor: @vendor/desktop @vendor/web
+
+.PHONY: @clean/desktop
+@clean/desktop:
+	if [ -d "lib/desktop" ]; then rm -r lib/desktop; fi
+
+.PHONY: @clean/web
+@clean/web:
+	if [ -d "lib/web" ]; then rm -r lib/web; fi
 
 .PHONY: @clean
 @clean:

@@ -248,8 +248,9 @@ BIN := ltlr
 BUILD := debug
 cflags.debug := -g -pg -Og
 cflags.release := -g -O2
-CFLAGS := -std=c17 -Wall -Wextra -Wpedantic $\(cflags.$\(BUILD)) -Ivendor/raylib/src -Ivendor/cJSON -DPLATFORM_DESKTOP
-LDLIBS := -Llib/desktop -lraylib -lGL -lm -lpthread -ldl -lrt -lX11 -lcJSON
+CFLAGS := -std=c17 -Wall -Wextra -Wpedantic $\(cflags.$\(BUILD)) -Ivendor/raylib/src -Ivendor/cJSON/src -DPLATFORM_DESKTOP
+ldlibs.vendor = $\(shell pkg-config --libs gl)
+LDLIBS := -Llib/desktop -lcJSON -lraylib $\(ldlibs.vendor) -lm
 
 SOURCE_HEADERS := \\
 ($makefile-source-headers)
@@ -365,8 +366,9 @@ $"# This file is auto-generated; any changes you make may be overwritten.
 
 EMCC := emcc
 
-CFLAGS := -std=c17 -Wall -Wextra -Wpedantic -g -O2 -Ivendor/raylib/src -Ivendor/cJSON -DPLATFORM_WEB
+CFLAGS := -std=c17 -Wall -Wextra -Wpedantic -g -O2 -Ivendor/raylib/src -Ivendor/cJSON/src -DPLATFORM_WEB
 LDLIBS := -Llib/web -lraylib -lcJSON
+EM_CACHE := .emscripten-cache
 
 TOTAL_MEMORY := 33554432
 SHELL_FILE := src/minshell.html
@@ -385,10 +387,12 @@ $\(VERBOSE).SILENT:
 .PHONY: @all
 @all: @clean @web
 
+$\(EM_CACHE):
+	mkdir $@
 ($makefile-directory-rules)
 ($makefile-source-rules)
-($output-directory)/index.html: $\(SOURCE_OUTPUT) | ($output-directory)
-	$\(EMCC) $\(CFLAGS) -o $@ $^ $\(LDLIBS) -s USE_GLFW=3 -s TOTAL_MEMORY=$\(TOTAL_MEMORY) --memory-init-file 0 --shell-file $\(SHELL_FILE) --preload-file build/content
+($output-directory)/index.html: $\(SOURCE_OUTPUT) | $\(EM_CACHE) ($output-directory)
+	$\(EMCC) $\(CFLAGS) -o $@ $^ $\(LDLIBS) -s USE_GLFW=3 -s TOTAL_MEMORY=$\(TOTAL_MEMORY) --memory-init-file 0 --shell-file $\(SHELL_FILE) --preload-file build/content --cache $\(EM_CACHE)
 
 .PHONY: @web
 @web: ($output-directory)/index.html

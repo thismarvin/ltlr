@@ -1,4 +1,9 @@
+!vendor/cJSON/Makefile.Desktop
+!vendor/cJSON/Makefile.Web
+!vendor/raylib/Makefile.Desktop
+!vendor/raylib/Makefile.Web
 .ccls-cache
+.emscripten-cache
 .idea
 .vscode
 Makefile.Content
@@ -7,7 +12,6 @@ Makefile.Web
 bin
 build
 lib
-src/vendor
 target
 
 # Prerequisites
