@@ -26,37 +26,35 @@ export def "makefile content" [
 		}
 	)
 
-	let images-input = (
-		(ls content/aseprite/**/*.aseprite).name
-		| wrap 'input'
-	)
-	let levels-input = (
-		(ls content/tiled/**/*.tmx).name
-		| wrap 'input'
-	)
+	let bundled = do {
+		let input = do {
+			ls content/bundle/**/*
+			| where type == file
+			| get name
+		}
+		let output = do {
+			$input
+			| str replace 'content/bundle/(.+/)*(.+)' $'($output-directory)/$1$2'
+		}
+		let input = ($input | wrap 'input')
+		let output = ($output | wrap 'output')
+		
+		($input | merge { $output })
+	}
+	let levels = do {
+		let input = (ls content/tiled/**/*.tmx).name
+		let output = do {
+			$input
+			| str replace 'content/tiled/((?:\w+/)*)(?:(\w+)\.tmx)' $"($output-directory)/$1$2.json"
+		}
+		let input = ($input | wrap 'input')
+		let output = ($output | wrap 'output')
 
-	let images-output = (
-		$images-input.input
-		| str replace 'content/aseprite/((?:\w+/)*)(?:(\w+)\.aseprite)' $"($output-directory)/$1$2.png"
-		| wrap 'output'
-	)
-	let levels-output = (
-		$levels-input.input
-		| str replace 'content/tiled/((?:\w+/)*)(?:(\w+)\.tmx)' $"($output-directory)/$1$2.json"
-		| wrap 'output'
-	)
+		($input | merge { $output })
+	}
 
-	let images = (
-		$images-input
-		| merge { $images-output }
-	)
-	let levels = (
-		$levels-input
-		| merge { $levels-output }
-	)
-
-	let images-directories = (
-		$images.output
+	let bundled-directories = (
+		$bundled.output
 		| each { |it| $it | path dirname }
 		| uniq
 	)
@@ -65,10 +63,9 @@ export def "makefile content" [
 		| each { |it| $it | path dirname }
 		| uniq
 	)
-
 	let required-directories = (
 		[]
-		| append $images-directories
+		| append $bundled-directories
 		| append $levels-directories
 		| uniq
 		| each { |it| stagger-path $it }
@@ -76,18 +73,8 @@ export def "makefile content" [
 		| uniq
 	)
 
-	let makefile-images-input = (
-		$images.input
-		| each { |it| $"\t($it) \\" }
-		| str collect "\n"
-	)
-	let makefile-levels-input = (
-		$levels.input
-		| each { |it| $"\t($it) \\" }
-		| str collect "\n"
-	)
-	let makefile-images-output = (
-		$images.output
+	let makefile-bundled-output = (
+		$bundled.output
 		| each { |it| $"\t($it) \\" }
 		| str collect "\n"
 	)
@@ -97,51 +84,66 @@ export def "makefile content" [
 		| str collect "\n"
 	)
 
-	let entries = (
+	let makefile-directory-rules = do {
+		def generate-rule [ directory: string ] {
+			let target = $directory
+			let prerequisites = do {
+				let dirname = ($directory | path dirname)
+				if (not ($dirname | empty?)) and ($dirname != $target) {
+					$' | ($dirname)'
+				} else {
+					''
+				}
+			}
+			let recipe = 'mkdir $@'
+
+			$"($target):($prerequisites)\n\t($recipe)\n"
+		}
+
 		$required-directories
-		| each { |it| { dir: $it, parent: ($it | path dirname) }}
-	)
-	let makefile-directory-rules = (
-		$entries
-		| each { |it| if not ($it.parent | empty?) { $"($it.dir): | ($it.parent)\n" } else { $"($it.dir):\n" }}
-		| each { |it| $"($it)\tmkdir $@\n" }
+		| each { |it| generate-rule $it }
 		| str collect "\n"
-	)
+	}
 
-	let makefile-image-rules = (
-		$images
-		| each { |it| $"($it.output): ($it.input) | ($it.output | path dirname)\n" }
-		| each { |it| $"($it)\t$\(ASEPRITE) -b $< --save-as $@\n" }
+	let makefile-bundled-rules = do {
+		def generate-rule [ input: string, output: string ] {
+			let target = $output
+			let prerequisites = $' ($input) | ($target | path dirname)'
+			let recipe = $'cp $< ($target | path dirname)'
+
+			$"($target):($prerequisites)\n\t($recipe)\n"
+		}
+
+		$bundled
+		| each { |it| generate-rule $it.input $it.output }
 		| str collect "\n"
-	)
+	}
+	let makefile-level-rules = do {
+		def generate-rule [ input: string, output: string ] {
+			let target = $output
+			let prerequisites = $' ($input) | ($target | path dirname)'
+			let recipe = $"\t$\(TILED) --embed-tilesets --export-map json $< $@\n\t$\(PRETTIER) --use-tabs -w $@"
 
-	let makefile-level-rules = (
+			$"($target):($prerequisites)\n($recipe)\n"
+		}
+
 		$levels
-		| each { |it| $"($it.output): ($it.input) | ($it.output | path dirname)\n" }
-		| each { |it| $"($it)\t$\(TILED) --embed-tilesets --export-map json $< $@\n" }
-		| each { |it| $"($it)\t$\(PRETTIER) -w --use-tabs $@\n" }
+		| each { |it| generate-rule $it.input $it.output }
 		| str collect "\n"
-	)
+	}
 
 $"# This file is auto-generated; any changes you make may be overwritten.
 
-ASEPRITE := aseprite
 TILED := tiled
 PRETTIER := prettier
 
-IMAGES_INPUT := \\
-($makefile-images-input)
-
-IMAGES_OUTPUT := \\
-($makefile-images-output)
-
-LEVELS_INPUT := \\
-($makefile-levels-input)
+BUNDLED_OUTPUT := \\
+($makefile-bundled-output)
 
 LEVELS_OUTPUT := \\
 ($makefile-levels-output)
 
-CONTENT := $\(IMAGES_OUTPUT) $\(LEVELS_OUTPUT)
+CONTENT := $\(BUNDLED_OUTPUT) $\(LEVELS_OUTPUT)
 
 $\(VERBOSE).SILENT:
 
@@ -149,7 +151,7 @@ $\(VERBOSE).SILENT:
 @all: @clean @content
 
 ($makefile-directory-rules)
-($makefile-image-rules)
+($makefile-bundled-rules)
 ($makefile-level-rules)
 .PHONY: @content
 @content: $\(CONTENT)
@@ -158,6 +160,7 @@ $\(VERBOSE).SILENT:
 @clean:
 	if [ -d \"($output-directory)\" ]; then rm -r ($output-directory); fi
 "
+	| str trim
 }
 
 export def "makefile desktop" [
