@@ -567,6 +567,8 @@ void SceneUpdate(Scene* self)
 
         FogUpdate(self, i);
         FogParticleUpdate(self, i);
+
+        SAnimationUpdate(self, i);
     }
 
     SceneCheckEndCondition(self);

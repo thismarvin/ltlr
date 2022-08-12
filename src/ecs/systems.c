@@ -424,6 +424,21 @@ void SFleetingUpdate(Scene* scene, const usize entity)
     }
 }
 
+void SAnimationUpdate(Scene* scene, const usize entity)
+{
+    REQUIRE_DEPS(TAG_ANIMATION);
+
+    CAnimation* animation = GET_COMPONENT(animation, entity);
+
+    animation->frameTimer += CTX_DT;
+
+    if (animation->frameTimer >= animation->frameDuration)
+    {
+        animation->frameTimer = 0.0f;
+        animation->frame = (animation->frame + 1) % animation->length;
+    }
+}
+
 void SSpriteDraw(const Scene* scene, const usize entity)
 {
     REQUIRE_DEPS(TAG_POSITION | TAG_COLOR | TAG_SPRITE);
