@@ -24,6 +24,7 @@ typedef struct
     CMortal mortals[MAX_ENTITIES];
     CDamage damages[MAX_ENTITIES];
     CFleeting fleetings[MAX_ENTITIES];
+    CAnimation animations[MAX_ENTITIES];
 } Components;
 
 typedef struct
@@ -84,7 +85,8 @@ void SceneDestroy(Scene* self);
     CPlayer: mScene->components.players[mEntity], \
     CMortal: mScene->components.mortals[mEntity], \
     CDamage: mScene->components.damages[mEntity], \
-    CFleeting: mScene->components.fleetings[mEntity])
+    CFleeting: mScene->components.fleetings[mEntity], \
+    CAnimation: mScene->components.animations[mEntity])
 
 #define SCENE_GET_COMPONENT_PTR(mScene, mValue, mEntity) _Generic((mValue), \
     const CPosition*: &mScene->components.positions[mEntity], \
@@ -108,7 +110,9 @@ void SceneDestroy(Scene* self);
     const CDamage*: &mScene->components.damages[mEntity], \
     CDamage*: &mScene->components.damages[mEntity], \
     const CFleeting*: &mScene->components.fleetings[mEntity], \
-    CFleeting*: &mScene->components.fleetings[mEntity])
+    CFleeting*: &mScene->components.fleetings[mEntity], \
+    const CAnimation*: &mScene->components.animations[mEntity], \
+    CAnimation*: &mScene->components.animations[mEntity])
 
 #define SCENE_SET_COMPONENT(mScene, mEntity, mValue) \
     SCENE_GET_COMPONENT(mScene, mValue, mEntity) = mValue

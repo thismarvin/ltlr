@@ -20,6 +20,7 @@
 #define TAG_FOG_BREATHING ((u64)1 << 14)
 #define TAG_FOG_MOVING ((u64)1 << 15)
 #define TAG_CLOUD_PARTICLE ((u64)1 << 16)
+#define TAG_ANIMATION ((u64)1 << 17)
 
 #define RESOLVE_NONE ((u8)0)
 #define RESOLVE_UP ((u8)1 << 0)
@@ -117,6 +118,17 @@ typedef struct
 
 typedef struct
 {
+    f32 frameTimer;
+    f32 frameDuration;
+    Vector2 offset;
+    SpriteMirroring mirroring;
+    u16 frame;
+    u16 length;
+    u8 handle;
+} CAnimation;
+
+typedef struct
+{
     Vector2 velocity;
     Vector2 acceleration;
 } CKinetic;
@@ -191,6 +203,7 @@ typedef struct
         CMortal mortal;
         CDamage damage;
         CFleeting fleeting;
+        CAnimation animation;
     };
 } Component;
 
@@ -205,3 +218,4 @@ Component ComponentCreateCPlayer(CPlayer value);
 Component ComponentCreateCMortal(CMortal value);
 Component ComponentCreateCDamage(CDamage value);
 Component ComponentCreateCFleeting(CFleeting value);
+Component ComponentCreateCAnimation(CAnimation value);

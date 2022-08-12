@@ -163,6 +163,12 @@ static void SceneExecuteSetComponent(Scene* self, const CommandSetComponent* set
             SCENE_SET_COMPONENT(self, entity, component->fleeting);
             break;
         }
+
+        case TAG_ANIMATION:
+        {
+            SCENE_SET_COMPONENT(self, entity, component->animation);
+            break;
+        }
     }
 }
 

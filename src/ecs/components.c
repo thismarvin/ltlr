@@ -98,3 +98,12 @@ Component ComponentCreateCFleeting(CFleeting value)
         .fleeting = value,
     };
 }
+
+Component ComponentCreateCAnimation(CAnimation value)
+{
+    return (Component)
+    {
+        .tag = TAG_ANIMATION,
+        .animation = value,
+    };
+}
