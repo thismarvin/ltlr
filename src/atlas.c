@@ -43,7 +43,6 @@ void AtlasInit(Atlas* self, const char* path)
             const cJSON* trimRectHeightObj = cJSON_GetObjectItem(trimRectObj, "height");
 
             char* name = cJSON_GetStringValue(nameObj);
-            const usize nameLength = strlen(name);
             const u16 x = (u16)cJSON_GetNumberValue(xObj);
             const u16 y = (u16)cJSON_GetNumberValue(yObj);
             const u16 width = (u16)cJSON_GetNumberValue(widthObj);
