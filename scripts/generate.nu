@@ -174,74 +174,101 @@ export def "makefile desktop" [
 		}
 	)
 
-	let source-headers = (
-		(ls src/**/*.h).name
-		| wrap 'header'
-	)
-	let source-input = (
-		(ls src/**/*.c).name
-		| wrap 'input'
-	)
+	let sources = do {
+		let input = (ls src/**/*.c).name
+		let output = do {
+			$input
+			| str replace 'src/(.+/)*(.+)\.c' $'($output-directory)/$1$2.o'
+		}
+		let input = ($input | wrap 'input')
+		let output = ($output | wrap 'output')
 
-	let source-output = (
-		$source-input.input
-		| str replace 'src/((?:\w+/)*)(?:(\w+)\.c)' $"($output-directory)/$1$2.o"
-		| wrap 'output'
-	)
+		($input | merge { $output })
+	}
 
-	let source = (
-		$source-input
-		| merge { $source-output }
-	)
+	let kickstarter = do {
+		let objects = (
+			$sources.output
+			| each { |it| $"\t($it) \\" }
+			| ($in | str collect "\n")
+			| $"OBJECTS := \\\n($in)"
+		)
 
-	let source-directories = (
-		$source.output
-		| each { |it| $it | path dirname }
-		| uniq
-	)
+		let dependencies = (
+			$sources.output
+			| str replace '(.+)\.o' '$1.d'
+			| each { |it| $"\t($it) \\" }
+			| ($in | str collect "\n")
+			| $"DEPENDENCIES := \\\n($in)"
+		)
 
-	let required-directories = (
 		[]
-		| append $source-directories
-		| uniq
-		| each { |it| stagger-path $it }
-		| flatten
-		| uniq
-	)
+		| append $objects
+		| append $dependencies
+		| str collect "\n\n"
+	}
 
-	let makefile-source-headers = (
-		$source-headers.header
-		| each { |it| $"\t($it) \\" }
-		| str collect "\n"
-	)
-	let makefile-source-input = (
-		$source.input
-		| each { |it| $"\t($it) \\" }
-		| str collect "\n"
-	)
-	let makefile-source-output = (
-		$source.output
-		| each { |it| $"\t($it) \\" }
-		| str collect "\n"
-	)
+	let rules = do {
+		let dependency-rules = (
+			"-include $\(DEPENDENCIES)\n"
+		)
+		let directory-rules = do {
+			let directories = (
+				$sources.output
+				| each { |it| $it | path dirname }
+				| uniq
+				| each { |it| stagger-path $it }
+				| flatten
+				| uniq
+			)
 
-	let entries = (
-		$required-directories
-		| each { |it| { dir: $it, parent: ($it | path dirname) }}
-	)
-	let makefile-directory-rules = (
-		$entries
-		| each { |it| if not ($it.parent | empty?) { $"($it.dir): | ($it.parent)\n" } else { $"($it.dir):\n" }}
-		| each { |it| $"($it)\tmkdir $@\n" }
-		| str collect "\n"
-	)
+			def generate-rule [ directory: string ] {
+				let target = $directory
+				let prerequisites = do {
+					let dirname = ($directory | path dirname)
+					if (not ($dirname | empty?)) and ($dirname != $target) {
+						$' | ($dirname)'
+					} else {
+						''
+					}
+				}
+				let recipe = 'mkdir $@'
 
-	let makefile-source-rules = (
-		$source
-		| each { |it| $"($it.output): ($it.input) $\(SOURCE_HEADERS) | ($it.output | path dirname)\n" }
-		| each { |it| $"($it)\t$\(CC) $\(CFLAGS) -o $@ -c $<\n" }
+				$"($target):($prerequisites)\n\t($recipe)\n"
+			}
+
+			$directories
+			| each { |it| generate-rule $it }
+			| str collect "\n"
+		};
+		let object-rules = do {
+			def generate-rule [ input: string, output: string ] {
+				let target = $output
+				let prerequisites = $' ($input) | ($target | path dirname)'
+				let recipe = $"$\(CC) $\(CFLAGS) -MMD -o $@ -c $<"
+
+				$"($target):($prerequisites)\n\t($recipe)\n"
+			}
+
+			$sources
+			| each { |it| generate-rule $it.input $it.output }
+			| str collect "\n"
+		}
+		let output-rules = do {
+			let target = $"($output-directory)/$\(BIN)"
+			let prerequisites = $" $\(OBJECTS) | ($target | path dirname)"
+			let recipe = $"$\(CC) $\(CFLAGS) -o $@ $^ $\(LDLIBS)"
+
+			$"($target):($prerequisites)\n\t($recipe)"
+		}
+
+		[]
+		| append $dependency-rules
+		| append $directory-rules
+		| append $object-rules
+		| append $output-rules
 		| str collect "\n"
-	)
+	}
 
 $"# This file is auto-generated; any changes you make may be overwritten.
 
@@ -249,30 +276,21 @@ CC := gcc
 
 BIN := ltlr
 BUILD := debug
+cflags.warnings := -Wall -Wextra -Wpedantic
 cflags.debug := -g -pg -Og
 cflags.release := -g -O2
-CFLAGS := -std=c17 -Wall -Wextra -Wpedantic $\(cflags.$\(BUILD)) -Ivendor/raylib/src -Ivendor/cJSON/src -DPLATFORM_DESKTOP
+CFLAGS := -std=c17 $\(cflags.warnings) $\(cflags.$\(BUILD)) -Ivendor/raylib/src -Ivendor/cJSON/src -DPLATFORM_DESKTOP
 ldlibs.vendor = $\(shell pkg-config --libs gl)
 LDLIBS := -Llib/desktop -lcJSON -lraylib $\(ldlibs.vendor) -lm
 
-SOURCE_HEADERS := \\
-($makefile-source-headers)
-
-SOURCE_INPUT := \\
-($makefile-source-input)
-
-SOURCE_OUTPUT := \\
-($makefile-source-output)
-
 $\(VERBOSE).SILENT:
+
+($kickstarter)
 
 .PHONY: @all
 @all: @clean @desktop
 
-($makefile-directory-rules)
-($makefile-source-rules)
-($output-directory)/$\(BIN): $\(SOURCE_OUTPUT) | ($output-directory)
-	$\(CC) $\(CFLAGS) -o $@ $^ $\(LDLIBS)
+($rules)
 
 .PHONY: @desktop
 @desktop: ($output-directory)/$\(BIN)
@@ -281,6 +299,7 @@ $\(VERBOSE).SILENT:
 @clean:
 	if [ -d \"($output-directory)\" ]; then rm -r ($output-directory); fi
 "
+	| str trim
 }
 
 export def "makefile web" [
@@ -296,74 +315,93 @@ export def "makefile web" [
 		}
 	)
 
-	let source-headers = (
-		(ls src/**/*.h).name
-		| wrap 'header'
-	)
-	let source-input = (
-		(ls src/**/*.c).name
-		| wrap 'input'
-	)
+	let sources = do {
+		let input = (ls src/**/*.c).name
+		let output = do {
+			$input
+			| str replace 'src/(.+/)*(.+)\.c' $'($output-directory)/$1$2.o'
+		}
+		let input = ($input | wrap 'input')
+		let output = ($output | wrap 'output')
 
-	let source-output = (
-		$source-input.input
-		| str replace 'src/((?:\w+/)*)(?:(\w+)\.c)' $"($output-directory)/$1$2.o"
-		| wrap 'output'
-	)
+		($input | merge { $output })
+	}
 
-	let source = (
-		$source-input
-		| merge { $source-output }
-	)
+	let kickstarter = do {
+		let objects = (
+			$sources.output
+			| each { |it| $"\t($it) \\" }
+			| ($in | str collect "\n")
+			| $"OBJECTS := \\\n($in)"
+		)
 
-	let source-directories = (
-		$source.output
-		| each { |it| $it | path dirname }
-		| uniq
-	)
+		let dependencies = (
+			$sources.output
+			| str replace '(.+)\.o' '$1.d'
+			| each { |it| $"\t($it) \\" }
+			| ($in | str collect "\n")
+			| $"DEPENDENCIES := \\\n($in)"
+		)
 
-	let required-directories = (
 		[]
-		| append $source-directories
-		| uniq
-		| each { |it| stagger-path $it }
-		| flatten
-		| uniq
-	)
+		| append $objects
+		| append $dependencies
+		| str collect "\n\n"
+	}
 
-	let makefile-source-headers = (
-		$source-headers.header
-		| each { |it| $"\t($it) \\" }
-		| str collect "\n"
-	)
-	let makefile-source-input = (
-		$source.input
-		| each { |it| $"\t($it) \\" }
-		| str collect "\n"
-	)
-	let makefile-source-output = (
-		$source.output
-		| each { |it| $"\t($it) \\" }
-		| str collect "\n"
-	)
+	let rules = do {
+		let dependency-rules = (
+			"-include $\(DEPENDENCIES)\n"
+		)
+		let directory-rules = do {
+			let directories = (
+				$sources.output
+				| each { |it| $it | path dirname }
+				| uniq
+				| each { |it| stagger-path $it }
+				| flatten
+				| uniq
+			)
 
-	let entries = (
-		$required-directories
-		| each { |it| { dir: $it, parent: ($it | path dirname) }}
-	)
-	let makefile-directory-rules = (
-		$entries
-		| each { |it| if not ($it.parent | empty?) { $"($it.dir): | ($it.parent)\n" } else { $"($it.dir):\n" }}
-		| each { |it| $"($it)\tmkdir $@\n" }
-		| str collect "\n"
-	)
+			def generate-rule [ directory: string ] {
+				let target = $directory
+				let prerequisites = do {
+					let dirname = ($directory | path dirname)
+					if (not ($dirname | empty?)) and ($dirname != $target) {
+						$' | ($dirname)'
+					} else {
+						''
+					}
+				}
+				let recipe = 'mkdir $@'
 
-	let makefile-source-rules = (
-		$source
-		| each { |it| $"($it.output): ($it.input) $\(SOURCE_HEADERS) | ($it.output | path dirname)\n" }
-		| each { |it| $"($it)\t$\(EMCC) $\(CFLAGS) -o $@ -c $<\n" }
+				$"($target):($prerequisites)\n\t($recipe)\n"
+			}
+
+			$directories
+			| each { |it| generate-rule $it }
+			| str collect "\n"
+		};
+		let object-rules = do {
+			def generate-rule [ input: string, output: string ] {
+				let target = $output
+				let prerequisites = $' ($input) | ($target | path dirname)'
+				let recipe = $"$\(EMCC) $\(CFLAGS) -MMD -o $@ -c $<"
+
+				$"($target):($prerequisites)\n\t($recipe)\n"
+			}
+
+			$sources
+			| each { |it| generate-rule $it.input $it.output }
+			| str collect "\n"
+		}
+
+		[]
+		| append $dependency-rules
+		| append $directory-rules
+		| append $object-rules
 		| str collect "\n"
-	)
+	}
 
 $"# This file is auto-generated; any changes you make may be overwritten.
 
@@ -376,25 +414,18 @@ EM_CACHE := .emscripten-cache
 TOTAL_MEMORY := 33554432
 SHELL_FILE := src/minshell.html
 
-SOURCE_HEADERS := \\
-($makefile-source-headers)
-
-SOURCE_INPUT := \\
-($makefile-source-input)
-
-SOURCE_OUTPUT := \\
-($makefile-source-output)
-
 $\(VERBOSE).SILENT:
+
+($kickstarter)
 
 .PHONY: @all
 @all: @clean @web
 
+($rules)
 $\(EM_CACHE):
 	mkdir $@
-($makefile-directory-rules)
-($makefile-source-rules)
-($output-directory)/index.html: $\(SOURCE_OUTPUT) | $\(EM_CACHE) ($output-directory)
+
+($output-directory)/index.html: $\(OBJECTS) | $\(EM_CACHE) ($output-directory)
 	$\(EMCC) $\(CFLAGS) -o $@ $^ $\(LDLIBS) -s USE_GLFW=3 -s TOTAL_MEMORY=$\(TOTAL_MEMORY) --memory-init-file 0 --shell-file $\(SHELL_FILE) --preload-file build/content --cache $\(EM_CACHE)
 
 .PHONY: @web
@@ -404,4 +435,5 @@ $\(EM_CACHE):
 @clean:
 	if [ -d \"($output-directory)\" ]; then rm -r ($output-directory); fi
 "
+	| str trim
 }
