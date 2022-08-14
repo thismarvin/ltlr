@@ -241,11 +241,7 @@ usize SceneGetEntityCount(const Scene* self)
 
 static void SceneSetupContent(Scene* self)
 {
-#if defined(PLATFORM_WEB)
-    self->atlas = LoadTexture("./build/content/atlas.png");
-#else
     self->atlas = LoadTexture("./content/atlas.png");
-#endif
 }
 
 static void SceneSetupInput(Scene* self)
@@ -419,11 +415,11 @@ static void SceneSetupLevelSegments(Scene* self)
 {
     // TODO(thismarvin): Should we crawl the resource directory to find levels?
 
-#if defined(PLATFORM_WEB)
-    const char* levels[2] = { "./build/content/level_00.json", "./build/content/level_01.json" };
-#else
-    const char* levels[2] = { "./content/level_00.json", "./content/level_01.json" };
-#endif
+    const char* levels[2] =
+    {
+        "./content/levels/level_00.json",
+        "./content/levels/level_01.json"
+    };
 
     self->segmentsLength = 2;
     self->segments = malloc(sizeof(LevelSegment) * self->segmentsLength);

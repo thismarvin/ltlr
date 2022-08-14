@@ -8,13 +8,10 @@ $(VERBOSE).SILENT:
 .PHONY: @all
 @all: @clean @desktop @web
 
-Makefile.Content: content
-	$(NU) -c "use scripts/generate.nu; generate makefile content | save Makefile.Content"
-
-Makefile.Desktop: src
+Makefile.Desktop: scripts/generate.nu src
 	$(NU) -c "use scripts/generate.nu; generate makefile desktop | save Makefile.Desktop"
 
-Makefile.Web: src
+Makefile.Web: scripts/generate.nu src
 	$(NU) -c "use scripts/generate.nu; generate makefile web | save Makefile.Web"
 
 .PHONY: @vendor/desktop
@@ -28,20 +25,12 @@ Makefile.Web: src
 .PHONY: @vendor
 @vendor: @vendor/desktop @vendor/web
 
-.PHONY: @content
-@content: Makefile.Content
-	$(MAKE) -f $< @content
-
 .PHONY: @desktop
-@desktop: @vendor/desktop @content Makefile.Desktop
+@desktop: @vendor/desktop Makefile.Desktop
 	$(MAKE) -f Makefile.Desktop @desktop
 
-	if [ -d "build/desktop/content" ]; then rm -r build/desktop/content; fi
-	mkdir build/desktop/content
-	cp -R build/content/. build/desktop/content
-
 .PHONY: @web
-@web: @vendor/web @content Makefile.Web
+@web: @vendor/web Makefile.Web
 	$(MAKE) -f Makefile.Web @web
 
 .PHONY: @dev
@@ -61,7 +50,6 @@ Makefile.Web: src
 
 .PHONY: @clean
 @clean:
-	if [ -f "Makefile.Content" ]; then rm Makefile.Content; fi
 	if [ -f "Makefile.Desktop" ]; then rm Makefile.Desktop; fi
 	if [ -f "Makefile.Web" ]; then rm Makefile.Web; fi
 	if [ -d "build" ]; then rm -r build; fi

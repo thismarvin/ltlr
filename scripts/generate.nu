@@ -15,154 +15,6 @@ def stagger-path [ path: string ] {
 	| flatten
 }
 
-export def "makefile content" [
-	--out-dir: string # Change the output directory
-] {
-	let output-directory = (
-		if ($out-dir | empty?) {
-			'build/content'
-		} else {
-			$out-dir
-		}
-	)
-
-	let bundled = do {
-		let input = do {
-			ls content/bundle/**/*
-			| where type == file
-			| get name
-		}
-		let output = do {
-			$input
-			| str replace 'content/bundle/(.+/)*(.+)' $'($output-directory)/$1$2'
-		}
-		let input = ($input | wrap 'input')
-		let output = ($output | wrap 'output')
-		
-		($input | merge { $output })
-	}
-	let levels = do {
-		let input = (ls content/tiled/**/*.tmx).name
-		let output = do {
-			$input
-			| str replace 'content/tiled/((?:\w+/)*)(?:(\w+)\.tmx)' $"($output-directory)/$1$2.json"
-		}
-		let input = ($input | wrap 'input')
-		let output = ($output | wrap 'output')
-
-		($input | merge { $output })
-	}
-
-	let bundled-directories = (
-		$bundled.output
-		| each { |it| $it | path dirname }
-		| uniq
-	)
-	let levels-directories = (
-		$levels.output
-		| each { |it| $it | path dirname }
-		| uniq
-	)
-	let required-directories = (
-		[]
-		| append $bundled-directories
-		| append $levels-directories
-		| uniq
-		| each { |it| stagger-path $it }
-		| flatten
-		| uniq
-	)
-
-	let makefile-bundled-output = (
-		$bundled.output
-		| each { |it| $"\t($it) \\" }
-		| str collect "\n"
-	)
-	let makefile-levels-output = (
-		$levels.output
-		| each { |it| $"\t($it) \\" }
-		| str collect "\n"
-	)
-
-	let makefile-directory-rules = do {
-		def generate-rule [ directory: string ] {
-			let target = $directory
-			let prerequisites = do {
-				let dirname = ($directory | path dirname)
-				if (not ($dirname | empty?)) and ($dirname != $target) {
-					$' | ($dirname)'
-				} else {
-					''
-				}
-			}
-			let recipe = 'mkdir $@'
-
-			$"($target):($prerequisites)\n\t($recipe)\n"
-		}
-
-		$required-directories
-		| each { |it| generate-rule $it }
-		| str collect "\n"
-	}
-
-	let makefile-bundled-rules = do {
-		def generate-rule [ input: string, output: string ] {
-			let target = $output
-			let prerequisites = $' ($input) | ($target | path dirname)'
-			let recipe = $'cp $< ($target | path dirname)'
-
-			$"($target):($prerequisites)\n\t($recipe)\n"
-		}
-
-		$bundled
-		| each { |it| generate-rule $it.input $it.output }
-		| str collect "\n"
-	}
-	let makefile-level-rules = do {
-		def generate-rule [ input: string, output: string ] {
-			let target = $output
-			let prerequisites = $' ($input) | ($target | path dirname)'
-			let recipe = $"\t$\(TILED) --embed-tilesets --export-map json $< $@\n\t$\(PRETTIER) --use-tabs -w $@"
-
-			$"($target):($prerequisites)\n($recipe)\n"
-		}
-
-		$levels
-		| each { |it| generate-rule $it.input $it.output }
-		| str collect "\n"
-	}
-
-$"# This file is auto-generated; any changes you make may be overwritten.
-
-TILED := tiled
-PRETTIER := prettier
-
-BUNDLED_OUTPUT := \\
-($makefile-bundled-output)
-
-LEVELS_OUTPUT := \\
-($makefile-levels-output)
-
-CONTENT := $\(BUNDLED_OUTPUT) $\(LEVELS_OUTPUT)
-
-$\(VERBOSE).SILENT:
-
-.PHONY: @all
-@all: @clean @content
-
-($makefile-directory-rules)
-($makefile-bundled-rules)
-($makefile-level-rules)
-.PHONY: @content
-@content: $\(CONTENT)
-
-.PHONY: @clean
-@clean:
-	if [ -d \"($output-directory)\" ]; then rm -r ($output-directory); fi
-"
-	| str trim
-}
-
 export def "makefile desktop" [
 	--out-dir: string # Change the output directory
 ] {
@@ -185,26 +37,49 @@ export def "makefile desktop" [
 
 		($input | merge { $output })
 	}
+	let content = do {
+		let input = do {
+			ls content/**/*
+			| where $it.type == file
+			| get name
+		}
+		let output = do {
+			$input
+			| each { |it| $'($output-directory)/($it)' }
+		}
+		let input = ($input | wrap 'input')
+		let output = ($output | wrap 'output')
+
+		($input | merge { $output })
+	}
 
 	let kickstarter = do {
-		let objects = (
+		let objects = do {
 			$sources.output
 			| each { |it| $"\t($it) \\" }
 			| ($in | str collect "\n")
 			| $"OBJECTS := \\\n($in)"
-		)
+		}
 
-		let dependencies = (
+		let dependencies = do {
 			$sources.output
 			| str replace '(.+)\.o' '$1.d'
 			| each { |it| $"\t($it) \\" }
 			| ($in | str collect "\n")
 			| $"DEPENDENCIES := \\\n($in)"
-		)
+		}
+
+		let content = do {
+			$content.output
+			| each { |it| $"\t($it) \\" }
+			| ($in | str collect "\n")
+			| $"CONTENT := \\\n($in)"
+		}
 
 		[]
 		| append $objects
 		| append $dependencies
+		| append $content
 		| str collect "\n\n"
 	}
 
@@ -213,14 +88,16 @@ export def "makefile desktop" [
 			"-include $\(DEPENDENCIES)\n"
 		)
 		let directory-rules = do {
-			let directories = (
-				$sources.output
+			let directories = do {
+				[]
+				| append $sources.output
+				| append $content.output
 				| each { |it| $it | path dirname }
 				| uniq
 				| each { |it| stagger-path $it }
 				| flatten
 				| uniq
-			)
+			}
 
 			def generate-rule [ directory: string ] {
 				let target = $directory
@@ -254,6 +131,19 @@ export def "makefile desktop" [
 			| each { |it| generate-rule $it.input $it.output }
 			| str collect "\n"
 		}
+		let content-rules = do {
+			def generate-rule [ input: string, output: string ] {
+				let target = $output
+				let prerequisites = $' ($input) | ($target | path dirname)'
+				let recipe = $"cp $< ($target | path dirname)"
+
+				$"($target):($prerequisites)\n\t($recipe)\n"
+			}
+
+			$content
+			| each { |it| generate-rule $it.input $it.output }
+			| str collect "\n"
+		}
 		let output-rules = do {
 			let target = $"($output-directory)/$\(BIN)"
 			let prerequisites = $" $\(OBJECTS) | ($target | path dirname)"
@@ -266,6 +156,7 @@ export def "makefile desktop" [
 		| append $dependency-rules
 		| append $directory-rules
 		| append $object-rules
+		| append $content-rules
 		| append $output-rules
 		| str collect "\n"
 	}
@@ -293,7 +184,7 @@ $\(VERBOSE).SILENT:
 ($rules)
 
 .PHONY: @desktop
-@desktop: ($output-directory)/$\(BIN)
+@desktop: ($output-directory)/$\(BIN) $\(CONTENT)
 
 .PHONY: @clean
 @clean:
@@ -326,26 +217,49 @@ export def "makefile web" [
 
 		($input | merge { $output })
 	}
+	let content = do {
+		let input = do {
+			ls content/**/*
+			| where $it.type == file
+			| get name
+		}
+		let output = do {
+			$input
+			| str replace 'content/(.+/)*(.+)' $'($output-directory)/$1$2'
+		}
+		let input = ($input | wrap 'input')
+		let output = ($output | wrap 'output')
+
+		($input | merge { $output })
+	}
 
 	let kickstarter = do {
-		let objects = (
+		let objects = do {
 			$sources.output
 			| each { |it| $"\t($it) \\" }
 			| ($in | str collect "\n")
 			| $"OBJECTS := \\\n($in)"
-		)
+		}
 
-		let dependencies = (
+		let dependencies = do {
 			$sources.output
 			| str replace '(.+)\.o' '$1.d'
 			| each { |it| $"\t($it) \\" }
 			| ($in | str collect "\n")
 			| $"DEPENDENCIES := \\\n($in)"
-		)
+		}
+
+		let content = do {
+			$content.output
+			| each { |it| $"\t($it) \\" }
+			| ($in | str collect "\n")
+			| $"CONTENT := \\\n($in)"
+		}
 
 		[]
 		| append $objects
 		| append $dependencies
+		| append $content
 		| str collect "\n\n"
 	}
 
@@ -354,14 +268,16 @@ export def "makefile web" [
 			"-include $\(DEPENDENCIES)\n"
 		)
 		let directory-rules = do {
-			let directories = (
-				$sources.output
+			let directories = do {
+				[]
+				| append $sources.output
+				| append $content.output
 				| each { |it| $it | path dirname }
 				| uniq
 				| each { |it| stagger-path $it }
 				| flatten
 				| uniq
-			)
+			}
 
 			def generate-rule [ directory: string ] {
 				let target = $directory
@@ -395,11 +311,33 @@ export def "makefile web" [
 			| each { |it| generate-rule $it.input $it.output }
 			| str collect "\n"
 		}
+		let content-rules = do {
+			def generate-rule [ input: string, output: string ] {
+				let target = $output
+				let prerequisites = $' ($input) | ($target | path dirname)'
+				let recipe = $"cp $< ($target | path dirname)"
+
+				$"($target):($prerequisites)\n\t($recipe)\n"
+			}
+
+			$content
+			| each { |it| generate-rule $it.input $it.output }
+			| str collect "\n"
+		}
+		let output-rules = do {
+			let target = $"($output-directory)/$\(BIN)"
+			let prerequisites = $" $\(OBJECTS) | ($target | path dirname)"
+			let recipe = $"$\(CC) $\(CFLAGS) -o $@ $^ $\(LDLIBS)"
+
+			$"($target):($prerequisites)\n\t($recipe)"
+		}
 
 		[]
 		| append $dependency-rules
 		| append $directory-rules
 		| append $object-rules
+		| append $content-rules
+		| append $output-rules
 		| str collect "\n"
 	}
 
@@ -426,7 +364,7 @@ $\(EM_CACHE):
 	mkdir $@
 
 ($output-directory)/index.html: $\(OBJECTS) | $\(EM_CACHE) ($output-directory)
-	$\(EMCC) $\(CFLAGS) -o $@ $^ $\(LDLIBS) -s USE_GLFW=3 -s TOTAL_MEMORY=$\(TOTAL_MEMORY) --memory-init-file 0 --shell-file $\(SHELL_FILE) --preload-file build/content --cache $\(EM_CACHE)
+	$\(EMCC) $\(CFLAGS) -o $@ $^ $\(LDLIBS) -s USE_GLFW=3 -s TOTAL_MEMORY=$\(TOTAL_MEMORY) --memory-init-file 0 --shell-file $\(SHELL_FILE) --preload-file content --cache $\(EM_CACHE)
 
 .PHONY: @web
 @web: ($output-directory)/index.html
