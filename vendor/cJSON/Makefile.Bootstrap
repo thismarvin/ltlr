@@ -1,4 +1,4 @@
-GIT := git
+GIT ?= git
 
 TAG := v1.7.15
 

@@ -1,7 +1,7 @@
-EMCC := emcc
-EMAR := emar
+EMCC ?= emcc
+EMAR ?= emar
 
-DESTDIR := .
+DESTDIR ?= .
 CFLAGS := -std=c89 -O1
 
 $(VERBOSE).SILENT:

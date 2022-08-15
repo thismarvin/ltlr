@@ -1,7 +1,7 @@
-CC := gcc
-AR := ar
+CC ?= gcc
+AR ?= ar
 
-DESTDIR := .
+DESTDIR ?= .
 CFLAGS := -std=c89 -O1
 
 $(VERBOSE).SILENT:

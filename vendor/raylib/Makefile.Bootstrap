@@ -1,5 +1,5 @@
-GIT := git
-NU := nu
+GIT ?= git
+NU ?= nu
 
 TAG := 4.0.0
 

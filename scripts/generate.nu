@@ -163,16 +163,17 @@ export def "makefile desktop" [
 
 $"# This file is auto-generated; any changes you make may be overwritten.
 
-CC := gcc
+CC ?= gcc
 
-BIN := ltlr
-BUILD := debug
+DESTDIR ?= .
+BIN ?= ltlr
+BUILD ?= debug
 cflags.warnings := -Wall -Wextra -Wpedantic
 cflags.debug := -g -pg -Og
 cflags.release := -g -O2
 CFLAGS := -std=c17 $\(cflags.warnings) $\(cflags.$\(BUILD)) -Ivendor/raylib/src -Ivendor/cJSON/src -DPLATFORM_DESKTOP
 ldlibs.vendor = $\(shell pkg-config --libs gl)
-LDLIBS := -Llib/desktop -lcJSON -lraylib $\(ldlibs.vendor) -lm
+LDLIBS := -L$\(DESTDIR)/lib/desktop -lcJSON -lraylib $\(ldlibs.vendor) -lm
 
 $\(VERBOSE).SILENT:
 
@@ -343,13 +344,13 @@ export def "makefile web" [
 
 $"# This file is auto-generated; any changes you make may be overwritten.
 
-EMCC := emcc
+EMCC ?= emcc
 
 CFLAGS := -std=c17 -Wall -Wextra -Wpedantic -g -O2 -Ivendor/raylib/src -Ivendor/cJSON/src -DPLATFORM_WEB
 LDLIBS := -Llib/web -lraylib -lcJSON
-EM_CACHE := .emscripten-cache
+EM_CACHE ?= .emscripten-cache
 
-TOTAL_MEMORY := 33554432
+TOTAL_MEMORY ?= 33554432
 SHELL_FILE := src/minshell.html
 
 $\(VERBOSE).SILENT:

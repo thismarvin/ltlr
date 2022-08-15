@@ -1,7 +1,7 @@
-EMCC := emcc
-EMAR := emar
+EMCC ?= emcc
+EMAR ?= emar
 
-DESTDIR := .
+DESTDIR ?= .
 CFLAGS := -O1 -DPLATFORM_WEB -DGRAPHICS_API_OPENGL_ES2
 
 $(VERBOSE).SILENT:
