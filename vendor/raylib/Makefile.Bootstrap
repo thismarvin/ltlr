@@ -1,7 +1,7 @@
 GIT ?= git
 NU ?= nu
 
-TAG := 4.0.0
+TAG := 4.2.0
 
 $(VERBOSE).SILENT:
 
