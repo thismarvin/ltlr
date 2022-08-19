@@ -35,12 +35,6 @@ EntityBuilder FogCreate(void)
         .value = FOG_INITIAL_POSITION,
     }));
 
-    ADD_COMPONENT(CDimension, ((CDimension)
-    {
-        .width = 32,
-        .height = FOG_HEIGHT,
-    }));
-
     ADD_COMPONENT(CColor, ((CColor)
     {
         .value = COLOR_BLACK,
@@ -176,7 +170,7 @@ void FogUpdate(Scene* scene, const usize entity)
 
 void FogDraw(const Scene* scene, const usize entity)
 {
-    u64 dependencies = TAG_FOG | TAG_POSITION | TAG_DIMENSION | TAG_COLOR | TAG_SMOOTH;
+    const u64 dependencies = TAG_FOG | TAG_POSITION | TAG_COLOR | TAG_SMOOTH;
 
     if (!SceneEntityHasDependencies(scene, entity, dependencies))
     {
@@ -184,7 +178,6 @@ void FogDraw(const Scene* scene, const usize entity)
     }
 
     const CPosition* position = SCENE_GET_COMPONENT_PTR(scene, position, entity);
-    const CDimension* dimension = SCENE_GET_COMPONENT_PTR(scene, dimension, entity);
     const CColor* color = SCENE_GET_COMPONENT_PTR(scene, color, entity);
     const CSmooth* smooth = SCENE_GET_COMPONENT_PTR(scene, smooth, entity);
 
@@ -193,7 +186,7 @@ void FogDraw(const Scene* scene, const usize entity)
     DrawRectangle(interpolated.x - CTX_VIEWPORT_WIDTH * 2, interpolated.y, CTX_VIEWPORT_WIDTH * 2,
                   dimension->height, color->value);
 
-    Vector2 currentCenter = Vector2Create(interpolated.x + dimension->width * 0.5f, interpolated.y);
+    Vector2 currentCenter = Vector2Create(interpolated.x, interpolated.y);
 
     const f32 radius = 32.0f;
 
