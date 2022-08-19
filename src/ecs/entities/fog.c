@@ -48,7 +48,7 @@ EntityBuilder FogCreate(void)
 
     ADD_COMPONENT(CKinetic, ((CKinetic)
     {
-        .velocity = Vector2Create(fogMoveSpeed, 0),
+        .velocity = VECTOR2_ZERO,
         .acceleration = VECTOR2_ZERO,
     }));
 
@@ -154,9 +154,10 @@ void FogUpdate(Scene* scene, const usize entity)
     CPosition* position = SCENE_GET_COMPONENT_PTR(scene, position, entity);
     CKinetic* kinetic = SCENE_GET_COMPONENT_PTR(scene, kinetic, entity);
 
-    if (position->value.x < 0 && playerPosition->value.x < CTX_VIEWPORT_WIDTH)
+    const bool hasNotMoved = kinetic->velocity.x == 0;
+    
+    if (hasNotMoved && playerPosition->value.x < CTX_VIEWPORT_WIDTH)
     {
-        kinetic->velocity = VECTOR2_ZERO;
         return;
     }
 
