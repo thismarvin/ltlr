@@ -84,7 +84,7 @@ static void SpawnBreathingParticles(Scene* scene, const CPosition* position)
             const Vector2 spawnPosition = (Vector2)
             {
                 .x = position->value.x + GetRandomValue(0, spawnDomain),
-                .y = (1.0f * i / spawnCount) * FOG_HEIGHT +
+                .y = position->value.y + (1.0f * i / spawnCount) * FOG_HEIGHT +
                      GetRandomValue(-spawnRange, spawnRange),
             };
 
