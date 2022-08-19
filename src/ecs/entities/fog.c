@@ -163,7 +163,7 @@ void FogUpdate(Scene* scene, const usize entity)
     kinetic->velocity = (Vector2)
     {
         .x = fogMoveSpeed,
-        .y = cosf(position->value.x * CTX_DT) * 32,
+        .y = cosf(ContextGetTotalTime()) * 32,
     };
 
     breathingParticleSpawnTimer += CTX_DT;
