@@ -124,10 +124,13 @@ static void SpawnMovingParticles(Scene* scene, const CPosition* position)
                 .y = GetRandomValue(0, CTX_VIEWPORT_HEIGHT),
             };
 
+            const Vector2 velocity = Vector2Create(
+                                         kinetic->velocity.x + GetRandomValue(minXSpeed, maxXSpeed),
+                                         GetRandomValue(minYSpeed, maxYSpeed));
+
             const EntityBuilder movingBuilder = FogMovingParticleCreate(
                                                     spawnPosition,
-                                                    Vector2Create(fogMoveSpeed + GetRandomValue(minXSpeed, maxXSpeed), GetRandomValue(minYSpeed,
-                                                            maxYSpeed)),
+                                                    velocity,
                                                     GetRandomValue(minSize, maxSize),
                                                     GetRandomValue(minLifetime, maxLifetime));
 
