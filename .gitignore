@@ -2,6 +2,7 @@
 !vendor/cJSON/Makefile.Web
 !vendor/raylib/Makefile.Desktop
 !vendor/raylib/Makefile.Web
+.cache
 .ccls-cache
 .emscripten-cache
 .idea
@@ -10,6 +11,7 @@ Makefile.Desktop
 Makefile.Web
 bin
 build
+compile_commands.json
 lib
 result
 target

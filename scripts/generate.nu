@@ -1,57 +1,102 @@
+def get-sources [output_directory: string] {
+	let input = do {
+		(ls src/**/*.c).name
+		| wrap 'input'
+	}
+	let output = do {
+		$input.input
+		| str replace 'src/(.+/)*(.+)\.c' $'($output_directory)/$1$2.o'
+		| wrap 'output'
+	}
+
+	($input | merge { $output })
+}
+
+def get-content [output_directory: string] {
+	let input = do {
+		ls content/**/*
+		| where $it.type == file
+		| get name
+		| wrap 'input'
+	}
+	let output = do {
+		$input.input
+		| each { |it| $'($output_directory)/($it)' }
+		| wrap 'output'
+	}
+
+	($input | merge { $output })
+}
+
 def stagger-path [ path: string ] {
 	let segments = ($path | path split)
 	let length = ($segments | length)
 	
-	let staggered = (
+	let staggered = do {
 		for i in 0..($length - 1) {
 			for j in 0..$i {
 				$"($segments | get $j)"
 			}
 		}
-	)
+	}
 
 	$staggered
 	| each { |it| $it | path join }
 	| flatten
 }
 
+export def "compilation database" [
+	--out-dir: string
+] {
+	let output_directory = if ($out-dir | empty?) { 'build/desktop' } else { $out-dir }
+	let record = get-sources $output_directory
+
+	let common_arguments = do {
+		[]
+		| append 'gcc'
+		| append '-std=c17'
+		| append '-Wall'
+		| append '-Wextra'
+		| append '-Wpedantic'
+		| append '-Ivendor/raylib/src'
+		| append '-Ivendor/cJSON/src'
+		| append '-DPLATFORM_DESKTOP'
+	}
+
+	let commands = do {
+		def generate [input: string, output: string] {
+			let directory = ($env.PWD)
+			let arguments = do {
+				$common_arguments
+				| append '-o'
+				| append $output
+				| append '-c'
+				| append $input
+			}
+			let arguments = do {
+				$arguments
+				| each { |it| $""($it)"" }
+			}
+			let arguments = ($arguments | str collect ', ')
+			let file = ($input | path expand)
+
+			$"\t{\n\t\t"directory": "($directory)",\n\t\t"file": "($file)",\n\t\t"arguments": [($arguments)],\n\t}"
+		}
+
+		$record
+		| each { |it| generate $it.input $it.output }
+		| str collect ",\n"
+	}
+
+	($"[\n($commands)\n]" | from json | to json)
+}
+
 export def "makefile desktop" [
 	--out-dir: string # Change the output directory
 ] {
-	let output-directory = (
-		if ($out-dir | empty?) {
-			'build/desktop'
-		} else {
-			$out-dir
-		}
-	)
-
-	let sources = do {
-		let input = (ls src/**/*.c).name
-		let output = do {
-			$input
-			| str replace 'src/(.+/)*(.+)\.c' $'($output-directory)/$1$2.o'
-		}
-		let input = ($input | wrap 'input')
-		let output = ($output | wrap 'output')
-
-		($input | merge { $output })
-	}
-	let content = do {
-		let input = do {
-			ls content/**/*
-			| where $it.type == file
-			| get name
-		}
-		let output = do {
-			$input
-			| each { |it| $'($output-directory)/($it)' }
-		}
-		let input = ($input | wrap 'input')
-		let output = ($output | wrap 'output')
-
-		($input | merge { $output })
-	}
+	let output_directory = if ($out-dir | empty?) { 'build/desktop' } else { $out-dir }
+	let sources = get-sources $output_directory
+	let content = get-content $output_directory
 
 	let kickstarter = do {
 		let objects = do {
@@ -84,10 +129,10 @@ export def "makefile desktop" [
 	}
 
 	let rules = do {
-		let dependency-rules = (
+		let dependency_rules = (
 			"-include $\(DEPENDENCIES)\n"
 		)
-		let directory-rules = do {
+		let directory_rules = do {
 			let directories = do {
 				[]
 				| append $sources.output
@@ -118,7 +163,7 @@ export def "makefile desktop" [
 			| each { |it| generate-rule $it }
 			| str collect "\n"
 		};
-		let object-rules = do {
+		let object_rules = do {
 			def generate-rule [ input: string, output: string ] {
 				let target = $output
 				let prerequisites = $' ($input) | ($target | path dirname)'
@@ -131,7 +176,7 @@ export def "makefile desktop" [
 			| each { |it| generate-rule $it.input $it.output }
 			| str collect "\n"
 		}
-		let content-rules = do {
+		let content_rules = do {
 			def generate-rule [ input: string, output: string ] {
 				let target = $output
 				let prerequisites = $' ($input) | ($target | path dirname)'
@@ -144,8 +189,8 @@ export def "makefile desktop" [
 			| each { |it| generate-rule $it.input $it.output }
 			| str collect "\n"
 		}
-		let output-rules = do {
-			let target = $"($output-directory)/$\(BIN)"
+		let output_rules = do {
+			let target = $"($output_directory)/$\(BIN)"
 			let prerequisites = $" $\(OBJECTS) | ($target | path dirname)"
 			let recipe = $"$\(CC) $\(CFLAGS) -o $@ $^ $\(LDLIBS)"
 
@@ -153,11 +198,11 @@ export def "makefile desktop" [
 		}
 
 		[]
-		| append $dependency-rules
-		| append $directory-rules
-		| append $object-rules
-		| append $content-rules
-		| append $output-rules
+		| append $dependency_rules
+		| append $directory_rules
+		| append $object_rules
+		| append $content_rules
+		| append $output_rules
 		| str collect "\n"
 	}
 
@@ -185,11 +230,11 @@ $\(VERBOSE).SILENT:
 ($rules)
 
 .PHONY: @desktop
-@desktop: ($output-directory)/$\(BIN) $\(CONTENT)
+@desktop: ($output_directory)/$\(BIN) $\(CONTENT)
 
 .PHONY: @clean
 @clean:
-	if [ -d \"($output-directory)\" ]; then rm -r ($output-directory); fi
+	if [ -d \"($output_directory)\" ]; then rm -r ($output_directory); fi
 "
 	| str trim
 }
@@ -199,40 +244,9 @@ export def "makefile web" [
 ] {
 	# TODO(thismarvin): A lot of this is copied from "makefile desktop"...
 
-	let output-directory = (
-		if ($out-dir | empty?) {
-			'build/web'
-		} else {
-			$out-dir
-		}
-	)
-
-	let sources = do {
-		let input = (ls src/**/*.c).name
-		let output = do {
-			$input
-			| str replace 'src/(.+/)*(.+)\.c' $'($output-directory)/$1$2.o'
-		}
-		let input = ($input | wrap 'input')
-		let output = ($output | wrap 'output')
-
-		($input | merge { $output })
-	}
-	let content = do {
-		let input = do {
-			ls content/**/*
-			| where $it.type == file
-			| get name
-		}
-		let output = do {
-			$input
-			| str replace 'content/(.+/)*(.+)' $'($output-directory)/$1$2'
-		}
-		let input = ($input | wrap 'input')
-		let output = ($output | wrap 'output')
-
-		($input | merge { $output })
-	}
+	let output_directory = if ($out-dir | empty?) { 'build/web' } else { $out-dir }
+	let sources = get-sources $output_directory
+	let content = get-sources $output_directory
 
 	let kickstarter = do {
 		let objects = do {
@@ -265,10 +279,10 @@ export def "makefile web" [
 	}
 
 	let rules = do {
-		let dependency-rules = (
+		let dependency_rules = (
 			"-include $\(DEPENDENCIES)\n"
 		)
-		let directory-rules = do {
+		let directory_rules = do {
 			let directories = do {
 				[]
 				| append $sources.output
@@ -280,7 +294,7 @@ export def "makefile web" [
 				| uniq
 			}
 
-			def generate-rule [ directory: string ] {
+			def generate_rule [ directory: string ] {
 				let target = $directory
 				let prerequisites = do {
 					let dirname = ($directory | path dirname)
@@ -299,7 +313,7 @@ export def "makefile web" [
 			| each { |it| generate-rule $it }
 			| str collect "\n"
 		};
-		let object-rules = do {
+		let object_rules = do {
 			def generate-rule [ input: string, output: string ] {
 				let target = $output
 				let prerequisites = $' ($input) | ($target | path dirname)'
@@ -312,7 +326,7 @@ export def "makefile web" [
 			| each { |it| generate-rule $it.input $it.output }
 			| str collect "\n"
 		}
-		let content-rules = do {
+		let content_rules = do {
 			def generate-rule [ input: string, output: string ] {
 				let target = $output
 				let prerequisites = $' ($input) | ($target | path dirname)'
@@ -325,8 +339,8 @@ export def "makefile web" [
 			| each { |it| generate-rule $it.input $it.output }
 			| str collect "\n"
 		}
-		let output-rules = do {
-			let target = $"($output-directory)/$\(BIN)"
+		let output_rules = do {
+			let target = $"($output_directory)/$\(BIN)"
 			let prerequisites = $" $\(OBJECTS) | ($target | path dirname)"
 			let recipe = $"$\(CC) $\(CFLAGS) -o $@ $^ $\(LDLIBS)"
 
@@ -334,11 +348,11 @@ export def "makefile web" [
 		}
 
 		[]
-		| append $dependency-rules
-		| append $directory-rules
-		| append $object-rules
-		| append $content-rules
-		| append $output-rules
+		| append $dependency_rules
+		| append $directory_rules
+		| append $object_rules
+		| append $content_rules
+		| append $output_rules
 		| str collect "\n"
 	}
 
@@ -364,15 +378,15 @@ $\(VERBOSE).SILENT:
 $\(EM_CACHE):
 	mkdir $@
 
-($output-directory)/index.html: $\(OBJECTS) | $\(EM_CACHE) ($output-directory)
+($output_directory)/index.html: $\(OBJECTS) | $\(EM_CACHE) ($output_directory)
 	$\(EMCC) $\(CFLAGS) -o $@ $^ $\(LDLIBS) -s USE_GLFW=3 -s TOTAL_MEMORY=$\(TOTAL_MEMORY) --memory-init-file 0 --shell-file $\(SHELL_FILE) --preload-file content --cache $\(EM_CACHE)
 
 .PHONY: @web
-@web: ($output-directory)/index.html
+@web: ($output_directory)/index.html
 
 .PHONY: @clean
 @clean:
-	if [ -d \"($output-directory)\" ]; then rm -r ($output-directory); fi
+	if [ -d \"($output_directory)\" ]; then rm -r ($output_directory); fi
 "
 	| str trim
 }

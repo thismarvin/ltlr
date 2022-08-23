@@ -8,6 +8,9 @@ $(VERBOSE).SILENT:
 .PHONY: @all
 @all: @clean @desktop @web
 
+compile_commands.json: scripts/generate.nu src
+	$(NU) -c "use scripts/generate.nu; generate compilation database | save db | mv db compile_commands.json"
+
 Makefile.Desktop: scripts/generate.nu src
 	$(NU) -c "use scripts/generate.nu; generate makefile desktop | save Makefile.Desktop"
 
@@ -34,7 +37,7 @@ Makefile.Web: scripts/generate.nu src
 	$(MAKE) -f Makefile.Web @web
 
 .PHONY: @dev
-@dev: @desktop
+@dev: compile_commands.json @desktop
 	cd build/desktop; ./ltlr
 	$(GPROF) build/desktop/ltlr build/desktop/gmon.out > build/desktop/profile
 
@@ -50,6 +53,7 @@ Makefile.Web: scripts/generate.nu src
 
 .PHONY: @clean
 @clean:
+	if [ -f "compile_commands.json" ]; then rm compile_commands.json; fi
 	if [ -f "Makefile.Desktop" ]; then rm Makefile.Desktop; fi
 	if [ -f "Makefile.Web" ]; then rm Makefile.Web; fi
 	if [ -d "build" ]; then rm -r build; fi
