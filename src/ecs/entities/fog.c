@@ -12,14 +12,16 @@
 }
 
 static const f32 fogMoveSpeed = 50;
-static f32 breathingParticleSpawnTimer = 0;
-static f32 breathingParticleSpawnDuration = 3;
-static f32 movingParticleSpawnTimer = 0;
-static f32 movingParticleSpawnDuration = 0.3f;
+static const f32 breathingParticleSpawnDuration = 5;
+static const f32 movingParticleSpawnDuration = 0.3f;
+static const f32 baseRadius = 40.0f;
+static f32 breathingParticleSpawnTimer = breathingParticleSpawnDuration;
+static f32 movingParticleSpawnTimer = movingParticleSpawnDuration;
 
 EntityBuilder FogCreate(void)
 {
     Deque components = DEQUE_OF(Component);
+    const f32 radius = 32.0f;
 
     const u64 tags =
         TAG_NONE
@@ -63,21 +65,21 @@ static void SpawnBreathingParticles(Scene* scene, const CPosition* position)
     if (breathingParticleSpawnTimer >= breathingParticleSpawnDuration)
     {
         static const i32 spawnDomain = 6;
-        static const i32 spawnRange = 12;
+        static const i32 spawnRange = 6;
 
         static const i32 minSize = 16;
         static const i32 maxSize = 32;
 
         static const i32 minLifetime = 2;
-        static const i32 maxLifetime = 12;
+        static const i32 maxLifetime = 6;
 
-        const i32 spawnCount = GetRandomValue(16, 48);
+        const i32 spawnCount = GetRandomValue(16, 24);
 
         for (i32 i = 0; i < spawnCount; i++)
         {
             const Vector2 spawnPosition = (Vector2)
             {
-                .x = position->value.x + GetRandomValue(0, spawnDomain),
+                .x = position->value.x + GetRandomValue(0, spawnDomain) + 20,
                 .y = position->value.y + (1.0f * i / spawnCount) * FOG_HEIGHT +
                      GetRandomValue(-spawnRange, spawnRange),
             };
@@ -94,14 +96,14 @@ static void SpawnBreathingParticles(Scene* scene, const CPosition* position)
     }
 }
 
-static void SpawnMovingParticles(Scene* scene, const CPosition* position)
+static void SpawnMovingParticles(Scene* scene, const CPosition* position, const CKinetic* kinetic)
 {
     if (movingParticleSpawnTimer >= movingParticleSpawnDuration)
     {
         if (GetRandomValue(0, 2) == 0)
         {
-            static const i32 minSize = 5;
-            static const i32 maxSize = 10;
+            static const i32 minSize = 3;
+            static const i32 maxSize = 6;
 
             static const i32 minXSpeed = 20;
             static const i32 maxXSpeed = 30;
@@ -161,11 +163,13 @@ void FogUpdate(Scene* scene, const usize entity)
         .y = cosf(ContextGetTotalTime()) * 32,
     };
 
+    // position->value.x = 0;
+
     breathingParticleSpawnTimer += CTX_DT;
     movingParticleSpawnTimer += CTX_DT;
 
-    SpawnBreathingParticles(scene, position);
-    SpawnMovingParticles(scene, position);
+    // SpawnBreathingParticles(scene, position);
+    SpawnMovingParticles(scene, position, kinetic);
 }
 
 void FogDraw(const Scene* scene, const usize entity)
@@ -183,16 +187,24 @@ void FogDraw(const Scene* scene, const usize entity)
 
     const Vector2 interpolated = Vector2Lerp(smooth->previous, position->value, ContextGetAlpha());
 
-    DrawRectangle(interpolated.x - CTX_VIEWPORT_WIDTH * 2, interpolated.y, CTX_VIEWPORT_WIDTH * 2,
-                  dimension->height, color->value);
-
     Vector2 currentCenter = Vector2Create(interpolated.x, interpolated.y);
 
-    const f32 radius = 32.0f;
+    const f32 radius = baseRadius + sinf(ContextGetTotalTime() * 5) * 10;
 
-    while (currentCenter.y <= position->value.y + dimension->height)
+    while (currentCenter.y <= position->value.y + FOG_HEIGHT)
+    {
+        DrawCircleV(currentCenter, radius * 1.1f, COLOR_WHITE);
+        currentCenter.y += baseRadius * 1.5f;
+    }
+
+    currentCenter = Vector2Create(interpolated.x, interpolated.y);
+
+    while (currentCenter.y <= position->value.y + FOG_HEIGHT)
     {
         DrawCircleV(currentCenter, radius, color->value);
-        currentCenter.y += radius * 1.5f;
+        currentCenter.y += baseRadius * 1.5f;
     }
+
+    DrawRectangle(interpolated.x - CTX_VIEWPORT_WIDTH * 2, interpolated.y, CTX_VIEWPORT_WIDTH * 2,
+                  FOG_HEIGHT, color->value);
 }

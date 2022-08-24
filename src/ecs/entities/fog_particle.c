@@ -133,10 +133,11 @@ void FogParticleDraw(const Scene* scene, const usize entity)
 
     Vector2 center = (Vector2)
     {
-        .x = interpolated.x + dimension->width * 0.5f,
-        .y = interpolated.y + dimension->height * 0.5f,
+        .x = interpolated.x,
+        .y = interpolated.y,
     };
 
+    // DrawCircleV(center, dimension->width * scale * 0.6f, COLOR_WHITE);
     DrawCircleV(center, dimension->width * scale * 0.5f, color->value);
 }
 

@@ -825,8 +825,12 @@ static void RenderForegroundLayer(const RenderFnParams* params)
 
     for (usize i = 0; i < SceneGetEntityCount(params->scene); ++i)
     {
-        FogDraw(params->scene, i);
         FogParticleDraw(params->scene, i);
+    }
+
+    for (usize i = 0; i < SceneGetEntityCount(params->scene); ++i)
+    {
+        FogDraw(params->scene, i);
     }
 }
 
