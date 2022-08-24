@@ -9,4 +9,5 @@ void SFleetingUpdate(Scene* scene, usize entity);
 void SAnimationUpdate(Scene* scene, usize entity);
 
 void SSpriteDraw(const Scene* scene, usize entity);
+void SAnimationDraw(const Scene* scene, usize entity);
 void SDebugDraw(const Scene* scene, usize entity);

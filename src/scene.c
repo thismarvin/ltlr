@@ -247,7 +247,8 @@ usize SceneGetEntityCount(const Scene* self)
 
 static void SceneSetupContent(Scene* self)
 {
-    self->atlas = LoadTexture("./content/atlas.png");
+    AtlasInit(&self->atlas, "./content/atlas.json");
+    self->atlasTexture = LoadTexture("./content/atlas.png");
 }
 
 static void SceneSetupInput(Scene* self)
@@ -662,7 +663,7 @@ static void SceneDrawTilemap(const Scene* self)
                 .height = self->segments[i].tileHeight
             };
 
-            DrawTextureRec(self->atlas, source, position, WHITE);
+            DrawTextureRec(self->atlasTexture, source, position, WHITE);
         }
 
         offset.x += self->segments[i].bounds.width;
@@ -799,6 +800,7 @@ static void RenderTargetLayer(const RenderFnParams* params)
     for (usize i = 0; i < SceneGetEntityCount(params->scene); ++i)
     {
         SSpriteDraw(params->scene, i);
+        SAnimationDraw(params->scene, i);
 
         if (params->scene->debugging)
         {
@@ -848,7 +850,7 @@ void SceneDeferReset(Scene* self)
 
 void SceneDestroy(Scene* self)
 {
-    UnloadTexture(self->atlas);
+    UnloadTexture(self->atlasTexture);
 
     for (usize i = 0; i < self->segmentsLength; ++i)
     {

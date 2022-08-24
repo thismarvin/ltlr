@@ -4,6 +4,7 @@
 #include "./ecs/command.h"
 #include "./ecs/components.h"
 #include "./ecs/entities.h"
+#include "atlas.h"
 #include "common.h"
 #include "input.h"
 #include "level_segment.h"
@@ -44,7 +45,8 @@ struct Scene
     usize player;
     usize fog;
     Rectangle bounds;
-    Texture2D atlas;
+    Texture2D atlasTexture;
+    Atlas atlas;
     LevelSegment* segments;
     usize segmentsLength;
     Rectangle trueResolution;

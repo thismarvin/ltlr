@@ -1,3 +1,4 @@
+#include "../animation.h"
 #include "../context.h"
 #include "../geometry/collider.h"
 #include "components.h"
@@ -466,6 +467,58 @@ void SSpriteDraw(const Scene* scene, const usize entity)
     if ((sprite->mirroring & FLIP_VERTICAL) != 0)
     {
         source.height = -sprite->source.height;
+    }
+
+    if (ENTITY_HAS_DEPS(entity, TAG_COLOR))
+    {
+        const CColor* color = GET_COMPONENT(color, entity);
+        DrawTextureRec(scene->atlasTexture, source, drawPosition, color->value);
+    }
+    else
+    {
+        DrawTextureRec(scene->atlasTexture, source, drawPosition, COLOR_WHITE);
+    }
+}
+
+void SAnimationDraw(const Scene* scene, const usize entity)
+{
+    REQUIRE_DEPS(TAG_POSITION | TAG_ANIMATION);
+
+    const CPosition* position = GET_COMPONENT(position, entity);
+    const CAnimation* animation = SCENE_GET_COMPONENT_PTR(scene, animation, entity);
+
+    Vector2 drawPosition = Vector2Add(position->value, animation->offset);
+
+    if (ENTITY_HAS_DEPS(entity, TAG_SMOOTH))
+    {
+        const CSmooth* smooth = GET_COMPONENT(smooth, entity);
+
+        const Vector2 interpolated = Vector2Lerp(smooth->previous, position->value, ContextGetAlpha());
+        drawPosition = Vector2Add(interpolated, animation->offset);
+    }
+
+    const char* name = ANIMATIONS[animation->handle][animation->frame];
+    const AtlasSprite* atlasSprite = AtlasGet(&scene->atlas, name);
+
+    drawPosition.x += atlasSprite->trimRect.width;
+    drawPosition.y += atlasSprite->trimRect.height;
+
+    Rectangle source = (Rectangle)
+    {
+        .x = atlasSprite->x,
+        .y = atlasSprite->y,
+        .width = atlasSprite->width,
+        .height = atlasSprite->height,
+    };
+
+    if ((animation->mirroring & FLIP_HORIZONTAL) != 0)
+    {
+        source.width = -source.width;
+    }
+
+    if ((animation->mirroring & FLIP_VERTICAL) != 0)
+    {
+        source.height = -source.height;
     }
 
     if (ENTITY_HAS_DEPS(entity, TAG_COLOR))
