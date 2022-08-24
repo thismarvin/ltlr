@@ -441,14 +441,12 @@ void SAnimationUpdate(Scene* scene, const usize entity)
 
 void SSpriteDraw(const Scene* scene, const usize entity)
 {
-    REQUIRE_DEPS(TAG_POSITION | TAG_COLOR | TAG_SPRITE);
+    REQUIRE_DEPS(TAG_POSITION | TAG_SPRITE);
 
     const CPosition* position = GET_COMPONENT(position, entity);
-    const CColor* color = GET_COMPONENT(color, entity);
     const CSprite* sprite = GET_COMPONENT(sprite, entity);
 
     Vector2 drawPosition = Vector2Add(position->value, sprite->offset);
-    Rectangle source = sprite->source;
 
     if (ENTITY_HAS_DEPS(entity, TAG_SMOOTH))
     {
@@ -457,6 +455,8 @@ void SSpriteDraw(const Scene* scene, const usize entity)
         const Vector2 interpolated = Vector2Lerp(smooth->previous, position->value, ContextGetAlpha());
         drawPosition = Vector2Add(interpolated, sprite->offset);
     }
+
+    Rectangle source = sprite->source;
 
     if ((sprite->mirroring & FLIP_HORIZONTAL) != 0)
     {
@@ -468,7 +468,15 @@ void SSpriteDraw(const Scene* scene, const usize entity)
         source.height = -sprite->source.height;
     }
 
-    DrawTextureRec(scene->atlas, source, drawPosition, color->value);
+    if (ENTITY_HAS_DEPS(entity, TAG_COLOR))
+    {
+        const CColor* color = GET_COMPONENT(color, entity);
+        DrawTextureRec(scene->atlasTexture, source, drawPosition, color->value);
+    }
+    else
+    {
+        DrawTextureRec(scene->atlasTexture, source, drawPosition, COLOR_WHITE);
+    }
 }
 
 void SDebugDraw(const Scene* scene, const usize entity)
