@@ -50,7 +50,6 @@
 					astyle
 					nodePackages.prettier
 					emscripten
-					ccls
 				];
 			};
 		};
