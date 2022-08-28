@@ -151,7 +151,7 @@ void FogUpdate(Scene* scene, const usize entity)
     CKinetic* kinetic = SCENE_GET_COMPONENT_PTR(scene, kinetic, entity);
 
     const bool hasNotMoved = kinetic->velocity.x == 0;
-    
+
     if (hasNotMoved && playerPosition->value.x < CTX_VIEWPORT_WIDTH)
     {
         return;
