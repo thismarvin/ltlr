@@ -189,7 +189,7 @@ void FogDraw(const Scene* scene, const usize entity)
 
     Vector2 currentCenter = Vector2Create(interpolated.x, interpolated.y);
 
-    const f32 radius = baseRadius + sinf(ContextGetTotalTime() * 5) * 10;
+    const f32 radius = baseRadius + sinf(ContextGetTotalTime() * 5) * 4;
 
     while (currentCenter.y <= position->value.y + FOG_HEIGHT)
     {
