@@ -2,13 +2,12 @@
 #include "common.h"
 #include <raymath.h>
 
-static EntityBuilder FogBaseParticleCreate
+EntityBuilder FogParticleCreate
 (
     const Vector2 position,
+    const Vector2 velocity,
     const f32 radius,
-    const f32 lifetime,
-    const Color color,
-    const Vector2 velocity
+    const f32 lifetime
 )
 {
     Deque components = DEQUE_OF(Component);
@@ -36,7 +35,7 @@ static EntityBuilder FogBaseParticleCreate
 
     ADD_COMPONENT(CColor, ((CColor)
     {
-        .value = color,
+        .value = COLOR_BLACK,
     }));
 
     ADD_COMPONENT(CKinetic, ((CKinetic)
@@ -61,47 +60,6 @@ static EntityBuilder FogBaseParticleCreate
         .tags = tags,
         .components = components,
     };
-}
-
-EntityBuilder FogBreathingParticleCreate(Vector2 position, f32 radius, f32 lifetime)
-{
-    EntityBuilder result = FogBaseParticleCreate(position, radius, lifetime, COLOR_BLACK, VECTOR2_ZERO);
-
-    result.tags |= TAG_FOG_BREATHING;
-
-    return result;
-}
-
-EntityBuilder FogMovingParticleCreate(Vector2 position, Vector2 velocity, f32 radius, f32 lifetime)
-{
-    EntityBuilder result = FogBaseParticleCreate(position, radius, lifetime, COLOR_BLACK, velocity);
-
-    result.tags |= TAG_FOG_MOVING;
-
-    return result;
-}
-
-void FogParticleUpdate(Scene* scene, const usize entity)
-{
-    const u64 dependencies = TAG_FOG_PARTICLE | TAG_KINETIC;
-
-    if (!SceneEntityHasDependencies(scene, entity, dependencies))
-    {
-        return;
-    }
-
-    assert(SceneEntityHasDependencies(scene, scene->fog, TAG_KINETIC));
-
-    const CKinetic* fogKinetic = SCENE_GET_COMPONENT_PTR(scene, fogKinetic, scene->fog);
-
-    CKinetic* kinetic = SCENE_GET_COMPONENT_PTR(scene, kinetic, entity);
-
-    if (SceneEntityHasDependencies(scene, entity, TAG_FOG_MOVING))
-    {
-        return;
-    }
-
-    kinetic->velocity = fogKinetic->velocity;
 }
 
 void FogParticleDraw(const Scene* scene, const usize entity)

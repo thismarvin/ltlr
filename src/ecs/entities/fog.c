@@ -12,16 +12,13 @@
 }
 
 static const f32 fogMoveSpeed = 50;
-static const f32 breathingParticleSpawnDuration = 5;
 static const f32 movingParticleSpawnDuration = 0.3f;
 static const f32 baseRadius = 40.0f;
-static f32 breathingParticleSpawnTimer = breathingParticleSpawnDuration;
 static f32 movingParticleSpawnTimer = movingParticleSpawnDuration;
 
 EntityBuilder FogCreate(void)
 {
     Deque components = DEQUE_OF(Component);
-    const f32 radius = 32.0f;
 
     const u64 tags =
         TAG_NONE
@@ -60,42 +57,6 @@ EntityBuilder FogCreate(void)
     };
 }
 
-static void SpawnBreathingParticles(Scene* scene, const CPosition* position)
-{
-    if (breathingParticleSpawnTimer >= breathingParticleSpawnDuration)
-    {
-        static const i32 spawnDomain = 6;
-        static const i32 spawnRange = 6;
-
-        static const i32 minSize = 16;
-        static const i32 maxSize = 32;
-
-        static const i32 minLifetime = 2;
-        static const i32 maxLifetime = 6;
-
-        const i32 spawnCount = GetRandomValue(16, 24);
-
-        for (i32 i = 0; i < spawnCount; i++)
-        {
-            const Vector2 spawnPosition = (Vector2)
-            {
-                .x = position->value.x + GetRandomValue(0, spawnDomain) + 20,
-                .y = position->value.y + (1.0f * i / spawnCount) * FOG_HEIGHT +
-                     GetRandomValue(-spawnRange, spawnRange),
-            };
-
-            const EntityBuilder particleBuilder = FogBreathingParticleCreate(
-                    spawnPosition,
-                    GetRandomValue(minSize, maxSize),
-                    GetRandomValue(minLifetime, maxLifetime));
-
-            SceneDeferAddEntity(scene, particleBuilder);
-        }
-
-        breathingParticleSpawnTimer = 0;
-    }
-}
-
 static void SpawnMovingParticles(Scene* scene, const CPosition* position, const CKinetic* kinetic)
 {
     if (movingParticleSpawnTimer >= movingParticleSpawnDuration)
@@ -124,7 +85,7 @@ static void SpawnMovingParticles(Scene* scene, const CPosition* position, const 
                                          kinetic->velocity.x + GetRandomValue(minXSpeed, maxXSpeed),
                                          GetRandomValue(minYSpeed, maxYSpeed));
 
-            const EntityBuilder movingBuilder = FogMovingParticleCreate(
+            const EntityBuilder movingBuilder = FogParticleCreate(
                                                     spawnPosition,
                                                     velocity,
                                                     GetRandomValue(minSize, maxSize),
@@ -165,10 +126,8 @@ void FogUpdate(Scene* scene, const usize entity)
 
     // position->value.x = 0;
 
-    breathingParticleSpawnTimer += CTX_DT;
     movingParticleSpawnTimer += CTX_DT;
 
-    // SpawnBreathingParticles(scene, position);
     SpawnMovingParticles(scene, position, kinetic);
 }
 

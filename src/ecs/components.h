@@ -18,9 +18,8 @@
 #define TAG_FOG ((u64)1 << 12)
 #define TAG_FOG_PARTICLE ((u64)1 << 13)
 #define TAG_FOG_BREATHING ((u64)1 << 14)
-#define TAG_FOG_MOVING ((u64)1 << 15)
-#define TAG_CLOUD_PARTICLE ((u64)1 << 16)
-#define TAG_ANIMATION ((u64)1 << 17)
+#define TAG_CLOUD_PARTICLE ((u64)1 << 15)
+#define TAG_ANIMATION ((u64)1 << 16)
 
 #define RESOLVE_NONE ((u8)0)
 #define RESOLVE_UP ((u8)1 << 0)
