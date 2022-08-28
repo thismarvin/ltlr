@@ -137,7 +137,16 @@ void FogParticleDraw(const Scene* scene, const usize entity)
         .y = interpolated.y,
     };
 
-    // DrawCircleV(center, dimension->width * scale * 0.6f, COLOR_WHITE);
-    DrawCircleV(center, dimension->width * scale * 0.5f, color->value);
+    const u32 sidesCount = entity % 4 + 3;
+
+    if (sidesCount == 6)
+    {
+        DrawCircleV(center, dimension->width * scale * 0.5f, color->value);
+    }
+    else
+    {
+        DrawPoly(center, sidesCount, dimension->width * scale * 0.5f, ContextGetTotalTime() * 100,
+                 color->value);
+    }
 }
 
