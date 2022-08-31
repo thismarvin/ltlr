@@ -125,7 +125,7 @@ void FogUpdate(Scene* scene, const usize entity)
     kinetic->velocity = (Vector2)
     {
         .x = fogMoveSpeed,
-        .y = cosf(ContextGetTotalTime()) * 32,
+        .y = cosf(ContextGetTotalTime() * 0.5f) * 16,
     };
 
     // position->value.x = 0;
