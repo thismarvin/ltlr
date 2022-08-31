@@ -76,23 +76,33 @@ static void SpawnMovingParticles(Scene* scene, const CPosition* position, const 
 {
     if (movingParticleSpawnTimer >= movingParticleSpawnDuration)
     {
-        if (GetRandomValue(0, 2) == 0)
+        if (GetRandomValue(0, 9) != 0)
         {
             static const i32 minSize = 3;
             static const i32 maxSize = 6;
 
-            static const i32 minXSpeed = 20;
-            static const i32 maxXSpeed = 30;
+            static const i32 minXSpeed = 25;
+            static const i32 maxXSpeed = 50;
 
-            static const i32 minYSpeed = -10;
-            static const i32 maxYSpeed = 10;
+            static const i32 minYSpeed = -5;
+            static const i32 maxYSpeed = 5;
 
-            static const i32 minLifetime = 1;
-            static const i32 maxLifetime = 3;
+            static const i32 minLifetime = 5;
+            static const i32 maxLifetime = 15;
+
+            f32 minRadius = lumpRadii[0];
+
+            for (usize i = 0; i < FOG_LUMP_TOTAL; ++i)
+            {
+                if (lumpRadii[i] < minRadius)
+                {
+                    minRadius = lumpRadii[i];
+                }
+            }
 
             const Vector2 spawnPosition = (Vector2)
             {
-                .x = position->value.x,
+                .x = position->value.x + (minRadius * 0.75f),
                 .y = GetRandomValue(0, CTX_VIEWPORT_HEIGHT),
             };
 
@@ -104,7 +114,7 @@ static void SpawnMovingParticles(Scene* scene, const CPosition* position, const 
                                                     spawnPosition,
                                                     velocity,
                                                     GetRandomValue(minSize, maxSize),
-                                                    GetRandomValue(minLifetime, maxLifetime));
+                                                    0.1f * GetRandomValue(minLifetime, maxLifetime));
 
             SceneDeferAddEntity(scene, movingBuilder);
         }
@@ -201,7 +211,6 @@ static void ShiftBreathingPhase()
     }
 
     breathingPhase = (breathingPhase % 5) + 1;
-    breathingPhaseTimer = 0;
 }
 
 void FogUpdate(Scene* scene, const usize entity)
@@ -263,6 +272,7 @@ void FogUpdate(Scene* scene, const usize entity)
         if (breathingPhaseTimer >= breathingPhaseDuration)
         {
             ShiftBreathingPhase();
+            breathingPhaseTimer = 0;
         }
     }
 }
