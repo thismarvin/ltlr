@@ -103,7 +103,14 @@ void FogParticleDraw(const Scene* scene, const usize entity)
     }
     else
     {
-        DrawPoly(center, sidesCount, dimension->width * scale * 0.5f, ContextGetTotalTime() * 100,
+        f32 rotation = ContextGetTotalTime() * 100;
+
+        if (sidesCount % 2 == 0)
+        {
+            rotation *= -1;
+        }
+
+        DrawPoly(center, sidesCount, dimension->width * scale * 0.5f, rotation,
                  color->value);
     }
 }
