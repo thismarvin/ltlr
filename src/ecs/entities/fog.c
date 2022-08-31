@@ -93,6 +93,10 @@ static void SpawnMovingParticles(Scene* scene, const CPosition* position, const 
 
             SceneDeferAddEntity(scene, movingBuilder);
         }
+
+        movingParticleSpawnTimer = 0;
+    }
+}
     }
 }
 
