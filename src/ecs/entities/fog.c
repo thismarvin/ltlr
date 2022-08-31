@@ -11,13 +11,28 @@
     .y = -(FOG_HEIGHT - CTX_VIEWPORT_HEIGHT) * 0.5f, \
 }
 
+#define FOG_LUMP_TOTAL 8
+
 static const f32 fogMoveSpeed = 50;
-static const f32 movingParticleSpawnDuration = 0.3f;
-static const f32 baseRadius = 40.0f;
+static const f32 movingParticleSpawnDuration = 0.05f;
 static f32 movingParticleSpawnTimer = movingParticleSpawnDuration;
+
+static const f32 baseRadius = 40.0f;
+static const f32 lumpSpacing = baseRadius * 1.25f;
+static f32 lumpRadii[FOG_LUMP_TOTAL];
+static f32 lumpTargetRadii[FOG_LUMP_TOTAL];
+static u8 breathingPhase = 0;
+static f32 breathingPhaseTimer = 0;
+static f32 breathingPhaseDuration = 1.0f;
 
 EntityBuilder FogCreate(void)
 {
+    for (usize i = 0; i < FOG_LUMP_TOTAL; ++i)
+    {
+        lumpRadii[i] = baseRadius;
+        lumpTargetRadii[i] = baseRadius;
+    }
+
     Deque components = DEQUE_OF(Component);
 
     const u64 tags =
@@ -97,7 +112,96 @@ static void SpawnMovingParticles(Scene* scene, const CPosition* position, const 
         movingParticleSpawnTimer = 0;
     }
 }
+
+static void ShiftBreathingPhase()
+{
+    switch (breathingPhase)
+    {
+        case 0:
+        {
+            for (usize i = 0; i < FOG_LUMP_TOTAL; ++i)
+            {
+                lumpTargetRadii[i] = baseRadius;
+            }
+
+            break;
+        }
+
+        case 1:
+        {
+            for (usize i = 0; i < FOG_LUMP_TOTAL; ++i)
+            {
+                if (i % 2 == 0)
+                {
+                    lumpTargetRadii[i] = baseRadius;
+                }
+                else
+                {
+                    const f32 radiusModifer = 1 - (GetRandomValue(-25, 25) / 100.0f);
+                    lumpTargetRadii[i] = baseRadius * radiusModifer;
+                }
+            }
+
+            break;
+        }
+
+        case 2:
+        {
+            for (usize i = 0; i < FOG_LUMP_TOTAL; ++i)
+            {
+                if (i % 2 == 1)
+                {
+                    lumpTargetRadii[i] = baseRadius;
+                }
+                else
+                {
+                    const f32 radiusModifer = 0.75f;
+                    lumpTargetRadii[i] = baseRadius * radiusModifer;
+                }
+            }
+
+            break;
+        }
+
+        case 3:
+        {
+            for (usize i = 0; i < FOG_LUMP_TOTAL; ++i)
+            {
+                if (i % 2 == 0)
+                {
+                    lumpTargetRadii[i] = baseRadius;
+                }
+                else
+                {
+                    const f32 radiusModifer = 1 - (GetRandomValue(-25, 25) / 100.0f);
+                    lumpTargetRadii[i] = baseRadius * radiusModifer;
+                }
+            }
+
+            break;
+        }
+
+        case 4:
+        {
+            for (usize i = 0; i < FOG_LUMP_TOTAL; ++i)
+            {
+                if (i % 2 == 1)
+                {
+                    lumpTargetRadii[i] = baseRadius;
+                }
+                else
+                {
+                    const f32 radiusModifer = 0.75f;
+                    lumpTargetRadii[i] = baseRadius * radiusModifer;
+                }
+            }
+
+            break;
+        }
     }
+
+    breathingPhase = (breathingPhase % 5) + 1;
+    breathingPhaseTimer = 0;
 }
 
 void FogUpdate(Scene* scene, const usize entity)
@@ -128,11 +232,39 @@ void FogUpdate(Scene* scene, const usize entity)
         .y = cosf(ContextGetTotalTime() * 0.5f) * 16,
     };
 
-    // position->value.x = 0;
-
     movingParticleSpawnTimer += CTX_DT;
 
     SpawnMovingParticles(scene, position, kinetic);
+
+    // Smooth phase transitioning logic for breathing.
+    {
+        static const f32 transitionIncrement = 0.1f;
+        static const f32 transitionLeeway = 0.5f;
+
+        for (usize i = 0; i < FOG_LUMP_TOTAL; ++i)
+        {
+            if (fabs(lumpRadii[i] - lumpTargetRadii[i]) <= transitionLeeway)
+            {
+                continue;
+            }
+
+            if (lumpRadii[i] < lumpTargetRadii[i])
+            {
+                lumpRadii[i] += transitionIncrement;
+            }
+            else
+            {
+                lumpRadii[i] -= transitionIncrement;
+            }
+        }
+
+        breathingPhaseTimer += CTX_DT;
+
+        if (breathingPhaseTimer >= breathingPhaseDuration)
+        {
+            ShiftBreathingPhase();
+        }
+    }
 }
 
 void FogDraw(const Scene* scene, const usize entity)
@@ -150,22 +282,20 @@ void FogDraw(const Scene* scene, const usize entity)
 
     const Vector2 interpolated = Vector2Lerp(smooth->previous, position->value, ContextGetAlpha());
 
-    Vector2 currentCenter = Vector2Create(interpolated.x, interpolated.y);
+    const f32 radiusPadding = sinf(ContextGetTotalTime() * 5) * 4;
 
-    const f32 radius = baseRadius + sinf(ContextGetTotalTime() * 5) * 4;
-
-    while (currentCenter.y <= position->value.y + FOG_HEIGHT)
+    for (usize lumpCount = 0; lumpCount < FOG_LUMP_TOTAL; ++lumpCount)
     {
-        DrawCircleV(currentCenter, radius * 1.1f, COLOR_WHITE);
-        currentCenter.y += baseRadius * 1.5f;
+        const f32 radius = lumpRadii[lumpCount] + radiusPadding;
+        const Vector2 center = Vector2Create(interpolated.x, interpolated.y + (lumpSpacing * lumpCount));
+        DrawCircleV(center, radius * 1.1f, COLOR_WHITE);
     }
 
-    currentCenter = Vector2Create(interpolated.x, interpolated.y);
-
-    while (currentCenter.y <= position->value.y + FOG_HEIGHT)
+    for (usize lumpCount = 0; lumpCount < FOG_LUMP_TOTAL; ++lumpCount)
     {
-        DrawCircleV(currentCenter, radius, color->value);
-        currentCenter.y += baseRadius * 1.5f;
+        const f32 radius = lumpRadii[lumpCount] + radiusPadding;
+        const Vector2 center = Vector2Create(interpolated.x, interpolated.y + (lumpSpacing * lumpCount));
+        DrawCircleV(center, radius, COLOR_BLACK);
     }
 
     DrawRectangle(interpolated.x - CTX_VIEWPORT_WIDTH * 2, interpolated.y, CTX_VIEWPORT_WIDTH * 2,
