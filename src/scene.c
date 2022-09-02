@@ -811,11 +811,6 @@ static void RenderTargetLayer(const RenderFnParams* params)
     {
         SSpriteDraw(params->scene, i);
         SAnimationDraw(params->scene, i);
-
-        if (params->scene->debugging)
-        {
-            SDebugDraw(params->scene, i);
-        }
     }
 }
 
@@ -843,6 +838,11 @@ static void RenderDebugLayer(const RenderFnParams* params)
     }
 
     ClearBackground(COLOR_TRANSPARENT);
+
+    for (usize i = 0; i < SceneGetEntityCount(params->scene); ++i)
+    {
+        SDebugDraw(params->scene, i);
+    }
 }
 
 void SceneDraw(const Scene* self)
