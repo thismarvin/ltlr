@@ -220,12 +220,12 @@ CFLAGS := -std=c17 $\(cflags.warnings) $\(cflags.$\(BUILD)) -Ivendor/raylib/src 
 ldlibs.vendor = $\(shell pkg-config --libs gl)
 LDLIBS := -L$\(DESTDIR)/lib/desktop -lcJSON -lraylib $\(ldlibs.vendor) -lm
 
-$\(VERBOSE).SILENT:
-
 ($kickstarter)
 
 .PHONY: @all
 @all: @clean @desktop
+
+$\(VERBOSE).SILENT:
 
 ($rules)
 
@@ -246,7 +246,7 @@ export def "makefile web" [
 
 	let output_directory = if ($out-dir | empty?) { 'build/web' } else { $out-dir }
 	let sources = get-sources $output_directory
-	let content = get-sources $output_directory
+	let content = get-content $output_directory
 
 	let kickstarter = do {
 		let objects = do {
@@ -294,7 +294,7 @@ export def "makefile web" [
 				| uniq
 			}
 
-			def generate_rule [ directory: string ] {
+			def generate-rule [ directory: string ] {
 				let target = $directory
 				let prerequisites = do {
 					let dirname = ($directory | path dirname)
@@ -367,14 +367,15 @@ EM_CACHE ?= .emscripten-cache
 TOTAL_MEMORY ?= 33554432
 SHELL_FILE := src/minshell.html
 
-$\(VERBOSE).SILENT:
-
 ($kickstarter)
 
 .PHONY: @all
 @all: @clean @web
 
+$\(VERBOSE).SILENT:
+
 ($rules)
+
 $\(EM_CACHE):
 	mkdir $@
 

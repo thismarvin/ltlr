@@ -3,10 +3,10 @@ ASTYLE := astyle
 PRETTIER := prettier
 GPROF := gprof
 
-$(VERBOSE).SILENT:
-
 .PHONY: @all
 @all: @clean @desktop @web
+
+$(VERBOSE).SILENT:
 
 compile_commands.json: scripts/generate.nu src
 	$(NU) -c "use scripts/generate.nu; generate compilation database | save db | mv db compile_commands.json"
