@@ -416,6 +416,7 @@ static void SceneSetupLayers(Scene* self)
     self->backgroundLayer = LoadRenderTexture(CTX_VIEWPORT_WIDTH, CTX_VIEWPORT_HEIGHT);
     self->targetLayer = LoadRenderTexture(CTX_VIEWPORT_WIDTH * zoom, CTX_VIEWPORT_HEIGHT * zoom);
     self->foregroundLayer = LoadRenderTexture(CTX_VIEWPORT_WIDTH, CTX_VIEWPORT_HEIGHT);
+    self->debugLayer = LoadRenderTexture(CTX_VIEWPORT_WIDTH * zoom, CTX_VIEWPORT_HEIGHT * zoom);
 }
 
 static void SceneSetupLevelSegments(Scene* self)
@@ -776,6 +777,15 @@ static void SceneDrawLayers(const Scene* self)
         DrawTexturePro(self->foregroundLayer.texture, source, destination, origin, 0, WHITE);
     }
 
+    // Draw debug layer.
+    if (self->debugging)
+    {
+        Rectangle source = RectangleFromRenderTexture(self->debugLayer);
+        source.height *= -1;
+
+        DrawTexturePro(self->debugLayer.texture, source, destination, origin, 0, WHITE);
+    }
+
     EndDrawing();
 }
 
@@ -825,6 +835,16 @@ static void RenderForegroundLayer(const RenderFnParams* params)
     }
 }
 
+static void RenderDebugLayer(const RenderFnParams* params)
+{
+    if (!params->scene->debugging)
+    {
+        return;
+    }
+
+    ClearBackground(COLOR_TRANSPARENT);
+}
+
 void SceneDraw(const Scene* self)
 {
     Rectangle actionCameraBounds = SceneCalculateActionCameraBounds(self, self->player);
@@ -839,6 +859,7 @@ void SceneDraw(const Scene* self)
     SceneRenderLayer(&self->backgroundLayer, RenderBackgroundLayer, &params);
     SceneRenderLayer(&self->targetLayer, RenderTargetLayer, &params);
     SceneRenderLayer(&self->foregroundLayer, RenderForegroundLayer, &params);
+    SceneRenderLayer(&self->debugLayer, RenderDebugLayer, &params);
 
     SceneDrawLayers(self);
 }
@@ -863,4 +884,5 @@ void SceneDestroy(Scene* self)
     UnloadRenderTexture(self->backgroundLayer);
     UnloadRenderTexture(self->targetLayer);
     UnloadRenderTexture(self->foregroundLayer);
+    UnloadRenderTexture(self->debugLayer);
 }

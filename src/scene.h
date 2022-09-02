@@ -55,6 +55,7 @@ struct Scene
     RenderTexture2D backgroundLayer;
     RenderTexture2D targetLayer;
     RenderTexture2D foregroundLayer;
+    RenderTexture2D debugLayer;
     // TODO(thismarvin): Should this exist in Scene?
     InputHandler input;
     Deque commands;
