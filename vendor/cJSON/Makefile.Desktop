@@ -4,10 +4,10 @@ AR ?= ar
 DESTDIR ?= .
 CFLAGS := -std=c89 -O1
 
-$(VERBOSE).SILENT:
-
 OBJECTS := \
 	$(DESTDIR)/lib/desktop/cJSON/cJSON.o
+
+$(VERBOSE).SILENT:
 
 .PHONY: @all
 @all: @clean @lib

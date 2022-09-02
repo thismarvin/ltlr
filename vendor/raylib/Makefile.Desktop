@@ -5,8 +5,6 @@ DESTDIR ?= .
 cflags.vendor := $(shell pkg-config --cflags x11 xcursor xext xfixes xi xinerama xrandr xrender)
 CFLAGS := -std=c99 -D_DEFAULT_SOURCE -fPIC -s -O1 -DPLATFORM_DESKTOP -DGRAPHICS_API_OPENGL_33 -Isrc -Isrc/external/glfw/include $(cflags.vendor)
 
-$(VERBOSE).SILENT:
-
 OBJECTS := \
 	$(DESTDIR)/lib/desktop/raylib/raudio.o \
 	$(DESTDIR)/lib/desktop/raylib/rcore.o \
@@ -19,6 +17,8 @@ OBJECTS := \
 
 .PHONY: @all
 @all: @clean @lib
+
+$(VERBOSE).SILENT:
 
 $(DESTDIR)/lib:
 	mkdir $@

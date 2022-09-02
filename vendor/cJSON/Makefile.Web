@@ -4,13 +4,13 @@ EMAR ?= emar
 DESTDIR ?= .
 CFLAGS := -std=c89 -O1
 
-$(VERBOSE).SILENT:
-
 OBJECTS := \
 	$(DESTDIR)/lib/web/cJSON/cJSON.o
 
 .PHONY: @all
 @all: @clean @lib
+
+$(VERBOSE).SILENT:
 
 $(DESTDIR)/lib:
 	mkdir $@

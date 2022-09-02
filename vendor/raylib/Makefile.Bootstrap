@@ -3,10 +3,10 @@ NU ?= nu
 
 TAG := 4.2.0
 
-$(VERBOSE).SILENT:
-
 .PHONY: @all
 @all: @clean @raylib
+
+$(VERBOSE).SILENT:
 
 src/raylib.h:
 	$(GIT) clone --depth 1 --branch $(TAG) https://github.com/raysan5/raylib

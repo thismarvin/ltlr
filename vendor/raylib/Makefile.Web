@@ -4,8 +4,6 @@ EMAR ?= emar
 DESTDIR ?= .
 CFLAGS := -O1 -DPLATFORM_WEB -DGRAPHICS_API_OPENGL_ES2
 
-$(VERBOSE).SILENT:
-
 OBJECTS := \
 	$(DESTDIR)/lib/web/raylib/raudio.o \
 	$(DESTDIR)/lib/web/raylib/rcore.o \
@@ -17,6 +15,8 @@ OBJECTS := \
 
 .PHONY: @all
 @all: @clean @lib
+
+$(VERBOSE).SILENT:
 
 $(DESTDIR)/lib:
 	mkdir $@

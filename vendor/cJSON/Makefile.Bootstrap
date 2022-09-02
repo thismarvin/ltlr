@@ -2,10 +2,10 @@ GIT ?= git
 
 TAG := v1.7.15
 
-$(VERBOSE).SILENT:
-
 .PHONY: @all
 @all: @clean @cJSON
+
+$(VERBOSE).SILENT:
 
 src:
 	mkdir $@
