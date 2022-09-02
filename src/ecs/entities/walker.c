@@ -1,3 +1,4 @@
+#include "../../animation.h"
 #include "common.h"
 #include "walker.h"
 
@@ -40,7 +41,7 @@ EntityBuilder WalkerCreate(const f32 x, const f32 y)
         | TAG_POSITION
         | TAG_DIMENSION
         | TAG_COLOR
-        | TAG_SPRITE
+        | TAG_ANIMATION
         | TAG_KINETIC
         | TAG_SMOOTH
         | TAG_COLLIDER
@@ -56,7 +57,7 @@ EntityBuilder WalkerCreate(const f32 x, const f32 y)
 
     ADD_COMPONENT(CDimension, ((CDimension)
     {
-        .width = 16,
+        .width = 18,
         .height = 16,
     }));
 
@@ -70,6 +71,18 @@ EntityBuilder WalkerCreate(const f32 x, const f32 y)
         .source = (Rectangle) { 3 * 16, 5 * 16, 16, 16 },
         .offset = VECTOR2_ZERO,
         .mirroring = FLIP_NONE,
+    }));
+
+    // TODO(thismarvin): Add CAnimationFromWalkerIdle() somewhere.
+    ADD_COMPONENT(CAnimation, ((CAnimation)
+    {
+        .frameTimer = 0,
+        .frameDuration = ANIMATION_WALKER_IDLE_FRAME_DURATION,
+        .offset = (Vector2) { -15, 0 },
+        .mirroring = FLIP_NONE,
+        .frame = 0,
+        .length = ANIMATION_WALKER_IDLE_LENGTH,
+        .handle = ANIMATION_WALKER_IDLE,
     }));
 
     ADD_COMPONENT(CKinetic, ((CKinetic)
