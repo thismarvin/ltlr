@@ -210,7 +210,7 @@ static void ShiftBreathingPhase()
         }
     }
 
-    breathingPhase = (breathingPhase % 5) + 1;
+    breathingPhase = (breathingPhase + 1) % 5;
 }
 
 void FogUpdate(Scene* scene, const usize entity)
