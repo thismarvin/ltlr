@@ -106,9 +106,11 @@ static void SpawnMovingParticles(Scene* scene, const CPosition* position, const 
                 .y = GetRandomValue(0, CTX_VIEWPORT_HEIGHT),
             };
 
-            const Vector2 velocity = Vector2Create(
-                                         kinetic->velocity.x + GetRandomValue(minXSpeed, maxXSpeed),
-                                         GetRandomValue(minYSpeed, maxYSpeed));
+            const Vector2 velocity = (Vector2)
+            {
+                .x = kinetic->velocity.x + GetRandomValue(minXSpeed, maxXSpeed),
+                .y = GetRandomValue(minYSpeed, maxYSpeed),
+            };
 
             const EntityBuilder movingBuilder = FogParticleCreate(
                                                     spawnPosition,
@@ -247,6 +249,7 @@ void FogUpdate(Scene* scene, const usize entity)
 
     // Smooth phase transitioning logic for breathing.
     {
+        // TODO(thismarvin): Use lerp here instead.
         static const f32 transitionIncrement = 0.1f;
         static const f32 transitionLeeway = 0.5f;
 
@@ -294,17 +297,17 @@ void FogDraw(const Scene* scene, const usize entity)
 
     const f32 radiusPadding = sinf(ContextGetTotalTime() * 5) * 4;
 
-    for (usize lumpCount = 0; lumpCount < FOG_LUMP_TOTAL; ++lumpCount)
+    for (usize i = 0; i < FOG_LUMP_TOTAL; ++i)
     {
-        const f32 radius = lumpRadii[lumpCount] + radiusPadding;
-        const Vector2 center = Vector2Create(interpolated.x, interpolated.y + (lumpSpacing * lumpCount));
+        const f32 radius = lumpRadii[i] + radiusPadding;
+        const Vector2 center = Vector2Create(interpolated.x, interpolated.y + (lumpSpacing * i));
         DrawCircleV(center, radius * 1.1f, COLOR_WHITE);
     }
 
-    for (usize lumpCount = 0; lumpCount < FOG_LUMP_TOTAL; ++lumpCount)
+    for (usize i = 0; i < FOG_LUMP_TOTAL; ++i)
     {
-        const f32 radius = lumpRadii[lumpCount] + radiusPadding;
-        const Vector2 center = Vector2Create(interpolated.x, interpolated.y + (lumpSpacing * lumpCount));
+        const f32 radius = lumpRadii[i] + radiusPadding;
+        const Vector2 center = Vector2Create(interpolated.x, interpolated.y + (lumpSpacing * i));
         DrawCircleV(center, radius, COLOR_BLACK);
     }
 
