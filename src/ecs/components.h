@@ -20,6 +20,7 @@
 #define TAG_FOG_BREATHING ((u64)1 << 14)
 #define TAG_CLOUD_PARTICLE ((u64)1 << 15)
 #define TAG_ANIMATION ((u64)1 << 16)
+#define TAG_BATTERY ((u64)1 << 17)
 
 #define RESOLVE_NONE ((u8)0)
 #define RESOLVE_UP ((u8)1 << 0)
@@ -31,6 +32,7 @@
 #define LAYER_NONE ((u64)0)
 #define LAYER_TERRAIN ((u64)1 << 0)
 #define LAYER_LETHAL ((u64)1 << 1)
+#define LAYER_INTERACTABLE ((u64)1 << 2)
 
 // TODO(thismarvin): Naming components is hard...
 

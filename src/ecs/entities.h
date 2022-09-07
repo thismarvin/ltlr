@@ -8,3 +8,4 @@
 #include "./entities/fog_particle.h"
 #include "./entities/player.h"
 #include "./entities/walker.h"
+#include "./entities/battery.h"
