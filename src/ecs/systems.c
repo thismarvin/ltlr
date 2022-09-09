@@ -365,6 +365,23 @@ void SCollisionUpdate(Scene* scene, const usize entity)
 
     position->value.x = resolvedAabb.x;
     position->value.y = resolvedAabb.y;
+}
+
+void SPostCollisionUpdate(Scene* scene, const usize entity)
+{
+    REQUIRE_DEPS(TAG_POSITION | TAG_DIMENSION | TAG_COLLIDER);
+
+    CPosition* position = GET_COMPONENT(position, entity);
+    const CDimension* dimension = GET_COMPONENT(dimension, entity);
+    const CCollider* collider = GET_COMPONENT(collider, entity);
+
+    const Rectangle aabb = (Rectangle)
+    {
+        .x = position->value.x,
+        .y = position->value.y,
+        .width = dimension->width,
+        .height = dimension->height,
+    };
 
     for (usize i = 0; i < SceneGetEntityCount(scene); ++i)
     {
@@ -392,15 +409,15 @@ void SCollisionUpdate(Scene* scene, const usize entity)
             .height = otherDimension->height
         };
 
-        if (CheckCollisionRecs(resolvedAabb, otherAabb))
+        if (CheckCollisionRecs(aabb, otherAabb))
         {
-            Rectangle overlap = GetCollisionRec(resolvedAabb, otherAabb);
+            Rectangle overlap = GetCollisionRec(aabb, otherAabb);
 
             OnCollisionParams onCollisionParams = (OnCollisionParams)
             {
                 .scene = scene,
                 .entity = entity,
-                .aabb = resolvedAabb,
+                .aabb = aabb,
                 .otherEntity = i,
                 .otherAabb = otherAabb,
                 .overlap = overlap,

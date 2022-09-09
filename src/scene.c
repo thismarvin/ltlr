@@ -563,6 +563,7 @@ void SceneUpdate(Scene* self)
         SKineticUpdate(self, i);
 
         SCollisionUpdate(self, i);
+        SPostCollisionUpdate(self, i);
 
         PlayerPostCollisionUpdate(self, i);
         PlayerMortalUpdate(self, i);
