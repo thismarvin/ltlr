@@ -33,10 +33,10 @@ const char* ANIMATION_PLAYER_SPIN_FRAMES[ANIMATION_PLAYER_SPIN_LENGTH] =
 };
 const char* ANIMATION_WALKER_IDLE_FRAMES[ANIMATION_WALKER_IDLE_LENGTH] =
 {
-    "walker_0",
-    "walker_1",
-    "walker_2",
-    "walker_3",
+    "walker_idle_0",
+    "walker_idle_1",
+    "walker_idle_2",
+    "walker_idle_3",
 };
 
 const char** ANIMATIONS[ANIMATIONS_LENGTH] =
