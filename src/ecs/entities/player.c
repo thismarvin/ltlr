@@ -342,7 +342,7 @@ static void PlayerOnCollision(const OnCollisionParams* params)
 {
     assert(ENTITY_HAS_DEPS(params->entity, TAG_PLAYER | TAG_MORTAL));
 
-    const CMortal* mortal = GET_COMPONENT(mortal, params->entity);
+    CMortal* mortal = GET_COMPONENT(mortal, params->entity);
 
     // Collision specific logic that will not resolve the player.
     {
@@ -356,8 +356,12 @@ static void PlayerOnCollision(const OnCollisionParams* params)
             };
 
             mortal->onDamage(&onDamageParams);
+        }
 
-            return;
+        if (ENTITY_HAS_DEPS(params->otherEntity, TAG_BATTERY))
+        {
+            mortal->hp += 1;
+            SceneDeferDeallocateEntity(params->scene, params->otherEntity);
         }
     }
 }
@@ -511,7 +515,7 @@ EntityBuilder PlayerCreate(const f32 x, const f32 y)
     {
         .resolutionSchema = RESOLVE_NONE,
         .layer = LAYER_NONE,
-        .mask = LAYER_TERRAIN | LAYER_LETHAL,
+        .mask = LAYER_TERRAIN | LAYER_LETHAL | LAYER_INTERACTABLE,
         .onCollision = PlayerOnCollision,
         .onResolution = PlayerOnResolution,
     }));
