@@ -363,6 +363,31 @@ static void PlayerOnCollision(const OnCollisionParams* params)
             mortal->hp += 1;
             SceneDeferDeallocateEntity(params->scene, params->otherEntity);
         }
+
+        if (ENTITY_HAS_DEPS(params->otherEntity, TAG_SOLAR_PANEL | TAG_SPRITE))
+        {
+            const AtlasSprite* atlasSprite = AtlasGet(&params->scene->atlas, "solar_1");
+
+            const Rectangle source = (Rectangle)
+            {
+                .x = atlasSprite->x,
+                .y = atlasSprite->y,
+                .width = atlasSprite->width,
+                .height = atlasSprite->height,
+            };
+
+            const CSprite brokenSprite = (CSprite)
+            {
+                .source = source,
+                .offset = VECTOR2_ZERO,
+                .mirroring = FLIP_NONE,
+            };
+
+            const Component component = ComponentCreateCSprite(brokenSprite);
+            const Command command = CommandCreateSetComponent(params->otherEntity, &component);
+            SceneSubmitCommand(params->scene, command);
+            SceneDeferDisableComponent(params->scene, params->otherEntity, TAG_SOLAR_PANEL);
+        }
     }
 }
 
