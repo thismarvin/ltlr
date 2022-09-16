@@ -21,6 +21,7 @@
 #define TAG_CLOUD_PARTICLE ((u64)1 << 15)
 #define TAG_ANIMATION ((u64)1 << 16)
 #define TAG_BATTERY ((u64)1 << 17)
+#define TAG_SOLAR_PANEL ((u64)1 << 18)
 
 #define RESOLVE_NONE ((u8)0)
 #define RESOLVE_UP ((u8)1 << 0)

@@ -9,3 +9,4 @@
 #include "./entities/player.h"
 #include "./entities/walker.h"
 #include "./entities/battery.h"
+#include "./entities/solar_panel.h"
