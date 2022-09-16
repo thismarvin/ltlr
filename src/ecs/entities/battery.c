@@ -13,17 +13,21 @@ EntityBuilder BatteryCreate(const f32 x, const f32 y, const AtlasSprite* atlasSp
         | TAG_DIMENSION
         | TAG_SPRITE
         | TAG_COLLIDER
+        | TAG_SMOOTH
+        | TAG_KINETIC
         | TAG_BATTERY;
+
+    const Vector2 position = Vector2Create(x, y);
 
     ADD_COMPONENT(CPosition, ((CPosition)
     {
-        .value = Vector2Create(x, y),
+        .value = position,
     }));
 
     ADD_COMPONENT(CDimension, ((CDimension)
     {
-        .width = atlasSprite->width,
-        .height = atlasSprite->height,
+        .width = 14,
+        .height = 32,
     }));
 
     const Rectangle source = (Rectangle)
@@ -37,7 +41,7 @@ EntityBuilder BatteryCreate(const f32 x, const f32 y, const AtlasSprite* atlasSp
     ADD_COMPONENT(CSprite, ((CSprite)
     {
         .source = source,
-        .offset = Vector2Create(atlasSprite->trimRect.width, atlasSprite->trimRect.height),
+        .offset = VECTOR2_ZERO,
         .mirroring = FLIP_NONE,
     }));
 
@@ -50,6 +54,17 @@ EntityBuilder BatteryCreate(const f32 x, const f32 y, const AtlasSprite* atlasSp
         .onResolution = OnResolutionNoop,
     }));
 
+    ADD_COMPONENT(CSmooth, ((CSmooth)
+    {
+        .previous = position,
+    }));
+
+    ADD_COMPONENT(CKinetic, ((CKinetic)
+    {
+        .velocity = VECTOR2_ZERO,
+        .acceleration = VECTOR2_ZERO,
+    }));
+
     return (EntityBuilder)
     {
         .tags = tags,
@@ -59,14 +74,14 @@ EntityBuilder BatteryCreate(const f32 x, const f32 y, const AtlasSprite* atlasSp
 
 void BatteryUpdate(Scene* scene, const usize entity)
 {
-    const u64 dependencies = TAG_BATTERY | TAG_POSITION;
+    const u64 dependencies = TAG_BATTERY | TAG_KINETIC;
 
     if (!SceneEntityHasDependencies(scene, entity, dependencies))
     {
         return;
     }
 
-    CPosition* position = SCENE_GET_COMPONENT_PTR(scene, position, entity);
+    CKinetic* kinetic = SCENE_GET_COMPONENT_PTR(scene, kinetic, entity);
 
-    position->value.y += sinf(ContextGetTotalTime() * 5) * 0.2f;
+    kinetic->velocity.y = sinf(ContextGetTotalTime() * 3.0f) * 10.0f;
 }
