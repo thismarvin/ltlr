@@ -569,6 +569,7 @@ void SceneUpdate(Scene* self)
         PlayerMortalUpdate(self, i);
 
         FogUpdate(self, i);
+        BatteryUpdate(self, i);
 
         SAnimationUpdate(self, i);
     }
