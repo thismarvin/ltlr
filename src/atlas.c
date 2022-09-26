@@ -7,66 +7,70 @@ void AtlasInit(Atlas* self, const char* path)
 {
     char* buffer = LoadFileText(path);
 
-    cJSON* parentObj = cJSON_Parse(buffer);
+    cJSON* spritesArray = cJSON_Parse(buffer);
+    usize spritesLength = cJSON_GetArraySize(spritesArray);
 
-    // Get Metadata.
+    self->sprites = malloc(sizeof(AtlasSprite) * spritesLength);
+    self->spritesLength = spritesLength;
+
+    for (usize i = 0; i < spritesLength; ++i)
     {
-        const cJSON* metadataObj = cJSON_GetObjectItem(parentObj, "METADATA");
+        const cJSON* spriteObj = cJSON_GetArrayItem(spritesArray, i);
 
-        const cJSON* nameObj = cJSON_GetObjectItem(metadataObj, "name");
-        const cJSON* sizeObj = cJSON_GetObjectItem(metadataObj, "size");
+        const cJSON* nameObj = cJSON_GetObjectItem(spriteObj, "name");
+        const cJSON* untrimmedObj = cJSON_GetObjectItem(spriteObj, "untrimmed");
+        const cJSON* sourceObj = cJSON_GetObjectItem(spriteObj, "source");
+        const cJSON* destinationObj = cJSON_GetObjectItem(spriteObj, "destination");
 
-        const char* name = cJSON_GetStringValue(nameObj);
-        strncpy(self->metadata.name, name, 5);
-        self->metadata.size = (u16)cJSON_GetNumberValue(sizeObj);
-    }
+        const cJSON* untrimmedWidthObj = cJSON_GetObjectItem(untrimmedObj, "width");
+        const cJSON* untrimmedHeightObj = cJSON_GetObjectItem(untrimmedObj, "height");
+        const cJSON* sourceXObj = cJSON_GetObjectItem(sourceObj, "x");
+        const cJSON* sourceYObj = cJSON_GetObjectItem(sourceObj, "y");
+        const cJSON* sourceWidthObj = cJSON_GetObjectItem(sourceObj, "width");
+        const cJSON* sourceHeightObj = cJSON_GetObjectItem(sourceObj, "height");
+        const cJSON* destinationXObj = cJSON_GetObjectItem(destinationObj, "x");
+        const cJSON* destinationYObj = cJSON_GetObjectItem(destinationObj, "y");
+        const cJSON* destinationWidthObj = cJSON_GetObjectItem(destinationObj, "width");
+        const cJSON* destinationHeightObj = cJSON_GetObjectItem(destinationObj, "height");
 
-    // Initialize sprites.
-    {
-        const cJSON* spritesArray = cJSON_GetObjectItem(parentObj, "sprites");
-        usize spritesLength = cJSON_GetArraySize(spritesArray);
+        char* name = cJSON_GetStringValue(nameObj);
+        const u16 untrimmedWidth = (u16)cJSON_GetNumberValue(untrimmedWidthObj);
+        const u16 untrimmedHeight = (u16)cJSON_GetNumberValue(untrimmedHeightObj);
+        const u16 sourceX = (u16)cJSON_GetNumberValue(sourceXObj);
+        const u16 sourceY = (u16)cJSON_GetNumberValue(sourceYObj);
+        const u16 sourceWidth = (u16)cJSON_GetNumberValue(sourceWidthObj);
+        const u16 sourceHeight = (u16)cJSON_GetNumberValue(sourceHeightObj);
+        const u16 destinationX = (u16)cJSON_GetNumberValue(destinationXObj);
+        const u16 destinationY = (u16)cJSON_GetNumberValue(destinationYObj);
+        const u16 destinationWidth = (u16)cJSON_GetNumberValue(destinationWidthObj);
+        const u16 destinationHeight = (u16)cJSON_GetNumberValue(destinationHeightObj);
 
-        self->sprites = malloc(sizeof(AtlasSprite) * spritesLength);
-        self->spritesLength = spritesLength;
-
-        for (usize i = 0; i < spritesLength; ++i)
+        self->sprites[i] = (AtlasSprite)
         {
-            const cJSON* spriteObj = cJSON_GetArrayItem(spritesArray, i);
-
-            const cJSON* nameObj = cJSON_GetObjectItem(spriteObj, "name");
-            const cJSON* xObj = cJSON_GetObjectItem(spriteObj, "x");
-            const cJSON* yObj = cJSON_GetObjectItem(spriteObj, "y");
-            const cJSON* widthObj = cJSON_GetObjectItem(spriteObj, "width");
-            const cJSON* heightObj = cJSON_GetObjectItem(spriteObj, "height");
-            const cJSON* trimRectObj = cJSON_GetObjectItem(spriteObj, "trimRect");
-            const cJSON* trimRectWidthObj = cJSON_GetObjectItem(trimRectObj, "width");
-            const cJSON* trimRectHeightObj = cJSON_GetObjectItem(trimRectObj, "height");
-
-            char* name = cJSON_GetStringValue(nameObj);
-            const u16 x = (u16)cJSON_GetNumberValue(xObj);
-            const u16 y = (u16)cJSON_GetNumberValue(yObj);
-            const u16 width = (u16)cJSON_GetNumberValue(widthObj);
-            const u16 height = (u16)cJSON_GetNumberValue(heightObj);
-            const u16 trimRectWidth = (u16)cJSON_GetNumberValue(trimRectWidthObj);
-            const u16 trimRectHeight = (u16)cJSON_GetNumberValue(trimRectHeightObj);
-
-            self->sprites[i] = (AtlasSprite)
+            .untrimmed = (AtlasSpriteDimension)
             {
-                .x = x,
-                .y = y,
-                .width = width,
-                .height = height,
-                .trimRect = (AtlasTrimRect)
-                {
-                    .width = trimRectWidth,
-                    .height = trimRectHeight,
-                }
-            };
-            strncpy(self->sprites[i].name, name, MAX_SPRITE_NAME_LENGTH);
-        }
+                .width = untrimmedWidth,
+                .height = untrimmedHeight,
+            },
+            .source = (AtlasSpriteImageRegion)
+            {
+                .x = sourceX,
+                .y = sourceY,
+                .width = sourceWidth,
+                .height = sourceHeight,
+            },
+            .destination = (AtlasSpriteImageRegion)
+            {
+                .x = destinationX,
+                .y = destinationY,
+                .width = destinationWidth,
+                .height = destinationHeight,
+            },
+        };
+        strncpy(self->sprites[i].name, name, MAX_SPRITE_NAME_LENGTH);
     }
 
-    cJSON_Delete(parentObj);
+    cJSON_Delete(spritesArray);
     free(buffer);
 }
 
@@ -86,7 +90,7 @@ AtlasSprite* AtlasGet(const Atlas* self, const char* name)
         return (AtlasSprite*)sprite;
     }
 
-    printf("The given name is not in the given atlas.\n");
+    fprintf(stderr, "The given name is not in the given atlas.\n");
     exit(EXIT_FAILURE);
 }
 

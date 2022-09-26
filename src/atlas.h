@@ -8,27 +8,26 @@ typedef struct
 {
     u16 width;
     u16 height;
-} AtlasTrimRect;
+} AtlasSpriteDimension;
 
 typedef struct
 {
-    char name[MAX_SPRITE_NAME_LENGTH];
     u16 x;
     u16 y;
     u16 width;
     u16 height;
-    AtlasTrimRect trimRect;
+} AtlasSpriteImageRegion;
+
+typedef struct
+{
+    char name[MAX_SPRITE_NAME_LENGTH];
+    AtlasSpriteDimension untrimmed;
+    AtlasSpriteImageRegion source;
+    AtlasSpriteImageRegion destination;
 } AtlasSprite;
 
 typedef struct
 {
-    char name[5];
-    u16 size;
-} AtlasMetadata;
-
-typedef struct
-{
-    AtlasMetadata metadata;
     AtlasSprite* sprites;
     usize spritesLength;
 } Atlas;

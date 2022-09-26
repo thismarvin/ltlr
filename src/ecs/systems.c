@@ -517,15 +517,12 @@ void SAnimationDraw(const Scene* scene, const usize entity)
     const char* name = ANIMATIONS[animation->handle][animation->frame];
     const AtlasSprite* atlasSprite = AtlasGet(&scene->atlas, name);
 
-    drawPosition.x += atlasSprite->trimRect.width;
-    drawPosition.y += atlasSprite->trimRect.height;
-
     Rectangle source = (Rectangle)
     {
-        .x = atlasSprite->x,
-        .y = atlasSprite->y,
-        .width = atlasSprite->width,
-        .height = atlasSprite->height,
+        .x = atlasSprite->destination.x,
+        .y = atlasSprite->destination.y,
+        .width = atlasSprite->destination.width,
+        .height = atlasSprite->destination.height,
     };
 
     if ((animation->mirroring & FLIP_HORIZONTAL) != 0)
