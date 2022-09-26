@@ -3,7 +3,7 @@
 #include "common.h"
 #include <raymath.h>
 
-EntityBuilder SolarPanelCreate(const f32 x, const f32 y, const AtlasSprite* atlasSprite)
+EntityBuilder SolarPanelCreate(const f32 x, const f32 y)
 {
     Deque components = DEQUE_OF(Component);
 
@@ -22,21 +22,13 @@ EntityBuilder SolarPanelCreate(const f32 x, const f32 y, const AtlasSprite* atla
 
     ADD_COMPONENT(CDimension, ((CDimension)
     {
-        .width = atlasSprite->width,
-        .height = atlasSprite->height,
+        .width = 88,
+        .height = 40,
     }));
-
-    const Rectangle source = (Rectangle)
-    {
-        .x = atlasSprite->x,
-        .y = atlasSprite->y,
-        .width = atlasSprite->width,
-        .height = atlasSprite->height,
-    };
 
     ADD_COMPONENT(CSprite, ((CSprite)
     {
-        .source = source,
+        .source = (Rectangle) { 217, 4, 88, 40 },
         .offset = VECTOR2_ZERO,
         .mirroring = FLIP_NONE,
     }));

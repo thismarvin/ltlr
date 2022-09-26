@@ -3,7 +3,7 @@
 #include "common.h"
 #include <raymath.h>
 
-EntityBuilder BatteryCreate(const f32 x, const f32 y, const AtlasSprite* atlasSprite)
+EntityBuilder BatteryCreate(const f32 x, const f32 y)
 {
     Deque components = DEQUE_OF(Component);
 
@@ -30,17 +30,9 @@ EntityBuilder BatteryCreate(const f32 x, const f32 y, const AtlasSprite* atlasSp
         .height = 32,
     }));
 
-    const Rectangle source = (Rectangle)
-    {
-        .x = atlasSprite->x,
-        .y = atlasSprite->y,
-        .width = atlasSprite->width,
-        .height = atlasSprite->height,
-    };
-
     ADD_COMPONENT(CSprite, ((CSprite)
     {
-        .source = source,
+        .source = (Rectangle) { 171, 120, 14, 32 },
         .offset = VECTOR2_ZERO,
         .mirroring = FLIP_NONE,
     }));

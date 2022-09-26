@@ -366,24 +366,14 @@ static void PlayerOnCollision(const OnCollisionParams* params)
 
         if (ENTITY_HAS_DEPS(params->otherEntity, TAG_SOLAR_PANEL | TAG_SPRITE))
         {
-            const AtlasSprite* atlasSprite = AtlasGet(&params->scene->atlas, "solar_1");
-
-            const Rectangle source = (Rectangle)
+            const CSprite sprite = (CSprite)
             {
-                .x = atlasSprite->x,
-                .y = atlasSprite->y,
-                .width = atlasSprite->width,
-                .height = atlasSprite->height,
-            };
-
-            const CSprite brokenSprite = (CSprite)
-            {
-                .source = source,
+                .source = (Rectangle) { 309, 4, 88, 40 },
                 .offset = VECTOR2_ZERO,
                 .mirroring = FLIP_NONE,
             };
 
-            const Component component = ComponentCreateCSprite(brokenSprite);
+            const Component component = ComponentCreateCSprite(sprite);
             const Command command = CommandCreateSetComponent(params->otherEntity, &component);
             SceneSubmitCommand(params->scene, command);
             SceneDeferDisableComponent(params->scene, params->otherEntity, TAG_SOLAR_PANEL);
