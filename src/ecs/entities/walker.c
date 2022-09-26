@@ -48,7 +48,14 @@ EntityBuilder WalkerCreate(const f32 x, const f32 y)
         | TAG_WALKER
         | TAG_DAMAGE;
 
-    Vector2 position = Vector2Create(x, y);
+    const Vector2 position = Vector2Create(x, y);
+    const Rectangle intramural = (Rectangle)
+    {
+        .x = 14,
+        .y = 0,
+        .width = 20,
+        .height = 16,
+    };
 
     ADD_COMPONENT(CPosition, ((CPosition)
     {
@@ -57,8 +64,8 @@ EntityBuilder WalkerCreate(const f32 x, const f32 y)
 
     ADD_COMPONENT(CDimension, ((CDimension)
     {
-        .width = 18,
-        .height = 16,
+        .width = intramural.width,
+        .height = intramural.height,
     }));
 
     ADD_COMPONENT(CColor, ((CColor)
@@ -66,19 +73,12 @@ EntityBuilder WalkerCreate(const f32 x, const f32 y)
         .value = COLOR_WHITE,
     }));
 
-    ADD_COMPONENT(CSprite, ((CSprite)
-    {
-        .source = (Rectangle) { 3 * 16, 5 * 16, 16, 16 },
-        .offset = VECTOR2_ZERO,
-        .mirroring = FLIP_NONE,
-    }));
-
     // TODO(thismarvin): Add CAnimationFromWalkerIdle() somewhere.
     ADD_COMPONENT(CAnimation, ((CAnimation)
     {
         .frameTimer = 0,
         .frameDuration = ANIMATION_WALKER_IDLE_FRAME_DURATION,
-        .offset = (Vector2) { -15, 0 },
+        .intramural = intramural,
         .mirroring = FLIP_NONE,
         .frame = 0,
         .length = ANIMATION_WALKER_IDLE_LENGTH,

@@ -15,6 +15,14 @@ EntityBuilder SolarPanelCreate(const f32 x, const f32 y)
         | TAG_COLLIDER
         | TAG_SOLAR_PANEL;
 
+    const Rectangle intramural = (Rectangle)
+    {
+        .x = 4,
+        .y = 8,
+        .width = 88,
+        .height = 40,
+    };
+
     ADD_COMPONENT(CPosition, ((CPosition)
     {
         .value = Vector2Create(x, y),
@@ -22,14 +30,14 @@ EntityBuilder SolarPanelCreate(const f32 x, const f32 y)
 
     ADD_COMPONENT(CDimension, ((CDimension)
     {
-        .width = 88,
-        .height = 40,
+        .width = intramural.width,
+        .height = intramural.height,
     }));
 
     ADD_COMPONENT(CSprite, ((CSprite)
     {
         .source = (Rectangle) { 217, 4, 88, 40 },
-        .offset = VECTOR2_ZERO,
+        .intramural = intramural,
         .mirroring = FLIP_NONE,
     }));
 

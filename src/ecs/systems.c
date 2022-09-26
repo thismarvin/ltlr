@@ -464,25 +464,37 @@ void SSpriteDraw(const Scene* scene, const usize entity)
     const CPosition* position = GET_COMPONENT(position, entity);
     const CSprite* sprite = GET_COMPONENT(sprite, entity);
 
-    Vector2 drawPosition = Vector2Add(position->value, sprite->offset);
+    Vector2 drawPosition = position->value;
 
     if (ENTITY_HAS_DEPS(entity, TAG_SMOOTH))
     {
         const CSmooth* smooth = GET_COMPONENT(smooth, entity);
 
         const Vector2 interpolated = Vector2Lerp(smooth->previous, position->value, ContextGetAlpha());
-        drawPosition = Vector2Add(interpolated, sprite->offset);
+        drawPosition = interpolated;
     }
 
     Rectangle source = sprite->source;
 
-    if ((sprite->mirroring & FLIP_HORIZONTAL) != 0)
+    if ((sprite->mirroring & FLIP_HORIZONTAL) == 0)
     {
+        drawPosition.x -= sprite->intramural.x;
+    }
+    else
+    {
+        drawPosition.x -= sprite->source.width - RectangleRight(sprite->intramural);
+
         source.width = -sprite->source.width;
     }
 
-    if ((sprite->mirroring & FLIP_VERTICAL) != 0)
+    if ((sprite->mirroring & FLIP_VERTICAL) == 0)
     {
+        drawPosition.y -= sprite->intramural.y;
+    }
+    else
+    {
+        drawPosition.y -= sprite->source.height - RectangleBottom(sprite->intramural);
+
         source.height = -sprite->source.height;
     }
 
@@ -504,14 +516,14 @@ void SAnimationDraw(const Scene* scene, const usize entity)
     const CPosition* position = GET_COMPONENT(position, entity);
     const CAnimation* animation = SCENE_GET_COMPONENT_PTR(scene, animation, entity);
 
-    Vector2 drawPosition = Vector2Add(position->value, animation->offset);
+    Vector2 drawPosition = position->value;
 
     if (ENTITY_HAS_DEPS(entity, TAG_SMOOTH))
     {
         const CSmooth* smooth = GET_COMPONENT(smooth, entity);
 
         const Vector2 interpolated = Vector2Lerp(smooth->previous, position->value, ContextGetAlpha());
-        drawPosition = Vector2Add(interpolated, animation->offset);
+        drawPosition = interpolated;
     }
 
     const char* name = ANIMATIONS[animation->handle][animation->frame];
@@ -525,13 +537,31 @@ void SAnimationDraw(const Scene* scene, const usize entity)
         .height = atlasSprite->destination.height,
     };
 
-    if ((animation->mirroring & FLIP_HORIZONTAL) != 0)
+    if ((animation->mirroring & FLIP_HORIZONTAL) == 0)
     {
+        drawPosition.x += atlasSprite->source.x;
+        drawPosition.x -= animation->intramural.x;
+    }
+    else
+    {
+        drawPosition.x += atlasSprite->untrimmed.width -
+                          (atlasSprite->source.x + atlasSprite->source.width);
+        drawPosition.x -= atlasSprite->untrimmed.width - RectangleRight(animation->intramural);
+
         source.width = -source.width;
     }
 
-    if ((animation->mirroring & FLIP_VERTICAL) != 0)
+    if ((animation->mirroring & FLIP_VERTICAL) == 0)
     {
+        drawPosition.y += atlasSprite->source.y;
+        drawPosition.y -= animation->intramural.y;
+    }
+    else
+    {
+        drawPosition.y += atlasSprite->untrimmed.height -
+                          (atlasSprite->source.y + atlasSprite->source.height);
+        drawPosition.y -= atlasSprite->untrimmed.height - RectangleBottom(animation->intramural);
+
         source.height = -source.height;
     }
 

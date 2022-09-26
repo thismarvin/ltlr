@@ -114,7 +114,7 @@ typedef struct
 typedef struct
 {
     Rectangle source;
-    Vector2 offset;
+    Rectangle intramural;
     SpriteMirroring mirroring;
 } CSprite;
 
@@ -122,7 +122,7 @@ typedef struct
 {
     f32 frameTimer;
     f32 frameDuration;
-    Vector2 offset;
+    Rectangle intramural;
     SpriteMirroring mirroring;
     u16 frame;
     u16 length;

@@ -18,6 +18,13 @@ EntityBuilder BatteryCreate(const f32 x, const f32 y)
         | TAG_BATTERY;
 
     const Vector2 position = Vector2Create(x, y);
+    const Rectangle intramural = (Rectangle)
+    {
+        .x = 1,
+        .y = 0,
+        .width = 14,
+        .height = 32,
+    };
 
     ADD_COMPONENT(CPosition, ((CPosition)
     {
@@ -26,14 +33,14 @@ EntityBuilder BatteryCreate(const f32 x, const f32 y)
 
     ADD_COMPONENT(CDimension, ((CDimension)
     {
-        .width = 14,
-        .height = 32,
+        .width = intramural.width,
+        .height = intramural.height,
     }));
 
     ADD_COMPONENT(CSprite, ((CSprite)
     {
         .source = (Rectangle) { 171, 120, 14, 32 },
-        .offset = VECTOR2_ZERO,
+        .intramural = intramural,
         .mirroring = FLIP_NONE,
     }));
 

@@ -366,10 +366,17 @@ static void PlayerOnCollision(const OnCollisionParams* params)
 
         if (ENTITY_HAS_DEPS(params->otherEntity, TAG_SOLAR_PANEL | TAG_SPRITE))
         {
+            const Rectangle intramural = (Rectangle)
+            {
+                .x = 4,
+                .y = 8,
+                .width = 88,
+                .height = 40,
+            };
             const CSprite sprite = (CSprite)
             {
                 .source = (Rectangle) { 309, 4, 88, 40 },
-                .offset = VECTOR2_ZERO,
+                .intramural = intramural,
                 .mirroring = FLIP_NONE,
             };
 
@@ -490,7 +497,14 @@ EntityBuilder PlayerCreate(const f32 x, const f32 y)
         | TAG_PLAYER
         | TAG_MORTAL;
 
-    Vector2 position = Vector2Create(x, y);
+    const Vector2 position = Vector2Create(x, y);
+    const Rectangle intramural = (Rectangle)
+    {
+        .x = 24,
+        .y = 29,
+        .width = 15,
+        .height = 35,
+    };
 
     ADD_COMPONENT(CPosition, ((CPosition)
     {
@@ -499,8 +513,8 @@ EntityBuilder PlayerCreate(const f32 x, const f32 y)
 
     ADD_COMPONENT(CDimension, ((CDimension)
     {
-        .width = 15,
-        .height = 35,
+        .width = intramural.width,
+        .height = intramural.height,
     }));
 
     ADD_COMPONENT(CColor, ((CColor)
@@ -511,7 +525,7 @@ EntityBuilder PlayerCreate(const f32 x, const f32 y)
     ADD_COMPONENT(CSprite, ((CSprite)
     {
         .source = (Rectangle) { 16, 0, 32, 48 },
-        .offset = Vector2Create(-8, -13),
+        .intramural = intramural,
         .mirroring = FLIP_NONE,
     }));
 
