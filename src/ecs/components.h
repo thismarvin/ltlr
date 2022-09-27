@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../animation.h"
 #include "../common.h"
 
 #define TAG_NONE ((u64)0)
@@ -124,9 +125,9 @@ typedef struct
     f32 frameDuration;
     Rectangle intramural;
     SpriteMirroring mirroring;
+    Animation type;
     u16 frame;
     u16 length;
-    u8 handle;
 } CAnimation;
 
 typedef struct

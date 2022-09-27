@@ -526,7 +526,7 @@ void SAnimationDraw(const Scene* scene, const usize entity)
         drawPosition = interpolated;
     }
 
-    const char* name = ANIMATIONS[animation->handle][animation->frame];
+    const char* name = ANIMATIONS[animation->type][animation->frame];
     const AtlasSprite* atlasSprite = AtlasGet(&scene->atlas, name);
 
     Rectangle source = (Rectangle)

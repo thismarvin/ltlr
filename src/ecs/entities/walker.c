@@ -82,7 +82,7 @@ EntityBuilder WalkerCreate(const f32 x, const f32 y)
         .mirroring = FLIP_NONE,
         .frame = 0,
         .length = ANIMATION_WALKER_IDLE_LENGTH,
-        .handle = ANIMATION_WALKER_IDLE,
+        .type = ANIMATION_WALKER_IDLE,
     }));
 
     ADD_COMPONENT(CKinetic, ((CKinetic)
