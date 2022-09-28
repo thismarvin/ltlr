@@ -57,5 +57,3 @@ Color P8PaletteGet(const usize index)
 
     return P8_BLACK;
 }
-
-

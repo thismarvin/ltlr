@@ -135,4 +135,3 @@ void CloudParticleDraw(const Scene* scene, const usize entity)
 
     DrawCircleV(center, drawSize * 0.5f, color->value);
 }
-

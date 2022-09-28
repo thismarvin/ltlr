@@ -113,4 +113,3 @@ void FogParticleDraw(const Scene* scene, const usize entity)
         DrawPoly(center, sidesCount, dimension->width * scale * 0.5f, rotation, color->value);
     }
 }
-
