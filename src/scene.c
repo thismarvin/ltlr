@@ -190,7 +190,7 @@ void SceneExecuteRemoveComponent(Scene* self, const CommandDisableComponent* rem
     self->components.tags[removeCommand->entity] &= ~removeCommand->componentTag;
 }
 
-void SceneExecuteCommands(Scene* self)
+static void SceneExecuteCommands(Scene* self)
 {
     Deque* commands = &self->commands;
 

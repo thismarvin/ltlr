@@ -72,7 +72,6 @@ void SceneDeferDeallocateEntity(Scene* self, usize entity);
 bool SceneEntityHasDependencies(const Scene* self, usize entity, u64 dependencies);
 usize SceneGetEntityCount(const Scene* self);
 void SceneSubmitCommand(Scene* self, Command command);
-void SceneExecuteCommands(Scene* self);
 void SceneUpdate(Scene* self);
 void SceneDraw(const Scene* self);
 void SceneDeferReset(Scene* self);
