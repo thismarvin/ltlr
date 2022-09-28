@@ -8,6 +8,7 @@ struct Quadtree
     Rectangle region;
     u8 maxDepth;
     u8 depth;
+    // `Deque<QuadtreeEntry>`
     Deque entries;
     struct Quadtree* topLeft;
     struct Quadtree* topRight;

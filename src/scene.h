@@ -34,6 +34,7 @@ typedef struct
     usize m_nextFreshEntityIndex;
     // A stack of indices in the Components struct that are not currently allocated but were
     // previously deallocated (an entity once resided in these indices).
+    // `Deque<usize>`
     Deque m_recycledEntityIndices;
 } EntityManager;
 
@@ -56,8 +57,8 @@ struct Scene
     RenderTexture2D targetLayer;
     RenderTexture2D foregroundLayer;
     RenderTexture2D debugLayer;
-    // TODO(thismarvin): Should this exist in Scene?
     InputHandler input;
+    // `Deque<Command>`
     Deque commands;
     bool resetRequested;
 };

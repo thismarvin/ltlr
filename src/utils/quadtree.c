@@ -163,6 +163,7 @@ static void QuadtreeQueryHelper(const Quadtree* current, const Rectangle region,
     QuadtreeQueryHelper(current->bottomLeft, region, result);
 }
 
+// Returns a `Deque<usize>` of the entities that are within the given region.
 Deque QuadtreeQuery(const Quadtree* self, const Rectangle region)
 {
     Deque result = DEQUE_OF(usize);

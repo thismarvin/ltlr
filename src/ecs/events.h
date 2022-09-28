@@ -7,6 +7,7 @@ typedef void (*OnRaise)(const void*);
 
 typedef struct
 {
+    // `Deque<OnRaise>`
     Deque listeners;
 } EventHandler;
 

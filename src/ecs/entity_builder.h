@@ -6,5 +6,6 @@
 typedef struct
 {
     u64 tags;
+    // `Deque<Component>`
     Deque components;
 } EntityBuilder;

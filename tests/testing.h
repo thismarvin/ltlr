@@ -16,6 +16,7 @@ typedef struct
 typedef struct
 {
     char* name;
+    // `Deque<TestRecord>`
     Deque records;
     usize passed;
     usize failed;
