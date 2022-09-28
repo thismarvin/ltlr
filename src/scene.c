@@ -518,6 +518,7 @@ void SceneInit(Scene* self)
     self->debugging = false;
 
     SceneStart(self);
+    SceneExecuteCommands(self);
 }
 
 static void SceneCheckEndCondition(Scene* self)
@@ -545,13 +546,6 @@ void SceneUpdate(Scene* self)
         self->debugging = !self->debugging;
     }
 
-    if (self->resetRequested)
-    {
-        SceneReset(self);
-    }
-
-    SceneExecuteCommands(self);
-
     for (usize i = 0; i < SceneGetEntityCount(self); ++i)
     {
         SFleetingUpdate(self, i);
@@ -575,6 +569,13 @@ void SceneUpdate(Scene* self)
     }
 
     SceneCheckEndCondition(self);
+
+    if (self->resetRequested)
+    {
+        SceneReset(self);
+    }
+
+    SceneExecuteCommands(self);
 }
 
 // Return a Rectangle that is within the scene's bounds and centered on a given entity.
