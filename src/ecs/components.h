@@ -49,6 +49,14 @@ typedef enum
     SPRINT_STATE_DECELERATING,
 } SprintState;
 
+typedef enum
+{
+    PLAYER_ANIMATION_STATE_STILL,
+    PLAYER_ANIMATION_STATE_RUNNING,
+    PLAYER_ANIMATION_STATE_JUMPING,
+    PLAYER_ANIMATION_STATE_SPINNING,
+} PlayerAnimationState;
+
 typedef struct
 {
     Scene* scene;
@@ -163,6 +171,7 @@ typedef struct
     f32 sprintTimer;
     f32 sprintDuration;
     Vector2 sprintForce;
+    PlayerAnimationState animationState;
 } CPlayer;
 
 typedef struct

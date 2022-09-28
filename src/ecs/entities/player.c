@@ -1,8 +1,11 @@
+#include "../../animation.h"
 #include "../events.h"
 #include "common.h"
 #include "player.h"
 #include <math.h>
 #include <raymath.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 static const f32 moveSpeed = 200;
 static const f32 jumpHeight = 16 * 3 + 6;
@@ -490,7 +493,7 @@ EntityBuilder PlayerCreate(const f32 x, const f32 y)
         | TAG_POSITION
         | TAG_DIMENSION
         | TAG_COLOR
-        | TAG_SPRITE
+        | TAG_ANIMATION
         | TAG_KINETIC
         | TAG_SMOOTH
         | TAG_COLLIDER
@@ -522,11 +525,15 @@ EntityBuilder PlayerCreate(const f32 x, const f32 y)
         .value = COLOR_WHITE,
     }));
 
-    ADD_COMPONENT(CSprite, ((CSprite)
+    ADD_COMPONENT(CAnimation, ((CAnimation)
     {
-        .type = SPRITE_PLAYER_JUMP_0000,
+        .frameTimer = 0,
+        .frameDuration = ANIMATION_PLAYER_STILL_FRAME_DURATION,
         .intramural = intramural,
         .reflection = REFLECTION_NONE,
+        .type = ANIMATION_PLAYER_STILL,
+        .frame = 0,
+        .length = ANIMATION_PLAYER_STILL_LENGTH,
     }));
 
     ADD_COMPONENT(CKinetic, ((CKinetic)
@@ -575,6 +582,7 @@ EntityBuilder PlayerCreate(const f32 x, const f32 y)
         .sprintTimer = 0,
         .sprintDuration = 0,
         .sprintForce = VECTOR2_ZERO,
+        .animationState = PLAYER_ANIMATION_STATE_STILL,
     }));
 
     return (EntityBuilder)
@@ -766,6 +774,16 @@ static void PlayerLateralMovementLogic(const Scene* scene, CPlayer* player, CKin
     }
 }
 
+Direction Facing(const CPlayer* player)
+{
+    if (player->sprintDirection != DIR_NONE)
+    {
+        return player->sprintDirection;
+    }
+
+    return player->initialDirection;
+}
+
 void PlayerInputUpdate(Scene* scene, const usize entity)
 {
     const u64 dependencies = TAG_PLAYER | TAG_POSITION | TAG_DIMENSION | TAG_KINETIC;
@@ -902,17 +920,17 @@ static void PlayerFlashingLogic(Scene* scene, const usize entity)
 
         if (passedSlices % 2 == 0)
         {
-            SceneDeferDisableComponent(scene, entity, TAG_SPRITE);
+            SceneDeferDisableComponent(scene, entity, TAG_ANIMATION);
         }
         else
         {
-            SceneDeferEnableComponent(scene, entity, TAG_SPRITE);
+            SceneDeferEnableComponent(scene, entity, TAG_ANIMATION);
         }
     }
     else
     {
         // This is a pre-caution to make sure the last state isn't off.
-        SceneDeferEnableComponent(scene, entity, TAG_SPRITE);
+        SceneDeferEnableComponent(scene, entity, TAG_ANIMATION);
     }
 }
 
@@ -951,4 +969,190 @@ void PlayerMortalUpdate(Scene* scene, const usize entity)
     }
 
     PlayerFlashingLogic(scene, entity);
+}
+
+static bool IsFrameJustStarting(const CAnimation* animation)
+{
+    return animation->frameTimer == 0;
+}
+
+static void EnableAnimation(Scene* scene, usize entity, CPlayer* player, Animation animation)
+{
+    CAnimation contents;
+
+    switch (animation)
+    {
+        case ANIMATION_PLAYER_STILL:
+        {
+            contents = (CAnimation)
+            {
+                .frameTimer = 0,
+                .frameDuration = ANIMATION_PLAYER_STILL_FRAME_DURATION,
+                .intramural = (Rectangle) { 24, 29, 15, 35 },
+                .reflection = REFLECTION_NONE,
+                .frame = 0,
+                .length = ANIMATION_PLAYER_STILL_LENGTH,
+                .type = ANIMATION_PLAYER_STILL,
+            };
+
+            player->animationState = PLAYER_ANIMATION_STATE_STILL;
+
+            break;
+        }
+
+        case ANIMATION_PLAYER_RUN:
+        {
+            contents = (CAnimation)
+            {
+                .frameTimer = 0,
+                .frameDuration = ANIMATION_PLAYER_RUN_FRAME_DURATION,
+                .intramural = (Rectangle) { 24, 29, 15, 35 },
+                .reflection = REFLECTION_NONE,
+                .frame = 0,
+                .length = ANIMATION_PLAYER_RUN_LENGTH,
+                .type = ANIMATION_PLAYER_RUN,
+            };
+
+            player->animationState = PLAYER_ANIMATION_STATE_RUNNING;
+
+            break;
+        }
+
+        case ANIMATION_PLAYER_JUMP:
+        {
+            contents = (CAnimation)
+            {
+                .frameTimer = 0,
+                .frameDuration = ANIMATION_PLAYER_JUMP_FRAME_DURATION,
+                .intramural = (Rectangle) { 24, 29, 15, 35 },
+                .reflection = REFLECTION_NONE,
+                .frame = 0,
+                .length = ANIMATION_PLAYER_JUMP_LENGTH,
+                .type = ANIMATION_PLAYER_JUMP,
+            };
+
+            player->animationState = PLAYER_ANIMATION_STATE_JUMPING;
+
+            break;
+        }
+
+        case ANIMATION_PLAYER_SPIN:
+        {
+            contents = (CAnimation)
+            {
+                .frameTimer = 0,
+                .frameDuration = ANIMATION_PLAYER_SPIN_FRAME_DURATION,
+                .intramural = (Rectangle) { 24, 29, 15, 35 },
+                .reflection = REFLECTION_NONE,
+                .frame = 0,
+                .length = ANIMATION_PLAYER_SPIN_LENGTH,
+                .type = ANIMATION_PLAYER_SPIN,
+            };
+
+            player->animationState = PLAYER_ANIMATION_STATE_SPINNING;
+
+            break;
+        }
+
+        default:
+        {
+            fprintf(stderr, "Unsupported Animation type");
+            exit(EXIT_FAILURE);
+            break;
+        }
+    }
+
+    scene->components.animations[entity] = contents;
+}
+
+void PlayerAnimationUpdate(Scene* scene, const usize entity)
+{
+    const u64 dependencies = TAG_PLAYER;
+
+    if (!SceneEntityHasDependencies(scene, entity, dependencies))
+    {
+        return;
+    }
+
+    CPlayer* player = SCENE_GET_COMPONENT_PTR(scene, player, entity);
+    CAnimation* animation = SCENE_GET_COMPONENT_PTR(scene, animation, entity);
+
+    switch (player->animationState)
+    {
+        case PLAYER_ANIMATION_STATE_STILL:
+        {
+            if (player->jumping)
+            {
+                EnableAnimation(scene, entity, player, ANIMATION_PLAYER_JUMP);
+
+                break;
+            }
+
+            if (player->sprintState != SPRINT_STATE_NONE)
+            {
+                EnableAnimation(scene, entity, player, ANIMATION_PLAYER_RUN);
+
+                break;
+            }
+
+            break;
+        }
+
+        case PLAYER_ANIMATION_STATE_RUNNING:
+        {
+            if (player->jumping)
+            {
+                EnableAnimation(scene, entity, player, ANIMATION_PLAYER_JUMP);
+
+                break;
+            }
+
+            if (player->sprintState == SPRINT_STATE_NONE)
+            {
+                if (IsFrameJustStarting(animation))
+                {
+                    EnableAnimation(scene, entity, player, ANIMATION_PLAYER_STILL);
+                }
+
+                break;
+            }
+
+            break;
+        }
+
+        case PLAYER_ANIMATION_STATE_JUMPING:
+        {
+            if (player->grounded)
+            {
+                if (player->sprintDirection != DIR_NONE)
+                {
+                    if (IsFrameJustStarting(animation))
+                    {
+                        EnableAnimation(scene, entity, player, ANIMATION_PLAYER_RUN);
+                    }
+
+                    break;
+                }
+
+                EnableAnimation(scene, entity, player, ANIMATION_PLAYER_STILL);
+
+                break;
+            }
+
+            break;
+        }
+
+        case PLAYER_ANIMATION_STATE_SPINNING:
+        {
+            break;
+        }
+    }
+
+    // Animation reflection logic.
+    {
+        const Direction facing = Facing(player);
+        const Reflection reflection = facing == DIR_LEFT ? REFLECTION_REVERSE_X_AXIS : REFLECTION_NONE;
+
+        animation->reflection = reflection;
+    }
 }

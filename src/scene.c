@@ -560,6 +560,8 @@ void SceneUpdate(Scene* self)
         BatteryUpdate(self, i);
 
         SAnimationUpdate(self, i);
+
+        PlayerAnimationUpdate(self, i);
     }
 
     SceneCheckEndCondition(self);
