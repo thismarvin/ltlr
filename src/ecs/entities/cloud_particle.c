@@ -21,8 +21,8 @@ static OnResolutionResult CloudParticleOnResolution(const OnResolutionParams* pa
     }
 
     // Resolve collision.
-    Rectangle resolvedAabb = ApplyResolutionPerfectly(params->aabb, params->otherAabb,
-                             params->resolution);
+    const Rectangle resolvedAabb = ApplyResolutionPerfectly(params->aabb, params->otherAabb,
+                                   params->resolution);
 
     return (OnResolutionResult)
     {
@@ -125,9 +125,9 @@ void CloudParticleDraw(const Scene* scene, const usize entity)
 
     const f32 drawSize = dimension->width * (fleeting->lifetime - fleeting->age) / fleeting->lifetime;
 
-    Vector2 interpolated = Vector2Lerp(smooth->previous, position->value, ContextGetAlpha());
+    const Vector2 interpolated = Vector2Lerp(smooth->previous, position->value, ContextGetAlpha());
 
-    Vector2 center = (Vector2)
+    const Vector2 center = (Vector2)
     {
         .x = interpolated.x + dimension->width * 0.5f,
         .y = interpolated.y + dimension->height * 0.5f,

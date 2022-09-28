@@ -10,8 +10,8 @@ static OnResolutionResult WalkerOnResolution(const OnResolutionParams* params)
     CKinetic* kinetic = GET_COMPONENT(kinetic, params->entity);
 
     // Resolve collision.
-    Rectangle resolvedAabb = ApplyResolutionPerfectly(params->aabb, params->otherAabb,
-                             params->resolution);
+    const Rectangle resolvedAabb = ApplyResolutionPerfectly(params->aabb, params->otherAabb,
+                                   params->resolution);
 
     // Walk side to side.
     {

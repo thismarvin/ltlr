@@ -11,7 +11,7 @@ EntityBuilder BlockCreate(const Rectangle aabb, const u8 resolutionSchema, const
         | TAG_DIMENSION
         | TAG_COLLIDER;
 
-    Vector2 position = Vector2Create(aabb.x, aabb.y);
+    const Vector2 position = Vector2Create(aabb.x, aabb.y);
 
     ADD_COMPONENT(CPosition, ((CPosition)
     {

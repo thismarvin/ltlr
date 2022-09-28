@@ -96,7 +96,7 @@ bool QuadtreeAdd(Quadtree* self, const usize id, const Rectangle aabb)
 
     if (QuadtreeIsLeaf(self))
     {
-        QuadtreeEntry entry = (QuadtreeEntry)
+        const QuadtreeEntry entry = (QuadtreeEntry)
         {
             .id = id,
             .aabb = aabb,
@@ -114,7 +114,7 @@ bool QuadtreeAdd(Quadtree* self, const usize id, const Rectangle aabb)
         return true;
     }
 
-    QuadtreeEntry entry = (QuadtreeEntry)
+    const QuadtreeEntry entry = (QuadtreeEntry)
     {
         .id = id,
         .aabb = aabb,
@@ -135,7 +135,7 @@ static void QuadtreeQueryHelper(const Quadtree* current, const Rectangle region,
     {
         for (usize i = 0; i < DequeGetSize(&current->entries); ++i)
         {
-            QuadtreeEntry* entry = &DEQUE_GET_UNCHECKED(&current->entries, QuadtreeEntry, i);
+            const QuadtreeEntry* entry = &DEQUE_GET_UNCHECKED(&current->entries, QuadtreeEntry, i);
             DequePushBack(result, &entry->id);
         }
     }
@@ -143,7 +143,7 @@ static void QuadtreeQueryHelper(const Quadtree* current, const Rectangle region,
     {
         for (usize i = 0; i < DequeGetSize(&current->entries); ++i)
         {
-            QuadtreeEntry* entry = &DEQUE_GET_UNCHECKED(&current->entries, QuadtreeEntry, i);
+            const QuadtreeEntry* entry = &DEQUE_GET_UNCHECKED(&current->entries, QuadtreeEntry, i);
 
             if (CheckCollisionRecs(entry->aabb, region))
             {

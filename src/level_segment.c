@@ -35,7 +35,7 @@ void LevelSegmentInit(LevelSegment* self, const char* path)
         const cJSON* tilesetObj = cJSON_GetArrayItem(tilesetsArray, 0);
         const cJSON* columnsObj = cJSON_GetObjectItem(tilesetObj, "columns");
 
-        u16 columns = (u16)cJSON_GetNumberValue(columnsObj);
+        const u16 columns = (u16)cJSON_GetNumberValue(columnsObj);
 
         self->tilesetColumns = columns;
     }
@@ -46,7 +46,7 @@ void LevelSegmentInit(LevelSegment* self, const char* path)
     {
         const cJSON* spritesObj = cJSON_GetArrayItem(layersArray, 0);
         const cJSON* dataArray = cJSON_GetObjectItem(spritesObj, "data");
-        usize dataLength = cJSON_GetArraySize(dataArray);
+        const usize dataLength = cJSON_GetArraySize(dataArray);
 
         self->sprites = malloc(sizeof(u16) * dataLength);
         self->spritesLength = dataLength;
@@ -55,7 +55,7 @@ void LevelSegmentInit(LevelSegment* self, const char* path)
         {
             const cJSON* spriteObj = cJSON_GetArrayItem(dataArray, i);
 
-            u16 sprite = (u16)cJSON_GetNumberValue(spriteObj);
+            const u16 sprite = (u16)cJSON_GetNumberValue(spriteObj);
 
             self->sprites[i] = sprite;
         }
@@ -65,7 +65,7 @@ void LevelSegmentInit(LevelSegment* self, const char* path)
     {
         const cJSON* collidersObj = cJSON_GetArrayItem(layersArray, 1);
         const cJSON* objectsArray = cJSON_GetObjectItem(collidersObj, "objects");
-        usize objectsLength = cJSON_GetArraySize(objectsArray);
+        const usize objectsLength = cJSON_GetArraySize(objectsArray);
 
         self->colliders = malloc(sizeof(LevelCollider) * objectsLength);
         self->collidersLength = objectsLength;
@@ -79,10 +79,10 @@ void LevelSegmentInit(LevelSegment* self, const char* path)
             const cJSON* widthObj = cJSON_GetObjectItem(colliderObj, "width");
             const cJSON* heightObj = cJSON_GetObjectItem(colliderObj, "height");
 
-            f32 x = (f32)cJSON_GetNumberValue(xObj);
-            f32 y = (f32)cJSON_GetNumberValue(yObj);
-            f32 width = (f32)cJSON_GetNumberValue(widthObj);
-            f32 height = (f32)cJSON_GetNumberValue(heightObj);
+            const f32 x = (f32)cJSON_GetNumberValue(xObj);
+            const f32 y = (f32)cJSON_GetNumberValue(yObj);
+            const f32 width = (f32)cJSON_GetNumberValue(widthObj);
+            const f32 height = (f32)cJSON_GetNumberValue(heightObj);
 
             const cJSON* propertiesArray = cJSON_GetObjectItem(colliderObj, "properties");
 
@@ -92,12 +92,12 @@ void LevelSegmentInit(LevelSegment* self, const char* path)
             const cJSON* layerObj = cJSON_GetObjectItem(layerPropObj, "value");
             const cJSON* resolutionschemaObj = cJSON_GetObjectItem(resolutionschemaPropObj, "value");
 
-            u64 layer = (u64)cJSON_GetNumberValue(layerObj);
-            u8 resolutionSchema = (u8)cJSON_GetNumberValue(resolutionschemaObj);
+            const u64 layer = (u64)cJSON_GetNumberValue(layerObj);
+            const u8 resolutionSchema = (u8)cJSON_GetNumberValue(resolutionschemaObj);
 
             // TODO(thismarvin): Support Polygons somehow...
 
-            Rectangle aabb = (Rectangle)
+            const Rectangle aabb = (Rectangle)
             {
                 .x = x,
                 .y = y,

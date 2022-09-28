@@ -112,13 +112,11 @@ static void SpawnMovingParticles(Scene* scene, const CPosition* position, const 
                 .y = GetRandomValue(minYSpeed, maxYSpeed),
             };
 
-            const EntityBuilder movingBuilder = FogParticleCreate(
-                                                    spawnPosition,
-                                                    velocity,
-                                                    GetRandomValue(minSize, maxSize),
-                                                    0.1f * GetRandomValue(minLifetime, maxLifetime));
+            const f32 radius = GetRandomValue(minSize, maxSize);
+            const f32 lifetime = 0.1f * GetRandomValue(minLifetime, maxLifetime);
+            const EntityBuilder builder = FogParticleCreate(spawnPosition, velocity, radius, lifetime);
 
-            SceneDeferAddEntity(scene, movingBuilder);
+            SceneDeferAddEntity(scene, builder);
         }
 
         movingParticleSpawnTimer = 0;
@@ -167,7 +165,7 @@ static void ShiftBreathingPhase()
                 }
                 else
                 {
-                    const f32 radiusModifer = 0.75f;
+                    static const f32 radiusModifer = 0.75f;
                     lumpTargetRadii[i] = baseRadius * radiusModifer;
                 }
             }
@@ -203,7 +201,7 @@ static void ShiftBreathingPhase()
                 }
                 else
                 {
-                    const f32 radiusModifer = 0.75f;
+                    static const f32 radiusModifer = 0.75f;
                     lumpTargetRadii[i] = baseRadius * radiusModifer;
                 }
             }
@@ -311,6 +309,11 @@ void FogDraw(const Scene* scene, const usize entity)
         DrawCircleV(center, radius, COLOR_BLACK);
     }
 
-    DrawRectangle(interpolated.x - CTX_VIEWPORT_WIDTH * 2, interpolated.y, CTX_VIEWPORT_WIDTH * 2,
-                  FOG_HEIGHT, color->value);
+    {
+        const f32 x = interpolated.x - CTX_VIEWPORT_WIDTH * 2;
+        const f32 y = interpolated.y;
+        const f32 width = CTX_VIEWPORT_WIDTH * 2;
+        const f32 height = FOG_HEIGHT;
+        DrawRectangle(x, y, width, height, color->value);
+    }
 }

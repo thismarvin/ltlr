@@ -20,9 +20,9 @@ TestSuite TestSuiteCreate(const char* name)
 
 void TestSuiteAdd(TestSuite* self, const char* name, TestFn fn)
 {
-    bool passed = fn();
+    const bool passed = fn();
 
-    TestRecord record = (TestRecord)
+    const TestRecord record = (TestRecord)
     {
         .name = (char*)name,
         .passed = passed,
@@ -46,15 +46,15 @@ bool TestSuitePresentResults(TestSuite* self)
 
     for (usize i = 0; i < DequeGetSize(&self->records); ++i)
     {
-        TestRecord record = DEQUE_GET_UNCHECKED(&self->records, TestRecord, i);
+        const TestRecord* record = &DEQUE_GET_UNCHECKED(&self->records, TestRecord, i);
 
-        if (record.passed)
+        if (record->passed)
         {
-            printf("%s %s\n", passPrompt, record.name);
+            printf("%s %s\n", passPrompt, record->name);
         }
         else
         {
-            printf("%s %s\n", failPrompt, record.name);
+            printf("%s %s\n", failPrompt, record->name);
         }
     }
 

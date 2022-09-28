@@ -36,7 +36,7 @@ static Rectangle CalculateAABB(const Vector2* vertices, const usize verticesLeng
 
 static OverlapInformation CalculateOverlap(const Polygon a, const Polygon b)
 {
-    Vector2 minNormal = { 0, 0 };
+    Vector2 minNormal = VECTOR2_ZERO;
     f32 minOverlap = FLT_MAX;
 
     for (usize i = 0; i < a.edgesLength; ++i)
@@ -54,7 +54,7 @@ static OverlapInformation CalculateOverlap(const Polygon a, const Polygon b)
 
         for (usize j = 0; j < a.verticesLength; ++j)
         {
-            f32 projection = Vector2DotProduct(a.vertices[j], normal);
+            const f32 projection = Vector2DotProduct(a.vertices[j], normal);
             minProjectionA = MIN(minProjectionA, projection);
             maxProjectionA = MAX(maxProjectionA, projection);
         }
@@ -64,12 +64,12 @@ static OverlapInformation CalculateOverlap(const Polygon a, const Polygon b)
 
         for (usize j = 0; j < b.verticesLength; ++j)
         {
-            f32 projection = Vector2DotProduct(b.vertices[j], normal);
+            const f32 projection = Vector2DotProduct(b.vertices[j], normal);
             minProjectionB = MIN(minProjectionB, projection);
             maxProjectionB = MAX(maxProjectionB, projection);
         }
 
-        f32 overlap = MIN(maxProjectionA, maxProjectionB) - MAX(minProjectionA, minProjectionB);
+        const f32 overlap = MIN(maxProjectionA, maxProjectionB) - MAX(minProjectionA, minProjectionB);
 
         if (overlap < minOverlap)
         {
@@ -107,34 +107,34 @@ static Vector2 RectangleGetCenter(const Rectangle rectangle)
 
 Vector2 SATGetResolution(const Polygon a, const Polygon b)
 {
-    Rectangle aAABB = CalculateAABB(a.vertices, a.verticesLength);
-    Rectangle bAABB = CalculateAABB(b.vertices, b.verticesLength);
+    const Rectangle aAABB = CalculateAABB(a.vertices, a.verticesLength);
+    const Rectangle bAABB = CalculateAABB(b.vertices, b.verticesLength);
 
     if (!CheckCollisionRecs(aAABB, bAABB))
     {
         return VECTOR2_ZERO;
     }
 
-    OverlapInformation pass0 = CalculateOverlap(a, b);
+    const OverlapInformation pass0 = CalculateOverlap(a, b);
 
     if (!pass0.valid)
     {
         return VECTOR2_ZERO;
     }
 
-    OverlapInformation pass1 = CalculateOverlap(b, a);
+    const OverlapInformation pass1 = CalculateOverlap(b, a);
 
     if (!pass1.valid)
     {
         return VECTOR2_ZERO;
     }
 
-    OverlapInformation minPass = pass0.overlap < pass1.overlap ? pass0 : pass1;
+    const OverlapInformation minPass = pass0.overlap < pass1.overlap ? pass0 : pass1;
     Vector2 resolution = Vector2Scale(minPass.normal, minPass.overlap);
 
-    Vector2 aCenter = RectangleGetCenter(aAABB);
-    Vector2 bCenter = RectangleGetCenter(bAABB);
-    Vector2 difference = Vector2Subtract(aCenter, bCenter);
+    const Vector2 aCenter = RectangleGetCenter(aAABB);
+    const Vector2 bCenter = RectangleGetCenter(bAABB);
+    const Vector2 difference = Vector2Subtract(aCenter, bCenter);
 
     if (Vector2DotProduct(difference, resolution) < 0)
     {

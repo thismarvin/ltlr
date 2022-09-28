@@ -8,7 +8,7 @@ void AtlasInit(Atlas* self, const char* path)
     char* buffer = LoadFileText(path);
 
     cJSON* spritesArray = cJSON_Parse(buffer);
-    usize spritesLength = cJSON_GetArraySize(spritesArray);
+    const usize spritesLength = cJSON_GetArraySize(spritesArray);
 
     self->sprites = malloc(sizeof(AtlasSprite) * spritesLength);
     self->spritesLength = spritesLength;
@@ -33,7 +33,7 @@ void AtlasInit(Atlas* self, const char* path)
         const cJSON* destinationWidthObj = cJSON_GetObjectItem(destinationObj, "width");
         const cJSON* destinationHeightObj = cJSON_GetObjectItem(destinationObj, "height");
 
-        char* name = cJSON_GetStringValue(nameObj);
+        const char* name = cJSON_GetStringValue(nameObj);
         const u16 untrimmedWidth = (u16)cJSON_GetNumberValue(untrimmedWidthObj);
         const u16 untrimmedHeight = (u16)cJSON_GetNumberValue(untrimmedHeightObj);
         const u16 sourceX = (u16)cJSON_GetNumberValue(sourceXObj);

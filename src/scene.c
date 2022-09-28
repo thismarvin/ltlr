@@ -35,7 +35,7 @@ static usize SceneAllocateEntity(Scene* self)
     }
 
     // No used indices, use next available fresh one.
-    usize next = MIN(entityManager->m_nextFreshEntityIndex, MAX_ENTITIES - 1);
+    const usize next = MIN(entityManager->m_nextFreshEntityIndex, MAX_ENTITIES - 1);
 
     entityManager->m_nextFreshEntityIndex = entityManager->m_nextFreshEntityIndex + 1;
     entityManager->m_nextFreshEntityIndex = MIN(entityManager->m_nextFreshEntityIndex, MAX_ENTITIES);
@@ -88,7 +88,7 @@ static void SceneExecuteSetTag(Scene* self, const CommandSetTag* setTag)
 
 static void SceneExecuteSetComponent(Scene* self, const CommandSetComponent* setCommand)
 {
-    usize entity = setCommand->entity;
+    const usize entity = setCommand->entity;
     const Component* component = &setCommand->component;
 
     switch (component->tag)
@@ -316,7 +316,7 @@ static void SceneSetupInput(Scene* self)
 
         // Axes.
         {
-            f32 threshold = 0.25;
+            static const f32 threshold = 0.25;
 
             {
                 AxisBinding binding = AxisBindingCreate("left", 2, ORD_LESS, -threshold);
@@ -463,9 +463,9 @@ static void SceneStart(Scene* self)
         {
             for (usize j = 0; j < self->segments[i].collidersLength; ++j)
             {
-                LevelCollider collider = self->segments[i].colliders[j];
+                const LevelCollider collider = self->segments[i].colliders[j];
 
-                Rectangle aabb = (Rectangle)
+                const Rectangle aabb = (Rectangle)
                 {
                     .x = collider.aabb.x + offset.x,
                     .y = collider.aabb.y + offset.y,
@@ -605,8 +605,8 @@ static Rectangle SceneCalculateActionCameraBounds(const Scene* self, const usize
 
     // Camera x-axis collision.
     {
-        f32 min = RectangleLeft(self->bounds) + CTX_VIEWPORT_WIDTH * 0.5;
-        f32 max = RectangleRight(self->bounds) - CTX_VIEWPORT_WIDTH * 0.5;
+        const f32 min = RectangleLeft(self->bounds) + CTX_VIEWPORT_WIDTH * 0.5;
+        const f32 max = RectangleRight(self->bounds) - CTX_VIEWPORT_WIDTH * 0.5;
 
         cameraPosition.x = MAX(min, cameraPosition.x);
         cameraPosition.x = MIN(max, cameraPosition.x);
@@ -614,8 +614,8 @@ static Rectangle SceneCalculateActionCameraBounds(const Scene* self, const usize
 
     // Camera y-axis collision.
     {
-        f32 min = RectangleTop(self->bounds) + CTX_VIEWPORT_HEIGHT * 0.5;
-        f32 max = RectangleBottom(self->bounds) - CTX_VIEWPORT_HEIGHT * 0.5;
+        const f32 min = RectangleTop(self->bounds) + CTX_VIEWPORT_HEIGHT * 0.5;
+        const f32 max = RectangleBottom(self->bounds) - CTX_VIEWPORT_HEIGHT * 0.5;
 
         cameraPosition.y = MAX(min, cameraPosition.y);
         cameraPosition.y = MIN(max, cameraPosition.y);
@@ -643,7 +643,7 @@ static void SceneDrawTilemap(const Scene* self)
                 continue;
             }
 
-            u16 sprite = self->segments[i].sprites[j] - 1;
+            const u16 sprite = self->segments[i].sprites[j] - 1;
 
             Vector2 position = (Vector2)
             {
@@ -653,7 +653,7 @@ static void SceneDrawTilemap(const Scene* self)
 
             position = Vector2Add(position, offset);
 
-            Rectangle source = (Rectangle)
+            const Rectangle source = (Rectangle)
             {
                 .x = (sprite % self->segments[i].tilesetColumns) * self->segments[i].tileWidth,
                 .y = (sprite / self->segments[i].tilesetColumns) * self->segments[i].tileHeight,
@@ -709,7 +709,7 @@ static void SceneDrawLayers(const Scene* self)
 {
     BeginDrawing();
 
-    Rectangle screenResolution = (Rectangle)
+    const Rectangle screenResolution = (Rectangle)
     {
         .x = 0,
         .y = 0,
@@ -723,10 +723,10 @@ static void SceneDrawLayers(const Scene* self)
     // Prefer integer scaling.
     zoom = floor(zoom);
 
-    i32 width = CTX_VIEWPORT_WIDTH * zoom;
-    i32 height = CTX_VIEWPORT_HEIGHT * zoom;
+    const i32 width = CTX_VIEWPORT_WIDTH * zoom;
+    const i32 height = CTX_VIEWPORT_HEIGHT * zoom;
 
-    Rectangle destination = (Rectangle)
+    const Rectangle destination = (Rectangle)
     {
         .x = floor(screenResolution.width * 0.5),
         .y = floor(screenResolution.height * 0.5),
@@ -734,7 +734,7 @@ static void SceneDrawLayers(const Scene* self)
         .height = height,
     };
 
-    Vector2 origin = (Vector2)
+    const Vector2 origin = (Vector2)
     {
         .x = floor(width * 0.5),
         .y = floor(height * 0.5),
@@ -848,7 +848,7 @@ static void RenderDebugLayer(const RenderFnParams* params)
 
 void SceneDraw(const Scene* self)
 {
-    Rectangle actionCameraBounds = SceneCalculateActionCameraBounds(self, self->player);
+    const Rectangle actionCameraBounds = SceneCalculateActionCameraBounds(self, self->player);
 
     const RenderFnParams params = (RenderFnParams)
     {

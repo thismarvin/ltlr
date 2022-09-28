@@ -30,7 +30,7 @@ static Scene scene;
 
 static void Timestep(void)
 {
-    f64 currentTime = GetTime();
+    const f64 currentTime = GetTime();
 
     f32 deltaTime = currentTime - previousTime;
 
@@ -128,8 +128,8 @@ static void DrawDebugInformation(void)
         return;
     }
 
-    f32 screenWidth = GetScreenWidth();
-    f32 screenHeight = GetScreenHeight();
+    const f32 screenWidth = GetScreenWidth();
+    const f32 screenHeight = GetScreenHeight();
 
     // Assume we need letterboxing.
     f32 zoom = screenWidth / CTX_VIEWPORT_WIDTH;
@@ -142,7 +142,7 @@ static void DrawDebugInformation(void)
 
     zoom = floor(zoom);
 
-    Camera2D camera = (Camera2D)
+    const Camera2D camera = (Camera2D)
     {
         .offset = VECTOR2_ZERO,
         .target = VECTOR2_ZERO,
@@ -152,19 +152,24 @@ static void DrawDebugInformation(void)
 
     BeginMode2D(camera);
     {
+        static const usize fontSize = 20;
+        static const f32 x = 0;
+        static const f32 y = 0;
+        static const usize xPadding = 8;
+        static const usize yPadding = 8;
+
         const char* text = TextFormat("%.f FPS", averageFps);
-
-        const usize fontSize = 20;
         const usize textWidth = MeasureText(text, fontSize);
-        const f32 x = 0;
-        const f32 y = 0;
-        const usize xPadding = 8;
-        const usize yPadding = 8;
 
-        DrawRectangle(x, y, textWidth + xPadding * 2, fontSize + yPadding * 2 - 1, (Color)
+        const Color backgroundColor = (Color)
         {
-            0, 0, 0, 150
-        });
+            .r = 0,
+            .g = 0,
+            .b = 0,
+            .a = 150,
+        };
+        DrawRectangle(x, y, textWidth + xPadding * 2, fontSize + yPadding * 2 - 1, backgroundColor);
+
         DrawText(text, x + xPadding + 2, y + yPadding + 2, fontSize, COLOR_BLACK);
         DrawText(text, x + xPadding, y + yPadding, fontSize, COLOR_WHITE);
     }

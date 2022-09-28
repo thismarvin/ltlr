@@ -348,7 +348,7 @@ static void PlayerOnCollision(const OnCollisionParams* params)
     {
         if (ENTITY_HAS_DEPS(params->otherEntity, TAG_WALKER | TAG_DAMAGE))
         {
-            OnDamageParams onDamageParams = (OnDamageParams)
+            const OnDamageParams onDamageParams = (OnDamageParams)
             {
                 .scene = params->scene,
                 .entity = params->entity,
@@ -447,8 +447,8 @@ static OnResolutionResult PlayerOnResolution(const OnResolutionParams* params)
     }
 
     // Resolve collision.
-    Rectangle resolvedAabb = ApplyResolutionPerfectly(params->aabb, params->otherAabb,
-                             params->resolution);
+    const Rectangle resolvedAabb = ApplyResolutionPerfectly(params->aabb, params->otherAabb,
+                                   params->resolution);
 
     // Resolution specific player logic.
     {
@@ -555,8 +555,8 @@ EntityBuilder PlayerCreate(const f32 x, const f32 y)
         .onDamage = PlayerOnDamage,
     }));
 
-    f32 coyoteDuration = CTX_DT * 6;
-    f32 invulnerableDuration = 1.5f;
+    static const f32 coyoteDuration = CTX_DT * 6;
+    static const f32 invulnerableDuration = 1.5f;
 
     ADD_COMPONENT(CPlayer, ((CPlayer)
     {
@@ -598,7 +598,7 @@ static void PlayerDecelerate(CPlayer* player, const CKinetic* kinetic)
 
     const f32 delta = fabsf(kinetic->velocity.x);
 
-    const f32 vf = 0;
+    static const f32 vf = 0;
     const f32 vo = kinetic->velocity.x;
     const f32 t = delta * timeToStop / moveSpeed;
 
@@ -893,12 +893,12 @@ static void PlayerFlashingLogic(Scene* scene, const usize entity)
 
     player->invulnerableTimer += CTX_DT;
 
-    const u32 totalFlashes = 5;
-    f32 timeSlice = player->invulnerableDuration / (totalFlashes * 2.0f);
+    static const u32 totalFlashes = 5;
+    const f32 timeSlice = player->invulnerableDuration / (totalFlashes * 2.0f);
 
     if (!player->dead && !PlayerIsVulnerable(player))
     {
-        u32 passedSlices = (u32)(player->invulnerableTimer / timeSlice);
+        const u32 passedSlices = (u32)(player->invulnerableTimer / timeSlice);
 
         if (passedSlices % 2 == 0)
         {
@@ -918,7 +918,7 @@ static void PlayerFlashingLogic(Scene* scene, const usize entity)
 
 void PlayerMortalUpdate(Scene* scene, const usize entity)
 {
-    u64 dependencies = TAG_PLAYER | TAG_MORTAL | TAG_POSITION | TAG_KINETIC;
+    const u64 dependencies = TAG_PLAYER | TAG_MORTAL | TAG_POSITION | TAG_KINETIC;
 
     if (!SceneEntityHasDependencies(scene, entity, dependencies))
     {

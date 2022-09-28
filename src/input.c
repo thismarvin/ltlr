@@ -353,7 +353,7 @@ static bool AxisBindingPressing(const AxisBinding* binding, const usize gamepad)
 
     for (usize i = 0; i < binding->m_axesLength; ++i)
     {
-        f32 value = GetGamepadAxisMovement(gamepad, binding->m_axes[i]);
+        const f32 value = GetGamepadAxisMovement(gamepad, binding->m_axes[i]);
 
         if (binding->m_ordering == ORD_LESS && value < binding->m_target)
         {

@@ -87,9 +87,9 @@ void FogParticleDraw(const Scene* scene, const usize entity)
     const f32 progress = fleeting->age / fleeting->lifetime;
     const f32 scale = -4 * (progress * progress - progress);
 
-    Vector2 interpolated = Vector2Lerp(smooth->previous, position->value, ContextGetAlpha());
+    const Vector2 interpolated = Vector2Lerp(smooth->previous, position->value, ContextGetAlpha());
 
-    Vector2 center = (Vector2)
+    const Vector2 center = (Vector2)
     {
         .x = interpolated.x,
         .y = interpolated.y,
@@ -110,8 +110,7 @@ void FogParticleDraw(const Scene* scene, const usize entity)
             rotation *= -1;
         }
 
-        DrawPoly(center, sidesCount, dimension->width * scale * 0.5f, rotation,
-                 color->value);
+        DrawPoly(center, sidesCount, dimension->width * scale * 0.5f, rotation, color->value);
     }
 }
 

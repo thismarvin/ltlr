@@ -103,7 +103,7 @@ static SimulateCollisionOnAxisResult SimulateCollisionOnAxis
 
     Rectangle simulatedAabb = params->aabb;
 
-    Vector2 direction = Vector2Create(SIGN(params->delta.x), SIGN(params->delta.y));
+    const Vector2 direction = Vector2Create(SIGN(params->delta.x), SIGN(params->delta.y));
     Vector2 remainder = Vector2Create(fabsf(params->delta.x), fabsf(params->delta.y));
 
     bool xModified = false;
@@ -135,7 +135,7 @@ static SimulateCollisionOnAxisResult SimulateCollisionOnAxis
                 continue;
             }
 
-            Rectangle otherAabb = (Rectangle)
+            const Rectangle otherAabb = (Rectangle)
             {
                 .x = otherPosition->value.x,
                 .y = otherPosition->value.y,
@@ -145,8 +145,8 @@ static SimulateCollisionOnAxisResult SimulateCollisionOnAxis
 
             if (CheckCollisionRecs(simulatedAabb, otherAabb))
             {
-                Vector2 rawResolution = Vector2Create(-direction.x, -direction.y);
-                Vector2 resolution = ExtractResolution(rawResolution, otherCollider->resolutionSchema);
+                const Vector2 rawResolution = Vector2Create(-direction.x, -direction.y);
+                const Vector2 resolution = ExtractResolution(rawResolution, otherCollider->resolutionSchema);
 
                 // Check if extracting the resolution also invalidated the resolution.
                 if (resolution.x == 0 && resolution.y == 0)
@@ -154,7 +154,7 @@ static SimulateCollisionOnAxisResult SimulateCollisionOnAxis
                     continue;
                 }
 
-                Rectangle overlap = GetCollisionRec(simulatedAabb, otherAabb);
+                const Rectangle overlap = GetCollisionRec(simulatedAabb, otherAabb);
 
                 // Make sure that the resolution is part of the axis with the least overlap.
                 {
@@ -171,18 +171,18 @@ static SimulateCollisionOnAxisResult SimulateCollisionOnAxis
 
                 // Make sure that the resolution points in the direction of the minimum offset.
                 {
-                    f32 left = RectangleLeft(simulatedAabb);
-                    f32 top = RectangleTop(simulatedAabb);
+                    const f32 left = RectangleLeft(simulatedAabb);
+                    const f32 top = RectangleTop(simulatedAabb);
 
-                    f32 otherLeft = RectangleLeft(otherAabb);
-                    f32 otherRight = RectangleRight(otherAabb);
-                    f32 otherTop = RectangleTop(otherAabb);
-                    f32 otherBottom = RectangleBottom(otherAabb);
+                    const f32 otherLeft = RectangleLeft(otherAabb);
+                    const f32 otherRight = RectangleRight(otherAabb);
+                    const f32 otherTop = RectangleTop(otherAabb);
+                    const f32 otherBottom = RectangleBottom(otherAabb);
 
-                    f32 offsetLeft = (otherLeft - simulatedAabb.width) - left;
-                    f32 offsetRight = otherRight - left;
-                    f32 offsetDown = otherBottom - top;
-                    f32 offsetUp = (otherTop - simulatedAabb.height) - top;
+                    const f32 offsetLeft = (otherLeft - simulatedAabb.width) - left;
+                    const f32 offsetRight = otherRight - left;
+                    const f32 offsetDown = otherBottom - top;
+                    const f32 offsetUp = (otherTop - simulatedAabb.height) - top;
 
                     if (resolution.x < 0 && fabsf(offsetLeft) > fabsf(offsetRight))
                     {
@@ -205,7 +205,7 @@ static SimulateCollisionOnAxisResult SimulateCollisionOnAxis
                     }
                 }
 
-                OnResolutionParams onResolutionParams = (OnResolutionParams)
+                const OnResolutionParams onResolutionParams = (OnResolutionParams)
                 {
                     .scene = params->scene,
                     .entity = params->entity,
@@ -216,7 +216,7 @@ static SimulateCollisionOnAxisResult SimulateCollisionOnAxis
                     .resolution = resolution,
                 };
 
-                OnResolutionResult result = params->onResolution(&onResolutionParams);
+                const OnResolutionResult result = params->onResolution(&onResolutionParams);
 
                 xModified |= result.aabb.x != simulatedAabb.x;
                 yModified |= result.aabb.y != simulatedAabb.y;
@@ -241,34 +241,34 @@ static SimulateCollisionOnAxisResult SimulateCollisionOnAxis
 
 static Rectangle AdvancedCollision(const AdvancedCollisionParams* params)
 {
-    Vector2 previousPosition = (Vector2)
+    const Vector2 previousPosition = (Vector2)
     {
         .x = params->previousAabb.x,
         .y = params->previousAabb.y,
     };
-    Vector2 currentPosition = (Vector2)
+    const Vector2 currentPosition = (Vector2)
     {
         .x = params->currentAabb.x,
         .y = params->currentAabb.y,
     };
 
-    Vector2 delta = Vector2Subtract(currentPosition, previousPosition);
+    const Vector2 delta = Vector2Subtract(currentPosition, previousPosition);
 
     Rectangle simulatedAabb = params->previousAabb;
     bool xModified = false;
     bool yModified = false;
 
-    const u8 step = 1;
+    static const u8 step = 1;
 
     // Simulate just the x-axis.
     {
-        Vector2 xDelta = (Vector2)
+        const Vector2 xDelta = (Vector2)
         {
             .x = delta.x,
             .y = 0,
         };
 
-        SimulateCollisionOnAxisParams onAxisParams = (SimulateCollisionOnAxisParams)
+        const SimulateCollisionOnAxisParams onAxisParams = (SimulateCollisionOnAxisParams)
         {
             .scene = (Scene*)params->scene,
             .entity = params->entity,
@@ -279,7 +279,7 @@ static Rectangle AdvancedCollision(const AdvancedCollisionParams* params)
             .onResolution = params->onResolution,
         };
 
-        SimulateCollisionOnAxisResult result = SimulateCollisionOnAxis(&onAxisParams);
+        const SimulateCollisionOnAxisResult result = SimulateCollisionOnAxis(&onAxisParams);
 
         simulatedAabb = result.simulatedAabb;
         xModified |= result.xModified;
@@ -294,13 +294,13 @@ static Rectangle AdvancedCollision(const AdvancedCollisionParams* params)
 
     // Simulate just the y-axis.
     {
-        Vector2 yDelta = (Vector2)
+        const Vector2 yDelta = (Vector2)
         {
             .x = 0,
             .y = delta.y,
         };
 
-        SimulateCollisionOnAxisParams onAxisParams = (SimulateCollisionOnAxisParams)
+        const SimulateCollisionOnAxisParams onAxisParams = (SimulateCollisionOnAxisParams)
         {
             .scene = (Scene*)params->scene,
             .entity = params->entity,
@@ -311,7 +311,7 @@ static Rectangle AdvancedCollision(const AdvancedCollisionParams* params)
             .onResolution = params->onResolution,
         };
 
-        SimulateCollisionOnAxisResult result = SimulateCollisionOnAxis(&onAxisParams);
+        const SimulateCollisionOnAxisResult result = SimulateCollisionOnAxis(&onAxisParams);
 
         simulatedAabb = result.simulatedAabb;
         xModified |= result.xModified;
@@ -336,14 +336,14 @@ void SCollisionUpdate(Scene* scene, const usize entity)
     const CDimension* dimension = GET_COMPONENT(dimension, entity);
     const CCollider* collider = GET_COMPONENT(collider, entity);
 
-    Rectangle previousAabb = (Rectangle)
+    const Rectangle previousAabb = (Rectangle)
     {
         .x = smooth->previous.x,
         .y = smooth->previous.y,
         .width = dimension->width,
         .height = dimension->height
     };
-    Rectangle currentAabb = (Rectangle)
+    const Rectangle currentAabb = (Rectangle)
     {
         .x = position->value.x,
         .y = position->value.y,
@@ -351,7 +351,7 @@ void SCollisionUpdate(Scene* scene, const usize entity)
         .height = dimension->height
     };
 
-    AdvancedCollisionParams params = (AdvancedCollisionParams)
+    const AdvancedCollisionParams params = (AdvancedCollisionParams)
     {
         .scene = scene,
         .entity = entity,
@@ -361,7 +361,7 @@ void SCollisionUpdate(Scene* scene, const usize entity)
         .onResolution = collider->onResolution
     };
 
-    Rectangle resolvedAabb = AdvancedCollision(&params);
+    const Rectangle resolvedAabb = AdvancedCollision(&params);
 
     position->value.x = resolvedAabb.x;
     position->value.y = resolvedAabb.y;
@@ -401,7 +401,7 @@ void SPostCollisionUpdate(Scene* scene, const usize entity)
             continue;
         }
 
-        Rectangle otherAabb = (Rectangle)
+        const Rectangle otherAabb = (Rectangle)
         {
             .x = otherPosition->value.x,
             .y = otherPosition->value.y,
@@ -411,9 +411,9 @@ void SPostCollisionUpdate(Scene* scene, const usize entity)
 
         if (CheckCollisionRecs(aabb, otherAabb))
         {
-            Rectangle overlap = GetCollisionRec(aabb, otherAabb);
+            const Rectangle overlap = GetCollisionRec(aabb, otherAabb);
 
-            OnCollisionParams onCollisionParams = (OnCollisionParams)
+            const OnCollisionParams onCollisionParams = (OnCollisionParams)
             {
                 .scene = scene,
                 .entity = entity,
@@ -583,7 +583,7 @@ void SDebugDraw(const Scene* scene, const usize entity)
     const CPosition* position = GET_COMPONENT(position, entity);
     const CDimension* dimension = GET_COMPONENT(dimension, entity);
 
-    Rectangle bounds = (Rectangle)
+    const Rectangle bounds = (Rectangle)
     {
         .x = position->value.x,
         .y = position->value.y,

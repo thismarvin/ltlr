@@ -7,7 +7,7 @@ typedef int32_t i32;
 static bool DequeTestCreate(void)
 {
     Deque newDeque = DEQUE_OF(i32);
-    usize size = DequeGetSize(&newDeque);
+    const usize size = DequeGetSize(&newDeque);
     DequeDestroy(&newDeque);
 
     return size == 0;
@@ -18,7 +18,7 @@ static bool DequeTestPushFront1(void)
     Deque deque = DEQUE_OF(i32);
     DEQUE_PUSH_FRONT(&deque, i32, 1);
 
-    bool result = DequeGetSize(&deque) == 1 && DEQUE_GET(&deque, i32, 0) == 1;
+    const bool result = DequeGetSize(&deque) == 1 && DEQUE_GET(&deque, i32, 0) == 1;
 
     DequeDestroy(&deque);
     return result;
@@ -33,7 +33,7 @@ static bool DequeTestPushFrontMultiple(void)
 
     bool result = DequeGetSize(&deque) == 3;
 
-    i32 expected[3] = { 1, 2, 3 };
+    const i32 expected[3] = { 1, 2, 3 };
 
     for (int i = 0; i < 3; ++i)
     {
@@ -49,7 +49,7 @@ static bool DequeTestPushBack1(void)
     Deque deque = DEQUE_OF(i32);
     DEQUE_PUSH_BACK(&deque, i32, 1);
 
-    bool result = DequeGetSize(&deque) == 1 && DEQUE_GET(&deque, i32, 0) == 1;
+    const bool result = DequeGetSize(&deque) == 1 && DEQUE_GET(&deque, i32, 0) == 1;
 
     DequeDestroy(&deque);
     return result;
@@ -64,7 +64,7 @@ static bool DequeTestPushBackMultiple(void)
 
     bool result = DequeGetSize(&deque) == 3;
 
-    i32 expected[3] = { 3, 2, 1 };
+    const i32 expected[3] = { 3, 2, 1 };
 
     for (int i = 0; i < 3; ++i)
     {
@@ -87,7 +87,7 @@ static bool DequeTestPushFrontAndBack(void)
 
     bool result = DequeGetSize(&deque) == 6;
 
-    i32 expected[6] = { -2, -1, 0, 1, 2, 3 };
+    const i32 expected[6] = { -2, -1, 0, 1, 2, 3 };
 
     for (int i = 0; i < 6; ++i)
     {
@@ -103,9 +103,9 @@ static bool DequeTestPopFront(void)
     Deque deque = DEQUE_OF(i32);
     DEQUE_PUSH_FRONT(&deque, i32, 1);
     DEQUE_PUSH_FRONT(&deque, i32, 2);
-    i32 pop = DEQUE_POP_FRONT(&deque, i32);
+    const i32 pop = DEQUE_POP_FRONT(&deque, i32);
 
-    bool result = DequeGetSize(&deque) == 1 && pop == 2;
+    const bool result = DequeGetSize(&deque) == 1 && pop == 2;
 
     DequeDestroy(&deque);
     return result;
@@ -116,9 +116,9 @@ static bool DequeTestPopBack(void)
     Deque deque = DEQUE_OF(i32);
     DEQUE_PUSH_FRONT(&deque, i32, 1);
     DEQUE_PUSH_FRONT(&deque, i32, 2);
-    i32 pop = DEQUE_POP_BACK(&deque, i32);
+    const i32 pop = DEQUE_POP_BACK(&deque, i32);
 
-    bool result = DequeGetSize(&deque) == 1 && pop == 1;
+    const bool result = DequeGetSize(&deque) == 1 && pop == 1;
 
     DequeDestroy(&deque);
     return result;
@@ -200,7 +200,7 @@ static bool DequeTestResize(void)
 
     result &= deque.m_capacity > 4;
 
-    i32 expected[] = {-2, -1, 0, 1, 2};
+    const i32 expected[] = { -2, -1, 0, 1, 2 };
 
     for (int i = 0; i < 5; ++i)
     {
