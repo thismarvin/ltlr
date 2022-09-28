@@ -229,11 +229,6 @@ void SceneExecuteCommands(Scene* self)
                 SceneExecuteRemoveComponent(self, &command->disableComponent);
                 break;
             }
-
-            default:
-            {
-                break;
-            }
         }
     }
 

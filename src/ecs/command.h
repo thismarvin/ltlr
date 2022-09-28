@@ -34,7 +34,6 @@ typedef struct
 
 typedef enum
 {
-    CT_NONE,
     CT_SET_TAG,
     CT_SET_COMPONENT,
     CT_DEALLOCATE_ENTITY,
