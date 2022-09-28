@@ -1,6 +1,7 @@
 #include "../src/utils/quadtree.h"
 #include "testing.h"
 #include <stdint.h>
+#include <stdlib.h>
 
 typedef int32_t i32;
 
@@ -552,6 +553,6 @@ int main(void)
 
     if (!allPass)
     {
-        return 1;
+        return EXIT_FAILURE;
     }
 }
