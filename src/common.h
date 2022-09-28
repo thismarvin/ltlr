@@ -33,6 +33,13 @@ typedef double f64;
 
 typedef enum
 {
+    ORD_LESS,
+    ORD_EQUAL,
+    ORD_GREATER,
+} Ordering;
+
+typedef enum
+{
     DIR_NONE = 0,
     DIR_LEFT = 1 << 0,
     DIR_UP = 1 << 1,

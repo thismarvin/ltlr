@@ -2,12 +2,6 @@
 
 #include "common.h"
 
-typedef enum
-{
-    ORD_LESS,
-    ORD_GREATER,
-} Ordering;
-
 typedef struct
 {
     char* m_name;
