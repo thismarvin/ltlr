@@ -247,7 +247,7 @@ static void SceneSetupContent(Scene* self)
 
 static void SceneSetupInput(Scene* self)
 {
-    InputProfile profile = InputProfileCreate(5);
+    self->defaultActionProfile = InputProfileCreate(5);
 
     // Keyboard.
     {
@@ -257,7 +257,7 @@ static void SceneSetupInput(Scene* self)
             KeyboardBindingAddKey(&binding, KEY_LEFT);
             KeyboardBindingAddKey(&binding, KEY_A);
 
-            InputProfileAddKeyboardBinding(&profile, binding);
+            InputProfileAddKeyboardBinding(&self->defaultActionProfile, binding);
         }
 
         {
@@ -266,7 +266,7 @@ static void SceneSetupInput(Scene* self)
             KeyboardBindingAddKey(&binding, KEY_RIGHT);
             KeyboardBindingAddKey(&binding, KEY_D);
 
-            InputProfileAddKeyboardBinding(&profile, binding);
+            InputProfileAddKeyboardBinding(&self->defaultActionProfile, binding);
         }
 
         {
@@ -277,7 +277,7 @@ static void SceneSetupInput(Scene* self)
 
             KeyboardBindingSetBuffer(&binding, CTX_DT * 8);
 
-            InputProfileAddKeyboardBinding(&profile, binding);
+            InputProfileAddKeyboardBinding(&self->defaultActionProfile, binding);
         }
     }
 
@@ -290,7 +290,7 @@ static void SceneSetupInput(Scene* self)
 
                 GamepadBindingAddButton(&binding, GAMEPAD_BUTTON_LEFT_FACE_LEFT);
 
-                InputProfileAddGamepadBinding(&profile, binding);
+                InputProfileAddGamepadBinding(&self->defaultActionProfile, binding);
             }
 
             {
@@ -298,7 +298,7 @@ static void SceneSetupInput(Scene* self)
 
                 GamepadBindingAddButton(&binding, GAMEPAD_BUTTON_LEFT_FACE_RIGHT);
 
-                InputProfileAddGamepadBinding(&profile, binding);
+                InputProfileAddGamepadBinding(&self->defaultActionProfile, binding);
             }
 
             {
@@ -309,13 +309,13 @@ static void SceneSetupInput(Scene* self)
 
                 GamepadBindingSetBuffer(&binding, CTX_DT * 8);
 
-                InputProfileAddGamepadBinding(&profile, binding);
+                InputProfileAddGamepadBinding(&self->defaultActionProfile, binding);
             }
         }
 
         // Axes.
         {
-            static const f32 threshold = 0.25;
+            static const f32 threshold = 0.25f;
 
             {
                 AxisBinding binding = AxisBindingCreate("left", 2, ORD_LESS, -threshold);
@@ -323,7 +323,7 @@ static void SceneSetupInput(Scene* self)
                 AxisBindingAddAxis(&binding, GAMEPAD_AXIS_LEFT_X);
                 AxisBindingAddAxis(&binding, GAMEPAD_AXIS_RIGHT_X);
 
-                InputProfileAddAxisBinding(&profile, binding);
+                InputProfileAddAxisBinding(&self->defaultActionProfile, binding);
             }
 
             {
@@ -332,14 +332,14 @@ static void SceneSetupInput(Scene* self)
                 AxisBindingAddAxis(&binding, GAMEPAD_AXIS_LEFT_X);
                 AxisBindingAddAxis(&binding, GAMEPAD_AXIS_RIGHT_X);
 
-                InputProfileAddAxisBinding(&profile, binding);
+                InputProfileAddAxisBinding(&self->defaultActionProfile, binding);
             }
         }
     }
 
     self->input = InputHandlerCreate(0);
 
-    InputHandlerSetProfile(&self->input, profile);
+    InputHandlerSetProfile(&self->input, &self->defaultActionProfile);
 }
 
 static Rectangle RectangleFromRenderTexture(const RenderTexture renderTexture)
@@ -887,4 +887,6 @@ void SceneDestroy(Scene* self)
     UnloadRenderTexture(self->targetLayer);
     UnloadRenderTexture(self->foregroundLayer);
     UnloadRenderTexture(self->debugLayer);
+
+    InputProfileDestroy(&self->defaultActionProfile);
 }

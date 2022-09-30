@@ -58,33 +58,37 @@ typedef struct
 typedef struct
 {
     usize m_gamepad;
-    bool m_enabled;
-    InputProfile m_profile;
+    InputProfile* m_profile;
 } InputHandler;
 
 KeyboardBinding KeyboardBindingCreate(const char* name, usize keysCapacity);
 void KeyboardBindingSetBuffer(KeyboardBinding* self, f32 bufferDuration);
 void KeyboardBindingAddKey(KeyboardBinding* self, KeyboardKey key);
+void KeyboardBindingDestroy(KeyboardBinding* self);
 
 GamepadBinding GamepadBindingCreate(const char* name, usize buttonsCapacity);
 void GamepadBindingSetBuffer(GamepadBinding* self, f32 bufferDuration);
 void GamepadBindingAddButton(GamepadBinding* self, GamepadButton button);
+void GamepadBindingDestroy(GamepadBinding* self);
 
 MouseBinding MouseBindingCreate(const char* name, usize buttonsCapacity);
 void MouseBindingSetBuffer(MouseBinding* self, f32 bufferDuration);
 void MouseBindingAddButton(MouseBinding* self, MouseButton button);
+void MouseBindingDestroy(MouseBinding* self);
 
 AxisBinding AxisBindingCreate(const char* name, usize axesCapacity, Ordering ordering, f32 target);
 void AxisBindingAddAxis(AxisBinding* self, GamepadAxis axis);
+void AxisBindingDestroy(AxisBinding* self);
 
 InputProfile InputProfileCreate(usize bindingsCapacity);
 void InputProfileAddKeyboardBinding(InputProfile* self, KeyboardBinding binding);
 void InputProfileAddGamepadBinding(InputProfile* self, GamepadBinding binding);
 void InputProfileAddMouseBinding(InputProfile* self, MouseBinding binding);
 void InputProfileAddAxisBinding(InputProfile* self, AxisBinding binding);
+void InputProfileDestroy(InputProfile* self);
 
 InputHandler InputHandlerCreate(usize gamepad);
-void InputHandlerSetProfile(InputHandler* self, InputProfile profile);
+void InputHandlerSetProfile(InputHandler* self, const InputProfile* profile);
 void InputHandlerUpdate(InputHandler* self);
 // TODO(thismarvin): Return the active bindings somehow...
 bool InputHandlerPressed(const InputHandler* self, const char* binding);
