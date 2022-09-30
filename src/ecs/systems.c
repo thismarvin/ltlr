@@ -474,7 +474,14 @@ void SSpriteDraw(const Scene* scene, const usize entity)
         drawPosition = interpolated;
     }
 
-    Rectangle source = sprite->source;
+    const AtlasSprite* atlasSprite = &scene->atlas.sprites[sprite->type];
+    Rectangle source = (Rectangle)
+    {
+        .x = atlasSprite->destination.x,
+        .y = atlasSprite->destination.y,
+        .width = atlasSprite->destination.width,
+        .height = atlasSprite->destination.height,
+    };
 
     if ((sprite->reflection & REFLECTION_REVERSE_X_AXIS) == 0)
     {
@@ -482,9 +489,9 @@ void SSpriteDraw(const Scene* scene, const usize entity)
     }
     else
     {
-        drawPosition.x -= sprite->source.width - RectangleRight(sprite->intramural);
+        drawPosition.x -= source.width - RectangleRight(sprite->intramural);
 
-        source.width = -sprite->source.width;
+        source.width = -source.width;
     }
 
     if ((sprite->reflection & REFLECTION_REVERSE_Y_AXIS) == 0)
@@ -493,9 +500,9 @@ void SSpriteDraw(const Scene* scene, const usize entity)
     }
     else
     {
-        drawPosition.y -= sprite->source.height - RectangleBottom(sprite->intramural);
+        drawPosition.y -= source.height - RectangleBottom(sprite->intramural);
 
-        source.height = -sprite->source.height;
+        source.height = -source.height;
     }
 
     if (ENTITY_HAS_DEPS(entity, TAG_COLOR))
@@ -526,9 +533,8 @@ void SAnimationDraw(const Scene* scene, const usize entity)
         drawPosition = interpolated;
     }
 
-    const char* name = ANIMATIONS[animation->type][animation->frame];
-    const AtlasSprite* atlasSprite = AtlasGet(&scene->atlas, name);
-
+    const Sprite type = ANIMATIONS[animation->type][animation->frame];
+    const AtlasSprite* atlasSprite = &scene->atlas.sprites[type];
     Rectangle source = (Rectangle)
     {
         .x = atlasSprite->destination.x,

@@ -2,6 +2,7 @@
 
 #include "../animation.h"
 #include "../common.h"
+#include "../sprites_generated.h"
 
 #define TAG_NONE ((u64)0)
 #define TAG_POSITION ((u64)1 << 0)
@@ -105,9 +106,9 @@ typedef struct
 
 typedef struct
 {
-    Rectangle source;
     Rectangle intramural;
     Reflection reflection;
+    Sprite type;
 } CSprite;
 
 typedef struct

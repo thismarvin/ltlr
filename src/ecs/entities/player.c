@@ -375,7 +375,7 @@ static void PlayerOnCollision(const OnCollisionParams* params)
             };
             const CSprite sprite = (CSprite)
             {
-                .source = (Rectangle) { 309, 4, 88, 40 },
+                .type = SPRITE_SOLAR_0001,
                 .intramural = intramural,
                 .reflection = REFLECTION_NONE,
             };
@@ -524,7 +524,7 @@ EntityBuilder PlayerCreate(const f32 x, const f32 y)
 
     ADD_COMPONENT(CSprite, ((CSprite)
     {
-        .source = (Rectangle) { 16, 0, 32, 48 },
+        .type = SPRITE_PLAYER_JUMP_0000,
         .intramural = intramural,
         .reflection = REFLECTION_NONE,
     }));

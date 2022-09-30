@@ -36,7 +36,7 @@ EntityBuilder SolarPanelCreate(const f32 x, const f32 y)
 
     ADD_COMPONENT(CSprite, ((CSprite)
     {
-        .source = (Rectangle) { 217, 4, 88, 40 },
+        .type = SPRITE_SOLAR_0000,
         .intramural = intramural,
         .reflection = REFLECTION_NONE,
     }));

@@ -39,7 +39,7 @@ EntityBuilder BatteryCreate(const f32 x, const f32 y)
 
     ADD_COMPONENT(CSprite, ((CSprite)
     {
-        .source = (Rectangle) { 171, 120, 14, 32 },
+        .type = SPRITE_BATTERY,
         .intramural = intramural,
         .reflection = REFLECTION_NONE,
     }));
