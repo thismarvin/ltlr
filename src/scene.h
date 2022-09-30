@@ -46,7 +46,6 @@ struct Scene
     usize player;
     usize fog;
     Rectangle bounds;
-    Texture2D atlasTexture;
     Atlas atlas;
     LevelSegment* segments;
     usize segmentsLength;

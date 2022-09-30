@@ -1,38 +1,37 @@
 #pragma once
 
 #include "common.h"
-
-#define MAX_SPRITE_NAME_LENGTH 16
+#include "sprites_generated.h"
 
 typedef struct
 {
     u16 width;
     u16 height;
-} AtlasSpriteDimension;
+} AtlasEntryDimension;
 
 typedef struct
 {
-    u16 x;
-    u16 y;
-    u16 width;
-    u16 height;
-} AtlasSpriteImageRegion;
+    AtlasEntryDimension untrimmed;
+    Rectangle source;
+    Rectangle destination;
+} AtlasEntry;
 
 typedef struct
 {
-    char name[MAX_SPRITE_NAME_LENGTH];
-    AtlasSpriteDimension untrimmed;
-    AtlasSpriteImageRegion source;
-    AtlasSpriteImageRegion destination;
-} AtlasSprite;
-
-typedef struct
-{
-    AtlasSprite* sprites;
-    usize spritesLength;
+    Texture2D texture;
+    AtlasEntry* entries;
+    usize entriesLength;
 } Atlas;
 
-void AtlasInit(Atlas* self, const char* path);
-AtlasSprite* AtlasGet(const Atlas* self, const char* name);
-// TODO(thismarvin): void AtlasDrawSprite(const Atlas* self, AtlasSprite* sprite);
+typedef struct
+{
+    Sprite sprite;
+    Vector2 position;
+    Rectangle intramural;
+    Reflection reflection;
+    Color tint;
+} AtlasDrawParams;
+
+Atlas AtlasCreate(const char* path);
+void AtlasDraw(const Atlas* self, const AtlasDrawParams* params);
 void AtlasDestroy(Atlas* self);

@@ -242,8 +242,7 @@ usize SceneGetEntityCount(const Scene* self)
 
 static void SceneSetupContent(Scene* self)
 {
-    AtlasInit(&self->atlas, "./content/atlas.json");
-    self->atlasTexture = LoadTexture("./content/atlas.png");
+    self->atlas = AtlasCreate("./content/atlas.png");
 }
 
 static void SceneSetupInput(Scene* self)
@@ -661,7 +660,7 @@ static void SceneDrawTilemap(const Scene* self)
                 .height = self->segments[i].tileHeight
             };
 
-            DrawTextureRec(self->atlasTexture, source, position, WHITE);
+            DrawTextureRec(self->atlas.texture, source, position, WHITE);
         }
 
         offset.x += self->segments[i].bounds.width;
@@ -872,7 +871,7 @@ void SceneDeferReset(Scene* self)
 
 void SceneDestroy(Scene* self)
 {
-    UnloadTexture(self->atlasTexture);
+    AtlasDestroy(&self->atlas);
 
     for (usize i = 0; i < self->segmentsLength; ++i)
     {

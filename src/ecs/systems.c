@@ -474,21 +474,17 @@ void SSpriteDraw(const Scene* scene, const usize entity)
         drawPosition = interpolated;
     }
 
-    const AtlasSprite* atlasSprite = &scene->atlas.sprites[sprite->type];
-    Rectangle source = (Rectangle)
-    {
-        .x = atlasSprite->destination.x,
-        .y = atlasSprite->destination.y,
-        .width = atlasSprite->destination.width,
-        .height = atlasSprite->destination.height,
-    };
+    const AtlasEntry* atlasEntry = &scene->atlas.entries[sprite->type];
+    Rectangle source = atlasEntry->destination;
 
     if ((sprite->reflection & REFLECTION_REVERSE_X_AXIS) == 0)
     {
+        drawPosition.x += atlasEntry->source.x;
         drawPosition.x -= sprite->intramural.x;
     }
     else
     {
+        drawPosition.x += atlasEntry->untrimmed.width - (atlasEntry->source.x + atlasEntry->source.width);
         drawPosition.x -= source.width - RectangleRight(sprite->intramural);
 
         source.width = -source.width;
@@ -496,10 +492,12 @@ void SSpriteDraw(const Scene* scene, const usize entity)
 
     if ((sprite->reflection & REFLECTION_REVERSE_Y_AXIS) == 0)
     {
+        drawPosition.y += atlasEntry->source.y;
         drawPosition.y -= sprite->intramural.y;
     }
     else
     {
+        drawPosition.y += atlasEntry->untrimmed.height - (atlasEntry->source.y + atlasEntry->source.height);
         drawPosition.y -= source.height - RectangleBottom(sprite->intramural);
 
         source.height = -source.height;
@@ -508,11 +506,11 @@ void SSpriteDraw(const Scene* scene, const usize entity)
     if (ENTITY_HAS_DEPS(entity, TAG_COLOR))
     {
         const CColor* color = GET_COMPONENT(color, entity);
-        DrawTextureRec(scene->atlasTexture, source, drawPosition, color->value);
+        DrawTextureRec(scene->atlas.texture, source, drawPosition, color->value);
     }
     else
     {
-        DrawTextureRec(scene->atlasTexture, source, drawPosition, COLOR_WHITE);
+        DrawTextureRec(scene->atlas.texture, source, drawPosition, COLOR_WHITE);
     }
 }
 
@@ -534,39 +532,31 @@ void SAnimationDraw(const Scene* scene, const usize entity)
     }
 
     const Sprite type = ANIMATIONS[animation->type][animation->frame];
-    const AtlasSprite* atlasSprite = &scene->atlas.sprites[type];
-    Rectangle source = (Rectangle)
-    {
-        .x = atlasSprite->destination.x,
-        .y = atlasSprite->destination.y,
-        .width = atlasSprite->destination.width,
-        .height = atlasSprite->destination.height,
-    };
+    const AtlasEntry* atlasEntry = &scene->atlas.entries[type];
+    Rectangle source = atlasEntry->destination;
 
     if ((animation->reflection & REFLECTION_REVERSE_X_AXIS) == 0)
     {
-        drawPosition.x += atlasSprite->source.x;
+        drawPosition.x += atlasEntry->source.x;
         drawPosition.x -= animation->intramural.x;
     }
     else
     {
-        drawPosition.x += atlasSprite->untrimmed.width -
-                          (atlasSprite->source.x + atlasSprite->source.width);
-        drawPosition.x -= atlasSprite->untrimmed.width - RectangleRight(animation->intramural);
+        drawPosition.x += atlasEntry->untrimmed.width - (atlasEntry->source.x + atlasEntry->source.width);
+        drawPosition.x -= atlasEntry->untrimmed.width - RectangleRight(animation->intramural);
 
         source.width = -source.width;
     }
 
     if ((animation->reflection & REFLECTION_REVERSE_Y_AXIS) == 0)
     {
-        drawPosition.y += atlasSprite->source.y;
+        drawPosition.y += atlasEntry->source.y;
         drawPosition.y -= animation->intramural.y;
     }
     else
     {
-        drawPosition.y += atlasSprite->untrimmed.height -
-                          (atlasSprite->source.y + atlasSprite->source.height);
-        drawPosition.y -= atlasSprite->untrimmed.height - RectangleBottom(animation->intramural);
+        drawPosition.y += atlasEntry->untrimmed.height - (atlasEntry->source.y + atlasEntry->source.height);
+        drawPosition.y -= atlasEntry->untrimmed.height - RectangleBottom(animation->intramural);
 
         source.height = -source.height;
     }
@@ -574,11 +564,11 @@ void SAnimationDraw(const Scene* scene, const usize entity)
     if (ENTITY_HAS_DEPS(entity, TAG_COLOR))
     {
         const CColor* color = GET_COMPONENT(color, entity);
-        DrawTextureRec(scene->atlasTexture, source, drawPosition, color->value);
+        DrawTextureRec(scene->atlas.texture, source, drawPosition, color->value);
     }
     else
     {
-        DrawTextureRec(scene->atlasTexture, source, drawPosition, COLOR_WHITE);
+        DrawTextureRec(scene->atlas.texture, source, drawPosition, COLOR_WHITE);
     }
 }
 
