@@ -42,15 +42,6 @@ typedef struct Scene Scene;
 
 typedef enum
 {
-    FLIP_NONE = 0,
-    // Reverse the x-axis of the sprite.
-    FLIP_HORIZONTAL = 1 << 0,
-    // Reverse the y-axis of the sprite.
-    FLIP_VERTICAL = 1 << 1,
-} SpriteMirroring;
-
-typedef enum
-{
     SPRINT_STATE_NONE,
     SPRINT_STATE_ACCELERATING,
     SPRINT_STATE_TERMINAL,
@@ -116,7 +107,7 @@ typedef struct
 {
     Rectangle source;
     Rectangle intramural;
-    SpriteMirroring mirroring;
+    Reflection reflection;
 } CSprite;
 
 typedef struct
@@ -124,7 +115,7 @@ typedef struct
     f32 frameTimer;
     f32 frameDuration;
     Rectangle intramural;
-    SpriteMirroring mirroring;
+    Reflection reflection;
     Animation type;
     u16 frame;
     u16 length;

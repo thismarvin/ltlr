@@ -476,7 +476,7 @@ void SSpriteDraw(const Scene* scene, const usize entity)
 
     Rectangle source = sprite->source;
 
-    if ((sprite->mirroring & FLIP_HORIZONTAL) == 0)
+    if ((sprite->reflection & REFLECTION_REVERSE_X_AXIS) == 0)
     {
         drawPosition.x -= sprite->intramural.x;
     }
@@ -487,7 +487,7 @@ void SSpriteDraw(const Scene* scene, const usize entity)
         source.width = -sprite->source.width;
     }
 
-    if ((sprite->mirroring & FLIP_VERTICAL) == 0)
+    if ((sprite->reflection & REFLECTION_REVERSE_Y_AXIS) == 0)
     {
         drawPosition.y -= sprite->intramural.y;
     }
@@ -537,7 +537,7 @@ void SAnimationDraw(const Scene* scene, const usize entity)
         .height = atlasSprite->destination.height,
     };
 
-    if ((animation->mirroring & FLIP_HORIZONTAL) == 0)
+    if ((animation->reflection & REFLECTION_REVERSE_X_AXIS) == 0)
     {
         drawPosition.x += atlasSprite->source.x;
         drawPosition.x -= animation->intramural.x;
@@ -551,7 +551,7 @@ void SAnimationDraw(const Scene* scene, const usize entity)
         source.width = -source.width;
     }
 
-    if ((animation->mirroring & FLIP_VERTICAL) == 0)
+    if ((animation->reflection & REFLECTION_REVERSE_Y_AXIS) == 0)
     {
         drawPosition.y += atlasSprite->source.y;
         drawPosition.y -= animation->intramural.y;

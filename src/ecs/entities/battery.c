@@ -41,7 +41,7 @@ EntityBuilder BatteryCreate(const f32 x, const f32 y)
     {
         .source = (Rectangle) { 171, 120, 14, 32 },
         .intramural = intramural,
-        .mirroring = FLIP_NONE,
+        .reflection = REFLECTION_NONE,
     }));
 
     ADD_COMPONENT(CCollider, ((CCollider)

@@ -377,7 +377,7 @@ static void PlayerOnCollision(const OnCollisionParams* params)
             {
                 .source = (Rectangle) { 309, 4, 88, 40 },
                 .intramural = intramural,
-                .mirroring = FLIP_NONE,
+                .reflection = REFLECTION_NONE,
             };
 
             const Component component = ComponentCreateCSprite(sprite);
@@ -526,7 +526,7 @@ EntityBuilder PlayerCreate(const f32 x, const f32 y)
     {
         .source = (Rectangle) { 16, 0, 32, 48 },
         .intramural = intramural,
-        .mirroring = FLIP_NONE,
+        .reflection = REFLECTION_NONE,
     }));
 
     ADD_COMPONENT(CKinetic, ((CKinetic)

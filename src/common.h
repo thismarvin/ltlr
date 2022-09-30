@@ -47,6 +47,13 @@ typedef enum
     DIR_DOWN = 1 << 3,
 } Direction;
 
+typedef enum
+{
+    REFLECTION_NONE = 0,
+    REFLECTION_REVERSE_X_AXIS = 1 << 0,
+    REFLECTION_REVERSE_Y_AXIS = 1 << 1,
+} Reflection;
+
 Vector2 Vector2Create(f32 x, f32 y);
 
 f32 RectangleLeft(Rectangle self);

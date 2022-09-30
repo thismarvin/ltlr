@@ -38,7 +38,7 @@ EntityBuilder SolarPanelCreate(const f32 x, const f32 y)
     {
         .source = (Rectangle) { 217, 4, 88, 40 },
         .intramural = intramural,
-        .mirroring = FLIP_NONE,
+        .reflection = REFLECTION_NONE,
     }));
 
     ADD_COMPONENT(CCollider, ((CCollider)

@@ -79,7 +79,7 @@ EntityBuilder WalkerCreate(const f32 x, const f32 y)
         .frameTimer = 0,
         .frameDuration = ANIMATION_WALKER_IDLE_FRAME_DURATION,
         .intramural = intramural,
-        .mirroring = FLIP_NONE,
+        .reflection = REFLECTION_NONE,
         .frame = 0,
         .length = ANIMATION_WALKER_IDLE_LENGTH,
         .type = ANIMATION_WALKER_IDLE,
