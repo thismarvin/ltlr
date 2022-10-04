@@ -349,7 +349,7 @@ static void PlayerOnCollision(const OnCollisionParams* params)
 
     // Collision specific logic that will not resolve the player.
     {
-        if (ENTITY_HAS_DEPS(params->otherEntity, TAG_WALKER | TAG_DAMAGE))
+        if (ENTITY_HAS_DEPS(params->otherEntity, TAG_DAMAGE))
         {
             const OnDamageParams onDamageParams = (OnDamageParams)
             {
