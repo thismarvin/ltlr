@@ -490,6 +490,8 @@ static void SceneStart(Scene* self)
     SceneDeferAddEntity(self, WalkerCreate(16 * 16, 16 * 6));
     SceneDeferAddEntity(self, WalkerCreate(16 * 16, 16 * 7));
     SceneDeferAddEntity(self, WalkerCreate(16 * 16, 16 * 8));
+
+    SceneDeferAddEntity(self, SpikeCreate(16 * 8, 16 * 7, SPIKE_ROTATE_0));
 }
 
 static void SceneReset(Scene* self)

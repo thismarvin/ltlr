@@ -9,4 +9,5 @@
 #include "./entities/fog_particle.h"
 #include "./entities/player.h"
 #include "./entities/solar_panel.h"
+#include "./entities/spike.h"
 #include "./entities/walker.h"
