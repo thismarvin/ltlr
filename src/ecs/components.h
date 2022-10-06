@@ -36,6 +36,7 @@
 #define LAYER_TERRAIN ((u64)1 << 0)
 #define LAYER_LETHAL ((u64)1 << 1)
 #define LAYER_INTERACTABLE ((u64)1 << 2)
+#define LAYER_INVISIBLE ((u64)1 << 3)
 
 // TODO(thismarvin): Naming components is hard...
 

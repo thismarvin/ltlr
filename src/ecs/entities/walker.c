@@ -100,7 +100,7 @@ EntityBuilder WalkerCreate(const f32 x, const f32 y)
     {
         .resolutionSchema = RESOLVE_ALL,
         .layer = LAYER_LETHAL,
-        .mask = LAYER_TERRAIN | LAYER_LETHAL,
+        .mask = LAYER_TERRAIN | LAYER_INVISIBLE | LAYER_LETHAL,
         .onCollision = OnCollisionNoop,
         .onResolution = WalkerOnResolution,
     }));
