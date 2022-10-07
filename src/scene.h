@@ -7,7 +7,7 @@
 #include "atlas.h"
 #include "common.h"
 #include "input.h"
-#include "level_segment.h"
+#include "level.h"
 
 #define MAX_ENTITIES 1024
 
@@ -47,8 +47,7 @@ struct Scene
     usize fog;
     Rectangle bounds;
     Atlas atlas;
-    LevelSegment* segments;
-    usize segmentsLength;
+    Level level;
     Rectangle trueResolution;
     Rectangle renderResolution;
     RenderTexture2D rootLayer;

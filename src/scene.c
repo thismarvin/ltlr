@@ -413,20 +413,20 @@ static void SceneSetupLayers(Scene* self)
     self->debugLayer = LoadRenderTexture(CTX_VIEWPORT_WIDTH * zoom, CTX_VIEWPORT_HEIGHT * zoom);
 }
 
-static void SceneSetupLevelSegments(Scene* self)
+// TODO(thismarvin): This is a proof-of-concept...
+static void PopulateLevel(Scene* scene)
 {
-    // TODO(thismarvin): Should we crawl the resource directory to find levels?
+    static const usize length = 1;
 
-    const char* levels[2] =
+    for (usize i = 0; i < length; ++i)
     {
-        "./content/levels/level_00.json",
-        "./content/levels/level_01.json"
-    };
+        scene->level.segments[i].type = GetRandomValue(0, 2);
+    }
 
-    self->segmentsLength = 2;
-    self->segments = malloc(sizeof(LevelSegment) * self->segmentsLength);
+    scene->level.segmentsLength = length;
 
-    self->bounds = (Rectangle)
+    Vector2 offset = VECTOR2_ZERO;
+    scene->bounds = (Rectangle)
     {
         .x = 0,
         .y = 0,
@@ -434,10 +434,25 @@ static void SceneSetupLevelSegments(Scene* self)
         .height = 180,
     };
 
-    for (usize i = 0; i < self->segmentsLength; ++i)
+    scene->player = SceneDeferAddEntity(scene, PlayerCreate(16 * 1, 16 * -4));
+    scene->fog = SceneDeferAddEntity(scene, FogCreate());
+
+    for (usize i = 0; i < scene->level.segmentsLength; ++i)
     {
-        LevelSegmentInit(&self->segments[i], levels[i]);
-        self->bounds.width += self->segments[i].bounds.width;
+        LevelSegment* segment = &scene->level.segments[i];
+        LevelSegmentBuilder segmentBuilder = LevelSegmentBuilderCreate(segment->type, offset);
+
+        for (usize i = 0; i < DequeGetSize(&segmentBuilder.entities); ++i)
+        {
+            const EntityBuilder builder = DEQUE_GET_UNCHECKED(&segmentBuilder.entities, EntityBuilder, i);
+            SceneDeferAddEntity(scene, builder);
+        }
+
+        segment->width = segmentBuilder.width;
+        offset.x += segmentBuilder.width;
+        scene->bounds.width += segmentBuilder.width;
+
+        DequeDestroy(&segmentBuilder.entities);
     }
 }
 
@@ -454,44 +469,7 @@ static void SceneStart(Scene* self)
         self->m_entityManager.m_recycledEntityIndices = DEQUE_WITH_CAPACITY(usize, MAX_ENTITIES);
     }
 
-    // Populate level.
-    {
-        Vector2 offset = VECTOR2_ZERO;
-
-        for (usize i = 0; i < self->segmentsLength; ++i)
-        {
-            for (usize j = 0; j < self->segments[i].collidersLength; ++j)
-            {
-                const LevelCollider collider = self->segments[i].colliders[j];
-
-                const Rectangle aabb = (Rectangle)
-                {
-                    .x = collider.aabb.x + offset.x,
-                    .y = collider.aabb.y + offset.y,
-                    .width = collider.aabb.width,
-                    .height = collider.aabb.height,
-                };
-
-                SceneDeferAddEntity
-                (
-                    self,
-                    BlockCreate(aabb, collider.resolutionSchema, collider.layer)
-                );
-            }
-
-            offset.x += self->segments[i].bounds.width;
-        }
-    }
-
-    // TODO(thismarvin): Put this into level.json somehow...
-    self->player = SceneDeferAddEntity(self, PlayerCreate(16 * 1, 16 * -4));
-    self->fog = SceneDeferAddEntity(self, FogCreate());
-
-    SceneDeferAddEntity(self, WalkerCreate(16 * 16, 16 * 6));
-    SceneDeferAddEntity(self, WalkerCreate(16 * 16, 16 * 7));
-    SceneDeferAddEntity(self, WalkerCreate(16 * 16, 16 * 8));
-
-    SceneDeferAddEntity(self, SpikeCreate(16 * 8, 16 * 7, SPIKE_ROTATE_0));
+    PopulateLevel(self);
 }
 
 static void SceneReset(Scene* self)
@@ -509,7 +487,6 @@ void SceneInit(Scene* self)
     SceneSetupContent(self);
     SceneSetupInput(self);
     SceneSetupLayers(self);
-    SceneSetupLevelSegments(self);
 
     self->debugging = false;
 
@@ -631,44 +608,6 @@ static Rectangle SceneCalculateActionCameraBounds(const Scene* self, const usize
         .width = CTX_VIEWPORT_WIDTH,
         .height = CTX_VIEWPORT_HEIGHT,
     };
-}
-
-static void SceneDrawTilemap(const Scene* self)
-{
-    Vector2 offset = VECTOR2_ZERO;
-
-    for (usize i = 0; i < self->segmentsLength; ++i)
-    {
-        for (usize j = 0; j < self->segments[i].spritesLength; ++j)
-        {
-            if (self->segments[i].sprites[j] == 0)
-            {
-                continue;
-            }
-
-            const u16 sprite = self->segments[i].sprites[j] - 1;
-
-            Vector2 position = (Vector2)
-            {
-                .x = (j % self->segments[i].tilemapWidth) * self->segments[i].tileWidth,
-                .y = (j / self->segments[i].tilemapWidth) * self->segments[i].tileHeight
-            };
-
-            position = Vector2Add(position, offset);
-
-            const Rectangle source = (Rectangle)
-            {
-                .x = (sprite % self->segments[i].tilesetColumns) * self->segments[i].tileWidth,
-                .y = (sprite / self->segments[i].tilesetColumns) * self->segments[i].tileHeight,
-                .width = self->segments[i].tileWidth,
-                .height = self->segments[i].tileHeight
-            };
-
-            DrawTextureRec(self->atlas.texture, source, position, WHITE);
-        }
-
-        offset.x += self->segments[i].bounds.width;
-    }
 }
 
 static void SceneRenderLayer
@@ -805,7 +744,17 @@ static void RenderTargetLayer(const RenderFnParams* params)
 {
     ClearBackground(COLOR_TRANSPARENT);
 
-    SceneDrawTilemap(params->scene);
+    // Draw Level.
+    {
+        Vector2 offset = VECTOR2_ZERO;
+
+        for (usize i = 0; i < params->scene->level.segmentsLength; ++i)
+        {
+            const LevelSegment* segment = &params->scene->level.segments[i];
+            LevelSegmentDraw(segment, &params->scene->atlas, offset);
+            offset.x += segment->width;
+        }
+    }
 
     for (usize i = 0; i < SceneGetEntityCount(params->scene); ++i)
     {
@@ -876,11 +825,6 @@ void SceneDeferReset(Scene* self)
 void SceneDestroy(Scene* self)
 {
     AtlasDestroy(&self->atlas);
-
-    for (usize i = 0; i < self->segmentsLength; ++i)
-    {
-        LevelSegmentDestroy(&self->segments[i]);
-    }
 
     DequeDestroy(&self->commands);
     DequeDestroy(&self->m_entityManager.m_recycledEntityIndices);
