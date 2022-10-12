@@ -9,6 +9,7 @@
 #include "replay.h"
 #include "rng.h"
 #include "scene_generated.h"
+#include "shaders.h"
 
 #include <assert.h>
 #include <raymath.h>
@@ -188,9 +189,44 @@ static void SceneFlush(Scene* self)
 	DequeClear(&self->deferred);
 }
 
+static void SceneSetupDropShadow(Scene* self)
+{
+	self->dropShadow = LoadShaderFromMemory(0, shaderDropShadowSource);
+
+	static const f32 directionValue[2] = { 1.0, -1.0 };
+	static const f32 sizeValue = 2.0;
+	static const f32 textureWidthValue = 320.0;
+	static const f32 textureHeightValue = 180.0;
+	static const f32 colorValue[4] = { 0.0, 0.0, 0.0, 0.5 };
+
+	const i32 directionLocation = GetShaderLocation(self->dropShadow, "Direction");
+	const i32 sizeLocation = GetShaderLocation(self->dropShadow, "Size");
+	const i32 textureWidthLocation = GetShaderLocation(self->dropShadow, "TextureWidth");
+	const i32 textureHeightLocation = GetShaderLocation(self->dropShadow, "TextureHeight");
+	const i32 colorLocation = GetShaderLocation(self->dropShadow, "Color");
+
+	SetShaderValue(self->dropShadow, directionLocation, &directionValue, SHADER_UNIFORM_VEC2);
+	SetShaderValue(self->dropShadow, sizeLocation, &sizeValue, SHADER_UNIFORM_FLOAT);
+	SetShaderValue(
+		self->dropShadow,
+		textureWidthLocation,
+		&textureWidthValue,
+		SHADER_UNIFORM_FLOAT
+	);
+	SetShaderValue(
+		self->dropShadow,
+		textureHeightLocation,
+		&textureHeightValue,
+		SHADER_UNIFORM_FLOAT
+	);
+	SetShaderValue(self->dropShadow, colorLocation, &colorValue, SHADER_UNIFORM_VEC4);
+}
+
 static void SceneSetupContent(Scene* self)
 {
 	self->atlas = AtlasCreate(DATADIR "content/atlas.png");
+
+	SceneSetupDropShadow(self);
 }
 
 // clang-format off
@@ -390,16 +426,21 @@ static void SceneSetupLayers(Scene* self)
 	// Ensure that the render resolution uses integer scaling.
 	zoom = floor(zoom);
 
+	const usize scaledWidth = CTX_VIEWPORT_WIDTH * zoom;
+	const usize scaledHeight = CTX_VIEWPORT_HEIGHT * zoom;
+
 	self->rootLayer = LoadRenderTexture(1, 1);
-	self->backgroundLayer =
-		LoadRenderTexture(CTX_VIEWPORT_WIDTH * zoom, CTX_VIEWPORT_HEIGHT * zoom);
-	self->targetLayer = LoadRenderTexture(CTX_VIEWPORT_WIDTH * zoom, CTX_VIEWPORT_HEIGHT * zoom);
+	self->backgroundLayer = LoadRenderTexture(scaledWidth, scaledHeight);
 	self->foregroundLayer = LoadRenderTexture(CTX_VIEWPORT_WIDTH, CTX_VIEWPORT_HEIGHT);
-	self->interfaceLayer = LoadRenderTexture(CTX_VIEWPORT_WIDTH * zoom, CTX_VIEWPORT_HEIGHT * zoom);
-	// TODO(thismarvin): If this is just for fades then this resolution is overkill!
-	self->transitionLayer =
-		LoadRenderTexture(CTX_VIEWPORT_WIDTH * zoom, CTX_VIEWPORT_HEIGHT * zoom);
-	self->debugLayer = LoadRenderTexture(CTX_VIEWPORT_WIDTH * zoom, CTX_VIEWPORT_HEIGHT * zoom);
+	self->interfaceLayer = LoadRenderTexture(scaledWidth, scaledHeight);
+	self->debugLayer = LoadRenderTexture(scaledWidth, scaledHeight);
+
+	// TODO(thismarvin): If this is just for fades thrn this resolution is overkill!
+	self->transitionLayer = LoadRenderTexture(scaledWidth, scaledHeight);
+
+	// It's very important that these two render textures have the same dimensions!
+	self->targetLayer = LoadRenderTexture(scaledWidth, scaledHeight);
+	self->targetLayerBuffer = LoadRenderTexture(scaledWidth, scaledHeight);
 
 	self->treeTexture = GenerateTreeTexture();
 }
@@ -1150,9 +1191,9 @@ static void DrawTree(const RenderFnParams* params, const Vector2 position, const
 	source.height *= -1;
 
 	const Color tint = (Color) {
-		.r = 240,
-		.g = 240,
-		.b = 240,
+		.r = 182,
+		.g = 215,
+		.b = 236,
 		.a = 255,
 	};
 
@@ -1221,6 +1262,41 @@ static void RenderTargetLayer(const RenderFnParams* params)
 
 	RUN_SYSTEM(SSpriteDraw, scene, entities);
 	RUN_SYSTEM(SAnimationDraw, scene, entities);
+}
+
+static void RenderTargetLayerShader(const RenderFnParams* params)
+{
+	const Scene* scene = (Scene*)params->scene;
+
+	const RenderTexture2D* renderTexture = &scene->targetLayer;
+
+	const i32 width = renderTexture->texture.width;
+	const i32 height = renderTexture->texture.height;
+
+	const Rectangle destination = (Rectangle) {
+		.x = floor(width * 0.5),
+		.y = floor(height * 0.5),
+		.width = width,
+		.height = height,
+	};
+
+	const Vector2 origin = (Vector2) {
+		.x = floor(width * 0.5),
+		.y = floor(height * 0.5),
+	};
+
+	BeginShaderMode(scene->dropShadow);
+	BeginDrawing();
+	{
+		ClearBackground(COLOR_TRANSPARENT);
+
+		Rectangle source = RectangleFromRenderTexture(renderTexture);
+		source.height *= -1;
+
+		DrawTexturePro(renderTexture->texture, source, destination, origin, 0, COLOR_WHITE);
+	}
+	EndDrawing();
+	EndShaderMode();
 }
 
 static void RenderMenuInterface(const RenderFnParams* params)
@@ -1344,12 +1420,13 @@ static void SceneMenuDraw(Scene* self)
 	RenderLayer(&self->rootLayer, RenderRootLayer, &stationaryCameraParams);
 	RenderLayer(&self->backgroundLayer, RenderBackgroundLayer, &stationaryCameraParams);
 	RenderLayer(&self->targetLayer, RenderTargetLayer, &actionCameraParams);
+	RenderLayer(&self->targetLayerBuffer, RenderTargetLayerShader, &stationaryCameraParams);
 	RenderLayer(&self->interfaceLayer, RenderInterfaceLayer, &stationaryCameraParams);
 
 	const RenderTexture renderTextures[4] = {
 		self->rootLayer,
 		self->backgroundLayer,
-		self->targetLayer,
+		self->targetLayerBuffer,
 		self->interfaceLayer,
 	};
 	DrawLayers(renderTextures, 4);
@@ -1376,6 +1453,7 @@ static void SceneActionDraw(Scene* self)
 	RenderLayer(&self->rootLayer, RenderRootLayer, &stationaryCameraParams);
 	RenderLayer(&self->backgroundLayer, RenderBackgroundLayer, &stationaryCameraParams);
 	RenderLayer(&self->targetLayer, RenderTargetLayer, &actionCameraParams);
+	RenderLayer(&self->targetLayerBuffer, RenderTargetLayerShader, &stationaryCameraParams);
 	RenderLayer(&self->foregroundLayer, RenderForegroundLayer, &actionCameraParams);
 	RenderLayer(&self->interfaceLayer, RenderInterfaceLayer, &stationaryCameraParams);
 	RenderLayer(&self->transitionLayer, RenderTransitionLayer, &stationaryCameraParams);
@@ -1385,7 +1463,7 @@ static void SceneActionDraw(Scene* self)
 	const RenderTexture renderTextures[7] = {
 		self->rootLayer,
 		self->backgroundLayer,
-		self->targetLayer,
+		self->targetLayerBuffer,
 		self->foregroundLayer,
 		self->interfaceLayer,
 		self->transitionLayer,
@@ -1428,6 +1506,7 @@ void SceneDestroy(Scene* self)
 	UnloadRenderTexture(self->treeTexture);
 	UnloadRenderTexture(self->backgroundLayer);
 	UnloadRenderTexture(self->targetLayer);
+	UnloadRenderTexture(self->targetLayerBuffer);
 	UnloadRenderTexture(self->foregroundLayer);
 	UnloadRenderTexture(self->interfaceLayer);
 	UnloadRenderTexture(self->transitionLayer);
@@ -1460,4 +1539,6 @@ void SceneDestroy(Scene* self)
 	{
 		InputStreamDestroy(&self->inputStreams[i]);
 	}
+
+	UnloadShader(self->dropShadow);
 }

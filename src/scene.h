@@ -93,6 +93,7 @@ struct Scene
 	RenderTexture2D rootLayer;
 	RenderTexture2D backgroundLayer;
 	RenderTexture2D targetLayer;
+	RenderTexture2D targetLayerBuffer;
 	RenderTexture2D foregroundLayer;
 	RenderTexture2D interfaceLayer;
 	RenderTexture2D transitionLayer;
@@ -116,6 +117,7 @@ struct Scene
 	u64 seed;
 	Rng rng;
 	ArenaAllocator arenaAllocator;
+	Shader dropShadow;
 };
 
 void SceneInit(Scene* self);
