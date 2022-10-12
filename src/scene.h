@@ -60,6 +60,8 @@ struct Scene
     // `Deque<Command>`
     Deque commands;
     bool resetRequested;
+    Vector2 actionCameraPosition;
+    RenderTexture2D treeTexture;
 };
 
 void SceneInit(Scene* self);
@@ -72,7 +74,7 @@ bool SceneEntityHasDependencies(const Scene* self, usize entity, u64 dependencie
 usize SceneGetEntityCount(const Scene* self);
 void SceneSubmitCommand(Scene* self, Command command);
 void SceneUpdate(Scene* self);
-void SceneDraw(const Scene* self);
+void SceneDraw(Scene* self);
 void SceneDeferReset(Scene* self);
 void SceneDestroy(Scene* self);
 

@@ -369,6 +369,80 @@ static f32 CalculateZoom(const Rectangle region, const Rectangle container)
     return zoom;
 }
 
+static RenderTexture GenerateTreeTexture(void)
+{
+    const RenderTexture renderTexture = LoadRenderTexture(CTX_VIEWPORT_WIDTH, CTX_VIEWPORT_HEIGHT);
+
+    const Camera2D camera = (Camera2D)
+    {
+        .zoom = 1,
+        .offset = VECTOR2_ZERO,
+        .target = VECTOR2_ZERO,
+        .rotation = 0,
+    };
+
+    BeginTextureMode(renderTexture);
+    BeginMode2D(camera);
+    {
+        ClearBackground(COLOR_TRANSPARENT);
+
+        static const u8 value = 240;
+        const Color gray = (Color)
+        {
+            .r = value,
+            .g = value,
+            .b = value,
+            .a = 255,
+        };
+
+        const f32 xInitial = renderTexture.texture.width * 0.5;
+        const f32 yInitial = 3;
+        const i32 offsetInitial = 6;
+
+        // Draw outline.
+        {
+            const f32 x = xInitial;
+            f32 y = yInitial;
+            i32 offset = offsetInitial;
+
+            while (y < renderTexture.texture.height * 1.1)
+            {
+                static const i32 padding = 3;
+
+                const Vector2 a = Vector2Create(x, y - padding);
+                const Vector2 b = Vector2Create(x - offset - padding, y + offset);
+                const Vector2 c = Vector2Create(x + offset + padding, y + offset);
+                DrawTriangle(a, b, c, COLOR_BLACK);
+
+                y += 4;
+                offset += 2;
+            }
+        }
+
+        // Draw primary region.
+        {
+            const f32 x = xInitial;
+            f32 y = yInitial;
+            i32 offset = offsetInitial;
+
+            while (y < renderTexture.texture.height * 1.1)
+            {
+                const Vector2 a = Vector2Create(x, y);
+                const Vector2 b = Vector2Create(x - offset, y + offset);
+                const Vector2 c = Vector2Create(x + offset, y + offset);
+                DrawTriangle(a, b, c, gray);
+
+                y += 4;
+                offset += 2;
+            }
+        }
+    }
+    EndMode2D();
+    EndTextureMode();
+
+    return renderTexture;
+}
+
 static void SceneSetupLayers(Scene* self)
 {
     self->trueResolution = (Rectangle)
@@ -407,10 +481,12 @@ static void SceneSetupLayers(Scene* self)
     zoom = floor(zoom);
 
     self->rootLayer = LoadRenderTexture(1, 1);
-    self->backgroundLayer = LoadRenderTexture(CTX_VIEWPORT_WIDTH, CTX_VIEWPORT_HEIGHT);
+    self->backgroundLayer = LoadRenderTexture(CTX_VIEWPORT_WIDTH * zoom, CTX_VIEWPORT_HEIGHT * zoom);
     self->targetLayer = LoadRenderTexture(CTX_VIEWPORT_WIDTH * zoom, CTX_VIEWPORT_HEIGHT * zoom);
     self->foregroundLayer = LoadRenderTexture(CTX_VIEWPORT_WIDTH, CTX_VIEWPORT_HEIGHT);
     self->debugLayer = LoadRenderTexture(CTX_VIEWPORT_WIDTH * zoom, CTX_VIEWPORT_HEIGHT * zoom);
+
+    self->treeTexture = GenerateTreeTexture();
 }
 
 // TODO(thismarvin): This is a proof-of-concept...
@@ -733,11 +809,49 @@ static void RenderRootLayer(UNUSED const RenderFnParams* params)
     ClearBackground(P8_BLUE);
 }
 
-static void RenderBackgroundLayer(UNUSED const RenderFnParams* params)
+static void DrawTree
+(
+    const RenderFnParams* params,
+    const Vector2 position,
+    const f32 scrollFactor
+)
+{
+    const RenderTexture* renderTexture = &params->scene->treeTexture;
+
+    const f32 domain = params->scene->bounds.width - CTX_VIEWPORT_WIDTH;
+    const f32 progress = params->scene->actionCameraPosition.x / domain;
+    const f32 partialDomain = domain * scrollFactor;
+    const f32 offset = partialDomain * progress;
+
+    const f32 x = -renderTexture->texture.width * 0.5 + position.x - offset;
+    const f32 y = position.y;
+
+    const Rectangle destination = (Rectangle)
+    {
+        .x = x,
+        .y = y,
+        .width = renderTexture->texture.width,
+        .height = renderTexture->texture.height,
+    };
+
+    Rectangle source = RectangleFromRenderTexture(*renderTexture);
+    source.height *= -1;
+
+    DrawTexturePro(renderTexture->texture, source, destination, VECTOR2_ZERO, 0, COLOR_WHITE);
+}
+
+static void RenderBackgroundLayer(const RenderFnParams* params)
 {
     ClearBackground(COLOR_TRANSPARENT);
 
-    // TODO(thismarvin): Draw trees here.
+    DrawTree(params, Vector2Create(64, 18), 0.15);
+    DrawTree(params, Vector2Create(120, 64), 0.15);
+    DrawTree(params, Vector2Create(250, 40), 0.15);
+
+    DrawTree(params, Vector2Create(120, 64), 0.2);
+    DrawTree(params, Vector2Create(180, 80), 0.2);
+    DrawTree(params, Vector2Create(334, 10), 0.2);
+    DrawTree(params, Vector2Create(300, 32), 0.2);
 }
 
 static void RenderTargetLayer(const RenderFnParams* params)
@@ -798,21 +912,32 @@ static void RenderDebugLayer(const RenderFnParams* params)
     }
 }
 
-void SceneDraw(const Scene* self)
+void SceneDraw(Scene* self)
 {
-    const Rectangle actionCameraBounds = SceneCalculateActionCameraBounds(self, self->player);
+    Rectangle actionCameraBounds = SceneCalculateActionCameraBounds(self, self->player);
 
-    const RenderFnParams params = (RenderFnParams)
+    self->actionCameraPosition = (Vector2)
+    {
+        .x = actionCameraBounds.x,
+        .y = actionCameraBounds.y,
+    };
+
+    const RenderFnParams actionCameraParams = (RenderFnParams)
     {
         .scene = (Scene*)self,
         .cameraBounds = actionCameraBounds,
     };
+    const RenderFnParams stationaryCameraParams = (RenderFnParams)
+    {
+        .scene = (Scene*)self,
+        .cameraBounds = (Rectangle) { 0, 0, CTX_VIEWPORT_WIDTH, CTX_VIEWPORT_HEIGHT },
+    };
 
-    SceneRenderLayer(&self->rootLayer, RenderRootLayer, &params);
-    SceneRenderLayer(&self->backgroundLayer, RenderBackgroundLayer, &params);
-    SceneRenderLayer(&self->targetLayer, RenderTargetLayer, &params);
-    SceneRenderLayer(&self->foregroundLayer, RenderForegroundLayer, &params);
-    SceneRenderLayer(&self->debugLayer, RenderDebugLayer, &params);
+    SceneRenderLayer(&self->rootLayer, RenderRootLayer, &actionCameraParams);
+    SceneRenderLayer(&self->backgroundLayer, RenderBackgroundLayer, &stationaryCameraParams);
+    SceneRenderLayer(&self->targetLayer, RenderTargetLayer, &actionCameraParams);
+    SceneRenderLayer(&self->foregroundLayer, RenderForegroundLayer, &actionCameraParams);
+    SceneRenderLayer(&self->debugLayer, RenderDebugLayer, &actionCameraParams);
 
     SceneDrawLayers(self);
 }
@@ -829,6 +954,7 @@ void SceneDestroy(Scene* self)
     DequeDestroy(&self->commands);
     DequeDestroy(&self->m_entityManager.m_recycledEntityIndices);
 
+    UnloadRenderTexture(self->treeTexture);
     UnloadRenderTexture(self->backgroundLayer);
     UnloadRenderTexture(self->targetLayer);
     UnloadRenderTexture(self->foregroundLayer);
