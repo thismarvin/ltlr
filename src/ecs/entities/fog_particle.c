@@ -91,25 +91,18 @@ void FogParticleDraw(const Scene* scene, const usize entity)
 
     const Vector2 center = (Vector2)
     {
-        .x = interpolated.x,
-        .y = interpolated.y,
+        .x = interpolated.x + dimension->width * 0.5f,
+        .y = interpolated.y + dimension->height * 0.5f,
     };
 
-    const u32 sidesCount = entity % 4 + 3;
+    const u32 sidesCount = 4 + entity % 3;
 
-    if (sidesCount == 6)
+    f32 rotation = ContextGetTotalTime() * 100;
+
+    if (sidesCount % 2 == 0)
     {
-        DrawCircleV(center, dimension->width * scale * 0.5f, color->value);
+        rotation *= -1;
     }
-    else
-    {
-        f32 rotation = ContextGetTotalTime() * 100;
 
-        if (sidesCount % 2 == 0)
-        {
-            rotation *= -1;
-        }
-
-        DrawPoly(center, sidesCount, dimension->width * scale * 0.5f, rotation, color->value);
-    }
+    DrawPoly(center, sidesCount, dimension->width * scale * 0.5f, rotation, color->value);
 }
