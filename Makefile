@@ -1,6 +1,5 @@
 NU := nu
 ASTYLE := astyle
-PRETTIER := prettier
 GPROF := gprof
 
 .PHONY: @all
@@ -49,7 +48,6 @@ Makefile.Web: scripts/generate.nu src
 @format:
 	$(ASTYLE) -n --project=.astylerc --recursive "src/*.c,*.h"
 	$(ASTYLE) -n --project=.astylerc --recursive "tests/*.c,*.h"
-	$(PRETTIER) --write --use-tabs src/minshell.html
 
 .PHONY: @clean
 @clean:
