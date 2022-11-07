@@ -44,14 +44,19 @@
       };
 
       devShells."${system}" = {
-        default = pkgs.mkShell {
+        minimal = pkgs.mkShell {
           inputsFrom = [ self.packages."${system}".default ];
           packages = with pkgs; [
             astyle
-            nodePackages.prettier
+          ];
+        };
+        extra = pkgs.mkShell {
+          inputsFrom = [ self.devShells."${system}".minimal ];
+          packages = with pkgs; [
             emscripten
           ];
         };
+        default = self.devShells."${system}".minimal;
       };
     };
 }
