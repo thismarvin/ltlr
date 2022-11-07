@@ -1,24 +1,24 @@
-let build-inputs = (
+let build_inputs = (
 	$env.buildInputs
 	| split row ' '
 	| str trim
 )
 
 let-env PATH = (
-	$build-inputs
+	$build_inputs
 	| find -p { |it| $'($it)/bin' | path exists }
 	| each { |it| $'($it)/bin' }
 	| str collect ':'
 )
 let-env PKG_CONFIG_PATH = do {
 	let lib = (
-		$build-inputs
+		$build_inputs
 		| find -p { |it| $'($it)/lib/pkgconfig' | path exists }
 		| each { |it| $'($it)/lib/pkgconfig' }
 		| str collect ':'
 	)
 	let share = (
-		$build-inputs
+		$build_inputs
 		| find -p { |it| $'($it)/share/pkgconfig' | path exists }
 		| each { |it| $'($it)/share/pkgconfig' }
 		| str collect ':'

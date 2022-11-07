@@ -48,7 +48,7 @@ def stagger-path [ path: string ] {
 export def "compilation database" [
 	--out-dir: string
 ] {
-	let output_directory = if ($out-dir | empty?) { 'build/desktop' } else { $out-dir }
+	let output_directory = if ($out_dir | is-empty) { 'build/desktop' } else { $out_dir }
 	let record = get-sources $output_directory
 
 	let common_arguments = do {
@@ -94,7 +94,7 @@ export def "compilation database" [
 export def "makefile desktop" [
 	--out-dir: string # Change the output directory
 ] {
-	let output_directory = if ($out-dir | empty?) { 'build/desktop' } else { $out-dir }
+	let output_directory = if ($out_dir | is-empty) { 'build/desktop' } else { $out_dir }
 	let sources = get-sources $output_directory
 	let content = get-content $output_directory
 
@@ -148,7 +148,7 @@ export def "makefile desktop" [
 				let target = $directory
 				let prerequisites = do {
 					let dirname = ($directory | path dirname)
-					if (not ($dirname | empty?)) and ($dirname != $target) {
+					if (not ($dirname | is-empty)) and ($dirname != $target) {
 						$' | ($dirname)'
 					} else {
 						''
@@ -244,7 +244,7 @@ export def "makefile web" [
 ] {
 	# TODO(thismarvin): A lot of this is copied from "makefile desktop"...
 
-	let output_directory = if ($out-dir | empty?) { 'build/web' } else { $out-dir }
+	let output_directory = if ($out_dir | is-empty) { 'build/web' } else { $out_dir }
 	let sources = get-sources $output_directory
 	let content = get-content $output_directory
 
@@ -298,7 +298,7 @@ export def "makefile web" [
 				let target = $directory
 				let prerequisites = do {
 					let dirname = ($directory | path dirname)
-					if (not ($dirname | empty?)) and ($dirname != $target) {
+					if (not ($dirname | is-empty)) and ($dirname != $target) {
 						$' | ($dirname)'
 					} else {
 						''
