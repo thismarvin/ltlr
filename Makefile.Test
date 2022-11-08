@@ -1,7 +1,6 @@
 CC := gcc
 GPROF := gprof
 
-BIN := ltlr
 CFLAGS := -std=c17 -Wall -Wextra -Wpedantic -g -pg -Og -Ivendor/raylib/src -Ivendor/cJSON -DPLATFORM_DESKTOP
 LDLIBS := -Llib/desktop -lraylib -lGL -lm -lpthread -ldl -lrt -lX11 -lcJSON
 
