@@ -2,19 +2,21 @@ NU := nu
 ASTYLE := astyle
 GPROF := gprof
 
+SRC_DIRS := $(shell find src -type d)
+
 .PHONY: @all
 @all: @clean @desktop
 
 $(VERBOSE).SILENT:
 
-compile_commands.json: scripts/generate.nu src
-	$(NU) -c "use scripts/generate.nu; generate compilation database | save db | mv db compile_commands.json"
+compile_commands.json: scripts/generate.nu $(SRC_DIRS)
+	$(NU) -c "use $<; generate compilation database | save db | mv db $@"
 
-Makefile.Desktop: scripts/generate.nu src
-	$(NU) -c "use scripts/generate.nu; generate makefile desktop | save Makefile.Desktop"
+Makefile.Desktop: scripts/generate.nu $(SRC_DIRS)
+	$(NU) -c "use $<; generate makefile desktop | save $@"
 
-Makefile.Web: scripts/generate.nu src
-	$(NU) -c "use scripts/generate.nu; generate makefile web | save Makefile.Web"
+Makefile.Web: scripts/generate.nu $(SRC_DIRS)
+	$(NU) -c "use $<; generate makefile web | save $@"
 
 .PHONY: @vendor/desktop
 @vendor/desktop: Makefile.Vendor
