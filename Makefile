@@ -3,7 +3,7 @@ ASTYLE := astyle
 GPROF := gprof
 
 .PHONY: @all
-@all: @clean @desktop @web
+@all: @clean @desktop
 
 $(VERBOSE).SILENT:
 
