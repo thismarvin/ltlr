@@ -1,7 +1,7 @@
-$(VERBOSE).SILENT:
-
 .PHONY: @all
 @all: @clean @vendor
+
+$(VERBOSE).SILENT:
 
 .PHONY: @vendor/desktop/cJSON
 @vendor/desktop/cJSON: vendor/cJSON/Makefile.Desktop
