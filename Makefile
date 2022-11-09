@@ -1,6 +1,6 @@
-NU := nu
-ASTYLE := astyle
-GPROF := gprof
+NU ?= nu
+ASTYLE ?= astyle
+GPROF ?= gprof
 
 SRC_DIRS := $(shell find src -type d)
 
