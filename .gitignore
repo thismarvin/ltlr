@@ -1,5 +1,3 @@
-!vendor/cJSON/Makefile.Desktop
-!vendor/cJSON/Makefile.Web
 !vendor/raylib/Makefile.Desktop
 !vendor/raylib/Makefile.Web
 .cache

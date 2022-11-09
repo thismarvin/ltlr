@@ -59,7 +59,6 @@ export def "compilation database" [
 		| append '-Wextra'
 		| append '-Wpedantic'
 		| append '-Ivendor/raylib/src'
-		| append '-Ivendor/cJSON/src'
 		| append '-DPLATFORM_DESKTOP'
 	}
 
@@ -217,9 +216,9 @@ export def "makefile desktop" [
 	| append $"cflags.warnings := -Wall -Wextra -Wpedantic"
 	| append $"cflags.debug := -g -pg -Og"
 	| append $"cflags.release := -g -O2"
-	| append $"CFLAGS := -std=c17 $\(cflags.warnings) $\(cflags.$\(BUILD)) -Ivendor/raylib/src -Ivendor/cJSON/src -DPLATFORM_DESKTOP"
+	| append $"CFLAGS := -std=c17 $\(cflags.warnings) $\(cflags.$\(BUILD)) -Ivendor/raylib/src -DPLATFORM_DESKTOP"
 	| append $"ldlibs.vendor := $\(shell pkg-config --libs gl)"
-	| append $"LDLIBS := -L$\(DESTDIR)/lib/desktop -lcJSON -lraylib $\(ldlibs.vendor) -lm"
+	| append $"LDLIBS := -L$\(DESTDIR)/lib/desktop -lraylib $\(ldlibs.vendor) -lm"
 	| append $""
 	| append $kickstarter
 	| append $""
@@ -337,8 +336,8 @@ export def "makefile web" [
 	| append $""
 	| append $"EMCC ?= emcc"
 	| append $""
-	| append $"CFLAGS := -std=c17 -Wall -Wextra -Wpedantic -g -O2 -Ivendor/raylib/src -Ivendor/cJSON/src -DPLATFORM_WEB"
-	| append $"LDLIBS := -Llib/web -lraylib -lcJSON"
+	| append $"CFLAGS := -std=c17 -Wall -Wextra -Wpedantic -g -O2 -Ivendor/raylib/src -DPLATFORM_WEB"
+	| append $"LDLIBS := -Llib/web -lraylib"
 	| append $""
 	| append $"EM_CACHE ?= .emscripten-cache"
 	| append $""

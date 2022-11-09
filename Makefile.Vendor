@@ -3,27 +3,19 @@
 
 $(VERBOSE).SILENT:
 
-.PHONY: @vendor/desktop/cJSON
-@vendor/desktop/cJSON: vendor/cJSON/Makefile.Desktop
-	$(MAKE) -C vendor/cJSON -f Makefile.Desktop @lib DESTDIR=../..
-
 .PHONY: @vendor/desktop/raylib
 @vendor/desktop/raylib: vendor/raylib/Makefile.Desktop
 	$(MAKE) -C vendor/raylib -f Makefile.Desktop @lib DESTDIR=../..
 
 .PHONY: @vendor/desktop
-@vendor/desktop: @vendor/desktop/cJSON @vendor/desktop/raylib
-
-.PHONY: @vendor/web/cJSON
-@vendor/web/cJSON: vendor/cJSON/Makefile.Web
-	$(MAKE) -C vendor/cJSON -f Makefile.Web @lib DESTDIR=../..
+@vendor/desktop: @vendor/desktop/raylib
 
 .PHONY: @vendor/web/raylib
 @vendor/web/raylib: vendor/raylib/Makefile.Web
 	$(MAKE) -C vendor/raylib -f Makefile.Web @lib DESTDIR=../..
 
 .PHONY: @vendor/web
-@vendor/web: @vendor/web/cJSON @vendor/web/raylib
+@vendor/web: @vendor/web/raylib
 
 .PHONY: @vendor
 @vendor: @vendor/desktop @vendor/web

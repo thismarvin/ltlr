@@ -39,7 +39,6 @@ do {
 	let makefile = $'($env.TMP)/Makefile.Desktop'
 	cd $env.src
 	^make -C vendor/raylib -f Makefile.Desktop @lib
-	^make -C vendor/cJSON -f Makefile.Desktop @lib
 	^nu -c $'use scripts/generate.nu; generate makefile desktop --out-dir ($env.TMP) | save ($makefile)'
 	^make -f $makefile @desktop
 }

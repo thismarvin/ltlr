@@ -108,42 +108,6 @@ export def build [] {
 		builder archive $record
 	}
 
-	# Build cJSON.
-	do {
-		let outdir = 'target/lib/cJSON'
-
-		let strategy = do {
-			let input = do {
-				(ls 'vendor/cJSON/src/*.c').name
-				| str replace -a '\\' '/'
-				| wrap 'input'
-			}
-			let output = do {
-				$input.input
-				| str replace 'vendor/cJSON/src/(.+)\.c' $'($outdir)/$1.o'
-				| wrap 'output'
-			}
-
-			($input | merge { $output })
-		}
-		let cflags = do {
-			[]
-			| append '-std=c89'
-			| append '-O1'
-		}
-
-		let record = {
-			cc: $cc,
-			ar: $ar,
-			outdir: $outdir,
-			library: 'target/lib/libcJSON.a',
-			strategy: $strategy,
-			cflags: $cflags,
-		}
-
-		builder archive $record
-	}
-
 	# Build application.
 	do {
 		let cflags = do {
@@ -155,7 +119,6 @@ export def build [] {
 			| append '-g'
 			| append '-O2'
 			| append '-Ivendor/raylib/src'
-			| append '-Ivendor/cJSON/src'
 			| append '-DPLATFORM_DESKTOP'
 		}
 		let ldlibs = do {
@@ -164,7 +127,6 @@ export def build [] {
 				'-Ltarget/lib'
 				'-static'
 				'-lraylib'
-				'-lcJSON'
 				'-lopengl32'
 				'-lgdi32'
 				'-lwinmm'
