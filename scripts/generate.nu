@@ -217,7 +217,7 @@ cflags.warnings := -Wall -Wextra -Wpedantic
 cflags.debug := -g -pg -Og
 cflags.release := -g -O2
 CFLAGS := -std=c17 $\(cflags.warnings) $\(cflags.$\(BUILD)) -Ivendor/raylib/src -Ivendor/cJSON/src -DPLATFORM_DESKTOP
-ldlibs.vendor = $\(shell pkg-config --libs gl)
+ldlibs.vendor := $\(shell pkg-config --libs gl)
 LDLIBS := -L$\(DESTDIR)/lib/desktop -lcJSON -lraylib $\(ldlibs.vendor) -lm
 
 ($kickstarter)
