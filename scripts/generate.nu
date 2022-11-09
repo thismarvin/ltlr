@@ -206,37 +206,37 @@ export def "makefile desktop" [
 		| str collect "\n"
 	}
 
-$"# This file is auto-generated; any changes you make may be overwritten.
-
-CC ?= gcc
-
-DESTDIR ?= .
-BIN ?= ltlr
-BUILD ?= debug
-cflags.warnings := -Wall -Wextra -Wpedantic
-cflags.debug := -g -pg -Og
-cflags.release := -g -O2
-CFLAGS := -std=c17 $\(cflags.warnings) $\(cflags.$\(BUILD)) -Ivendor/raylib/src -Ivendor/cJSON/src -DPLATFORM_DESKTOP
-ldlibs.vendor := $\(shell pkg-config --libs gl)
-LDLIBS := -L$\(DESTDIR)/lib/desktop -lcJSON -lraylib $\(ldlibs.vendor) -lm
-
-($kickstarter)
-
-.PHONY: @all
-@all: @clean @desktop
-
-$\(VERBOSE).SILENT:
-
-($rules)
-
-.PHONY: @desktop
-@desktop: ($output_directory)/$\(BIN) $\(CONTENT)
-
-.PHONY: @clean
-@clean:
-	if [ -d \"($output_directory)\" ]; then rm -r ($output_directory); fi
-"
-	| str trim
+	[]
+	| append $"# This file is auto-generated; any changes you make may be overwritten."
+	| append $""
+	| append $"CC ?= gcc"
+	| append $""
+	| append $"DESTDIR ?= ."
+	| append $"BIN ?= ltlr"
+	| append $"BUILD ?= debug"
+	| append $"cflags.warnings := -Wall -Wextra -Wpedantic"
+	| append $"cflags.debug := -g -pg -Og"
+	| append $"cflags.release := -g -O2"
+	| append $"CFLAGS := -std=c17 $\(cflags.warnings) $\(cflags.$\(BUILD)) -Ivendor/raylib/src -Ivendor/cJSON/src -DPLATFORM_DESKTOP"
+	| append $"ldlibs.vendor := $\(shell pkg-config --libs gl)"
+	| append $"LDLIBS := -L$\(DESTDIR)/lib/desktop -lcJSON -lraylib $\(ldlibs.vendor) -lm"
+	| append $""
+	| append $kickstarter
+	| append $""
+	| append $".PHONY: @all"
+	| append $"@all: @clean @desktop"
+	| append $""
+	| append $"$\(VERBOSE).SILENT:"
+	| append $""
+	| append $rules
+	| append $""
+	| append $".PHONY: @desktop"
+	| append $"@desktop: ($output_directory)/$\(BIN) $\(CONTENT)"
+	| append $""
+	| append $".PHONY: @clean"
+	| append $"@clean:"
+	| append $"\tif [ -d \"($output_directory)\" ]; then rm -r ($output_directory); fi"
+	| str collect "\n"
 }
 
 export def "makefile web" [
@@ -356,38 +356,39 @@ export def "makefile web" [
 		| str collect "\n"
 	}
 
-$"# This file is auto-generated; any changes you make may be overwritten.
-
-EMCC ?= emcc
-
-CFLAGS := -std=c17 -Wall -Wextra -Wpedantic -g -O2 -Ivendor/raylib/src -Ivendor/cJSON/src -DPLATFORM_WEB
-LDLIBS := -Llib/web -lraylib -lcJSON
-EM_CACHE ?= .emscripten-cache
-
-TOTAL_MEMORY ?= 33554432
-SHELL_FILE := src/minshell.html
-
-($kickstarter)
-
-.PHONY: @all
-@all: @clean @web
-
-$\(VERBOSE).SILENT:
-
-($rules)
-
-$\(EM_CACHE):
-	mkdir $@
-
-($output_directory)/index.html: $\(OBJECTS) | $\(EM_CACHE) ($output_directory)
-	$\(EMCC) $\(CFLAGS) -o $@ $^ $\(LDLIBS) -s USE_GLFW=3 -s TOTAL_MEMORY=$\(TOTAL_MEMORY) --memory-init-file 0 --shell-file $\(SHELL_FILE) --preload-file content --cache $\(EM_CACHE)
-
-.PHONY: @web
-@web: ($output_directory)/index.html
-
-.PHONY: @clean
-@clean:
-	if [ -d \"($output_directory)\" ]; then rm -r ($output_directory); fi
-"
-	| str trim
+	[]
+	| append $"# This file is auto-generated; any changes you make may be overwritten."
+	| append $""
+	| append $"EMCC ?= emcc"
+	| append $""
+	| append $"CFLAGS := -std=c17 -Wall -Wextra -Wpedantic -g -O2 -Ivendor/raylib/src -Ivendor/cJSON/src -DPLATFORM_WEB"
+	| append $"LDLIBS := -Llib/web -lraylib -lcJSON"
+	| append $""
+	| append $"EM_CACHE ?= .emscripten-cache"
+	| append $""
+	| append $"TOTAL_MEMORY ?= 33554432"
+	| append $"SHELL_FILE := src/minshell.html"
+	| append $""
+	| append $kickstarter
+	| append $""
+	| append $".PHONY: @all"
+	| append $"@all: @clean @web"
+	| append $""
+	| append $"$\(VERBOSE).SILENT:"
+	| append $""
+	| append $rules
+	| append $""
+	| append $"$\(EM_CACHE):"
+	| append $"\tmkdir $@"
+	| append $""
+	| append $"($output_directory)/index.html: $\(OBJECTS) | $\(EM_CACHE) ($output_directory)"
+	| append $"\t$\(EMCC) $\(CFLAGS) -o $@ $^ $\(LDLIBS) -s USE_GLFW=3 -s TOTAL_MEMORY=$\(TOTAL_MEMORY) --memory-init-file 0 --shell-file $\(SHELL_FILE) --preload-file content --cache $\(EM_CACHE)"
+	| append $""
+	| append $".PHONY: @web"
+	| append $"@web: ($output_directory)/index.html"
+	| append $""
+	| append $".PHONY: @clean"
+	| append $"@clean:"
+	| append $"\tif [ -d \"($output_directory)\" ]; then rm -r ($output_directory); fi"
+	| str collect "\n"
 }
