@@ -246,7 +246,6 @@ export def "makefile web" [
 
 	let output_directory = if ($out_dir | is-empty) { 'build/web' } else { $out_dir }
 	let sources = get-sources $output_directory
-	let content = get-content $output_directory
 
 	let kickstarter = do {
 		let objects = do {
@@ -264,17 +263,9 @@ export def "makefile web" [
 			| $"DEPENDENCIES := \\\n($in)"
 		}
 
-		let content = do {
-			$content.output
-			| each { |it| $"\t($it) \\" }
-			| ($in | str collect "\n")
-			| $"CONTENT := \\\n($in)"
-		}
-
 		[]
 		| append $objects
 		| append $dependencies
-		| append $content
 		| str collect "\n\n"
 	}
 
@@ -286,7 +277,6 @@ export def "makefile web" [
 			let directories = do {
 				[]
 				| append $sources.output
-				| append $content.output
 				| each { |it| $it | path dirname }
 				| uniq
 				| each { |it| stagger-path $it }
@@ -326,19 +316,6 @@ export def "makefile web" [
 			| each { |it| generate-rule $it.input $it.output }
 			| str collect "\n"
 		}
-		let content_rules = do {
-			def generate-rule [ input: string, output: string ] {
-				let target = $output
-				let prerequisites = $' ($input) | ($target | path dirname)'
-				let recipe = $"cp $< ($target | path dirname)"
-
-				$"($target):($prerequisites)\n\t($recipe)\n"
-			}
-
-			$content
-			| each { |it| generate-rule $it.input $it.output }
-			| str collect "\n"
-		}
 		let output_rules = do {
 			let target = $"($output_directory)/$\(BIN)"
 			let prerequisites = $" $\(OBJECTS) | ($target | path dirname)"
@@ -351,7 +328,6 @@ export def "makefile web" [
 		| append $dependency_rules
 		| append $directory_rules
 		| append $object_rules
-		| append $content_rules
 		| append $output_rules
 		| str collect "\n"
 	}
