@@ -10,7 +10,7 @@ SRC_DIRS := $(shell find src -type d)
 $(VERBOSE).SILENT:
 
 compile_commands.json: scripts/generate.nu $(SRC_DIRS)
-	$(NU) -c "use $<; generate compilation database | save db | mv db $@"
+	$(NU) -c "use $<; generate compilation database | save db | mv -f db $@"
 
 Makefile.Desktop: scripts/generate.nu $(SRC_DIRS)
 	$(NU) -c "use $<; generate makefile desktop | save $@"
