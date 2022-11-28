@@ -563,13 +563,12 @@ static void SceneStart(Scene* self)
 {
     memset(&self->components.tags, 0, sizeof(u64) * MAX_ENTITIES);
 
-    // TODO(austin0209): Use clear instead of re-initializing?
-    self->commands = DEQUE_OF(Command);
+    DequeClear(&self->commands);
 
     // Initialize EntityManager.
     {
         self->m_entityManager.m_nextFreshEntityIndex = 0;
-        self->m_entityManager.m_recycledEntityIndices = DEQUE_WITH_CAPACITY(usize, MAX_ENTITIES);
+        DequeClear(&self->m_entityManager.m_recycledEntityIndices);
     }
 
     PopulateLevel(self);
@@ -578,9 +577,6 @@ static void SceneStart(Scene* self)
 
 static void SceneReset(Scene* self)
 {
-    DequeDestroy(&self->commands);
-    DequeDestroy(&self->m_entityManager.m_recycledEntityIndices);
-
     SceneStart(self);
 
     self->resetRequested = false;
@@ -593,6 +589,9 @@ void SceneInit(Scene* self)
     SceneSetupLayers(self);
 
     self->debugging = false;
+
+    self->commands = DEQUE_OF(Command);
+    self->m_entityManager.m_recycledEntityIndices = DEQUE_WITH_CAPACITY(usize, MAX_ENTITIES);
 
     self->treePositionsBack = DEQUE_OF(Vector2);
     self->treePositionsFront = DEQUE_OF(Vector2);
