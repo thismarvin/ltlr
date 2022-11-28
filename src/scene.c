@@ -532,6 +532,33 @@ static void PopulateLevel(Scene* scene)
     }
 }
 
+static void PlantTrees(Scene* scene)
+{
+    static const i32 spacing = 80;
+
+    DequeClear(&scene->treePositionsBack);
+    DequeClear(&scene->treePositionsFront);
+
+    const f32 domain = spacing + scene->bounds.width + spacing;
+    const usize total = ceilf(domain / spacing);
+
+    for (usize i = 0; i < total; ++i)
+    {
+        const f32 x = -spacing + spacing * i + -48 + GetRandomValue(0, 6) * 16;
+        const f32 y = 8 + GetRandomValue(0, 4) * 16;
+        const Vector2 position = Vector2Create(x, y);
+        DEQUE_PUSH_BACK(&scene->treePositionsBack, Vector2, position);
+    }
+
+    for (usize i = 0; i < total; ++i)
+    {
+        const f32 x = -spacing + spacing * i + -32 + GetRandomValue(0, 4) * 16;
+        const f32 y = 8 + 8 + GetRandomValue(0, 4) * 16;
+        const Vector2 position = Vector2Create(x, y);
+        DEQUE_PUSH_BACK(&scene->treePositionsFront, Vector2, position);
+    }
+}
+
 static void SceneStart(Scene* self)
 {
     memset(&self->components.tags, 0, sizeof(u64) * MAX_ENTITIES);
@@ -546,6 +573,7 @@ static void SceneStart(Scene* self)
     }
 
     PopulateLevel(self);
+    PlantTrees(self);
 }
 
 static void SceneReset(Scene* self)
@@ -565,6 +593,9 @@ void SceneInit(Scene* self)
     SceneSetupLayers(self);
 
     self->debugging = false;
+
+    self->treePositionsBack = DEQUE_OF(Vector2);
+    self->treePositionsFront = DEQUE_OF(Vector2);
 
     SceneStart(self);
     SceneExecuteCommands(self);
@@ -840,18 +871,26 @@ static void DrawTree
     DrawTexturePro(renderTexture->texture, source, destination, VECTOR2_ZERO, 0, COLOR_WHITE);
 }
 
+static void DrawTreeLayer
+(
+    const RenderFnParams* params,
+    const Deque* treePositions,
+    const f32 scrollFactor
+)
+{
+    for (usize i = 0; i < DequeGetSize(treePositions); ++i)
+    {
+        const Vector2 position = DEQUE_GET_UNCHECKED(treePositions, Vector2, i);
+        DrawTree(params, position, scrollFactor);
+    }
+}
+
 static void RenderBackgroundLayer(const RenderFnParams* params)
 {
     ClearBackground(COLOR_TRANSPARENT);
 
-    DrawTree(params, Vector2Create(64, 18), 0.15);
-    DrawTree(params, Vector2Create(120, 64), 0.15);
-    DrawTree(params, Vector2Create(250, 40), 0.15);
-
-    DrawTree(params, Vector2Create(120, 64), 0.2);
-    DrawTree(params, Vector2Create(180, 80), 0.2);
-    DrawTree(params, Vector2Create(334, 10), 0.2);
-    DrawTree(params, Vector2Create(300, 32), 0.2);
+    DrawTreeLayer(params, &params->scene->treePositionsBack, 0.15);
+    DrawTreeLayer(params, &params->scene->treePositionsFront, 0.2);
 }
 
 static void RenderTargetLayer(const RenderFnParams* params)
@@ -953,6 +992,8 @@ void SceneDestroy(Scene* self)
 
     DequeDestroy(&self->commands);
     DequeDestroy(&self->m_entityManager.m_recycledEntityIndices);
+    DequeDestroy(&self->treePositionsBack);
+    DequeDestroy(&self->treePositionsFront);
 
     UnloadRenderTexture(self->treeTexture);
     UnloadRenderTexture(self->backgroundLayer);

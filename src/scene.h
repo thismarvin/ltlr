@@ -62,6 +62,10 @@ struct Scene
     bool resetRequested;
     Vector2 actionCameraPosition;
     RenderTexture2D treeTexture;
+    // `Deque<Vector2>`
+    Deque treePositionsBack;
+    // `Deque<Vector2>`
+    Deque treePositionsFront;
 };
 
 void SceneInit(Scene* self);
