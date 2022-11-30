@@ -1101,6 +1101,18 @@ void PlayerAnimationUpdate(Scene* scene, const usize entity)
     CPlayer* player = SCENE_GET_COMPONENT_PTR(scene, player, entity);
     CAnimation* animation = SCENE_GET_COMPONENT_PTR(scene, animation, entity);
 
+    // Deal with death.
+    {
+        if (player->dead && player->animationState != PLAYER_ANIMATION_STATE_DYING)
+        {
+            EnableAnimation(scene, entity, player, ANIMATION_PLAYER_SPIN);
+
+            // This is a little hacky, but I don't want to add a bespoke death animation!
+            animation->frameDuration = ANIMATION_PLAYER_SPIN_FRAME_DURATION * 0.5;
+            player->animationState = PLAYER_ANIMATION_STATE_DYING;
+        }
+    }
+
     switch (player->animationState)
     {
         case PLAYER_ANIMATION_STATE_STILL:
@@ -1118,6 +1130,8 @@ void PlayerAnimationUpdate(Scene* scene, const usize entity)
 
                 break;
             }
+
+            // TODO(thismarvin): Implement an idle animation?
 
             break;
         }
@@ -1167,6 +1181,11 @@ void PlayerAnimationUpdate(Scene* scene, const usize entity)
         }
 
         case PLAYER_ANIMATION_STATE_SPINNING:
+        {
+            break;
+        }
+
+        case PLAYER_ANIMATION_STATE_DYING:
         {
             break;
         }
