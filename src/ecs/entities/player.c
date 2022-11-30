@@ -948,6 +948,7 @@ void PlayerMortalUpdate(Scene* scene, const usize entity)
     const CPosition* position = SCENE_GET_COMPONENT_PTR(scene, position, entity);
     CKinetic* kinetic = SCENE_GET_COMPONENT_PTR(scene, kinetic, entity);
 
+    // TODO(thismarvin): This might need to be more involved in the future...
     if (position->value.y > CTX_VIEWPORT_HEIGHT * 2)
     {
         SceneDeferReset(scene);
@@ -955,17 +956,40 @@ void PlayerMortalUpdate(Scene* scene, const usize entity)
         return;
     }
 
-    if (!player->dead && mortal->hp <= 0)
+    if (player->dead)
+    {
+        return;
+    }
+
+    // Deal with the player falling out-of-bounds.
+    if (position->value.y > scene->bounds.height)
     {
         player->dead = true;
 
         SceneDeferDisableComponent(scene, entity, TAG_COLLIDER);
 
-        kinetic->velocity = (Vector2)
+        kinetic->velocity.x = 0;
+        kinetic->acceleration.x = 0;
+
+        return;
+    }
+
+    // Deal with the player literally dying.
+    if (mortal->hp <= 0)
+    {
+        player->dead = true;
+
+        SceneDeferEnableComponent(scene, entity, TAG_ANIMATION);
+        SceneDeferDisableComponent(scene, entity, TAG_COLLIDER);
+
+        if (kinetic->velocity.y >= 0)
         {
-            .x = kinetic->velocity.x,
-            .y = -250,
-        };
+            kinetic->velocity.y = -jumpVelocity * 0.85;
+        }
+
+        kinetic->acceleration.x = 0;
+
+        return;
     }
 
     PlayerFlashingLogic(scene, entity);
