@@ -4,8 +4,7 @@ NU ?= nu
 TAG := 4.2.0
 
 .PHONY: @all
-@all: @clean
-	$(MAKE) @raylib
+@all: @raylib
 
 $(VERBOSE).SILENT:
 

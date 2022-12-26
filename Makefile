@@ -5,8 +5,7 @@ GPROF ?= gprof
 SRC_DIRS := $(shell find src -type d)
 
 .PHONY: @all
-@all: @clean
-	$(MAKE) @desktop
+@all: @desktop
 
 $(VERBOSE).SILENT:
 
