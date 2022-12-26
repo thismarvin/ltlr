@@ -9,7 +9,7 @@ def get-sources [output_directory: string] {
 		| wrap 'output'
 	}
 
-	($input | merge { $output })
+	($input | merge $output)
 }
 
 def get-content [output_directory: string] {
@@ -25,24 +25,16 @@ def get-content [output_directory: string] {
 		| wrap 'output'
 	}
 
-	($input | merge { $output })
+	($input | merge $output)
 }
 
 def stagger-path [ path: string ] {
 	let segments = ($path | path split)
 	let length = ($segments | length)
 	
-	let staggered = do {
-		for i in 0..($length - 1) {
-			for j in 0..$i {
-				$"($segments | get $j)"
-			}
-		}
-	}
-
-	$staggered
-	| each { |it| $it | path join }
-	| flatten
+	(1..$length)
+	| each { |it| ($segments | take $it) }
+	| each { path join }
 }
 
 export def "compilation database" [
