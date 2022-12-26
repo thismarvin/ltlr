@@ -7,14 +7,17 @@ def 'builder archive' [record] {
 
 	do {
 		$record.strategy
-		| each { |it| ^$record.cc $record.cflags -o $it.output -c $it.input }
+		| each {
+			|it|
+				do -s { ^$record.cc $record.cflags -o $it.output -c $it.input }
+				| complete
+				| if $in.exit_code != 0 { error make { msg: 'An error occurred during compilation!' }}
+		}
 	}
 
-	do {
-		^$record.ar rcs $record.library $record.strategy.output
-		| complete
-		| if $in.exit_code != 0 { error make { msg: 'An error occurred during compilation!' }}
-	}
+	do -s { ^$record.ar rcs $record.library $record.strategy.output }
+	| complete
+	| if $in.exit_code != 0 { error make { msg: 'An error occurred while archiving!' }}
 }
 
 def 'builder application' [record] {
@@ -37,7 +40,7 @@ def 'builder application' [record] {
 			| append $record.ldlibs
 		}
 
-		^$record.cc $args
+		do -s { ^$record.cc $args }
 		| complete
 		| if $in.exit_code != 0 { error make { msg: 'An error occurred during compilation!' }}
 	}

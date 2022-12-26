@@ -128,7 +128,7 @@ export def "makefile desktop" [
 				[]
 				| append $sources.output
 				| append $content.output
-				| each { |it| $it | path dirname }
+				| each { path dirname }
 				| uniq
 				| each { |it| stagger-path $it }
 				| flatten
@@ -268,7 +268,7 @@ export def "makefile web" [
 			let directories = do {
 				[]
 				| append $sources.output
-				| each { |it| $it | path dirname }
+				| each { path dirname }
 				| uniq
 				| each { |it| stagger-path $it }
 				| flatten

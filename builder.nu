@@ -1,15 +1,15 @@
-let build_inputs = (
+let build_inputs = do {
 	$env.buildInputs
 	| split row ' '
 	| str trim
-)
+}
 
-let-env PATH = (
+let-env PATH = do {
 	$build_inputs
 	| where { |it| $'($it)/bin' | path exists }
 	| each { |it| $'($it)/bin' }
 	| str collect ':'
-)
+}
 let-env PKG_CONFIG_PATH = do {
 	let lib = (
 		$build_inputs
