@@ -215,7 +215,8 @@ export def "makefile desktop" [
 	| append $kickstarter
 	| append $""
 	| append $".PHONY: @all"
-	| append $"@all: @clean @desktop"
+	| append $"@all: @clean"
+	| append $"\t$\(MAKE) @desktop"
 	| append $""
 	| append $"$\(VERBOSE).SILENT:"
 	| append $""
@@ -339,7 +340,8 @@ export def "makefile web" [
 	| append $kickstarter
 	| append $""
 	| append $".PHONY: @all"
-	| append $"@all: @clean @web"
+	| append $"@all: @clean"
+	| append $"\t$\(MAKE) @web"
 	| append $""
 	| append $"$\(VERBOSE).SILENT:"
 	| append $""

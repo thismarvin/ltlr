@@ -1,5 +1,6 @@
 .PHONY: @all
-@all: @clean @vendor
+@all: @clean
+	$(MAKE) @vendor
 
 $(VERBOSE).SILENT:
 

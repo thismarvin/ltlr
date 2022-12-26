@@ -16,7 +16,8 @@ OBJECTS := \
 	$(DESTDIR)/lib/desktop/raylib/utils.o \
 
 .PHONY: @all
-@all: @clean @lib
+@all: @clean
+	$(MAKE) @lib
 
 $(VERBOSE).SILENT:
 

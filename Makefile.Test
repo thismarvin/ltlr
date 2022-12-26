@@ -13,7 +13,8 @@ DEPS := \
 $(VERBOSE).SILENT:
 
 .PHONY: @all
-@all: @clean build/tests/unit_tests
+@all: @clean
+	$(MAKE) build/tests/unit_tests
 
 build:
 	mkdir $@
