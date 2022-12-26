@@ -1,0 +1,5 @@
+vendor/raylib/src/* linguist-vendored
+
+Makefile.* linguist-language=Makefile
+
+*_generated linguist-generated=true
