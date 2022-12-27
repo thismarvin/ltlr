@@ -13,10 +13,10 @@ compile_commands.json: scripts/generate.nu $(SRC_DIRS)
 	$(NU) -c "use $<; generate compilation database | save db | mv -f db $@"
 
 Makefile.Desktop: scripts/generate.nu $(SRC_DIRS)
-	$(NU) -c "use $<; generate makefile desktop | save $@"
+	$(NU) -c "use $<; generate makefile desktop | save -f $@"
 
 Makefile.Web: scripts/generate.nu $(SRC_DIRS)
-	$(NU) -c "use $<; generate makefile web | save $@"
+	$(NU) -c "use $<; generate makefile web | save -f $@"
 
 .PHONY: @vendor/desktop
 @vendor/desktop: Makefile.Vendor
