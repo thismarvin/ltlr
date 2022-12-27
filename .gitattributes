@@ -1,5 +1,6 @@
-vendor/raylib/src/* linguist-vendored
+vendor/raylib/src/** linguist-vendored
 
 Makefile.* linguist-language=Makefile
 
-*_generated linguist-generated=true
+src/segments/** linguist-generated=true
+*_generated.* linguist-generated=true
