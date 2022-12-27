@@ -23,6 +23,11 @@ LevelSegmentBuilder LevelSegmentBuilderCreate(const u16 type, const Vector2 offs
         {
             return LevelSegmentBuilderCreate_segment_2(offset);
         }
+
+        case 3:
+        {
+            return LevelSegmentBuilderCreate_segment_3(offset);
+        }
     }
 
     fprintf(stderr, "The given type is not a valid LevelSegmentType");
@@ -48,6 +53,12 @@ void LevelSegmentDraw(const LevelSegment* self, const Atlas* atlas, const Vector
         case 2:
         {
             LevelSegmentDraw_segment_2(atlas, offset);
+            break;
+        }
+
+        case 3:
+        {
+            LevelSegmentDraw_segment_3(atlas, offset);
             break;
         }
     }

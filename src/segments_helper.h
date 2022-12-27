@@ -79,5 +79,5 @@
 
 #define DRAW_COVER_UP(mX, mY, mColor) \
 { \
-    DrawRectangle(mX + offset.x, mY + offset.y, 4, 4, mColor); \
+    DrawRectangle(mX + offset.x, mY + offset.y, 6, 6, mColor); \
 }

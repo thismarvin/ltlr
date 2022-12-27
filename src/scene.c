@@ -496,7 +496,7 @@ static void PopulateLevel(Scene* scene)
 
     for (usize i = 0; i < length; ++i)
     {
-        scene->level.segments[i].type = GetRandomValue(0, 2);
+        scene->level.segments[i].type = GetRandomValue(0, 3);
     }
 
     scene->level.segmentsLength = length;
