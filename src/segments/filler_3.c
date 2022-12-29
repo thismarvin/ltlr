@@ -4,7 +4,7 @@
 #include "../segments_generated.h"
 #include "../segments_helper.h"
 
-LevelSegmentBuilder LevelSegmentBuilderCreate_segment_3(const Vector2 offset)
+LevelSegmentBuilder LevelSegmentBuilderCreate_filler_3(const Vector2 offset)
 {
     Deque entities = DEQUE_WITH_CAPACITY(EntityBuilder, 7);
     CREATE_SOLID_BLOCK(0, 160, 240, 96);
@@ -22,7 +22,7 @@ LevelSegmentBuilder LevelSegmentBuilderCreate_segment_3(const Vector2 offset)
     };
 }
 
-void LevelSegmentDraw_segment_3(const Atlas* atlas, const Vector2 offset)
+void LevelSegmentDraw_filler_3(const Atlas* atlas, const Vector2 offset)
 {
     DRAW_SPRITE(SPRITE_BLOCK_2_0012, 112, 80);
     DRAW_COVER_UP(122, 90, COLOR_BLACK);

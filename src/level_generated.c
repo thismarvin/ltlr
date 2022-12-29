@@ -11,22 +11,37 @@ LevelSegmentBuilder LevelSegmentBuilderCreate(const u16 type, const Vector2 offs
     {
         case 0:
         {
-            return LevelSegmentBuilderCreate_segment_0(offset);
+            return LevelSegmentBuilderCreate_battery_0(offset);
         }
 
         case 1:
         {
-            return LevelSegmentBuilderCreate_segment_1(offset);
+            return LevelSegmentBuilderCreate_filler_0(offset);
         }
 
         case 2:
         {
-            return LevelSegmentBuilderCreate_segment_2(offset);
+            return LevelSegmentBuilderCreate_filler_1(offset);
         }
 
         case 3:
         {
-            return LevelSegmentBuilderCreate_segment_3(offset);
+            return LevelSegmentBuilderCreate_filler_2(offset);
+        }
+
+        case 4:
+        {
+            return LevelSegmentBuilderCreate_filler_3(offset);
+        }
+
+        case 5:
+        {
+            return LevelSegmentBuilderCreate_solar_0(offset);
+        }
+
+        case 6:
+        {
+            return LevelSegmentBuilderCreate_starter_0(offset);
         }
     }
 
@@ -40,25 +55,43 @@ void LevelSegmentDraw(const LevelSegment* self, const Atlas* atlas, const Vector
     {
         case 0:
         {
-            LevelSegmentDraw_segment_0(atlas, offset);
+            LevelSegmentDraw_battery_0(atlas, offset);
             break;
         }
 
         case 1:
         {
-            LevelSegmentDraw_segment_1(atlas, offset);
+            LevelSegmentDraw_filler_0(atlas, offset);
             break;
         }
 
         case 2:
         {
-            LevelSegmentDraw_segment_2(atlas, offset);
+            LevelSegmentDraw_filler_1(atlas, offset);
             break;
         }
 
         case 3:
         {
-            LevelSegmentDraw_segment_3(atlas, offset);
+            LevelSegmentDraw_filler_2(atlas, offset);
+            break;
+        }
+
+        case 4:
+        {
+            LevelSegmentDraw_filler_3(atlas, offset);
+            break;
+        }
+
+        case 5:
+        {
+            LevelSegmentDraw_solar_0(atlas, offset);
+            break;
+        }
+
+        case 6:
+        {
+            LevelSegmentDraw_starter_0(atlas, offset);
             break;
         }
     }

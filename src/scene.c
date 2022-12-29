@@ -3,6 +3,7 @@
 #include "./palette/p8.h"
 #include "context.h"
 #include "scene.h"
+#include "scene_generated.h"
 #include <assert.h>
 #include <raymath.h>
 #include <string.h>
@@ -489,17 +490,33 @@ static void SceneSetupLayers(Scene* self)
     self->treeTexture = GenerateTreeTexture();
 }
 
-// TODO(thismarvin): This is a proof-of-concept...
 static void PopulateLevel(Scene* scene)
 {
-    static const usize length = 1;
+    static const u16 totalStarters = TOTAL_STARTER_SEGMENTS;
+    static const u16 totalFillers = TOTAL_FILLER_SEGMENTS;
+    static const u16 totalBatteries = TOTAL_BATTERY_SEGMENTS;
+    static const u16 totalSolars = TOTAL_SOLAR_SEGMENTS;
 
-    for (usize i = 0; i < length; ++i)
+    static const u16 starterBegin = totalBatteries + totalFillers + totalSolars;
+    static const u16 fillerBegin = totalBatteries;
+    static const u16 batteryBegin = 0;
+    static const u16 solarBegin = totalBatteries + totalFillers;
+
+    const u16 starter = GetRandomValue(0, totalStarters - 1);
+    scene->level.segments[0].type = starterBegin + starter;
+
+    for (usize i = 0; i < 3; ++i)
     {
-        scene->level.segments[i].type = GetRandomValue(0, 3);
+        const u16 filler = GetRandomValue(0, totalFillers - 1);
+        const u16 battery = GetRandomValue(0, totalBatteries - 1);
+        scene->level.segments[(i * 2) + 1].type = fillerBegin + filler;
+        scene->level.segments[(i * 2) + 2].type = batteryBegin + battery;
     }
 
-    scene->level.segmentsLength = length;
+    const u16 solar = GetRandomValue(0, totalSolars - 1);
+    scene->level.segments[7].type = solarBegin + solar;
+
+    scene->level.segmentsLength = MAX_LEVEL_SEGMENTS;
 
     Vector2 offset = VECTOR2_ZERO;
     scene->bounds = (Rectangle)
