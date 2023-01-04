@@ -4,34 +4,56 @@
 #include <math.h>
 #include <raymath.h>
 
-#define FOG_HEIGHT CTX_VIEWPORT_HEIGHT * 2
+#define FOG_HEIGHT (CTX_VIEWPORT_HEIGHT * 2)
 #define FOG_INITIAL_POSITION (Vector2) \
 { \
-    .x = -CTX_VIEWPORT_WIDTH, \
+    .x = -CTX_VIEWPORT_WIDTH * 0.5, \
     .y = -(FOG_HEIGHT - CTX_VIEWPORT_HEIGHT) * 0.5f, \
 }
 
 #define FOG_LUMP_TOTAL 8
 
-static const f32 fogMoveSpeed = 25;
-static const f32 movingParticleSpawnDuration = 0.025f;
-static f32 movingParticleSpawnTimer = movingParticleSpawnDuration;
+#define FOG_SPEED (50)
+#define FOG_DECELERATION_DELTA (128.0)
+// a = (vf^2 - vo^2) / (2 * (xf - xo))
+#define FOG_DECELERATION ((0.0 - FOG_SPEED * FOG_SPEED) / (2.0 * FOG_DECELERATION_DELTA))
+// t = (vf - vo) / a
+#define FOG_DECELERATION_DURATION ((0.0 - FOG_SPEED) / FOG_DECELERATION)
 
 static const f32 baseRadius = (f32)FOG_HEIGHT / FOG_LUMP_TOTAL * 0.75f;
 static const f32 lumpSpacing = (f32)FOG_HEIGHT / FOG_LUMP_TOTAL;
 static f32 lumpRadii[FOG_LUMP_TOTAL];
 static f32 lumpTargetRadii[FOG_LUMP_TOTAL];
-static u8 breathingPhase = 0;
+static const f32 breathingPhaseDuration = 4.0f;
 static f32 breathingPhaseTimer = 0;
-static f32 breathingPhaseDuration = 4.0f;
+static u8 breathingPhase = 0;
 
-EntityBuilder FogCreate(void)
+static const f32 movingParticleSpawnDuration = 0.025f;
+static f32 movingParticleSpawnTimer = movingParticleSpawnDuration;
+
+static bool decelerationTimerEnabled = false;
+static f32 decelerationTimer = 0.0;
+
+static void FogReset(void)
 {
     for (usize i = 0; i < FOG_LUMP_TOTAL; ++i)
     {
         lumpRadii[i] = baseRadius;
         lumpTargetRadii[i] = baseRadius;
     }
+
+    breathingPhaseTimer = 0;
+    breathingPhase = 0;
+
+    movingParticleSpawnTimer = movingParticleSpawnDuration;
+
+    decelerationTimerEnabled = false;
+    decelerationTimer = 0.0;
+}
+
+EntityBuilder FogCreate(void)
+{
+    FogReset();
 
     Deque components = DEQUE_OF(Component);
 
@@ -194,11 +216,38 @@ void FogUpdate(Scene* scene, const usize entity)
         return;
     }
 
-    kinetic->velocity = (Vector2)
+    kinetic->velocity.y = cosf(ContextGetTotalTime() * 0.5f) * 8;
+
+    // Make sure the fog does not overlap the level's last segment.
     {
-        .x = fogMoveSpeed,
-        .y = cosf(ContextGetTotalTime() * 0.5f) * 8,
-    };
+        const f32 lastSegmentWidth = scene->level.segments[scene->level.segmentsLength - 1].width;
+        const f32 xMax = scene->bounds.width - lastSegmentWidth;
+
+        if (!decelerationTimerEnabled)
+        {
+            kinetic->velocity.x = FOG_SPEED;
+
+            // Decelerate as the fog reaches its limit.
+            if (position->value.x + baseRadius >= xMax - FOG_DECELERATION_DELTA)
+            {
+                kinetic->acceleration.x = FOG_DECELERATION;
+                decelerationTimerEnabled = true;
+                decelerationTimer = 0;
+            }
+        }
+        else
+        {
+            if (decelerationTimer < FOG_DECELERATION_DURATION)
+            {
+                decelerationTimer += CTX_DT;
+            }
+            else
+            {
+                kinetic->acceleration.x = 0;
+                kinetic->velocity.x = 0;
+            }
+        }
+    }
 
     // Moving Particle spawn logic.
     {
