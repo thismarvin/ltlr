@@ -6,13 +6,14 @@
 
 LevelSegmentBuilder LevelSegmentBuilderCreate_starter_1(const Vector2 offset)
 {
-    Deque entities = DEQUE_WITH_CAPACITY(EntityBuilder, 5);
+    Deque entities = DEQUE_WITH_CAPACITY(EntityBuilder, 6);
     CREATE_SOLID_BLOCK(0, 112, 48, 144);
     CREATE_SOLID_BLOCK(48, 144, 16, 112);
     CREATE_SOLID_BLOCK(64, 160, 48, 96);
     CREATE_SOLID_BLOCK(112, 128, 48, 128);
     CREATE_SOLID_BLOCK(160, 112, 48, 144);
-    const u16 width = 208;
+    CREATE_SOLID_BLOCK(208, 160, 32, 96);
+    const u16 width = 240;
     return (LevelSegmentBuilder)
     {
         .entities = entities,
@@ -63,6 +64,8 @@ void LevelSegmentDraw_starter_1(const Atlas* atlas, const Vector2 offset)
     DRAW_SPRITE(SPRITE_BLOCK_6_0013, 112, 160);
     DRAW_SPRITE(SPRITE_BLOCK_6_0015, 128, 160);
     DRAW_SPRITE(SPRITE_BLOCK_6_0007, 144, 160);
+    DRAW_SPRITE(SPRITE_BLOCK_0_0012, 208, 160);
+    DRAW_SPRITE(SPRITE_BLOCK_0_0006, 224, 160);
     DRAW_SPRITE(SPRITE_BLOCK_0_0009, 0, 176);
     DRAW_SPRITE(SPRITE_BLOCK_0_0011, 16, 176);
     DRAW_SPRITE(SPRITE_BLOCK_0_0011, 32, 176);
@@ -73,6 +76,8 @@ void LevelSegmentDraw_starter_1(const Atlas* atlas, const Vector2 offset)
     DRAW_SPRITE(SPRITE_BLOCK_6_0009, 112, 176);
     DRAW_SPRITE(SPRITE_BLOCK_6_0011, 128, 176);
     DRAW_SPRITE(SPRITE_BLOCK_6_0003, 144, 176);
+    DRAW_SPRITE(SPRITE_BLOCK_0_0009, 208, 176);
+    DRAW_SPRITE(SPRITE_BLOCK_0_0003, 224, 176);
     DRAW_SPRITE(SPRITE_BLOCK_6_0012, 160, 112);
     DRAW_SPRITE(SPRITE_BLOCK_6_0014, 176, 112);
     DRAW_SPRITE(SPRITE_BLOCK_6_0006, 192, 112);
@@ -89,4 +94,9 @@ void LevelSegmentDraw_starter_1(const Atlas* atlas, const Vector2 offset)
     DRAW_SPRITE(SPRITE_BLOCK_6_0009, 160, 176);
     DRAW_SPRITE(SPRITE_BLOCK_6_0011, 176, 176);
     DRAW_SPRITE(SPRITE_BLOCK_6_0003, 192, 176);
+
+    DRAW_SPRITE(SPRITE_BLOCK_0_0014, 0, 160);
+    DRAW_SPRITE(SPRITE_BLOCK_0_0015, 0, 176);
+    DRAW_SPRITE(SPRITE_BLOCK_0_0014, 224, 160);
+    DRAW_SPRITE(SPRITE_BLOCK_0_0015, 224, 176);
 }
