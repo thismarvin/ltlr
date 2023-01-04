@@ -527,9 +527,6 @@ static void PopulateLevel(Scene* scene)
         .height = 180,
     };
 
-    scene->player = SceneDeferAddEntity(scene, PlayerCreate(16 * 1, 16 * -4));
-    scene->fog = SceneDeferAddEntity(scene, FogCreate());
-
     for (usize i = 0; i < scene->level.segmentsLength; ++i)
     {
         LevelSegment* segment = &scene->level.segments[i];
@@ -547,6 +544,9 @@ static void PopulateLevel(Scene* scene)
 
         DequeDestroy(&segmentBuilder.entities);
     }
+
+    scene->player = SceneDeferAddEntity(scene, PlayerCreate(16 * 1, 16 * -4));
+    scene->fog = SceneDeferAddEntity(scene, FogCreate());
 }
 
 static void PlantTrees(Scene* scene)
