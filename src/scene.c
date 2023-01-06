@@ -490,6 +490,30 @@ static void SceneSetupLayers(Scene* self)
     self->treeTexture = GenerateTreeTexture();
 }
 
+static void ArrayFillWithRange(i32* array, const i32 start, const i32 end)
+{
+    const usize domain = end - start;
+
+    for (usize i = 0; i < domain; ++i)
+    {
+        array[i] = start + i;
+    }
+}
+
+static void ArrayShuffle(i32* array, i32* candidates, usize arrayLength)
+{
+    for (usize i = 0; i < arrayLength; ++i)
+    {
+        const usize end = arrayLength - 1 - i;
+
+        const usize index = GetRandomValue(0, end);
+
+        array[i] = candidates[index];
+
+        memcpy(candidates + index, candidates + index + 1, sizeof(i32) * (end - index));
+    }
+}
+
 static void PopulateLevel(Scene* scene)
 {
     static const u16 totalStarters = TOTAL_STARTER_SEGMENTS;
@@ -502,13 +526,29 @@ static void PopulateLevel(Scene* scene)
     static const u16 batteryBegin = 0;
     static const u16 solarBegin = totalBatteries + totalFillers;
 
+    i32 fillerCandidates[totalFillers];
+    {
+        i32 candidates[totalFillers];
+        ArrayFillWithRange(candidates, 0, totalFillers);
+
+        ArrayShuffle(fillerCandidates, candidates, totalFillers);
+    }
+
+    i32 batteryCandidates[totalBatteries];
+    {
+        i32 candidates[totalBatteries];
+        ArrayFillWithRange(candidates, 0, totalBatteries);
+
+        ArrayShuffle(batteryCandidates, candidates, totalBatteries);
+    }
+
     const u16 starter = GetRandomValue(0, totalStarters - 1);
     scene->level.segments[0].type = starterBegin + starter;
 
     for (usize i = 0; i < 3; ++i)
     {
-        const u16 filler = GetRandomValue(0, totalFillers - 1);
-        const u16 battery = GetRandomValue(0, totalBatteries - 1);
+        const u16 filler = fillerCandidates[i];
+        const u16 battery = batteryCandidates[i];
         scene->level.segments[(i * 2) + 1].type = fillerBegin + filler;
         scene->level.segments[(i * 2) + 2].type = batteryBegin + battery;
     }
