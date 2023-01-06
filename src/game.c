@@ -108,6 +108,8 @@ int main(void)
 
 static void Initialize(void)
 {
+    ContextInit();
+
     SceneInit(&scene);
 }
 

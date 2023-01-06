@@ -8,14 +8,6 @@
 #include <raymath.h>
 #include <string.h>
 
-typedef struct
-{
-    Scene* scene;
-    Rectangle cameraBounds;
-} RenderFnParams;
-
-typedef void (*RenderFn)(const RenderFnParams*);
-
 void SceneDeferEnableComponent(Scene* self, const usize entity, const usize tag)
 {
     SceneSubmitCommand(self, CommandCreateEnableComponent(entity, tag));
@@ -343,33 +335,6 @@ static void SceneSetupInput(Scene* self)
     InputHandlerSetProfile(&self->input, &self->defaultActionProfile);
 }
 
-static Rectangle RectangleFromRenderTexture(const RenderTexture renderTexture)
-{
-    return (Rectangle)
-    {
-        .x = 0,
-        .y = 0,
-        .width = renderTexture.texture.width,
-        .height = renderTexture.texture.height,
-    };
-}
-
-// Returns the maximum value the dimensions of a given region can be multiplied by and still fit
-// within a given container.
-static f32 CalculateZoom(const Rectangle region, const Rectangle container)
-{
-    // Assume we need letterboxing.
-    f32 zoom = container.width / region.width;
-
-    // Check if pillarboxing is more appropriate.
-    if (region.height * zoom > container.height)
-    {
-        zoom = container.height / region.height;
-    }
-
-    return zoom;
-}
-
 static RenderTexture GenerateTreeTexture(void)
 {
     const RenderTexture renderTexture = LoadRenderTexture(CTX_VIEWPORT_WIDTH, CTX_VIEWPORT_HEIGHT);
@@ -446,37 +411,11 @@ static RenderTexture GenerateTreeTexture(void)
 
 static void SceneSetupLayers(Scene* self)
 {
-    self->trueResolution = (Rectangle)
-    {
-        .x = 0,
-        .y = 0,
-        .width = CTX_VIEWPORT_WIDTH,
-        .height = CTX_VIEWPORT_HEIGHT,
-    };
-
     // TODO(thismarvin): Expose a "Render Resolution" option.
-
     // Use the monitor's resolution as the default render resolution.
-    const int currentMonitor = GetCurrentMonitor();
-    int width = GetMonitorWidth(currentMonitor);
-    int height = GetMonitorHeight(currentMonitor);
+    self->renderResolution = GetMonitorResolution();
 
-    // The following is always true for every platform except desktop.
-    if (width == 0 || height == 0)
-    {
-        width = DEFAULT_WINDOW_WIDTH;
-        height = DEFAULT_WINDOW_HEIGHT;
-    }
-
-    self->renderResolution = (Rectangle)
-    {
-        .x = 0,
-        .y = 0,
-        .width = width,
-        .height = height,
-    };
-
-    f32 zoom = CalculateZoom(self->trueResolution, self->renderResolution);
+    f32 zoom = CalculateZoom(CTX_VIEWPORT, self->renderResolution);
 
     // Ensure that the render resolution uses integer scaling.
     zoom = floor(zoom);
@@ -721,7 +660,7 @@ static Rectangle SceneCalculateActionCameraBounds(const Scene* self, const usize
 {
     if ((self->components.tags[targetEntity] & (TAG_POSITION)) != (TAG_POSITION))
     {
-        return self->trueResolution;
+        return CTX_VIEWPORT;
     }
 
     Vector2 cameraPosition = self->components.positions[targetEntity].value;
@@ -773,124 +712,6 @@ static Rectangle SceneCalculateActionCameraBounds(const Scene* self, const usize
     };
 }
 
-static void SceneRenderLayer
-(
-    const RenderTexture* renderTexture,
-    const RenderFn fn,
-    const RenderFnParams* params
-)
-{
-    const Rectangle bounds = RectangleFromRenderTexture(*renderTexture);
-    const f32 zoom = CalculateZoom(params->scene->trueResolution, bounds);
-
-    const Vector2 cameraCenter = (Vector2)
-    {
-        .x = params->cameraBounds.x + CTX_VIEWPORT_WIDTH * 0.5,
-        .y = params->cameraBounds.y + CTX_VIEWPORT_HEIGHT * 0.5,
-    };
-
-    const Camera2D camera = (Camera2D)
-    {
-        .zoom = zoom,
-        .offset = Vector2Scale(cameraCenter, -zoom),
-        .target = (Vector2)
-        {
-            .x = -CTX_VIEWPORT_WIDTH * 0.5,
-            .y = -CTX_VIEWPORT_HEIGHT * 0.5,
-        },
-        .rotation = 0,
-    };
-
-    BeginTextureMode(*renderTexture);
-    BeginMode2D(camera);
-    {
-        fn(params);
-    }
-    EndMode2D();
-    EndTextureMode();
-}
-
-static void SceneDrawLayers(const Scene* self)
-{
-    BeginDrawing();
-
-    const Rectangle screenResolution = (Rectangle)
-    {
-        .x = 0,
-        .y = 0,
-        .width = GetScreenWidth(),
-        .height = GetScreenHeight(),
-    };
-
-    f32 zoom = CalculateZoom(self->trueResolution, screenResolution);
-
-    // TODO(thismarvin): Expose "preferIntegerScaling" option.
-    // Prefer integer scaling.
-    zoom = floor(zoom);
-
-    const i32 width = CTX_VIEWPORT_WIDTH * zoom;
-    const i32 height = CTX_VIEWPORT_HEIGHT * zoom;
-
-    const Rectangle destination = (Rectangle)
-    {
-        .x = floor(screenResolution.width * 0.5),
-        .y = floor(screenResolution.height * 0.5),
-        .width = width,
-        .height = height,
-    };
-
-    const Vector2 origin = (Vector2)
-    {
-        .x = floor(width * 0.5),
-        .y = floor(height * 0.5),
-    };
-
-    ClearBackground(BLACK);
-
-    // Draw root layer.
-    {
-        Rectangle source = RectangleFromRenderTexture(self->rootLayer);
-        source.height *= -1;
-
-        DrawTexturePro(self->rootLayer.texture, source, destination, origin, 0, WHITE);
-    }
-
-    // Draw background layer.
-    {
-        Rectangle source = RectangleFromRenderTexture(self->backgroundLayer);
-        source.height *= -1;
-
-        DrawTexturePro(self->backgroundLayer.texture, source, destination, origin, 0, WHITE);
-    }
-
-    // Draw target layer.
-    {
-        Rectangle source = RectangleFromRenderTexture(self->targetLayer);
-        source.height *= -1;
-
-        DrawTexturePro(self->targetLayer.texture, source, destination, origin, 0, WHITE);
-    }
-
-    // Draw foreground layer.
-    {
-        Rectangle source = RectangleFromRenderTexture(self->foregroundLayer);
-        source.height *= -1;
-
-        DrawTexturePro(self->foregroundLayer.texture, source, destination, origin, 0, WHITE);
-    }
-
-    // Draw debug layer.
-    if (self->debugging)
-    {
-        Rectangle source = RectangleFromRenderTexture(self->debugLayer);
-        source.height *= -1;
-
-        DrawTexturePro(self->debugLayer.texture, source, destination, origin, 0, WHITE);
-    }
-
-    EndDrawing();
-}
-
 static void RenderRootLayer(UNUSED const RenderFnParams* params)
 {
     ClearBackground(P8_BLUE);
@@ -903,10 +724,12 @@ static void DrawTree
     const f32 scrollFactor
 )
 {
-    const RenderTexture* renderTexture = &params->scene->treeTexture;
+    const Scene* scene = (Scene*)params->scene;
 
-    const f32 domain = params->scene->bounds.width - CTX_VIEWPORT_WIDTH;
-    const f32 progress = params->scene->actionCameraPosition.x / domain;
+    const RenderTexture* renderTexture = &scene->treeTexture;
+
+    const f32 domain = scene->bounds.width - CTX_VIEWPORT_WIDTH;
+    const f32 progress = scene->actionCameraPosition.x / domain;
     const f32 partialDomain = domain * scrollFactor;
     const f32 offset = partialDomain * progress;
 
@@ -921,7 +744,7 @@ static void DrawTree
         .height = renderTexture->texture.height,
     };
 
-    Rectangle source = RectangleFromRenderTexture(*renderTexture);
+    Rectangle source = RectangleFromRenderTexture(renderTexture);
     source.height *= -1;
 
     DrawTexturePro(renderTexture->texture, source, destination, VECTOR2_ZERO, 0, COLOR_WHITE);
@@ -943,67 +766,75 @@ static void DrawTreeLayer
 
 static void RenderBackgroundLayer(const RenderFnParams* params)
 {
+    const Scene* scene = (Scene*)params->scene;
+
     ClearBackground(COLOR_TRANSPARENT);
 
-    DrawTreeLayer(params, &params->scene->treePositionsBack, 0.15);
-    DrawTreeLayer(params, &params->scene->treePositionsFront, 0.2);
+    DrawTreeLayer(params, &scene->treePositionsBack, 0.15);
+    DrawTreeLayer(params, &scene->treePositionsFront, 0.2);
 }
 
 static void RenderTargetLayer(const RenderFnParams* params)
 {
+    const Scene* scene = (Scene*)params->scene;
+
     ClearBackground(COLOR_TRANSPARENT);
 
     // Draw Level.
     {
         Vector2 offset = VECTOR2_ZERO;
 
-        for (usize i = 0; i < params->scene->level.segmentsLength; ++i)
+        for (usize i = 0; i < scene->level.segmentsLength; ++i)
         {
-            const LevelSegment* segment = &params->scene->level.segments[i];
-            LevelSegmentDraw(segment, &params->scene->atlas, offset);
+            const LevelSegment* segment = &scene->level.segments[i];
+            LevelSegmentDraw(segment, &scene->atlas, offset);
             offset.x += segment->width;
         }
     }
 
-    for (usize i = 0; i < SceneGetEntityCount(params->scene); ++i)
+    for (usize i = 0; i < SceneGetEntityCount(scene); ++i)
     {
-        SSpriteDraw(params->scene, i);
-        SAnimationDraw(params->scene, i);
+        SSpriteDraw(scene, i);
+        SAnimationDraw(scene, i);
     }
 }
 
 static void RenderForegroundLayer(const RenderFnParams* params)
 {
+    const Scene* scene = (Scene*)params->scene;
+
     ClearBackground(COLOR_TRANSPARENT);
 
-    for (usize i = 0; i < SceneGetEntityCount(params->scene); ++i)
+    for (usize i = 0; i < SceneGetEntityCount(scene); ++i)
     {
-        CloudParticleDraw(params->scene, i);
+        CloudParticleDraw(scene, i);
     }
 
-    for (usize i = 0; i < SceneGetEntityCount(params->scene); ++i)
+    for (usize i = 0; i < SceneGetEntityCount(scene); ++i)
     {
-        FogParticleDraw(params->scene, i);
+        FogParticleDraw(scene, i);
     }
 
-    for (usize i = 0; i < SceneGetEntityCount(params->scene); ++i)
+    for (usize i = 0; i < SceneGetEntityCount(scene); ++i)
     {
-        FogDraw(params->scene, i);
+        FogDraw(scene, i);
     }
 }
 
 static void RenderDebugLayer(const RenderFnParams* params)
 {
-    if (!params->scene->debugging)
+    const Scene* scene = (Scene*)params->scene;
+
+    if (!scene->debugging)
     {
         return;
     }
 
     ClearBackground(COLOR_TRANSPARENT);
 
-    for (usize i = 0; i < SceneGetEntityCount(params->scene); ++i)
+    for (usize i = 0; i < SceneGetEntityCount(scene); ++i)
     {
-        SDebugDraw(params->scene, i);
+        SDebugDraw(scene, i);
     }
 }
 
@@ -1019,22 +850,30 @@ void SceneDraw(Scene* self)
 
     const RenderFnParams actionCameraParams = (RenderFnParams)
     {
-        .scene = (Scene*)self,
+        .scene = self,
         .cameraBounds = actionCameraBounds,
     };
     const RenderFnParams stationaryCameraParams = (RenderFnParams)
     {
-        .scene = (Scene*)self,
-        .cameraBounds = (Rectangle) { 0, 0, CTX_VIEWPORT_WIDTH, CTX_VIEWPORT_HEIGHT },
+        .scene = self,
+        .cameraBounds = CTX_VIEWPORT,
     };
 
-    SceneRenderLayer(&self->rootLayer, RenderRootLayer, &actionCameraParams);
-    SceneRenderLayer(&self->backgroundLayer, RenderBackgroundLayer, &stationaryCameraParams);
-    SceneRenderLayer(&self->targetLayer, RenderTargetLayer, &actionCameraParams);
-    SceneRenderLayer(&self->foregroundLayer, RenderForegroundLayer, &actionCameraParams);
-    SceneRenderLayer(&self->debugLayer, RenderDebugLayer, &actionCameraParams);
+    RenderLayer(&self->rootLayer, RenderRootLayer, &stationaryCameraParams);
+    RenderLayer(&self->backgroundLayer, RenderBackgroundLayer, &stationaryCameraParams);
+    RenderLayer(&self->targetLayer, RenderTargetLayer, &actionCameraParams);
+    RenderLayer(&self->foregroundLayer, RenderForegroundLayer, &actionCameraParams);
+    RenderLayer(&self->debugLayer, RenderDebugLayer, &actionCameraParams);
 
-    SceneDrawLayers(self);
+    const RenderTexture renderTextures[5] =
+    {
+        self->rootLayer,
+        self->backgroundLayer,
+        self->targetLayer,
+        self->foregroundLayer,
+        self->debugLayer,
+    };
+    DrawLayers(renderTextures, 5);
 }
 
 void SceneDeferReset(Scene* self)

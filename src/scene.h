@@ -48,7 +48,6 @@ struct Scene
     Rectangle bounds;
     Atlas atlas;
     Level level;
-    Rectangle trueResolution;
     Rectangle renderResolution;
     RenderTexture2D rootLayer;
     RenderTexture2D backgroundLayer;
