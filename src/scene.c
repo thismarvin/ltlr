@@ -667,14 +667,14 @@ static Rectangle SceneCalculateActionCameraBounds(const Scene* self, const usize
 
     if ((self->components.tags[targetEntity] & (TAG_SMOOTH)) == (TAG_SMOOTH))
     {
-        const CSmooth* smooth = &self->components.smooths[self->player];
+        const CSmooth* smooth = &self->components.smooths[targetEntity];
 
         cameraPosition = Vector2Lerp(smooth->previous, cameraPosition, ContextGetAlpha());
     }
 
     if ((self->components.tags[targetEntity] & (TAG_DIMENSION)) == (TAG_DIMENSION))
     {
-        const CDimension* dimension = &self->components.dimensions[self->player];
+        const CDimension* dimension = &self->components.dimensions[targetEntity];
 
         const Vector2 offset = (Vector2)
         {
