@@ -6,7 +6,7 @@
   outputs = { self, nixpkgs }:
     let
       pname = "ltlr";
-      version = "2023-01-02";
+      version = "2023-01-09";
       system = "x86_64-linux";
       pkgs = import nixpkgs { inherit system; };
     in
