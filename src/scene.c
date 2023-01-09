@@ -462,6 +462,7 @@ static void SceneSetupLayers(Scene* self)
     self->backgroundLayer = LoadRenderTexture(CTX_VIEWPORT_WIDTH * zoom, CTX_VIEWPORT_HEIGHT * zoom);
     self->targetLayer = LoadRenderTexture(CTX_VIEWPORT_WIDTH * zoom, CTX_VIEWPORT_HEIGHT * zoom);
     self->foregroundLayer = LoadRenderTexture(CTX_VIEWPORT_WIDTH, CTX_VIEWPORT_HEIGHT);
+    self->interfaceLayer = LoadRenderTexture(CTX_VIEWPORT_WIDTH * zoom, CTX_VIEWPORT_HEIGHT * zoom);
     self->debugLayer = LoadRenderTexture(CTX_VIEWPORT_WIDTH * zoom, CTX_VIEWPORT_HEIGHT * zoom);
 
     self->treeTexture = GenerateTreeTexture();
@@ -564,6 +565,7 @@ static void PopulateLevel(Scene* scene)
 
     scene->player = SceneDeferAddEntity(scene, PlayerCreate(16 * 1, 16 * -4));
     scene->fog = SceneDeferAddEntity(scene, FogCreate());
+    scene->lakitu = SceneDeferAddEntity(scene, LakituCreate());
 }
 
 static void PlantTrees(Scene* scene)
@@ -622,6 +624,8 @@ void SceneInit(Scene* self)
     SceneSetupInput(self);
     SceneSetupLayers(self);
 
+    self->state = SCENE_STATE_MENU;
+
     self->debugging = false;
 
     self->commands = DEQUE_OF(Command);
@@ -650,15 +654,34 @@ static void SceneCheckEndCondition(Scene* self)
     }
 }
 
-void SceneUpdate(Scene* self)
+static void SceneMenuUpdate(Scene* self)
 {
-    InputHandlerUpdate(&self->input);
-
-    if (IsKeyPressed(KEY_EQUAL))
+    if (InputHandlerPressed(&self->input, "select"))
     {
-        self->debugging = !self->debugging;
+        InputHandlerConsume(&self->input, "select");
+
+        // TODO(thismarvin): Defer this somehow...
+        self->state = SCENE_STATE_ACTION;
+        InputHandlerSetProfile(&self->input, &self->defaultActionProfile);
     }
 
+    // TODO(thismarvin): The following is very hacky! Also, maybe put this in LakituUpdate?
+    {
+        CPosition* position = &self->components.positions[self->lakitu];
+
+        SSmoothUpdate(self, self->lakitu);
+        SKineticUpdate(self, self->lakitu);
+
+        if (position->value.x > self->bounds.width - CTX_VIEWPORT_WIDTH * 0.5)
+        {
+            position->value.x = CTX_VIEWPORT_WIDTH * 0.5;
+            self->components.smooths[self->lakitu].previous = position->value;
+        }
+    }
+}
+
+static void SceneActionUpdate(Scene* self)
+{
     for (usize i = 0; i < SceneGetEntityCount(self); ++i)
     {
         SFleetingUpdate(self, i);
@@ -688,6 +711,31 @@ void SceneUpdate(Scene* self)
     if (self->resetRequested)
     {
         SceneReset(self);
+    }
+}
+
+void SceneUpdate(Scene* self)
+{
+    InputHandlerUpdate(&self->input);
+
+    if (IsKeyPressed(KEY_EQUAL))
+    {
+        self->debugging = !self->debugging;
+    }
+
+    switch (self->state)
+    {
+        case SCENE_STATE_MENU:
+        {
+            SceneMenuUpdate(self);
+            break;
+        }
+
+        case SCENE_STATE_ACTION:
+        {
+            SceneActionUpdate(self);
+            break;
+        }
     }
 
     SceneExecuteCommands(self);
@@ -837,6 +885,38 @@ static void RenderTargetLayer(const RenderFnParams* params)
     }
 }
 
+static void RenderInterfaceLayer(const RenderFnParams* params)
+{
+    const Scene* scene = (Scene*)params->scene;
+
+    const Color transparentBlack = (Color)
+    {
+        .r = 0,
+        .g = 0,
+        .b = 0,
+        .a = 100
+    };
+
+    ClearBackground(transparentBlack);
+
+    const Rectangle intramural = (Rectangle)
+    {
+        .x = 0,
+        .y = 0,
+        .width = 138,
+        .height = 112,
+    };
+    const AtlasDrawParams drawParams = (AtlasDrawParams)
+    {
+        .sprite = SPRITE_LOGO,
+        .position = (Vector2) { 32, (180.0 - 112) / 2 },
+        .intramural = intramural,
+        .reflection = REFLECTION_NONE,
+        .tint = COLOR_WHITE,
+    };
+    AtlasDraw(&scene->atlas, &drawParams);
+}
+
 static void RenderForegroundLayer(const RenderFnParams* params)
 {
     const Scene* scene = (Scene*)params->scene;
@@ -876,7 +956,43 @@ static void RenderDebugLayer(const RenderFnParams* params)
     }
 }
 
-void SceneDraw(Scene* self)
+static void SceneMenuDraw(Scene* self)
+{
+    Rectangle actionCameraBounds = SceneCalculateActionCameraBounds(self, self->lakitu);
+
+    self->actionCameraPosition = (Vector2)
+    {
+        .x = actionCameraBounds.x,
+        .y = actionCameraBounds.y,
+    };
+
+    const RenderFnParams actionCameraParams = (RenderFnParams)
+    {
+        .scene = self,
+        .cameraBounds = actionCameraBounds,
+    };
+    const RenderFnParams stationaryCameraParams = (RenderFnParams)
+    {
+        .scene = self,
+        .cameraBounds = CTX_VIEWPORT,
+    };
+
+    RenderLayer(&self->rootLayer, RenderRootLayer, &stationaryCameraParams);
+    RenderLayer(&self->backgroundLayer, RenderBackgroundLayer, &stationaryCameraParams);
+    RenderLayer(&self->targetLayer, RenderTargetLayer, &actionCameraParams);
+    RenderLayer(&self->interfaceLayer, RenderInterfaceLayer, &stationaryCameraParams);
+
+    const RenderTexture renderTextures[4] =
+    {
+        self->rootLayer,
+        self->backgroundLayer,
+        self->targetLayer,
+        self->interfaceLayer,
+    };
+    DrawLayers(renderTextures, 4);
+}
+
+static void SceneActionDraw(Scene* self)
 {
     Rectangle actionCameraBounds = SceneCalculateActionCameraBounds(self, self->player);
 
@@ -914,6 +1030,24 @@ void SceneDraw(Scene* self)
     DrawLayers(renderTextures, 5);
 }
 
+void SceneDraw(Scene* self)
+{
+    switch (self->state)
+    {
+        case SCENE_STATE_MENU:
+        {
+            SceneMenuDraw(self);
+            break;
+        }
+
+        case SCENE_STATE_ACTION:
+        {
+            SceneActionDraw(self);
+            break;
+        }
+    }
+}
+
 void SceneDeferReset(Scene* self)
 {
     self->resetRequested = true;
@@ -932,6 +1066,7 @@ void SceneDestroy(Scene* self)
     UnloadRenderTexture(self->backgroundLayer);
     UnloadRenderTexture(self->targetLayer);
     UnloadRenderTexture(self->foregroundLayer);
+    UnloadRenderTexture(self->interfaceLayer);
     UnloadRenderTexture(self->debugLayer);
 
     InputProfileDestroy(&self->defaultMenuProfile);

@@ -11,6 +11,12 @@
 
 #define MAX_ENTITIES 1024
 
+typedef enum
+{
+    SCENE_STATE_MENU,
+    SCENE_STATE_ACTION,
+} SceneState;
+
 typedef struct
 {
     u64 tags[MAX_ENTITIES];
@@ -40,11 +46,13 @@ typedef struct
 
 struct Scene
 {
+    SceneState state;
     Components components;
     EntityManager m_entityManager;
     bool debugging;
     usize player;
     usize fog;
+    usize lakitu;
     Rectangle bounds;
     Atlas atlas;
     Level level;
@@ -53,6 +61,7 @@ struct Scene
     RenderTexture2D backgroundLayer;
     RenderTexture2D targetLayer;
     RenderTexture2D foregroundLayer;
+    RenderTexture2D interfaceLayer;
     RenderTexture2D debugLayer;
     InputProfile defaultMenuProfile;
     InputProfile defaultActionProfile;
