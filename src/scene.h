@@ -54,6 +54,7 @@ struct Scene
     RenderTexture2D targetLayer;
     RenderTexture2D foregroundLayer;
     RenderTexture2D debugLayer;
+    InputProfile defaultMenuProfile;
     InputProfile defaultActionProfile;
     InputHandler input;
     // `Deque<Command>`

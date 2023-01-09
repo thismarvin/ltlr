@@ -238,9 +238,9 @@ static void SceneSetupContent(Scene* self)
     self->atlas = AtlasCreate("./content/atlas.png");
 }
 
-static void SceneSetupInput(Scene* self)
+static void SceneSetupActionProfile(Scene* self)
 {
-    self->defaultActionProfile = InputProfileCreate(5);
+    self->defaultActionProfile = InputProfileCreate(3);
 
     // Keyboard.
     {
@@ -329,10 +329,48 @@ static void SceneSetupInput(Scene* self)
             }
         }
     }
+}
 
+static void SceneSetupMenuProfile(Scene* self)
+{
+    self->defaultMenuProfile = InputProfileCreate(1);
+
+    // Keyboard.
+    {
+        {
+            KeyboardBinding binding = KeyboardBindingCreate("select", 2);
+
+            KeyboardBindingAddKey(&binding, KEY_SPACE);
+            KeyboardBindingAddKey(&binding, KEY_ENTER);
+
+            InputProfileAddKeyboardBinding(&self->defaultMenuProfile, binding);
+        }
+    }
+
+    // Gamepad.
+    {
+        // Buttons.
+        {
+            {
+                GamepadBinding binding = GamepadBindingCreate("select", 2);
+
+                GamepadBindingAddButton(&binding, GAMEPAD_BUTTON_MIDDLE_LEFT);
+                GamepadBindingAddButton(&binding, GAMEPAD_BUTTON_MIDDLE_RIGHT);
+
+                InputProfileAddGamepadBinding(&self->defaultMenuProfile, binding);
+            }
+        }
+    }
+}
+
+static void SceneSetupInput(Scene* self)
+{
     self->input = InputHandlerCreate(0);
 
-    InputHandlerSetProfile(&self->input, &self->defaultActionProfile);
+    SceneSetupMenuProfile(self);
+    SceneSetupActionProfile(self);
+
+    InputHandlerSetProfile(&self->input, &self->defaultMenuProfile);
 }
 
 static RenderTexture GenerateTreeTexture(void)
@@ -896,5 +934,6 @@ void SceneDestroy(Scene* self)
     UnloadRenderTexture(self->foregroundLayer);
     UnloadRenderTexture(self->debugLayer);
 
+    InputProfileDestroy(&self->defaultMenuProfile);
     InputProfileDestroy(&self->defaultActionProfile);
 }
