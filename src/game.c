@@ -77,7 +77,7 @@ static void Timestep(void)
 int main(void)
 {
     // TODO(thismarvin): Incorporate a config file or cli options for window resolution.
-    InitWindow(DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT, "LTL");
+    InitWindow(DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT, "Larry the Light-bulb Redux");
     InitAudioDevice();
 
     SetWindowState(FLAG_VSYNC_HINT | FLAG_WINDOW_RESIZABLE);
