@@ -26,6 +26,8 @@ static f64 averageFps;
 
 static bool debugging;
 
+static Image icon;
+
 static Scene scene;
 
 static void Timestep(void)
@@ -83,6 +85,10 @@ int main(void)
     SetWindowState(FLAG_VSYNC_HINT | FLAG_WINDOW_RESIZABLE);
     SetWindowMinSize(CTX_VIEWPORT_WIDTH, CTX_VIEWPORT_HEIGHT);
 
+    icon = LoadImage("./content/icon.png");
+
+    SetWindowIcon(icon);
+
     Initialize();
 
     previousTime = GetTime();
@@ -102,6 +108,8 @@ int main(void)
 
     CloseAudioDevice();
     CloseWindow();
+
+    UnloadImage(icon);
 
     return 0;
 }
