@@ -946,7 +946,7 @@ static void RenderTargetLayer(const RenderFnParams* params)
     }
 }
 
-static void RenderInterfaceLayer(const RenderFnParams* params)
+static void RenderMenuInterface(const RenderFnParams* params)
 {
     const Scene* scene = (Scene*)params->scene;
 
@@ -960,22 +960,47 @@ static void RenderInterfaceLayer(const RenderFnParams* params)
 
     ClearBackground(transparentBlack);
 
-    const Rectangle intramural = (Rectangle)
+    // Draw logo.
     {
-        .x = 0,
-        .y = 0,
-        .width = 138,
-        .height = 112,
-    };
-    const AtlasDrawParams drawParams = (AtlasDrawParams)
+        const AtlasDrawParams drawParams = (AtlasDrawParams)
+        {
+            .sprite = SPRITE_LOGO,
+            .position = (Vector2) { 32, (180.0 - 112) / 2 },
+            .intramural = (Rectangle) { 0, 0, 0, 0 },
+            .reflection = REFLECTION_NONE,
+            .tint = COLOR_WHITE,
+        };
+        AtlasDraw(&scene->atlas, &drawParams);
+    }
+}
+
+static void RenderActionInterface(const RenderFnParams* params)
+{
+    const Scene* scene = (Scene*)params->scene;
+
+    ClearBackground(COLOR_TRANSPARENT);
+
+    SceneDrawScore(scene, Vector2Create(4, 4));
+}
+
+static void RenderInterfaceLayer(const RenderFnParams* params)
+{
+    const Scene* scene = (Scene*)params->scene;
+
+    switch (scene->state)
     {
-        .sprite = SPRITE_LOGO,
-        .position = (Vector2) { 32, (180.0 - 112) / 2 },
-        .intramural = intramural,
-        .reflection = REFLECTION_NONE,
-        .tint = COLOR_WHITE,
-    };
-    AtlasDraw(&scene->atlas, &drawParams);
+        case SCENE_STATE_MENU:
+        {
+            RenderMenuInterface(params);
+            break;
+        }
+
+        case SCENE_STATE_ACTION:
+        {
+            RenderActionInterface(params);
+            break;
+        }
+    }
 }
 
 static void RenderForegroundLayer(const RenderFnParams* params)
@@ -1078,14 +1103,16 @@ static void SceneActionDraw(Scene* self)
     RenderLayer(&self->backgroundLayer, RenderBackgroundLayer, &stationaryCameraParams);
     RenderLayer(&self->targetLayer, RenderTargetLayer, &actionCameraParams);
     RenderLayer(&self->foregroundLayer, RenderForegroundLayer, &actionCameraParams);
+    RenderLayer(&self->interfaceLayer, RenderInterfaceLayer, &stationaryCameraParams);
     RenderLayer(&self->debugLayer, RenderDebugLayer, &actionCameraParams);
 
-    const RenderTexture renderTextures[5] =
+    const RenderTexture renderTextures[6] =
     {
         self->rootLayer,
         self->backgroundLayer,
         self->targetLayer,
         self->foregroundLayer,
+        self->interfaceLayer,
         self->debugLayer,
     };
     DrawLayers(renderTextures, 5);
