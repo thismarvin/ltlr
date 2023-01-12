@@ -364,6 +364,9 @@ static void PlayerOnCollision(const OnCollisionParams* params)
         if (ENTITY_HAS_DEPS(params->otherEntity, TAG_BATTERY))
         {
             mortal->hp += 1;
+
+            SceneIncrementScore(params->scene, 100);
+
             SceneDeferDeallocateEntity(params->scene, params->otherEntity);
         }
 
