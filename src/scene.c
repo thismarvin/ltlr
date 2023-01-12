@@ -597,6 +597,9 @@ static void PlantTrees(Scene* scene)
 
 static void SceneStart(Scene* self)
 {
+    self->score = 0;
+    memset(&self->scoreString, '0', sizeof(char) * MAX_SCORE_DIGITS);
+
     memset(&self->components.tags, 0, sizeof(u64) * MAX_ENTITIES);
 
     DequeClear(&self->commands);

@@ -11,6 +11,9 @@
 
 #define MAX_ENTITIES 1024
 
+#define MAX_SCORE_DIGITS (6 + 1)
+#define MAX_SCORE (999999)
+
 typedef enum
 {
     SCENE_STATE_MENU,
@@ -50,6 +53,8 @@ struct Scene
     Components components;
     EntityManager m_entityManager;
     bool debugging;
+    u32 score;
+    char scoreString[MAX_SCORE_DIGITS];
     usize player;
     usize fog;
     usize lakitu;
