@@ -54,6 +54,9 @@ struct Scene
     EntityManager m_entityManager;
     bool debugging;
     u32 score;
+    f32 scoreBufferTimerDuration;
+    f32 scoreBufferTimer;
+    i32 scoreBuffer;
     char scoreString[MAX_SCORE_DIGITS];
     usize player;
     usize fog;
@@ -91,6 +94,7 @@ void SceneDeferDeallocateEntity(Scene* self, usize entity);
 bool SceneEntityHasDependencies(const Scene* self, usize entity, u64 dependencies);
 usize SceneGetEntityCount(const Scene* self);
 void SceneSubmitCommand(Scene* self, Command command);
+void SceneIncrementScore(Scene* self, u32 value);
 void SceneUpdate(Scene* self);
 void SceneDraw(Scene* self);
 void SceneDeferReset(Scene* self);

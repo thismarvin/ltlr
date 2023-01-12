@@ -6,6 +6,7 @@
 #include "scene_generated.h"
 #include <assert.h>
 #include <raymath.h>
+#include <stdio.h>
 #include <string.h>
 
 void SceneDeferEnableComponent(Scene* self, const usize entity, const usize tag)
@@ -600,6 +601,10 @@ static void SceneStart(Scene* self)
     self->score = 0;
     memset(&self->scoreString, '0', sizeof(char) * MAX_SCORE_DIGITS);
 
+    self->scoreBufferTimerDuration = CTX_DT * 2;
+    self->scoreBufferTimer = 0;
+    self->scoreBuffer = 0;
+
     memset(&self->components.tags, 0, sizeof(u64) * MAX_ENTITIES);
 
     DequeClear(&self->commands);
@@ -639,6 +644,38 @@ void SceneInit(Scene* self)
 
     SceneStart(self);
     SceneExecuteCommands(self);
+}
+
+void SceneIncrementScore(Scene* self, const u32 value)
+{
+    self->scoreBuffer += value;
+    self->scoreBuffer = MIN(self->scoreBuffer, MAX_SCORE);
+}
+
+static void SceneUpdateScore(Scene* self)
+{
+    if (self->scoreBuffer == 0)
+    {
+        return;
+    }
+
+    self->scoreBufferTimer += CTX_DT;
+
+    if (self->scoreBufferTimer >= self->scoreBufferTimerDuration)
+    {
+        const i32 take = ceilf(self->scoreBuffer * 0.1);
+
+        self->score += take;
+        self->score = MIN(self->score, MAX_SCORE);
+
+        self->scoreBuffer -= take;
+        self->scoreBuffer = MAX(self->scoreBuffer, 0);
+
+        // TODO(thismarvin): Is this expensive? Should we evaluate this lazily?
+        snprintf((char*)self->scoreString, MAX_SCORE_DIGITS, "%06d", self->score);
+
+        self->scoreBufferTimer = 0;
+    }
 }
 
 static void SceneCheckEndCondition(Scene* self)
@@ -709,6 +746,7 @@ static void SceneActionUpdate(Scene* self)
         PlayerAnimationUpdate(self, i);
     }
 
+    SceneUpdateScore(self);
     SceneCheckEndCondition(self);
 
     if (self->resetRequested)
