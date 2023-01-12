@@ -801,6 +801,26 @@ static Rectangle SceneCalculateActionCameraBounds(const Scene* self, const usize
     };
 }
 
+static void SceneDrawScore(const Scene* self, const Vector2 position)
+{
+    for (usize i = 0; i < MAX_SCORE_DIGITS - 1; ++i)
+    {
+        const i32 index = (MAX_SCORE_DIGITS - 2) - i;
+
+        const Sprite digit = SPRITE_NUMBERS_0000 + (self->scoreString[index] - '0');
+
+        const AtlasDrawParams params = (AtlasDrawParams)
+        {
+            .sprite = digit,
+            .position = (Vector2) { position.x + index * 14, position.y },
+            .intramural = (Rectangle) { 0, 0, 0, 0 },
+            .reflection = REFLECTION_NONE,
+            .tint = COLOR_WHITE,
+        };
+        AtlasDraw(&self->atlas, &params);
+    }
+}
+
 static void RenderRootLayer(UNUSED const RenderFnParams* params)
 {
     ClearBackground(P8_BLUE);
