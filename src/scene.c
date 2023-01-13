@@ -1034,11 +1034,14 @@ static void RenderMenuInterface(const RenderFnParams* params)
 
 static void RenderActionInterface(const RenderFnParams* params)
 {
+    static const usize healthBarWidth = 15 * PLAYER_MAX_HIT_POINTS + 4;
+
     const Scene* scene = (Scene*)params->scene;
 
     ClearBackground(COLOR_TRANSPARENT);
 
     SceneDrawScore(scene, Vector2Create(4, 4));
+    SceneDrawHealthBar(scene, Vector2Create(CTX_VIEWPORT_WIDTH - 4 - healthBarWidth, 4));
 }
 
 static void RenderInterfaceLayer(const RenderFnParams* params)
