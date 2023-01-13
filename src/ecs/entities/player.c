@@ -363,7 +363,9 @@ static void PlayerOnCollision(const OnCollisionParams* params)
 
         if (ENTITY_HAS_DEPS(params->otherEntity, TAG_BATTERY))
         {
+            // TODO(thismarvin): Add a static PlayerIncrementHealth method?
             mortal->hp += 1;
+            mortal->hp = MIN(mortal->hp, PLAYER_MAX_HIT_POINTS);
 
             SceneIncrementScore(params->scene, 100);
 
