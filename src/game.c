@@ -1,7 +1,9 @@
 #include "common.h"
 #include "context.h"
 #include "scene.h"
+#include "coroutines.h"
 #include <math.h>
+#include <stdio.h>
 
 #if defined(PLATFORM_WEB)
     #include <emscripten/emscripten.h>
@@ -27,6 +29,8 @@ static f64 averageFps;
 static bool debugging;
 
 static Scene scene;
+
+static Coroutine coroutine;
 
 static void Timestep(void)
 {
@@ -106,9 +110,21 @@ int main(void)
     return 0;
 }
 
+static void Test(Coroutine* coroutine)
+{
+    CO_BEGIN();
+    {
+        CO_WAIT(2.0);
+    }
+    CO_END();
+}
+
 static void Initialize(void)
 {
     SceneInit(&scene);
+
+    coroutine = CoroutineCreate();
+    CoroutineStart(&coroutine);
 }
 
 static void Update(void)
@@ -119,6 +135,12 @@ static void Update(void)
     }
 
     SceneUpdate(&scene);
+
+    if (coroutine.state != -1 && !coroutine.done)
+    {
+        coroutine.timer += CTX_DT;
+        Test(&coroutine);
+    }
 }
 
 static void DrawDebugInformation(void)

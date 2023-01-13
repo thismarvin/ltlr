@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../coroutines.h"
 #include "../animation.h"
 #include "../common.h"
 #include "../sprites_generated.h"
@@ -172,7 +173,8 @@ typedef struct
     f32 sprintTimer;
     f32 sprintDuration;
     Vector2 sprintForce;
-    PlayerAnimationState animationState;
+    // PlayerAnimationState animationState;
+    Coroutine animationRoutine;
 } CPlayer;
 
 typedef struct

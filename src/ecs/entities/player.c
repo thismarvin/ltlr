@@ -582,7 +582,8 @@ EntityBuilder PlayerCreate(const f32 x, const f32 y)
         .sprintTimer = 0,
         .sprintDuration = 0,
         .sprintForce = VECTOR2_ZERO,
-        .animationState = PLAYER_ANIMATION_STATE_STILL,
+        // .animationState = PLAYER_ANIMATION_STATE_STILL,
+        .animationRoutine = CoroutineCreate(),
     }));
 
     return (EntityBuilder)
@@ -995,7 +996,7 @@ static void EnableAnimation(Scene* scene, usize entity, CPlayer* player, Animati
                 .type = ANIMATION_PLAYER_STILL,
             };
 
-            player->animationState = PLAYER_ANIMATION_STATE_STILL;
+            // player->animationState = PLAYER_ANIMATION_STATE_STILL;
 
             break;
         }
@@ -1013,7 +1014,7 @@ static void EnableAnimation(Scene* scene, usize entity, CPlayer* player, Animati
                 .type = ANIMATION_PLAYER_RUN,
             };
 
-            player->animationState = PLAYER_ANIMATION_STATE_RUNNING;
+            // player->animationState = PLAYER_ANIMATION_STATE_RUNNING;
 
             break;
         }
@@ -1031,7 +1032,7 @@ static void EnableAnimation(Scene* scene, usize entity, CPlayer* player, Animati
                 .type = ANIMATION_PLAYER_JUMP,
             };
 
-            player->animationState = PLAYER_ANIMATION_STATE_JUMPING;
+            // player->animationState = PLAYER_ANIMATION_STATE_JUMPING;
 
             break;
         }
@@ -1049,7 +1050,7 @@ static void EnableAnimation(Scene* scene, usize entity, CPlayer* player, Animati
                 .type = ANIMATION_PLAYER_SPIN,
             };
 
-            player->animationState = PLAYER_ANIMATION_STATE_SPINNING;
+            // player->animationState = PLAYER_ANIMATION_STATE_SPINNING;
 
             break;
         }
@@ -1077,34 +1078,31 @@ void PlayerAnimationUpdate(Scene* scene, const usize entity)
     CPlayer* player = SCENE_GET_COMPONENT_PTR(scene, player, entity);
     CAnimation* animation = SCENE_GET_COMPONENT_PTR(scene, animation, entity);
 
-    switch (player->animationState)
+    Coroutine* coroutine = &scene->components.players[entity].animationRoutine;
+    CO_BEGIN();
     {
-        case PLAYER_ANIMATION_STATE_STILL:
+        CO_LABEL(PLAYER_ANIMATION_STATE_STILL);
         {
             if (player->jumping)
             {
                 EnableAnimation(scene, entity, player, ANIMATION_PLAYER_JUMP);
-
-                break;
+                CO_GOTO(PLAYER_ANIMATION_STATE_JUMPING);
             }
 
             if (player->sprintState != SPRINT_STATE_NONE)
             {
                 EnableAnimation(scene, entity, player, ANIMATION_PLAYER_RUN);
-
-                break;
+                CO_GOTO(PLAYER_ANIMATION_STATE_RUNNING);
             }
-
-            break;
         }
+        CO_CONTINUE();
 
-        case PLAYER_ANIMATION_STATE_RUNNING:
+        CO_LABEL(PLAYER_ANIMATION_STATE_RUNNING);
         {
             if (player->jumping)
             {
                 EnableAnimation(scene, entity, player, ANIMATION_PLAYER_JUMP);
-
-                break;
+                CO_GOTO(PLAYER_ANIMATION_STATE_JUMPING);
             }
 
             if (player->sprintState == SPRINT_STATE_NONE)
@@ -1112,15 +1110,13 @@ void PlayerAnimationUpdate(Scene* scene, const usize entity)
                 if (IsFrameJustStarting(animation))
                 {
                     EnableAnimation(scene, entity, player, ANIMATION_PLAYER_STILL);
+                    CO_GOTO(PLAYER_ANIMATION_STATE_STILL);
                 }
-
-                break;
             }
-
-            break;
         }
+        CO_CONTINUE();
 
-        case PLAYER_ANIMATION_STATE_JUMPING:
+        CO_LABEL(PLAYER_ANIMATION_STATE_JUMPING);
         {
             if (player->grounded)
             {
@@ -1129,24 +1125,90 @@ void PlayerAnimationUpdate(Scene* scene, const usize entity)
                     if (IsFrameJustStarting(animation))
                     {
                         EnableAnimation(scene, entity, player, ANIMATION_PLAYER_RUN);
+                        CO_GOTO(PLAYER_ANIMATION_STATE_RUNNING);
                     }
 
-                    break;
+                    CO_CONTINUE();
                 }
 
                 EnableAnimation(scene, entity, player, ANIMATION_PLAYER_STILL);
-
-                break;
+                CO_GOTO(PLAYER_ANIMATION_STATE_STILL);
             }
-
-            break;
         }
-
-        case PLAYER_ANIMATION_STATE_SPINNING:
-        {
-            break;
-        }
+        CO_CONTINUE();
     }
+    CO_END();
+
+    // switch (player->animationState)
+    // {
+    //     case PLAYER_ANIMATION_STATE_STILL:
+    //     {
+    //         if (player->jumping)
+    //         {
+    //             EnableAnimation(scene, entity, player, ANIMATION_PLAYER_JUMP);
+    //
+    //             break;
+    //         }
+    //
+    //         if (player->sprintState != SPRINT_STATE_NONE)
+    //         {
+    //             EnableAnimation(scene, entity, player, ANIMATION_PLAYER_RUN);
+    //
+    //             break;
+    //         }
+    //
+    //         break;
+    //     }
+    //
+    //     case PLAYER_ANIMATION_STATE_RUNNING:
+    //     {
+    //         if (player->jumping)
+    //         {
+    //             EnableAnimation(scene, entity, player, ANIMATION_PLAYER_JUMP);
+    //
+    //             break;
+    //         }
+    //
+    //         if (player->sprintState == SPRINT_STATE_NONE)
+    //         {
+    //             if (IsFrameJustStarting(animation))
+    //             {
+    //                 EnableAnimation(scene, entity, player, ANIMATION_PLAYER_STILL);
+    //             }
+    //
+    //             break;
+    //         }
+    //
+    //         break;
+    //     }
+    //
+    //     case PLAYER_ANIMATION_STATE_JUMPING:
+    //     {
+    //         if (player->grounded)
+    //         {
+    //             if (player->sprintDirection != DIR_NONE)
+    //             {
+    //                 if (IsFrameJustStarting(animation))
+    //                 {
+    //                     EnableAnimation(scene, entity, player, ANIMATION_PLAYER_RUN);
+    //                 }
+    //
+    //                 break;
+    //             }
+    //
+    //             EnableAnimation(scene, entity, player, ANIMATION_PLAYER_STILL);
+    //
+    //             break;
+    //         }
+    //
+    //         break;
+    //     }
+    //
+    //     case PLAYER_ANIMATION_STATE_SPINNING:
+    //     {
+    //         break;
+    //     }
+    // }
 
     // Animation reflection logic.
     {
