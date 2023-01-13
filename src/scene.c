@@ -859,6 +859,64 @@ static void SceneDrawScore(const Scene* self, const Vector2 position)
     }
 }
 
+static void SceneDrawHealthBar(const Scene* self, const Vector2 position)
+{
+    static const usize totalHearts = PLAYER_MAX_HIT_POINTS;
+
+    const Rectangle intramural = (Rectangle)
+    {
+        .x = 8,
+        .y = 7,
+        .width = 19,
+        .height = 17,
+    };
+
+    // Draw heart capsules.
+    for (usize i = 0; i < totalHearts; ++i)
+    {
+        const Vector2 myPosition = (Vector2)
+        {
+            .x = position.x + i * 15,
+            .y = position.y,
+        };
+
+        const AtlasDrawParams params = (AtlasDrawParams)
+        {
+            .sprite = SPRITE_HEART_0000,
+            .position = myPosition,
+            .intramural = intramural,
+            .reflection = REFLECTION_NONE,
+            .tint = COLOR_WHITE,
+        };
+        AtlasDraw(&self->atlas, &params);
+    }
+
+    // Draw heart containers.
+    {
+        const usize hp = self->components.mortals[self->player].hp;
+        const usize hearts = totalHearts - hp;
+
+        for (usize i = hearts; i < totalHearts; ++i)
+        {
+            const Vector2 myPosition = (Vector2)
+            {
+                .x = position.x + i * 15,
+                .y = position.y
+            };
+
+            const AtlasDrawParams params = (AtlasDrawParams)
+            {
+                .sprite = SPRITE_HEART_0001,
+                .position = myPosition,
+                .intramural = intramural,
+                .reflection = REFLECTION_NONE,
+                .tint = COLOR_WHITE,
+            };
+            AtlasDraw(&self->atlas, &params);
+        }
+    }
+}
+
 static void RenderRootLayer(UNUSED const RenderFnParams* params)
 {
     ClearBackground(P8_BLUE);
