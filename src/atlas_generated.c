@@ -4,7 +4,7 @@
 
 Atlas AtlasCreate(const char* path)
 {
-    static const usize length = 180;
+    static const usize length = 178;
 
     Atlas atlas = (Atlas)
     {
@@ -45,7 +45,7 @@ Atlas AtlasCreate(const char* path)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 221, 120, 16, 16 },
+        .destination = (Rectangle) { 491, 97, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_0_0004] = (AtlasEntry)
@@ -66,14 +66,14 @@ Atlas AtlasCreate(const char* path)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 241, 120, 16, 16 },
+        .destination = (Rectangle) { 221, 120, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_0_0007] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 261, 120, 16, 16 },
+        .destination = (Rectangle) { 241, 120, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_0_0008] = (AtlasEntry)
@@ -87,7 +87,7 @@ Atlas AtlasCreate(const char* path)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 281, 120, 16, 16 },
+        .destination = (Rectangle) { 261, 120, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_0_0010] = (AtlasEntry)
@@ -101,595 +101,595 @@ Atlas AtlasCreate(const char* path)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 301, 120, 16, 16 },
+        .destination = (Rectangle) { 281, 120, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_0_0012] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 321, 120, 16, 16 },
+        .destination = (Rectangle) { 301, 120, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_0_0013] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 341, 120, 16, 16 },
+        .destination = (Rectangle) { 321, 120, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_0_0014] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 361, 120, 16, 16 },
+        .destination = (Rectangle) { 341, 120, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_0_0015] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 381, 120, 16, 16 },
+        .destination = (Rectangle) { 361, 120, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_1_0000] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 401, 120, 16, 16 },
+        .destination = (Rectangle) { 381, 120, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_1_0001] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 421, 120, 16, 16 },
+        .destination = (Rectangle) { 401, 120, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_1_0002] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 441, 120, 16, 16 },
+        .destination = (Rectangle) { 421, 120, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_1_0003] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 461, 120, 16, 16 },
+        .destination = (Rectangle) { 441, 120, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_1_0004] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 481, 120, 16, 16 },
+        .destination = (Rectangle) { 461, 120, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_1_0005] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 4, 160, 16, 16 },
+        .destination = (Rectangle) { 481, 120, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_1_0006] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 24, 160, 16, 16 },
+        .destination = (Rectangle) { 4, 160, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_1_0007] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 44, 160, 16, 16 },
+        .destination = (Rectangle) { 24, 160, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_1_0008] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 64, 160, 16, 16 },
+        .destination = (Rectangle) { 44, 160, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_1_0009] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 84, 160, 16, 16 },
+        .destination = (Rectangle) { 64, 160, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_1_0010] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 104, 160, 16, 16 },
+        .destination = (Rectangle) { 84, 160, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_1_0011] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 124, 160, 16, 16 },
+        .destination = (Rectangle) { 104, 160, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_1_0012] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 144, 160, 16, 16 },
+        .destination = (Rectangle) { 124, 160, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_1_0013] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 164, 160, 16, 16 },
+        .destination = (Rectangle) { 144, 160, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_1_0014] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 184, 160, 16, 16 },
+        .destination = (Rectangle) { 164, 160, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_1_0015] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 204, 160, 16, 16 },
+        .destination = (Rectangle) { 184, 160, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_2_0000] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 224, 160, 16, 16 },
+        .destination = (Rectangle) { 204, 160, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_2_0001] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 244, 160, 16, 16 },
+        .destination = (Rectangle) { 224, 160, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_2_0002] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 264, 160, 16, 16 },
+        .destination = (Rectangle) { 244, 160, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_2_0003] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 284, 160, 16, 16 },
+        .destination = (Rectangle) { 264, 160, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_2_0004] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 304, 160, 16, 16 },
+        .destination = (Rectangle) { 284, 160, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_2_0005] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 324, 160, 16, 16 },
+        .destination = (Rectangle) { 304, 160, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_2_0006] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 344, 160, 16, 16 },
+        .destination = (Rectangle) { 324, 160, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_2_0007] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 364, 160, 16, 16 },
+        .destination = (Rectangle) { 344, 160, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_2_0008] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 384, 160, 16, 16 },
+        .destination = (Rectangle) { 364, 160, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_2_0009] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 404, 160, 16, 16 },
+        .destination = (Rectangle) { 384, 160, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_2_0010] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 424, 160, 16, 16 },
+        .destination = (Rectangle) { 404, 160, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_2_0011] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 444, 160, 16, 16 },
+        .destination = (Rectangle) { 424, 160, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_2_0012] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 464, 160, 16, 16 },
+        .destination = (Rectangle) { 444, 160, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_2_0013] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 484, 160, 16, 16 },
+        .destination = (Rectangle) { 464, 160, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_2_0014] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 4, 180, 16, 16 },
+        .destination = (Rectangle) { 484, 160, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_2_0015] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 24, 180, 16, 16 },
+        .destination = (Rectangle) { 4, 180, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_3_0000] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 44, 180, 16, 16 },
+        .destination = (Rectangle) { 24, 180, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_3_0001] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 64, 180, 16, 16 },
+        .destination = (Rectangle) { 44, 180, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_3_0002] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 84, 180, 16, 16 },
+        .destination = (Rectangle) { 64, 180, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_3_0003] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 104, 180, 16, 16 },
+        .destination = (Rectangle) { 84, 180, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_3_0004] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 124, 180, 16, 16 },
+        .destination = (Rectangle) { 104, 180, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_3_0005] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 144, 180, 16, 16 },
+        .destination = (Rectangle) { 124, 180, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_3_0006] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 164, 180, 16, 16 },
+        .destination = (Rectangle) { 144, 180, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_3_0007] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 184, 180, 16, 16 },
+        .destination = (Rectangle) { 164, 180, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_3_0008] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 204, 180, 16, 16 },
+        .destination = (Rectangle) { 184, 180, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_3_0009] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 224, 180, 16, 16 },
+        .destination = (Rectangle) { 204, 180, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_3_0010] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 244, 180, 16, 16 },
+        .destination = (Rectangle) { 224, 180, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_3_0011] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 264, 180, 16, 16 },
+        .destination = (Rectangle) { 244, 180, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_3_0012] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 284, 180, 16, 16 },
+        .destination = (Rectangle) { 264, 180, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_3_0013] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 304, 180, 16, 16 },
+        .destination = (Rectangle) { 284, 180, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_3_0014] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 324, 180, 16, 16 },
+        .destination = (Rectangle) { 304, 180, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_3_0015] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 344, 180, 16, 16 },
+        .destination = (Rectangle) { 324, 180, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_4_0000] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 364, 180, 16, 16 },
+        .destination = (Rectangle) { 344, 180, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_4_0001] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 384, 180, 16, 16 },
+        .destination = (Rectangle) { 364, 180, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_4_0002] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 404, 180, 16, 16 },
+        .destination = (Rectangle) { 384, 180, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_4_0003] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 424, 180, 16, 16 },
+        .destination = (Rectangle) { 404, 180, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_4_0004] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 444, 180, 16, 16 },
+        .destination = (Rectangle) { 424, 180, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_4_0005] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 464, 180, 16, 16 },
+        .destination = (Rectangle) { 444, 180, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_4_0006] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 484, 180, 16, 16 },
+        .destination = (Rectangle) { 464, 180, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_4_0007] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 4, 200, 16, 16 },
+        .destination = (Rectangle) { 484, 180, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_4_0008] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 24, 200, 16, 16 },
+        .destination = (Rectangle) { 4, 200, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_4_0009] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 44, 200, 16, 16 },
+        .destination = (Rectangle) { 24, 200, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_4_0010] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 64, 200, 16, 16 },
+        .destination = (Rectangle) { 44, 200, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_4_0011] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 84, 200, 16, 16 },
+        .destination = (Rectangle) { 64, 200, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_4_0012] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 104, 200, 16, 16 },
+        .destination = (Rectangle) { 84, 200, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_4_0013] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 124, 200, 16, 16 },
+        .destination = (Rectangle) { 104, 200, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_4_0014] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 144, 200, 16, 16 },
+        .destination = (Rectangle) { 124, 200, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_4_0015] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 164, 200, 16, 16 },
+        .destination = (Rectangle) { 144, 200, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_5_0000] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 184, 200, 16, 16 },
+        .destination = (Rectangle) { 164, 200, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_5_0001] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 204, 200, 16, 16 },
+        .destination = (Rectangle) { 184, 200, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_5_0002] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 224, 200, 16, 16 },
+        .destination = (Rectangle) { 204, 200, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_5_0003] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 244, 200, 16, 16 },
+        .destination = (Rectangle) { 224, 200, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_5_0004] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 264, 200, 16, 16 },
+        .destination = (Rectangle) { 244, 200, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_5_0005] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 284, 200, 16, 16 },
+        .destination = (Rectangle) { 264, 200, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_5_0006] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 304, 200, 16, 16 },
+        .destination = (Rectangle) { 284, 200, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_5_0007] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 324, 200, 16, 16 },
+        .destination = (Rectangle) { 304, 200, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_5_0008] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 344, 200, 16, 16 },
+        .destination = (Rectangle) { 324, 200, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_5_0009] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 364, 200, 16, 16 },
+        .destination = (Rectangle) { 344, 200, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_5_0010] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 384, 200, 16, 16 },
+        .destination = (Rectangle) { 364, 200, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_5_0011] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 404, 200, 16, 16 },
+        .destination = (Rectangle) { 384, 200, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_5_0012] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 424, 200, 16, 16 },
+        .destination = (Rectangle) { 404, 200, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_5_0013] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 444, 200, 16, 16 },
+        .destination = (Rectangle) { 424, 200, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_5_0014] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 464, 200, 16, 16 },
+        .destination = (Rectangle) { 444, 200, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_5_0015] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 484, 200, 16, 16 },
+        .destination = (Rectangle) { 464, 200, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_6_0000] = (AtlasEntry)
@@ -703,105 +703,105 @@ Atlas AtlasCreate(const char* path)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 4, 220, 16, 16 },
+        .destination = (Rectangle) { 484, 200, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_6_0002] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 24, 220, 16, 16 },
+        .destination = (Rectangle) { 4, 220, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_6_0003] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 44, 220, 16, 16 },
+        .destination = (Rectangle) { 24, 220, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_6_0004] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 64, 220, 16, 16 },
+        .destination = (Rectangle) { 44, 220, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_6_0005] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 84, 220, 16, 16 },
+        .destination = (Rectangle) { 64, 220, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_6_0006] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 104, 220, 16, 16 },
+        .destination = (Rectangle) { 84, 220, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_6_0007] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 124, 220, 16, 16 },
+        .destination = (Rectangle) { 104, 220, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_6_0008] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 144, 220, 16, 16 },
+        .destination = (Rectangle) { 124, 220, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_6_0009] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 164, 220, 16, 16 },
+        .destination = (Rectangle) { 144, 220, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_6_0010] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 184, 220, 16, 16 },
+        .destination = (Rectangle) { 164, 220, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_6_0011] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 204, 220, 16, 16 },
+        .destination = (Rectangle) { 184, 220, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_6_0012] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 224, 220, 16, 16 },
+        .destination = (Rectangle) { 204, 220, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_6_0013] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 244, 220, 16, 16 },
+        .destination = (Rectangle) { 224, 220, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_6_0014] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 264, 220, 16, 16 },
+        .destination = (Rectangle) { 244, 220, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_6_0015] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 284, 220, 16, 16 },
+        .destination = (Rectangle) { 264, 220, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_7_0000] = (AtlasEntry)
@@ -815,105 +815,105 @@ Atlas AtlasCreate(const char* path)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 304, 220, 16, 16 },
+        .destination = (Rectangle) { 284, 220, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_7_0002] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 324, 220, 16, 16 },
+        .destination = (Rectangle) { 304, 220, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_7_0003] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 344, 220, 16, 16 },
+        .destination = (Rectangle) { 324, 220, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_7_0004] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 364, 220, 16, 16 },
+        .destination = (Rectangle) { 344, 220, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_7_0005] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 384, 220, 16, 16 },
+        .destination = (Rectangle) { 364, 220, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_7_0006] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 404, 220, 16, 16 },
+        .destination = (Rectangle) { 384, 220, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_7_0007] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 424, 220, 16, 16 },
+        .destination = (Rectangle) { 404, 220, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_7_0008] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 444, 220, 16, 16 },
+        .destination = (Rectangle) { 424, 220, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_7_0009] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 464, 220, 16, 16 },
+        .destination = (Rectangle) { 444, 220, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_7_0010] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 484, 220, 16, 16 },
+        .destination = (Rectangle) { 464, 220, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_7_0011] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 4, 240, 16, 16 },
+        .destination = (Rectangle) { 484, 220, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_7_0012] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 24, 240, 16, 16 },
+        .destination = (Rectangle) { 4, 240, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_7_0013] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 44, 240, 16, 16 },
+        .destination = (Rectangle) { 24, 240, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_7_0014] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 64, 240, 16, 16 },
+        .destination = (Rectangle) { 44, 240, 16, 16 },
     };
 
     atlas.entries[SPRITE_BLOCK_7_0015] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 0, 0, 16, 16 },
-        .destination = (Rectangle) { 84, 240, 16, 16 },
+        .destination = (Rectangle) { 64, 240, 16, 16 },
     };
 
     atlas.entries[SPRITE_GAME_OVER] = (AtlasEntry)
@@ -925,29 +925,15 @@ Atlas AtlasCreate(const char* path)
 
     atlas.entries[SPRITE_HEART_0000] = (AtlasEntry)
     {
-        .untrimmed = (AtlasEntryDimension) { 16, 32 },
-        .source = (Rectangle) { 0, 0, 16, 17 },
-        .destination = (Rectangle) { 372, 97, 16, 17 },
+        .untrimmed = (AtlasEntryDimension) { 32, 32 },
+        .source = (Rectangle) { 8, 7, 19, 17 },
+        .destination = (Rectangle) { 372, 97, 19, 17 },
     };
 
     atlas.entries[SPRITE_HEART_0001] = (AtlasEntry)
     {
-        .untrimmed = (AtlasEntryDimension) { 16, 32 },
-        .source = (Rectangle) { 0, 0, 16, 17 },
-        .destination = (Rectangle) { 392, 97, 16, 17 },
-    };
-
-    atlas.entries[SPRITE_HEART_0002] = (AtlasEntry)
-    {
-        .untrimmed = (AtlasEntryDimension) { 16, 32 },
-        .source = (Rectangle) { 0, 2, 2, 7 },
-        .destination = (Rectangle) { 504, 160, 2, 7 },
-    };
-
-    atlas.entries[SPRITE_HEART_0003] = (AtlasEntry)
-    {
-        .untrimmed = (AtlasEntryDimension) { 16, 32 },
-        .source = (Rectangle) { 3, 2, 13, 11 },
+        .untrimmed = (AtlasEntryDimension) { 32, 32 },
+        .source = (Rectangle) { 12, 9, 13, 11 },
         .destination = (Rectangle) { 189, 140, 13, 11 },
     };
 
@@ -1039,7 +1025,7 @@ Atlas AtlasCreate(const char* path)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 2, 0, 12, 16 },
-        .destination = (Rectangle) { 104, 240, 12, 16 },
+        .destination = (Rectangle) { 84, 240, 12, 16 },
     };
 
     atlas.entries[SPRITE_ONE_WAY_TOP] = (AtlasEntry)
@@ -1242,28 +1228,28 @@ Atlas AtlasCreate(const char* path)
     {
         .untrimmed = (AtlasEntryDimension) { 16, 16 },
         .source = (Rectangle) { 11, 0, 5, 16 },
-        .destination = (Rectangle) { 120, 240, 5, 16 },
+        .destination = (Rectangle) { 100, 240, 5, 16 },
     };
 
     atlas.entries[SPRITE_WALKER_IDLE_0000] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 48, 16 },
         .source = (Rectangle) { 10, 0, 28, 16 },
-        .destination = (Rectangle) { 412, 97, 28, 16 },
+        .destination = (Rectangle) { 395, 97, 28, 16 },
     };
 
     atlas.entries[SPRITE_WALKER_IDLE_0001] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 48, 16 },
         .source = (Rectangle) { 10, 0, 28, 16 },
-        .destination = (Rectangle) { 444, 97, 28, 16 },
+        .destination = (Rectangle) { 427, 97, 28, 16 },
     };
 
     atlas.entries[SPRITE_WALKER_IDLE_0002] = (AtlasEntry)
     {
         .untrimmed = (AtlasEntryDimension) { 48, 16 },
         .source = (Rectangle) { 10, 0, 28, 16 },
-        .destination = (Rectangle) { 476, 97, 28, 16 },
+        .destination = (Rectangle) { 459, 97, 28, 16 },
     };
 
     atlas.entries[SPRITE_WALKER_IDLE_0003] = (AtlasEntry)
