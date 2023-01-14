@@ -1091,12 +1091,12 @@ static void RenderDebugLayer(const RenderFnParams* params)
 {
     const Scene* scene = (Scene*)params->scene;
 
+    ClearBackground(COLOR_TRANSPARENT);
+
     if (!scene->debugging)
     {
         return;
     }
-
-    ClearBackground(COLOR_TRANSPARENT);
 
     for (usize i = 0; i < SceneGetEntityCount(scene); ++i)
     {
