@@ -1177,7 +1177,7 @@ static void SceneActionDraw(Scene* self)
         self->interfaceLayer,
         self->debugLayer,
     };
-    DrawLayers(renderTextures, 5);
+    DrawLayers(renderTextures, 6);
 }
 
 void SceneDraw(Scene* self)
