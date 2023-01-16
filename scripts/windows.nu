@@ -86,7 +86,7 @@ export def build [] {
 				| wrap 'output'
 			}
 
-			($input | merge { $output })
+			($input | merge $output)
 		}
 		let cflags = do {
 			[]
