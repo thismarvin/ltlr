@@ -52,7 +52,7 @@
 
 #define CREATE_BATTERY(mX, mY) \
 { \
-    const f32 x = mX + offset.x; \
+    const f32 x = mX + offset.x + 1; \
     const f32 y = mY + offset.y; \
     DEQUE_PUSH_BACK(&entities, EntityBuilder, BatteryCreate(x, y)); \
 }
