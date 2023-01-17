@@ -2,7 +2,7 @@
 #include "fader.h"
 #include <raymath.h>
 
-Fader FaderCreate(const Color color, const f32 duration)
+Fader FaderCreate(const EasingFn ease, const Color color, const f32 duration)
 {
     return (Fader)
     {
@@ -11,6 +11,7 @@ Fader FaderCreate(const Color color, const f32 duration)
         .previous = 0.0,
         .current = 0.0,
         .color = color,
+        .ease = ease,
     };
 }
 
@@ -30,10 +31,15 @@ void FaderUpdate(Fader* self)
 {
     self->timer += CTX_DT;
 
-    self->previous = self->current;
-    self->current = self->timer / self->duration;
+    const f64 value = MIN(self->timer / self->duration, 1.0);
 
-    self->current = MIN(self->current, 1.0);
+    const EasingFnParams params = (EasingFnParams)
+    {
+        .value = value,
+    };
+
+    self->previous = self->current;
+    self->current = self->ease(&params);
 }
 
 void FaderDraw(const Fader* self)

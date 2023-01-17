@@ -646,7 +646,7 @@ void SceneInit(Scene* self)
     self->treePositionsBack = DEQUE_OF(Vector2);
     self->treePositionsFront = DEQUE_OF(Vector2);
 
-    self->fader = FaderCreate(COLOR_BLACK, CTX_DT * 40);
+    self->fader = FaderCreate(EaseInOutQuad, COLOR_BLACK, CTX_DT * 40);
 
     SceneStart(self);
     SceneExecuteCommands(self);
