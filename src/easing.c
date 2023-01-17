@@ -1,6 +1,13 @@
 #include "easing.h"
 #include <math.h>
 
+f64 EaseLinear(const EasingFnParams* params)
+{
+    const f64 x = params->value;
+
+    return x;
+}
+
 // https://easings.net/#easeInQuad
 f64 EaseInQuad(const EasingFnParams* params)
 {
