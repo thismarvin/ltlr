@@ -464,6 +464,8 @@ static void SceneSetupLayers(Scene* self)
     self->targetLayer = LoadRenderTexture(CTX_VIEWPORT_WIDTH * zoom, CTX_VIEWPORT_HEIGHT * zoom);
     self->foregroundLayer = LoadRenderTexture(CTX_VIEWPORT_WIDTH, CTX_VIEWPORT_HEIGHT);
     self->interfaceLayer = LoadRenderTexture(CTX_VIEWPORT_WIDTH * zoom, CTX_VIEWPORT_HEIGHT * zoom);
+    // TODO(thismarvin): If this is just for fades then this resolution is overkill!
+    self->transitionLayer = LoadRenderTexture(CTX_VIEWPORT_WIDTH * zoom, CTX_VIEWPORT_HEIGHT * zoom);
     self->debugLayer = LoadRenderTexture(CTX_VIEWPORT_WIDTH * zoom, CTX_VIEWPORT_HEIGHT * zoom);
 
     self->treeTexture = GenerateTreeTexture();
@@ -605,6 +607,8 @@ static void SceneStart(Scene* self)
     self->scoreBufferTimer = 0;
     self->scoreBuffer = 0;
 
+    FaderReset(&self->fader);
+
     memset(&self->components.tags, 0, sizeof(u64) * MAX_ENTITIES);
 
     DequeClear(&self->commands);
@@ -641,6 +645,8 @@ void SceneInit(Scene* self)
 
     self->treePositionsBack = DEQUE_OF(Vector2);
     self->treePositionsFront = DEQUE_OF(Vector2);
+
+    self->fader = FaderCreate(COLOR_BLACK, CTX_DT * 40);
 
     SceneStart(self);
     SceneExecuteCommands(self);
@@ -751,7 +757,12 @@ static void SceneActionUpdate(Scene* self)
 
     if (self->resetRequested)
     {
-        SceneReset(self);
+        FaderUpdate(&self->fader);
+
+        if (FaderDone(&self->fader))
+        {
+            SceneReset(self);
+        }
     }
 }
 
@@ -1065,6 +1076,20 @@ static void RenderInterfaceLayer(const RenderFnParams* params)
     }
 }
 
+static void RenderTransitionLayer(const RenderFnParams* params)
+{
+    const Scene* scene = (Scene*)params->scene;
+
+    ClearBackground(COLOR_TRANSPARENT);
+
+    if (!scene->resetRequested)
+    {
+        return;
+    }
+
+    FaderDraw(&scene->fader);
+}
+
 static void RenderForegroundLayer(const RenderFnParams* params)
 {
     const Scene* scene = (Scene*)params->scene;
@@ -1166,18 +1191,20 @@ static void SceneActionDraw(Scene* self)
     RenderLayer(&self->targetLayer, RenderTargetLayer, &actionCameraParams);
     RenderLayer(&self->foregroundLayer, RenderForegroundLayer, &actionCameraParams);
     RenderLayer(&self->interfaceLayer, RenderInterfaceLayer, &stationaryCameraParams);
+    RenderLayer(&self->transitionLayer, RenderTransitionLayer, &stationaryCameraParams);
     RenderLayer(&self->debugLayer, RenderDebugLayer, &actionCameraParams);
 
-    const RenderTexture renderTextures[6] =
+    const RenderTexture renderTextures[7] =
     {
         self->rootLayer,
         self->backgroundLayer,
         self->targetLayer,
         self->foregroundLayer,
         self->interfaceLayer,
+        self->transitionLayer,
         self->debugLayer,
     };
-    DrawLayers(renderTextures, 6);
+    DrawLayers(renderTextures, 7);
 }
 
 void SceneDraw(Scene* self)
@@ -1217,6 +1244,7 @@ void SceneDestroy(Scene* self)
     UnloadRenderTexture(self->targetLayer);
     UnloadRenderTexture(self->foregroundLayer);
     UnloadRenderTexture(self->interfaceLayer);
+    UnloadRenderTexture(self->transitionLayer);
     UnloadRenderTexture(self->debugLayer);
 
     InputProfileDestroy(&self->defaultMenuProfile);

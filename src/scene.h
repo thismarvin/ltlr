@@ -6,6 +6,7 @@
 #include "./ecs/entities.h"
 #include "atlas.h"
 #include "common.h"
+#include "fader.h"
 #include "input.h"
 #include "level.h"
 
@@ -64,12 +65,14 @@ struct Scene
     Rectangle bounds;
     Atlas atlas;
     Level level;
+    Fader fader;
     Rectangle renderResolution;
     RenderTexture2D rootLayer;
     RenderTexture2D backgroundLayer;
     RenderTexture2D targetLayer;
     RenderTexture2D foregroundLayer;
     RenderTexture2D interfaceLayer;
+    RenderTexture2D transitionLayer;
     RenderTexture2D debugLayer;
     InputProfile defaultMenuProfile;
     InputProfile defaultActionProfile;
