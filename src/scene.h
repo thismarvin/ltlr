@@ -21,6 +21,13 @@ typedef enum
     SCENE_STATE_ACTION,
 } SceneState;
 
+typedef enum
+{
+    DIRECTOR_STATE_ENTRANCE,
+    DIRECTOR_STATE_SUPERVISE,
+    DIRECTOR_STATE_EXIT,
+} DirectorState;
+
 typedef struct
 {
     u64 tags[MAX_ENTITIES];
@@ -65,6 +72,7 @@ struct Scene
     Rectangle bounds;
     Atlas atlas;
     Level level;
+    DirectorState director;
     Fader fader;
     Rectangle renderResolution;
     RenderTexture2D rootLayer;

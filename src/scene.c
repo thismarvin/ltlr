@@ -607,7 +607,10 @@ static void SceneStart(Scene* self)
     self->scoreBufferTimer = 0;
     self->scoreBuffer = 0;
 
+    self->director = DIRECTOR_STATE_ENTRANCE;
     FaderReset(&self->fader);
+    self->fader.type = FADE_IN;
+    self->fader.easer.duration = CTX_DT * 20;
 
     memset(&self->components.tags, 0, sizeof(u64) * MAX_ENTITIES);
 
@@ -646,8 +649,9 @@ void SceneInit(Scene* self)
     self->treePositionsBack = DEQUE_OF(Vector2);
     self->treePositionsFront = DEQUE_OF(Vector2);
 
+    self->director = DIRECTOR_STATE_ENTRANCE;
     self->fader = FaderDefault();
-    self->fader.type = FADE_OUT;
+    self->fader.easer.ease = EaseInOutQuad;
 
     SceneStart(self);
     SceneExecuteCommands(self);
@@ -710,6 +714,9 @@ static void SceneMenuUpdate(Scene* self)
         // TODO(thismarvin): Defer this somehow...
         self->state = SCENE_STATE_ACTION;
         InputHandlerSetProfile(&self->input, &self->defaultActionProfile);
+
+        // TODO(thismarvin): There should be a bespoke transition into the Action state.
+        self->fader.easer.duration = CTX_DT * 40;
     }
 
     // TODO(thismarvin): The following is very hacky! Also, maybe put this in LakituUpdate?
@@ -723,6 +730,67 @@ static void SceneMenuUpdate(Scene* self)
         {
             position->value.x = CTX_VIEWPORT_WIDTH * 0.5;
             self->components.smooths[self->lakitu].previous = position->value;
+        }
+    }
+}
+
+static void SceneUpdateDirectorAction(Scene* self)
+{
+    switch (self->director)
+    {
+        case DIRECTOR_STATE_ENTRANCE:
+        {
+            FaderUpdate(&self->fader);
+
+            if (FaderIsDone(&self->fader))
+            {
+                self->director = DIRECTOR_STATE_SUPERVISE;
+            }
+
+            break;
+        }
+
+        case DIRECTOR_STATE_SUPERVISE:
+        {
+            if (self->resetRequested)
+            {
+                self->director = DIRECTOR_STATE_EXIT;
+
+                FaderReset(&self->fader);
+                self->fader.type = FADE_OUT;
+                self->fader.easer.duration = CTX_DT * 40;
+            }
+
+            break;
+        }
+
+        case DIRECTOR_STATE_EXIT:
+        {
+            FaderUpdate(&self->fader);
+
+            if (FaderIsDone(&self->fader))
+            {
+                SceneReset(self);
+            }
+
+            break;
+        }
+    }
+}
+
+static void SceneUpdateDirector(Scene* self)
+{
+    switch (self->state)
+    {
+        case SCENE_STATE_MENU:
+        {
+            break;
+        }
+
+        case SCENE_STATE_ACTION:
+        {
+            SceneUpdateDirectorAction(self);
+            break;
         }
     }
 }
@@ -755,16 +823,6 @@ static void SceneActionUpdate(Scene* self)
 
     SceneUpdateScore(self);
     SceneCheckEndCondition(self);
-
-    if (self->resetRequested)
-    {
-        FaderUpdate(&self->fader);
-
-        if (FaderIsDone(&self->fader))
-        {
-            SceneReset(self);
-        }
-    }
 }
 
 void SceneUpdate(Scene* self)
@@ -790,6 +848,8 @@ void SceneUpdate(Scene* self)
             break;
         }
     }
+
+    SceneUpdateDirector(self);
 
     SceneExecuteCommands(self);
 }
@@ -1083,7 +1143,7 @@ static void RenderTransitionLayer(const RenderFnParams* params)
 
     ClearBackground(COLOR_TRANSPARENT);
 
-    if (!scene->resetRequested)
+    if (scene->director == DIRECTOR_STATE_SUPERVISE)
     {
         return;
     }
