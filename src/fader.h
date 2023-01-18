@@ -3,18 +3,23 @@
 #include "common.h"
 #include "easing.h"
 
+typedef enum
+{
+    FADE_IN,
+    FADE_OUT,
+} FadeType;
+
 typedef struct
 {
-    f32 duration;
-    f32 timer;
+    Easer easer;
+    Color color;
     f32 previous;
     f32 current;
-    Color color;
-    EasingFn ease;
+    FadeType type;
 } Fader;
 
-Fader FaderCreate(const EasingFn ease, Color color, f32 duration);
-bool FaderDone(const Fader* self);
+Fader FaderDefault(void);
+bool FaderIsDone(const Fader* self);
 void FaderReset(Fader* self);
 void FaderUpdate(Fader* self);
 void FaderDraw(const Fader* self);

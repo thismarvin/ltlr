@@ -646,7 +646,8 @@ void SceneInit(Scene* self)
     self->treePositionsBack = DEQUE_OF(Vector2);
     self->treePositionsFront = DEQUE_OF(Vector2);
 
-    self->fader = FaderCreate(EaseInOutQuad, COLOR_BLACK, CTX_DT * 40);
+    self->fader = FaderDefault();
+    self->fader.type = FADE_OUT;
 
     SceneStart(self);
     SceneExecuteCommands(self);
@@ -759,7 +760,7 @@ static void SceneActionUpdate(Scene* self)
     {
         FaderUpdate(&self->fader);
 
-        if (FaderDone(&self->fader))
+        if (FaderIsDone(&self->fader))
         {
             SceneReset(self);
         }

@@ -2,49 +2,47 @@
 #include "fader.h"
 #include <raymath.h>
 
-Fader FaderCreate(const EasingFn ease, const Color color, const f32 duration)
+Fader FaderDefault(void)
 {
     return (Fader)
     {
-        .duration = duration,
-        .timer = 0.0,
+        .easer = EaserCreate(EaseLinear, CTX_DT * 60),
         .previous = 0.0,
         .current = 0.0,
-        .color = color,
-        .ease = ease,
+        .color = COLOR_BLACK,
+        .type = FADE_IN,
     };
 }
 
-bool FaderDone(const Fader* self)
+bool FaderIsDone(const Fader* self)
 {
-    return self->timer >= self->duration;
+    return EaserIsDone(&self->easer);
 }
 
 void FaderReset(Fader* self)
 {
-    self->timer = 0.0;
+    EaserReset(&self->easer);
+
     self->previous = 0.0;
     self->current = 0.0;
 }
 
 void FaderUpdate(Fader* self)
 {
-    self->timer += CTX_DT;
-
-    const f64 value = MIN(self->timer / self->duration, 1.0);
-
-    const EasingFnParams params = (EasingFnParams)
-    {
-        .value = value,
-    };
+    EaserUpdate(&self->easer, CTX_DT);
 
     self->previous = self->current;
-    self->current = self->ease(&params);
+    self->current = self->easer.value;
 }
 
 void FaderDraw(const Fader* self)
 {
-    const f32 alpha = Lerp(self->previous, self->current, ContextGetAlpha());
+    const f32 value = Lerp(self->previous, self->current, ContextGetAlpha());
+
+    const f32 start = self->type == FADE_IN ? 1 : 0;
+    const f32 end = self->type == FADE_IN ? 0 : 1;
+
+    const f32 alpha = Lerp(start, end, value);
 
     const u8 r = (u8)floorf(self->color.r * alpha);
     const u8 g = (u8)floorf(self->color.g * alpha);
