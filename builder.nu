@@ -30,6 +30,18 @@ let-env PKG_CONFIG_PATH = do {
 	| str collect ':'
 }
 
+let-env NIX_BUILD_CORES = do {
+	let cores = if ('NIX_BUILD_CORES' in (env).name) { ($env.NIX_BUILD_CORES | into int) } else { 1 }
+
+	if ($cores <= 0) {
+		let guess = (sys | get cpu | length)
+
+		if ($guess <= 0) { 1 } else { $guess }
+	} else {
+		$cores
+	}
+}
+
 let-env VERBOSE = 1
 let-env DESTDIR = $env.TMP
 let-env BUILD = 'release'
@@ -38,9 +50,9 @@ let-env BIN = 'app'
 do {
 	let makefile = $'($env.TMP)/Makefile.Desktop'
 	cd $env.src
-	^make -C vendor/raylib -f Makefile.Desktop @lib
+	^make -C vendor/raylib -f Makefile.Desktop @lib -j $env.NIX_BUILD_CORES
 	^nu -c $'use scripts/generate.nu; generate makefile desktop --out-dir ($env.TMP) | save ($makefile)'
-	^make -f $makefile @desktop
+	^make -f $makefile @desktop -j $env.NIX_BUILD_CORES 
 }
 
 do {
