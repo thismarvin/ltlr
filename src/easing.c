@@ -64,6 +64,11 @@ void EaserUpdate(Easer* self, f64 deltaTime)
 {
     self->elapsed += deltaTime;
 
+    if (self->elapsed > self->duration)
+    {
+        self->elapsed = self->duration;
+    }
+
     EaserRecalculateValue(self);
 }
 
