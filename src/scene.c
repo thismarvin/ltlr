@@ -616,11 +616,8 @@ static void SceneStart(Scene* self)
 
     DequeClear(&self->commands);
 
-    // Initialize EntityManager.
-    {
-        self->m_entityManager.m_nextFreshEntityIndex = 0;
-        DequeClear(&self->m_entityManager.m_recycledEntityIndices);
-    }
+    self->m_entityManager.m_nextFreshEntityIndex = 0;
+    DequeClear(&self->m_entityManager.m_recycledEntityIndices);
 
     PopulateLevel(self);
     PlantTrees(self);
@@ -644,7 +641,11 @@ void SceneInit(Scene* self)
     self->debugging = false;
 
     self->commands = DEQUE_OF(Command);
-    self->m_entityManager.m_recycledEntityIndices = DEQUE_WITH_CAPACITY(usize, MAX_ENTITIES);
+    self->m_entityManager = (EntityManager)
+    {
+        .m_nextFreshEntityIndex = 0,
+        .m_recycledEntityIndices = DEQUE_WITH_CAPACITY(usize, MAX_ENTITIES),
+    };
 
     self->treePositionsBack = DEQUE_OF(Vector2);
     self->treePositionsFront = DEQUE_OF(Vector2);
