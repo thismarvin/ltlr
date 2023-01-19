@@ -598,15 +598,8 @@ static void PlantTrees(Scene* scene)
     }
 }
 
-static void SceneStart(Scene* self)
+static void SceneBuildStage(Scene* self)
 {
-    self->score = 0;
-    memset(&self->scoreString, '0', sizeof(char) * MAX_SCORE_DIGITS);
-
-    self->scoreBufferTimerDuration = CTX_DT * 2;
-    self->scoreBufferTimer = 0;
-    self->scoreBuffer = 0;
-
     self->director = DIRECTOR_STATE_ENTRANCE;
     FaderReset(&self->fader);
     self->fader.type = FADE_IN;
@@ -621,13 +614,38 @@ static void SceneStart(Scene* self)
 
     PopulateLevel(self);
     PlantTrees(self);
+
+    self->resetRequested = false;
+    self->advanceStageRequested = false;
+
+    SceneExecuteCommands(self);
 }
 
 static void SceneReset(Scene* self)
 {
-    SceneStart(self);
+    self->stage = 0;
 
-    self->resetRequested = false;
+    self->score = 0;
+    memset(&self->scoreString, '0', sizeof(char) * MAX_SCORE_DIGITS);
+
+    self->scoreBufferTimerDuration = CTX_DT * 2;
+    self->scoreBufferTimer = 0;
+    self->scoreBuffer = 0;
+
+    SceneBuildStage(self);
+}
+
+static void SceneAdvanceStage(Scene* self)
+{
+    self->stage += 1;
+    self->stage = MIN(self->stage, 64);
+
+    const CMortal playersMortal = self->components.mortals[self->player];
+
+    SceneBuildStage(self);
+
+    // TODO(thismarvin): Is there a better way to preserve the player's health?
+    self->components.mortals[self->player] = playersMortal;
 }
 
 void SceneInit(Scene* self)
@@ -654,14 +672,23 @@ void SceneInit(Scene* self)
     self->fader = FaderDefault();
     self->fader.easer.ease = EaseInOutQuad;
 
-    SceneStart(self);
-    SceneExecuteCommands(self);
+    SceneReset(self);
 }
 
 void SceneIncrementScore(Scene* self, const u32 value)
 {
     self->scoreBuffer += value;
     self->scoreBuffer = MIN(self->scoreBuffer, MAX_SCORE);
+}
+
+void SceneDeferReset(Scene* self)
+{
+    self->resetRequested = true;
+}
+
+void SceneDeferAdvanceStage(Scene* self)
+{
+    self->advanceStageRequested = true;
 }
 
 static void SceneUpdateScore(Scene* self)
@@ -753,7 +780,7 @@ static void SceneUpdateDirectorAction(Scene* self)
 
         case DIRECTOR_STATE_SUPERVISE:
         {
-            if (self->resetRequested)
+            if (self->resetRequested || self->advanceStageRequested)
             {
                 self->director = DIRECTOR_STATE_EXIT;
 
@@ -771,7 +798,14 @@ static void SceneUpdateDirectorAction(Scene* self)
 
             if (FaderIsDone(&self->fader))
             {
-                SceneReset(self);
+                if (self->advanceStageRequested)
+                {
+                    SceneAdvanceStage(self);
+                }
+                else if (self->resetRequested)
+                {
+                    SceneReset(self);
+                }
             }
 
             break;
@@ -1285,11 +1319,6 @@ void SceneDraw(Scene* self)
             break;
         }
     }
-}
-
-void SceneDeferReset(Scene* self)
-{
-    self->resetRequested = true;
 }
 
 void SceneDestroy(Scene* self)

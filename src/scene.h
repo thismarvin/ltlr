@@ -72,6 +72,7 @@ struct Scene
     Rectangle bounds;
     Atlas atlas;
     Level level;
+    u8 stage;
     DirectorState director;
     Fader fader;
     Rectangle renderResolution;
@@ -88,6 +89,7 @@ struct Scene
     // `Deque<Command>`
     Deque commands;
     bool resetRequested;
+    bool advanceStageRequested;
     Vector2 actionCameraPosition;
     RenderTexture2D treeTexture;
     // `Deque<Vector2>`
@@ -106,9 +108,10 @@ bool SceneEntityHasDependencies(const Scene* self, usize entity, u64 dependencie
 usize SceneGetEntityCount(const Scene* self);
 void SceneSubmitCommand(Scene* self, Command command);
 void SceneIncrementScore(Scene* self, u32 value);
+void SceneDeferReset(Scene* self);
+void SceneDeferAdvanceStage(Scene* self);
 void SceneUpdate(Scene* self);
 void SceneDraw(Scene* self);
-void SceneDeferReset(Scene* self);
 void SceneDestroy(Scene* self);
 
 #define SCENE_GET_COMPONENT(mScene, mValue, mEntity) _Generic((mValue), \
