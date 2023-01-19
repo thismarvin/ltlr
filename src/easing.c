@@ -34,11 +34,16 @@ f64 EaseInOutQuad(const EasingFnParams* params)
 
 Easer EaserCreate(const EasingFn ease, const f64 duration)
 {
+    const EasingFnParams params = (EasingFnParams)
+    {
+        .value = 0.0,
+    };
+
     return (Easer)
     {
         .elapsed = 0.0,
         .duration = duration,
-        .value = 0.0,
+        .value = ease(&params),
         .ease = ease,
     };
 }
