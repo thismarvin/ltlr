@@ -572,14 +572,14 @@ static void ScenePopulateLevel(Scene* self)
     self->lakitu = SceneDeferAddEntity(self, LakituCreate());
 }
 
-static void PlantTrees(Scene* scene)
+static void ScenePlantTrees(Scene* self)
 {
     static const i32 spacing = 80;
 
-    DequeClear(&scene->treePositionsBack);
-    DequeClear(&scene->treePositionsFront);
+    DequeClear(&self->treePositionsBack);
+    DequeClear(&self->treePositionsFront);
 
-    const f32 domain = spacing + scene->bounds.width + spacing;
+    const f32 domain = spacing + self->bounds.width + spacing;
     const usize total = ceilf(domain / spacing);
 
     for (usize i = 0; i < total; ++i)
@@ -587,7 +587,7 @@ static void PlantTrees(Scene* scene)
         const f32 x = -spacing + spacing * i + -48 + GetRandomValue(0, 6) * 16;
         const f32 y = 8 + GetRandomValue(0, 4) * 16;
         const Vector2 position = Vector2Create(x, y);
-        DEQUE_PUSH_BACK(&scene->treePositionsBack, Vector2, position);
+        DEQUE_PUSH_BACK(&self->treePositionsBack, Vector2, position);
     }
 
     for (usize i = 0; i < total; ++i)
@@ -595,7 +595,7 @@ static void PlantTrees(Scene* scene)
         const f32 x = -spacing + spacing * i + -32 + GetRandomValue(0, 4) * 16;
         const f32 y = 8 + 8 + GetRandomValue(0, 4) * 16;
         const Vector2 position = Vector2Create(x, y);
-        DEQUE_PUSH_BACK(&scene->treePositionsFront, Vector2, position);
+        DEQUE_PUSH_BACK(&self->treePositionsFront, Vector2, position);
     }
 }
 
@@ -629,7 +629,7 @@ static void SceneBuildStage(Scene* self)
     DequeClear(&self->m_entityManager.m_recycledEntityIndices);
 
     ScenePopulateLevel(self);
-    PlantTrees(self);
+    ScenePlantTrees(self);
 
     self->resetRequested = false;
     self->advanceStageRequested = false;
