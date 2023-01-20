@@ -52,7 +52,7 @@ usize SceneDeferAddEntity(Scene* self, EntityBuilder entityBuilder)
     {
         const Component* component = &DEQUE_GET_UNCHECKED(&entityBuilder.components, Component, i);
 
-        SceneSubmitCommand(self, CommandCreateSetComponent(entity, component));
+        SceneSubmitCommand(self, CommandCreateSetComponent(entity, *component));
     }
 
     DequeDestroy(&entityBuilder.components);

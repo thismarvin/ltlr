@@ -13,7 +13,7 @@ Command CommandCreateSetTag(const usize entity, const u64 tag)
     };
 }
 
-Command CommandCreateSetComponent(const usize entity, const Component* component)
+Command CommandCreateSetComponent(const usize entity, const Component component)
 {
     return (Command)
     {
@@ -21,7 +21,7 @@ Command CommandCreateSetComponent(const usize entity, const Component* component
         .setComponent = (CommandSetComponent)
         {
             .entity = entity,
-            .component = *component,
+            .component = component,
         },
     };
 }

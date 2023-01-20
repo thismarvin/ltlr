@@ -55,7 +55,7 @@ typedef struct
 } Command;
 
 Command CommandCreateSetTag(usize entity, u64 tag);
-Command CommandCreateSetComponent(usize entity, const Component* component);
+Command CommandCreateSetComponent(usize entity, Component component);
 Command CommandCreateDeallocateEntity(usize entity);
 Command CommandCreateEnableComponent(usize entity, u64 componentTag);
 Command CommandCreateDisableComponent(usize entity, u64 componentTag);
