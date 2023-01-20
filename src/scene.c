@@ -599,12 +599,27 @@ static void PlantTrees(Scene* scene)
     }
 }
 
-static void SceneBuildStage(Scene* self)
+static void SceneBeginFadeIn(Scene* self)
 {
     self->director = DIRECTOR_STATE_ENTRANCE;
+
     FaderReset(&self->fader);
     self->fader.type = FADE_IN;
     self->fader.easer.duration = CTX_DT * 20;
+}
+
+static void SceneBeginFadeOut(Scene* self)
+{
+    self->director = DIRECTOR_STATE_EXIT;
+
+    FaderReset(&self->fader);
+    self->fader.type = FADE_OUT;
+    self->fader.easer.duration = CTX_DT * 40;
+}
+
+static void SceneBuildStage(Scene* self)
+{
+    SceneBeginFadeIn(self);
 
     memset(&self->components.tags, 0, sizeof(u64) * MAX_ENTITIES);
 
@@ -783,11 +798,7 @@ static void SceneUpdateDirectorAction(Scene* self)
         {
             if (self->resetRequested || self->advanceStageRequested)
             {
-                self->director = DIRECTOR_STATE_EXIT;
-
-                FaderReset(&self->fader);
-                self->fader.type = FADE_OUT;
-                self->fader.easer.duration = CTX_DT * 40;
+                SceneBeginFadeOut(self);
             }
 
             break;
