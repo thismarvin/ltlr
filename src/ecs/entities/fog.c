@@ -60,8 +60,6 @@ EntityBuilder FogCreate(void)
     const u64 tags =
         TAG_NONE
         | TAG_POSITION
-        | TAG_DIMENSION
-        | TAG_COLOR
         | TAG_KINETIC
         | TAG_SMOOTH
         | TAG_FOG;
@@ -69,11 +67,6 @@ EntityBuilder FogCreate(void)
     ADD_COMPONENT(CPosition, ((CPosition)
     {
         .value = FOG_INITIAL_POSITION,
-    }));
-
-    ADD_COMPONENT(CColor, ((CColor)
-    {
-        .value = COLOR_BLACK,
     }));
 
     ADD_COMPONENT(CKinetic, ((CKinetic)
@@ -278,7 +271,7 @@ void FogUpdate(Scene* scene, const usize entity)
 
 void FogDraw(const Scene* scene, const usize entity)
 {
-    const u64 dependencies = TAG_FOG | TAG_POSITION | TAG_COLOR | TAG_SMOOTH;
+    const u64 dependencies = TAG_FOG | TAG_POSITION | TAG_SMOOTH;
 
     if (!SceneEntityHasDependencies(scene, entity, dependencies))
     {
@@ -286,7 +279,6 @@ void FogDraw(const Scene* scene, const usize entity)
     }
 
     const CPosition* position = SCENE_GET_COMPONENT_PTR(scene, position, entity);
-    const CColor* color = SCENE_GET_COMPONENT_PTR(scene, color, entity);
     const CSmooth* smooth = SCENE_GET_COMPONENT_PTR(scene, smooth, entity);
 
     const Vector2 interpolated = Vector2Lerp(smooth->previous, position->value, ContextGetAlpha());
@@ -317,6 +309,6 @@ void FogDraw(const Scene* scene, const usize entity)
         const f32 y = interpolated.y;
         const f32 width = CTX_VIEWPORT_WIDTH * 2;
         const f32 height = FOG_HEIGHT;
-        DrawRectangle(x, y, width, height, color->value);
+        DrawRectangle(x, y, width, height, COLOR_BLACK);
     }
 }
