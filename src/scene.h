@@ -75,7 +75,6 @@ struct Scene
     u8 stage;
     DirectorState director;
     Fader fader;
-    Rectangle renderResolution;
     RenderTexture2D rootLayer;
     RenderTexture2D backgroundLayer;
     RenderTexture2D targetLayer;

@@ -450,11 +450,12 @@ static RenderTexture GenerateTreeTexture(void)
 
 static void SceneSetupLayers(Scene* self)
 {
-    // TODO(thismarvin): Expose a "Render Resolution" option.
-    // Use the monitor's resolution as the default render resolution.
-    self->renderResolution = GetMonitorResolution();
+    // TODO(thismarvin): Expose a "Render Resolution" option?
 
-    f32 zoom = CalculateZoom(CTX_VIEWPORT, self->renderResolution);
+    // Use the monitor's resolution as the default render resolution.
+    Rectangle renderResolution = GetMonitorResolution();
+
+    f32 zoom = CalculateZoom(CTX_VIEWPORT, renderResolution);
 
     // Ensure that the render resolution uses integer scaling.
     zoom = floor(zoom);
