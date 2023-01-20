@@ -567,6 +567,18 @@ static void ScenePopulateLevel(Scene* self)
         DequeDestroy(&segmentBuilder.entities);
     }
 
+    // Extend the end of the level so the player doesn't visibly fall out-of-bounds.
+    {
+        const Rectangle aabb = (Rectangle)
+        {
+            .x = self->bounds.width,
+            .y = 16 * 10,
+            .width = 16 * 5,
+            .height = 16 * (2 + 4),
+        };
+        SceneDeferAddEntity(self, BlockCreate(aabb, RESOLVE_ALL, LAYER_TERRAIN));
+    }
+
     self->player = SceneDeferAddEntity(self, PlayerCreate(16 * 1, 16 * -4));
     self->fog = SceneDeferAddEntity(self, FogCreate());
     self->lakitu = SceneDeferAddEntity(self, LakituCreate());
