@@ -1,6 +1,7 @@
 #include "../animation.h"
 #include "../context.h"
 #include "../geometry/collider.h"
+#include "../palette/p8.h"
 #include "components.h"
 #include "entities.h"
 #include "events.h"
@@ -551,14 +552,113 @@ void SAnimationDraw(const Scene* scene, const usize entity)
     }
 }
 
-void SDebugDraw(const Scene* scene, const usize entity)
+static void ColliderDrawLayerBoundaries(const CCollider* self, const Rectangle aabb)
 {
-    REQUIRE_DEPS(TAG_POSITION | TAG_DIMENSION);
+    static const f32 alpha = 0.75;
+
+    if ((self->layer & LAYER_TERRAIN) == LAYER_TERRAIN)
+    {
+        const Color color = P8_DARK_GREEN;
+        DrawRectangleRec(aabb, ColorAlpha(color, alpha));
+        DrawRectangleLinesEx(aabb, 4, color);
+    }
+
+    if ((self->layer & LAYER_LETHAL) == LAYER_LETHAL)
+    {
+        const Color color = P8_YELLOW;
+        DrawRectangleRec(aabb, ColorAlpha(color, alpha));
+        DrawRectangleLinesEx(aabb, 1, color);
+    }
+
+    if ((self->layer & LAYER_INTERACTABLE) == LAYER_INTERACTABLE)
+    {
+        const Color color = P8_ORANGE;
+        DrawRectangleRec(aabb, ColorAlpha(color, alpha));
+        DrawRectangleLinesEx(aabb, 2, color);
+    }
+
+    if ((self->layer & LAYER_INVISIBLE) == LAYER_INVISIBLE)
+    {
+        const Color color = P8_LAVENDER;
+        DrawRectangleRec(aabb, ColorAlpha(color, alpha));
+        DrawRectangleLinesEx(aabb, 2, color);
+    }
+}
+
+static void ColliderDrawResolutionSchema
+(
+    const CCollider* self,
+    const Rectangle aabb,
+    const Color color
+)
+{
+    static const usize thickness = 2;
+
+    if (self->resolutionSchema == RESOLVE_ALL)
+    {
+        DrawRectangleLinesEx(aabb, thickness, color);
+
+        return;
+    }
+
+    if ((self->resolutionSchema & RESOLVE_UP) == RESOLVE_UP)
+    {
+        const Rectangle edge = (Rectangle)
+        {
+            .x = aabb.x,
+            .y = aabb.y,
+            .width = aabb.width,
+            .height = thickness,
+        };
+        DrawRectangleRec(edge, color);
+    }
+
+    if ((self->resolutionSchema & RESOLVE_RIGHT) == RESOLVE_RIGHT)
+    {
+        const Rectangle edge = (Rectangle)
+        {
+            .x = RectangleRight(aabb) - thickness,
+            .y = aabb.y,
+            .width = thickness,
+            .height = aabb.height,
+        };
+        DrawRectangleRec(edge, color);
+    }
+
+    if ((self->resolutionSchema & RESOLVE_DOWN) == RESOLVE_DOWN)
+    {
+        const Rectangle edge = (Rectangle)
+        {
+            .x = aabb.x,
+            .y = RectangleBottom(aabb),
+            .width = aabb.width,
+            .height = thickness,
+        };
+        DrawRectangleRec(edge, color);
+    }
+
+    if ((self->resolutionSchema & RESOLVE_LEFT) == RESOLVE_LEFT)
+    {
+        const Rectangle edge = (Rectangle)
+        {
+            .x = aabb.x,
+            .y = aabb.y,
+            .width = thickness,
+            .height = aabb.height,
+        };
+        DrawRectangleRec(edge, color);
+    }
+}
+
+void SDebugColliderDraw(const Scene* scene, const usize entity)
+{
+    REQUIRE_DEPS(TAG_POSITION | TAG_DIMENSION | TAG_COLLIDER);
 
     const CPosition* position = GET_COMPONENT(position, entity);
     const CDimension* dimension = GET_COMPONENT(dimension, entity);
+    const CCollider* collider = GET_COMPONENT(collider, entity);
 
-    const Rectangle bounds = (Rectangle)
+    const Rectangle aabb = (Rectangle)
     {
         .x = position->value.x,
         .y = position->value.y,
@@ -566,5 +666,10 @@ void SDebugDraw(const Scene* scene, const usize entity)
         .height = dimension->height
     };
 
-    DrawRectangleLinesEx(bounds, 4, COLOR_RED);
+    ColliderDrawLayerBoundaries(collider, aabb);
+
+    if ((collider->layer & LAYER_TERRAIN) == LAYER_TERRAIN)
+    {
+        ColliderDrawResolutionSchema(collider, aabb, P8_GREEN);
+    }
 }
