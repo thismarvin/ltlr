@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <string.h>
 
-#define DEQUE_RESIZE_FACTOR 2
+#define DEQUE_RESIZE_FACTOR (2)
 
 // An internal get: used for indexing the internal m_data array.
 static void* Get(const Deque* deque, const size_t index)

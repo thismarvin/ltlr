@@ -2,7 +2,7 @@
 
 #include "../common.h"
 
-#define P8_PALETTE_LENGTH 16
+#define P8_PALETTE_LENGTH (16)
 
 #define P8_BLACK (Color) { 0, 0, 0, 255 }
 #define P8_DARK_BLUE (Color) { 29, 43, 83, 255 }

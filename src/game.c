@@ -7,7 +7,7 @@
     #include <emscripten/emscripten.h>
 #endif
 
-#define FRAMERATE_SAMPLING_FREQUENCY 0.1f
+#define FRAMERATE_SAMPLING_FREQUENCY (0.1f)
 
 static void Initialize(void);
 static void Update(void);

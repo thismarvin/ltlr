@@ -22,7 +22,7 @@ typedef double f64;
 #define MIN(mA,mB) (((mA) < (mB)) ? (mA) : (mB))
 #define SIGN(mA) ((mA) == 0 ? 0 : (mA) < 0 ? -1 : 1)
 
-#define VECTOR2_ZERO (Vector2) { .x = 0, .y = 0 }
+#define VECTOR2_ZERO (Vector2) { 0.0f, 0.0f }
 
 #define COLOR_TRANSPARENT (Color) { 0, 0, 0, 0 }
 #define COLOR_BLACK (Color) { 0, 0, 0, 255 }

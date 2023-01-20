@@ -11,7 +11,7 @@
     .y = -(FOG_HEIGHT - CTX_VIEWPORT_HEIGHT) * 0.5f, \
 }
 
-#define FOG_LUMP_TOTAL 8
+#define FOG_LUMP_TOTAL (8)
 
 #define FOG_SPEED (50)
 #define FOG_DECELERATION_DELTA (128.0)
