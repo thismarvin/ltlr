@@ -1,4 +1,5 @@
 #include "../../animation.h"
+#include "../../palette/p8.h"
 #include "../events.h"
 #include "common.h"
 #include "player.h"
@@ -1197,5 +1198,33 @@ void PlayerAnimationUpdate(Scene* scene, const usize entity)
         const Reflection reflection = facing == DIR_LEFT ? REFLECTION_REVERSE_X_AXIS : REFLECTION_NONE;
 
         animation->reflection = reflection;
+    }
+}
+
+void PlayerDebugDraw(const Scene* scene, usize entity)
+{
+    const u64 dependencies = TAG_PLAYER | TAG_POSITION | TAG_DIMENSION;
+
+    if (!SceneEntityHasDependencies(scene, entity, dependencies))
+    {
+        return;
+    }
+
+    const CPosition* position = SCENE_GET_COMPONENT_PTR(scene, position, entity);
+    const CDimension* dimension = SCENE_GET_COMPONENT_PTR(scene, dimension, entity);
+
+    const Rectangle aabb = (Rectangle)
+    {
+        .x = position->value.x,
+        .y = position->value.y,
+        .width = dimension->width,
+        .height = dimension->height
+    };
+
+    // Draw general-purpose aabb.
+    {
+        const Color color = P8_RED;
+        DrawRectangleRec(aabb, ColorAlpha(color, 0.75));
+        DrawRectangleLinesEx(aabb, 2, color);
     }
 }

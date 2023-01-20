@@ -1248,6 +1248,7 @@ static void RenderDebugLayer(const RenderFnParams* params)
     {
         SDebugColliderDraw(scene, i);
         FogDebugDraw(scene, i);
+        PlayerDebugDraw(scene, i);
     }
 }
 
