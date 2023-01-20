@@ -374,23 +374,12 @@ static void PlayerOnCollision(const OnCollisionParams* params)
 
         if (ENTITY_HAS_DEPS(params->otherEntity, TAG_SOLAR_PANEL | TAG_SPRITE))
         {
-            const Rectangle intramural = (Rectangle)
-            {
-                .x = 4,
-                .y = 8,
-                .width = 88,
-                .height = 40,
-            };
-            const CSprite sprite = (CSprite)
-            {
-                .type = SPRITE_SOLAR_0001,
-                .intramural = intramural,
-                .reflection = REFLECTION_NONE,
-            };
+            // TODO(thismarvin): Check if we have a battery.
 
-            const Component component = ComponentCreateCSprite(sprite);
-            const Command command = CommandCreateSetComponent(params->otherEntity, &component);
-            SceneSubmitCommand(params->scene, command);
+            CSprite* otherSprite = &params->scene->components.sprites[params->otherEntity];
+
+            otherSprite->type = SPRITE_SOLAR_0001;
+
             SceneDeferDisableComponent(params->scene, params->otherEntity, TAG_SOLAR_PANEL);
         }
     }
