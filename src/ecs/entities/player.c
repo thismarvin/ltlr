@@ -787,6 +787,11 @@ void PlayerInputUpdate(Scene* scene, const usize entity)
         return;
     }
 
+    if (scene->advanceStageRequested)
+    {
+        return;
+    }
+
     CPlayer* player = SCENE_GET_COMPONENT_PTR(scene, player, entity);
     const CPosition* position = SCENE_GET_COMPONENT_PTR(scene, position, entity);
     const CDimension* dimension = SCENE_GET_COMPONENT_PTR(scene, dimension, entity);
@@ -887,7 +892,7 @@ void PlayerPostCollisionUpdate(Scene* scene, const usize entity)
         }
         else if (position->value.x > RectangleRight(scene->bounds))
         {
-            // TODO(thismarvin): Force the player offscreen to the right somehow...
+            kinetic->velocity.x = moveSpeed;
 
             SceneDeferAdvanceStage(scene);
         }
