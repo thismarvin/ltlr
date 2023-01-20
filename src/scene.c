@@ -496,7 +496,7 @@ static void ArrayShuffle(i32* array, i32* candidates, usize arrayLength)
     }
 }
 
-static void PopulateLevel(Scene* scene)
+static void ScenePopulateLevel(Scene* self)
 {
     static const u16 totalStarters = TOTAL_STARTER_SEGMENTS;
     static const u16 totalFillers = TOTAL_FILLER_SEGMENTS;
@@ -525,23 +525,23 @@ static void PopulateLevel(Scene* scene)
     }
 
     const u16 starter = GetRandomValue(0, totalStarters - 1);
-    scene->level.segments[0].type = starterBegin + starter;
+    self->level.segments[0].type = starterBegin + starter;
 
     for (usize i = 0; i < 3; ++i)
     {
         const u16 filler = fillerCandidates[i];
         const u16 battery = batteryCandidates[i];
-        scene->level.segments[(i * 2) + 1].type = fillerBegin + filler;
-        scene->level.segments[(i * 2) + 2].type = batteryBegin + battery;
+        self->level.segments[(i * 2) + 1].type = fillerBegin + filler;
+        self->level.segments[(i * 2) + 2].type = batteryBegin + battery;
     }
 
     const u16 solar = GetRandomValue(0, totalSolars - 1);
-    scene->level.segments[7].type = solarBegin + solar;
+    self->level.segments[7].type = solarBegin + solar;
 
-    scene->level.segmentsLength = MAX_LEVEL_SEGMENTS;
+    self->level.segmentsLength = MAX_LEVEL_SEGMENTS;
 
     Vector2 offset = VECTOR2_ZERO;
-    scene->bounds = (Rectangle)
+    self->bounds = (Rectangle)
     {
         .x = 0,
         .y = 0,
@@ -549,27 +549,27 @@ static void PopulateLevel(Scene* scene)
         .height = 180,
     };
 
-    for (usize i = 0; i < scene->level.segmentsLength; ++i)
+    for (usize i = 0; i < self->level.segmentsLength; ++i)
     {
-        LevelSegment* segment = &scene->level.segments[i];
+        LevelSegment* segment = &self->level.segments[i];
         LevelSegmentBuilder segmentBuilder = LevelSegmentBuilderCreate(segment->type, offset);
 
         for (usize i = 0; i < DequeGetSize(&segmentBuilder.entities); ++i)
         {
             const EntityBuilder builder = DEQUE_GET_UNCHECKED(&segmentBuilder.entities, EntityBuilder, i);
-            SceneDeferAddEntity(scene, builder);
+            SceneDeferAddEntity(self, builder);
         }
 
         segment->width = segmentBuilder.width;
         offset.x += segmentBuilder.width;
-        scene->bounds.width += segmentBuilder.width;
+        self->bounds.width += segmentBuilder.width;
 
         DequeDestroy(&segmentBuilder.entities);
     }
 
-    scene->player = SceneDeferAddEntity(scene, PlayerCreate(16 * 1, 16 * -4));
-    scene->fog = SceneDeferAddEntity(scene, FogCreate());
-    scene->lakitu = SceneDeferAddEntity(scene, LakituCreate());
+    self->player = SceneDeferAddEntity(self, PlayerCreate(16 * 1, 16 * -4));
+    self->fog = SceneDeferAddEntity(self, FogCreate());
+    self->lakitu = SceneDeferAddEntity(self, LakituCreate());
 }
 
 static void PlantTrees(Scene* scene)
@@ -628,7 +628,7 @@ static void SceneBuildStage(Scene* self)
     self->m_entityManager.m_nextFreshEntityIndex = 0;
     DequeClear(&self->m_entityManager.m_recycledEntityIndices);
 
-    PopulateLevel(self);
+    ScenePopulateLevel(self);
     PlantTrees(self);
 
     self->resetRequested = false;
