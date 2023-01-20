@@ -755,8 +755,9 @@ static void SceneCheckEndCondition(Scene* self)
 
     const f32 distance = fogPosition->value.x - playerPosition->value.x;
 
-    if (distance > CTX_VIEWPORT_WIDTH * 0.5f)
+    if (distance > FOG_LETHAL_DISTANCE)
     {
+        // TODO(thismarvin): Isn't the transition redundant here?
         SceneDeferReset(self);
     }
 }
