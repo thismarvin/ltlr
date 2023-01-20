@@ -1,3 +1,4 @@
+#include "../../palette/p8.h"
 #include "../components.h"
 #include "common.h"
 #include "fog.h"
@@ -310,5 +311,47 @@ void FogDraw(const Scene* scene, const usize entity)
         const f32 width = CTX_VIEWPORT_WIDTH * 2;
         const f32 height = FOG_HEIGHT;
         DrawRectangle(x, y, width, height, COLOR_BLACK);
+    }
+}
+
+void FogDebugDraw(const Scene* scene, const usize entity)
+{
+    const u64 dependencies = TAG_FOG | TAG_POSITION;
+
+    if (!SceneEntityHasDependencies(scene, entity, dependencies))
+    {
+        return;
+    }
+
+    const CPosition* position = SCENE_GET_COMPONENT_PTR(scene, position, entity);
+
+    static const i32 padding = 16;
+
+    // Draw the pseudo-bounds of the fog.
+    {
+        const Rectangle aabb = (Rectangle)
+        {
+            .x = position->value.x - CTX_VIEWPORT_WIDTH * 2,
+            .y = -padding,
+            .width = CTX_VIEWPORT_WIDTH * 2,
+            .height = padding + CTX_VIEWPORT_HEIGHT + padding,
+        };
+        const Color color = P8_PINK;
+
+        DrawRectangleRec(aabb, ColorAlpha(color, 0.75));
+        DrawRectangleLinesEx(aabb, 4, color);
+    }
+
+    // Draw the line of lethalness.
+    {
+        const Rectangle aabb = (Rectangle)
+        {
+            .x = position->value.x - FOG_LETHAL_DISTANCE,
+            .y = -padding,
+            .width = 1,
+            .height = padding + CTX_VIEWPORT_HEIGHT + padding,
+        };
+
+        DrawRectangleRec(aabb, P8_RED);
     }
 }

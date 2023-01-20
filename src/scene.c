@@ -1247,6 +1247,7 @@ static void RenderDebugLayer(const RenderFnParams* params)
     for (usize i = 0; i < SceneGetEntityCount(scene); ++i)
     {
         SDebugColliderDraw(scene, i);
+        FogDebugDraw(scene, i);
     }
 }
 
