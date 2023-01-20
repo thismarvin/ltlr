@@ -896,10 +896,11 @@ void PlayerPostCollisionUpdate(Scene* scene, const usize entity)
             position->value.x = scene->bounds.x;
             PlayerStandstill(player, kinetic);
         }
-        else if (position->value.x + dimension->width > RectangleRight(scene->bounds))
+        else if (position->value.x > RectangleRight(scene->bounds))
         {
-            position->value.x = RectangleRight(scene->bounds) - dimension->width;
-            PlayerStandstill(player, kinetic);
+            // TODO(thismarvin): Force the player offscreen to the right somehow...
+
+            SceneDeferAdvanceStage(scene);
         }
     }
 
