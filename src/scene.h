@@ -112,20 +112,3 @@ void SceneDeferAdvanceStage(Scene* self);
 void SceneUpdate(Scene* self);
 void SceneDraw(Scene* self);
 void SceneDestroy(Scene* self);
-
-#define SCENE_GET_COMPONENT(mScene, mValue, mEntity) _Generic((mValue), \
-    CPosition: mScene->components.positions[mEntity], \
-    CDimension: mScene->components.dimensions[mEntity], \
-    CColor: mScene->components.colors[mEntity], \
-    CSprite: mScene->components.sprites[mEntity], \
-    CKinetic: mScene->components.kinetics[mEntity], \
-    CSmooth: mScene->components.smooths[mEntity], \
-    CCollider: mScene->components.colliders[mEntity], \
-    CPlayer: mScene->components.players[mEntity], \
-    CMortal: mScene->components.mortals[mEntity], \
-    CDamage: mScene->components.damages[mEntity], \
-    CFleeting: mScene->components.fleetings[mEntity], \
-    CAnimation: mScene->components.animations[mEntity])
-
-#define SCENE_SET_COMPONENT(mScene, mEntity, mValue) \
-    SCENE_GET_COMPONENT(mScene, mValue, mEntity) = mValue

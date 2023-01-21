@@ -94,73 +94,85 @@ static void SceneExecuteSetComponent(Scene* self, const CommandSetComponent* set
 
         case TAG_POSITION:
         {
-            SCENE_SET_COMPONENT(self, entity, component->position);
+            self->components.positions[entity] = component->position;
+
             break;
         }
 
         case TAG_DIMENSION:
         {
-            SCENE_SET_COMPONENT(self, entity, component->dimension);
+            self->components.dimensions[entity] = component->dimension;
+
             break;
         }
 
         case TAG_COLOR:
         {
-            SCENE_SET_COMPONENT(self, entity, component->color);
+            self->components.colors[entity] = component->color;
+
             break;
         }
 
         case TAG_SPRITE:
         {
-            SCENE_SET_COMPONENT(self, entity, component->sprite);
+            self->components.sprites[entity] = component->sprite;
+
             break;
         }
 
         case TAG_KINETIC:
         {
-            SCENE_SET_COMPONENT(self, entity, component->kinetic);
+            self->components.kinetics[entity] = component->kinetic;
+
             break;
         }
 
         case TAG_SMOOTH:
         {
-            SCENE_SET_COMPONENT(self, entity, component->smooth);
+            self->components.smooths[entity] = component->smooth;
+
             break;
         }
 
         case TAG_PLAYER:
         {
-            SCENE_SET_COMPONENT(self, entity, component->player);
+            self->components.players[entity] = component->player;
+
             break;
         }
 
         case TAG_COLLIDER:
         {
-            SCENE_SET_COMPONENT(self, entity, component->collider);
+            self->components.colliders[entity] = component->collider;
+
             break;
         }
 
         case TAG_MORTAL:
         {
-            SCENE_SET_COMPONENT(self, entity, component->mortal);
+            self->components.mortals[entity] = component->mortal;
+
             break;
         }
 
         case TAG_DAMAGE:
         {
-            SCENE_SET_COMPONENT(self, entity, component->damage);
+            self->components.damages[entity] = component->damage;
+
             break;
         }
 
         case TAG_FLEETING:
         {
-            SCENE_SET_COMPONENT(self, entity, component->fleeting);
+            self->components.fleetings[entity] = component->fleeting;
+
             break;
         }
 
         case TAG_ANIMATION:
         {
-            SCENE_SET_COMPONENT(self, entity, component->animation);
+            self->components.animations[entity] = component->animation;
+
             break;
         }
     }
