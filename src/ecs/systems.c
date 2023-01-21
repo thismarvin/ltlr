@@ -9,10 +9,6 @@
 #include <assert.h>
 #include <raymath.h>
 
-#define REQUIRE_DEPS(mDependencies) if ((scene->components.tags[entity] & (mDependencies)) != (mDependencies)) return
-#define ENTITY_HAS_DEPS(mEntity, mDependencies) ((scene->components.tags[mEntity] & (mDependencies)) == (mDependencies))
-#define GET_COMPONENT(mValue, mEntity) SCENE_GET_COMPONENT_PTR(scene, mValue, mEntity)
-
 typedef struct
 {
     Rectangle simulatedAabb;
@@ -43,20 +39,30 @@ typedef struct
 
 void SSmoothUpdate(Scene* scene, const usize entity)
 {
-    REQUIRE_DEPS(TAG_POSITION | TAG_SMOOTH);
+    static const u64 dependencies = TAG_POSITION | TAG_SMOOTH;
 
-    const CPosition* position = GET_COMPONENT(position, entity);
-    CSmooth* smooth = GET_COMPONENT(smooth, entity);
+    if (!SceneEntityHasDependencies(scene, entity, dependencies))
+    {
+        return;
+    }
+
+    const CPosition* position = &scene->components.positions[entity];
+    CSmooth* smooth = &scene->components.smooths[entity];
 
     smooth->previous = position->value;
 }
 
 void SKineticUpdate(Scene* scene, const usize entity)
 {
-    REQUIRE_DEPS(TAG_POSITION | TAG_KINETIC);
+    static const u64 dependencies = TAG_POSITION | TAG_KINETIC;
 
-    CPosition* position = GET_COMPONENT(position, entity);
-    CKinetic* kinetic = GET_COMPONENT(kinetic, entity);
+    if (!SceneEntityHasDependencies(scene, entity, dependencies))
+    {
+        return;
+    }
+
+    CPosition* position = &scene->components.positions[entity];
+    CKinetic* kinetic = &scene->components.kinetics[entity];
 
     kinetic->velocity.x += kinetic->acceleration.x * CTX_DT;
     kinetic->velocity.y += kinetic->acceleration.y * CTX_DT;
@@ -127,9 +133,9 @@ static SimulateCollisionOnAxisResult SimulateCollisionOnAxis
                 continue;
             }
 
-            const CPosition* otherPosition = SCENE_GET_COMPONENT_PTR(params->scene, otherPosition, i);
-            const CDimension* otherDimension = SCENE_GET_COMPONENT_PTR(params->scene, otherDimension, i);
-            const CCollider* otherCollider = SCENE_GET_COMPONENT_PTR(params->scene, otherCollider, i);
+            const CPosition* otherPosition = &params->scene->components.positions[i];
+            const CDimension* otherDimension = &params->scene->components.dimensions[i];
+            const CCollider* otherCollider = &params->scene->components.colliders[i];
 
             if ((params->collider->mask & otherCollider->layer) == 0)
             {
@@ -330,12 +336,17 @@ static Rectangle AdvancedCollision(const AdvancedCollisionParams* params)
 
 void SCollisionUpdate(Scene* scene, const usize entity)
 {
-    REQUIRE_DEPS(TAG_SMOOTH | TAG_POSITION | TAG_DIMENSION | TAG_COLLIDER);
+    static const u64 dependencies = TAG_SMOOTH | TAG_POSITION | TAG_DIMENSION | TAG_COLLIDER;
 
-    const CSmooth* smooth = GET_COMPONENT(smooth, entity);
-    CPosition* position = GET_COMPONENT(position, entity);
-    const CDimension* dimension = GET_COMPONENT(dimension, entity);
-    const CCollider* collider = GET_COMPONENT(collider, entity);
+    if (!SceneEntityHasDependencies(scene, entity, dependencies))
+    {
+        return;
+    }
+
+    const CSmooth* smooth = &scene->components.smooths[entity];
+    CPosition* position = &scene->components.positions[entity];
+    const CDimension* dimension = &scene->components.dimensions[entity];
+    const CCollider* collider = &scene->components.colliders[entity];
 
     const Rectangle previousAabb = (Rectangle)
     {
@@ -370,11 +381,16 @@ void SCollisionUpdate(Scene* scene, const usize entity)
 
 void SPostCollisionUpdate(Scene* scene, const usize entity)
 {
-    REQUIRE_DEPS(TAG_POSITION | TAG_DIMENSION | TAG_COLLIDER);
+    static const u64 dependencies = TAG_POSITION | TAG_DIMENSION | TAG_COLLIDER;
 
-    CPosition* position = GET_COMPONENT(position, entity);
-    const CDimension* dimension = GET_COMPONENT(dimension, entity);
-    const CCollider* collider = GET_COMPONENT(collider, entity);
+    if (!SceneEntityHasDependencies(scene, entity, dependencies))
+    {
+        return;
+    }
+
+    CPosition* position = &scene->components.positions[entity];
+    const CDimension* dimension = &scene->components.dimensions[entity];
+    const CCollider* collider = &scene->components.colliders[entity];
 
     const Rectangle aabb = (Rectangle)
     {
@@ -386,16 +402,16 @@ void SPostCollisionUpdate(Scene* scene, const usize entity)
 
     for (usize i = 0; i < SceneGetEntityCount(scene); ++i)
     {
-        const u64 dependencies = TAG_POSITION | TAG_DIMENSION | TAG_COLLIDER;
+        const u64 otherDependencies = TAG_POSITION | TAG_DIMENSION | TAG_COLLIDER;
 
-        if (i == entity || !SceneEntityHasDependencies(scene, i, dependencies))
+        if (i == entity || !SceneEntityHasDependencies(scene, i, otherDependencies))
         {
             continue;
         }
 
-        const CPosition* otherPosition = SCENE_GET_COMPONENT_PTR(scene, otherPosition, i);
-        const CDimension* otherDimension = SCENE_GET_COMPONENT_PTR(scene, otherDimension, i);
-        const CCollider* otherCollider = SCENE_GET_COMPONENT_PTR(scene, otherCollider, i);
+        const CPosition* otherPosition = &scene->components.positions[i];
+        const CDimension* otherDimension = &scene->components.dimensions[i];
+        const CCollider* otherCollider = &scene->components.colliders[i];
 
         if ((collider->mask & otherCollider->layer) == 0)
         {
@@ -431,9 +447,14 @@ void SPostCollisionUpdate(Scene* scene, const usize entity)
 
 void SFleetingUpdate(Scene* scene, const usize entity)
 {
-    REQUIRE_DEPS(TAG_FLEETING);
+    static const u64 dependencies = TAG_FLEETING;
 
-    CFleeting* fleeting = GET_COMPONENT(fleeting, entity);
+    if (!SceneEntityHasDependencies(scene, entity, dependencies))
+    {
+        return;
+    }
+
+    CFleeting* fleeting = &scene->components.fleetings[entity];
 
     fleeting->age += CTX_DT;
 
@@ -445,9 +466,14 @@ void SFleetingUpdate(Scene* scene, const usize entity)
 
 void SAnimationUpdate(Scene* scene, const usize entity)
 {
-    REQUIRE_DEPS(TAG_ANIMATION);
+    static const u64 dependencies = TAG_ANIMATION;
 
-    CAnimation* animation = GET_COMPONENT(animation, entity);
+    if (!SceneEntityHasDependencies(scene, entity, dependencies))
+    {
+        return;
+    }
+
+    CAnimation* animation = &scene->components.animations[entity];
 
     animation->frameTimer += CTX_DT;
 
@@ -479,24 +505,30 @@ static void DrawCSprite
 
 void SSpriteDraw(const Scene* scene, const usize entity)
 {
-    REQUIRE_DEPS(TAG_POSITION | TAG_SPRITE);
+    static const u64 dependencies = TAG_POSITION | TAG_SPRITE;
 
-    const CPosition* position = GET_COMPONENT(position, entity);
-    const CSprite* sprite = GET_COMPONENT(sprite, entity);
+    if (!SceneEntityHasDependencies(scene, entity, dependencies))
+    {
+        return;
+    }
+
+    const CPosition* position = &scene->components.positions[entity];
+    const CSprite* sprite = &scene->components.sprites[entity];
 
     Vector2 drawPosition = position->value;
 
-    if (ENTITY_HAS_DEPS(entity, TAG_SMOOTH))
+    if (SceneEntityHasDependencies(scene, entity, TAG_SMOOTH))
     {
-        const CSmooth* smooth = GET_COMPONENT(smooth, entity);
+        const CSmooth* smooth = &scene->components.smooths[entity];
 
         const Vector2 interpolated = Vector2Lerp(smooth->previous, position->value, ContextGetAlpha());
         drawPosition = interpolated;
     }
 
-    if (ENTITY_HAS_DEPS(entity, TAG_COLOR))
+    if (SceneEntityHasDependencies(scene, entity, TAG_COLOR))
     {
-        const CColor* color = GET_COMPONENT(color, entity);
+        const CColor* color = &scene->components.colors[entity];
+
         DrawCSprite(&scene->atlas, sprite, drawPosition, color->value);
     }
     else
@@ -526,24 +558,30 @@ static void DrawCAnimation
 
 void SAnimationDraw(const Scene* scene, const usize entity)
 {
-    REQUIRE_DEPS(TAG_POSITION | TAG_ANIMATION);
+    static const u64 dependencies = TAG_POSITION | TAG_ANIMATION;
 
-    const CPosition* position = GET_COMPONENT(position, entity);
-    const CAnimation* animation = SCENE_GET_COMPONENT_PTR(scene, animation, entity);
+    if (!SceneEntityHasDependencies(scene, entity, dependencies))
+    {
+        return;
+    }
+
+    const CPosition* position = &scene->components.positions[entity];
+    const CAnimation* animation = &scene->components.animations[entity];
 
     Vector2 drawPosition = position->value;
 
-    if (ENTITY_HAS_DEPS(entity, TAG_SMOOTH))
+    if (SceneEntityHasDependencies(scene, entity, TAG_SMOOTH))
     {
-        const CSmooth* smooth = GET_COMPONENT(smooth, entity);
+        const CSmooth* smooth = &scene->components.smooths[entity];
 
         const Vector2 interpolated = Vector2Lerp(smooth->previous, position->value, ContextGetAlpha());
         drawPosition = interpolated;
     }
 
-    if (ENTITY_HAS_DEPS(entity, TAG_COLOR))
+    if (SceneEntityHasDependencies(scene, entity, TAG_COLOR))
     {
-        const CColor* color = GET_COMPONENT(color, entity);
+        const CColor* color = &scene->components.colors[entity];
+
         DrawCAnimation(&scene->atlas, animation, drawPosition, color->value);
     }
     else
@@ -652,11 +690,16 @@ static void ColliderDrawResolutionSchema
 
 void SDebugColliderDraw(const Scene* scene, const usize entity)
 {
-    REQUIRE_DEPS(TAG_POSITION | TAG_DIMENSION | TAG_COLLIDER);
+    static const u64 dependencies = TAG_POSITION | TAG_DIMENSION | TAG_COLLIDER;
 
-    const CPosition* position = GET_COMPONENT(position, entity);
-    const CDimension* dimension = GET_COMPONENT(dimension, entity);
-    const CCollider* collider = GET_COMPONENT(collider, entity);
+    if (!SceneEntityHasDependencies(scene, entity, dependencies))
+    {
+        return;
+    }
+
+    const CPosition* position = &scene->components.positions[entity];
+    const CDimension* dimension = &scene->components.dimensions[entity];
+    const CCollider* collider = &scene->components.colliders[entity];
 
     const Rectangle aabb = (Rectangle)
     {
