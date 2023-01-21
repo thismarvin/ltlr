@@ -124,7 +124,7 @@ static SimulateCollisionOnAxisResult SimulateCollisionOnAxis
         simulatedAabb.x += params->step * direction.x;
         simulatedAabb.y += params->step * direction.y;
 
-        for (usize i = 0; i < SceneGetEntityCount(params->scene); ++i)
+        for (usize i = 0; i < SceneGetTotalAllocatedEntities(params->scene); ++i)
         {
             const u64 dependencies = TAG_POSITION | TAG_DIMENSION | TAG_COLLIDER;
 
@@ -400,7 +400,7 @@ void SPostCollisionUpdate(Scene* scene, const usize entity)
         .height = dimension->height,
     };
 
-    for (usize i = 0; i < SceneGetEntityCount(scene); ++i)
+    for (usize i = 0; i < SceneGetTotalAllocatedEntities(scene); ++i)
     {
         const u64 otherDependencies = TAG_POSITION | TAG_DIMENSION | TAG_COLLIDER;
 

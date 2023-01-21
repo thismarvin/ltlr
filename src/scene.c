@@ -241,7 +241,7 @@ static void SceneExecuteCommands(Scene* self)
     DequeClear(commands);
 }
 
-usize SceneGetEntityCount(const Scene* self)
+usize SceneGetTotalAllocatedEntities(const Scene* self)
 {
     return self->m_entityManager.m_nextFreshEntityIndex;
 }
@@ -871,7 +871,7 @@ static void SceneUpdateDirector(Scene* self)
 
 static void SceneActionUpdate(Scene* self)
 {
-    for (usize i = 0; i < SceneGetEntityCount(self); ++i)
+    for (usize i = 0; i < SceneGetTotalAllocatedEntities(self); ++i)
     {
         SFleetingUpdate(self, i);
 
@@ -1143,7 +1143,7 @@ static void RenderTargetLayer(const RenderFnParams* params)
         }
     }
 
-    for (usize i = 0; i < SceneGetEntityCount(scene); ++i)
+    for (usize i = 0; i < SceneGetTotalAllocatedEntities(scene); ++i)
     {
         SSpriteDraw(scene, i);
         SAnimationDraw(scene, i);
@@ -1231,17 +1231,17 @@ static void RenderForegroundLayer(const RenderFnParams* params)
 
     ClearBackground(COLOR_TRANSPARENT);
 
-    for (usize i = 0; i < SceneGetEntityCount(scene); ++i)
+    for (usize i = 0; i < SceneGetTotalAllocatedEntities(scene); ++i)
     {
         CloudParticleDraw(scene, i);
     }
 
-    for (usize i = 0; i < SceneGetEntityCount(scene); ++i)
+    for (usize i = 0; i < SceneGetTotalAllocatedEntities(scene); ++i)
     {
         FogParticleDraw(scene, i);
     }
 
-    for (usize i = 0; i < SceneGetEntityCount(scene); ++i)
+    for (usize i = 0; i < SceneGetTotalAllocatedEntities(scene); ++i)
     {
         FogDraw(scene, i);
     }
@@ -1258,7 +1258,7 @@ static void RenderDebugLayer(const RenderFnParams* params)
         return;
     }
 
-    for (usize i = 0; i < SceneGetEntityCount(scene); ++i)
+    for (usize i = 0; i < SceneGetTotalAllocatedEntities(scene); ++i)
     {
         SDebugColliderDraw(scene, i);
         FogDebugDraw(scene, i);

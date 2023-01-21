@@ -104,7 +104,7 @@ void SceneDeferDisableComponent(Scene* self, usize entity, usize tag);
 usize SceneDeferAddEntity(Scene* self, EntityBuilder entityBuilder);
 void SceneDeferDeallocateEntity(Scene* self, usize entity);
 bool SceneEntityHasDependencies(const Scene* self, usize entity, u64 dependencies);
-usize SceneGetEntityCount(const Scene* self);
+usize SceneGetTotalAllocatedEntities(const Scene* self);
 void SceneSubmitCommand(Scene* self, Command command);
 void SceneIncrementScore(Scene* self, u32 value);
 void SceneDeferReset(Scene* self);
