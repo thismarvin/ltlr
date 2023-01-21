@@ -4,10 +4,11 @@
 
 static OnResolutionResult WalkerOnResolution(const OnResolutionParams* params)
 {
-    assert(ENTITY_HAS_DEPS(params->entity, TAG_POSITION | TAG_KINETIC));
+    static const u64 dependencies = TAG_POSITION | TAG_KINETIC;
+    assert(SceneEntityHasDependencies(params->scene, params->entity, dependencies));
 
-    const CPosition* position = GET_COMPONENT(position, params->entity);
-    CKinetic* kinetic = GET_COMPONENT(kinetic, params->entity);
+    const CPosition* position = SCENE_GET_COMPONENT_PTR(params->scene, position, params->entity);
+    CKinetic* kinetic = SCENE_GET_COMPONENT_PTR(params->scene, kinetic, params->entity);
 
     // Resolve collision.
     const Rectangle resolvedAabb = ApplyResolutionPerfectly(params->aabb, params->otherAabb,

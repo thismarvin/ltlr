@@ -344,18 +344,19 @@ static void PlayerOnDamage(Scene* scene, const usize entity, const usize otherEn
 
 static void PlayerOnCollision(const OnCollisionParams* params)
 {
-    assert(ENTITY_HAS_DEPS(params->entity, TAG_PLAYER | TAG_MORTAL));
+    static const u64 dependencies = TAG_PLAYER | TAG_MORTAL;
+    assert(SceneEntityHasDependencies(params->scene, params->entity, dependencies));
 
-    CMortal* mortal = GET_COMPONENT(mortal, params->entity);
+    CMortal* mortal = SCENE_GET_COMPONENT_PTR(params->scene, mortal, params->entity);
 
     // Collision specific logic that will not resolve the player.
     {
-        if (ENTITY_HAS_DEPS(params->otherEntity, TAG_DAMAGE))
+        if (SceneEntityHasDependencies(params->scene, params->otherEntity, TAG_DAMAGE))
         {
             PlayerOnDamage(params->scene, params->entity, params->otherEntity);
         }
 
-        if (ENTITY_HAS_DEPS(params->otherEntity, TAG_BATTERY))
+        if (SceneEntityHasDependencies(params->scene, params->otherEntity, TAG_BATTERY))
         {
             // TODO(thismarvin): Add a static PlayerIncrementHealth method?
             mortal->hp += 1;
@@ -366,7 +367,7 @@ static void PlayerOnCollision(const OnCollisionParams* params)
             SceneDeferDeallocateEntity(params->scene, params->otherEntity);
         }
 
-        if (ENTITY_HAS_DEPS(params->otherEntity, TAG_SOLAR_PANEL | TAG_SPRITE))
+        if (SceneEntityHasDependencies(params->scene, params->otherEntity, TAG_SOLAR_PANEL | TAG_SPRITE))
         {
             // TODO(thismarvin): Check if we have a battery.
 
@@ -381,15 +382,16 @@ static void PlayerOnCollision(const OnCollisionParams* params)
 
 static OnResolutionResult PlayerOnResolution(const OnResolutionParams* params)
 {
-    assert(ENTITY_HAS_DEPS(params->entity, TAG_PLAYER | TAG_POSITION | TAG_KINETIC));
+    static const u64 dependencies = TAG_PLAYER | TAG_POSITION | TAG_KINETIC;
+    assert(SceneEntityHasDependencies(params->scene, params->entity, dependencies));
 
-    CPlayer* player = GET_COMPONENT(player, params->entity);
-    const CPosition* position = GET_COMPONENT(position, params->entity);
-    CKinetic* kinetic = GET_COMPONENT(kinetic, params->entity);
+    CPlayer* player = SCENE_GET_COMPONENT_PTR(params->scene, player, params->entity);
+    const CPosition* position = SCENE_GET_COMPONENT_PTR(params->scene, position, params->entity);
+    CKinetic* kinetic = SCENE_GET_COMPONENT_PTR(params->scene, kinetic, params->entity);
 
     // Collision specific logic that will not resolve the player.
     {
-        if (ENTITY_HAS_DEPS(params->otherEntity, TAG_WALKER))
+        if (SceneEntityHasDependencies(params->scene, params->otherEntity, TAG_WALKER))
         {
             return (OnResolutionResult)
             {
