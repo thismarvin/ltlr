@@ -45,7 +45,6 @@ EntityBuilder CloudParticleCreate
         TAG_NONE
         | TAG_POSITION
         | TAG_DIMENSION
-        | TAG_COLOR
         | TAG_KINETIC
         | TAG_SMOOTH
         | TAG_COLLIDER
@@ -61,11 +60,6 @@ EntityBuilder CloudParticleCreate
     {
         .width = radius * 2,
         .height = radius * 2,
-    }));
-
-    ADD_COMPONENT(CColor, ((CColor)
-    {
-        .value = COLOR_WHITE,
     }));
 
     ADD_COMPONENT(CKinetic, ((CKinetic)
@@ -108,7 +102,6 @@ void CloudParticleDraw(const Scene* scene, const usize entity)
         | TAG_POSITION
         | TAG_DIMENSION
         | TAG_FLEETING
-        | TAG_COLOR
         | TAG_SMOOTH
         | TAG_CLOUD_PARTICLE;
 
@@ -118,7 +111,6 @@ void CloudParticleDraw(const Scene* scene, const usize entity)
     }
 
     const CPosition* position = SCENE_GET_COMPONENT_PTR(scene, position, entity);
-    const CColor* color = SCENE_GET_COMPONENT_PTR(scene, color, entity);
     const CFleeting* fleeting = SCENE_GET_COMPONENT_PTR(scene, fleeting, entity);
     const CDimension* dimension = SCENE_GET_COMPONENT_PTR(scene, dimension, entity);
     const CSmooth* smooth = SCENE_GET_COMPONENT_PTR(scene, smooth, entity);
@@ -133,5 +125,5 @@ void CloudParticleDraw(const Scene* scene, const usize entity)
         .y = interpolated.y + dimension->height * 0.5f,
     };
 
-    DrawCircleV(center, drawSize * 0.5f, color->value);
+    DrawCircleV(center, drawSize * 0.5f, COLOR_WHITE);
 }

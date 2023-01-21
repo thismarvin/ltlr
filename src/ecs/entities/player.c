@@ -487,7 +487,6 @@ EntityBuilder PlayerCreate(const f32 x, const f32 y)
         TAG_NONE
         | TAG_POSITION
         | TAG_DIMENSION
-        | TAG_COLOR
         | TAG_ANIMATION
         | TAG_KINETIC
         | TAG_SMOOTH
@@ -513,11 +512,6 @@ EntityBuilder PlayerCreate(const f32 x, const f32 y)
     {
         .width = intramural.width,
         .height = intramural.height,
-    }));
-
-    ADD_COMPONENT(CColor, ((CColor)
-    {
-        .value = COLOR_WHITE,
     }));
 
     ADD_COMPONENT(CAnimation, ((CAnimation)

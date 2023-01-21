@@ -16,7 +16,6 @@ EntityBuilder FogParticleCreate
         TAG_NONE
         | TAG_POSITION
         | TAG_DIMENSION
-        | TAG_COLOR
         | TAG_KINETIC
         | TAG_SMOOTH
         | TAG_FLEETING
@@ -31,11 +30,6 @@ EntityBuilder FogParticleCreate
     {
         .width = radius * 2,
         .height = radius * 2,
-    }));
-
-    ADD_COMPONENT(CColor, ((CColor)
-    {
-        .value = COLOR_BLACK,
     }));
 
     ADD_COMPONENT(CKinetic, ((CKinetic)
@@ -69,7 +63,6 @@ void FogParticleDraw(const Scene* scene, const usize entity)
         | TAG_POSITION
         | TAG_DIMENSION
         | TAG_FLEETING
-        | TAG_COLOR
         | TAG_SMOOTH
         | TAG_FOG_PARTICLE;
 
@@ -79,7 +72,6 @@ void FogParticleDraw(const Scene* scene, const usize entity)
     }
 
     const CPosition* position = SCENE_GET_COMPONENT_PTR(scene, position, entity);
-    const CColor* color = SCENE_GET_COMPONENT_PTR(scene, color, entity);
     const CFleeting* fleeting = SCENE_GET_COMPONENT_PTR(scene, fleeting, entity);
     const CDimension* dimension = SCENE_GET_COMPONENT_PTR(scene, dimension, entity);
     const CSmooth* smooth = SCENE_GET_COMPONENT_PTR(scene, smooth, entity);
@@ -104,5 +96,5 @@ void FogParticleDraw(const Scene* scene, const usize entity)
         rotation *= -1;
     }
 
-    DrawPoly(center, sidesCount, dimension->width * scale * 0.5f, rotation, color->value);
+    DrawPoly(center, sidesCount, dimension->width * scale * 0.5f, rotation, COLOR_BLACK);
 }
