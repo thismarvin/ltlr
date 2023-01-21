@@ -199,9 +199,9 @@ void FogUpdate(Scene* scene, const usize entity)
 
     assert(SceneEntityHasDependencies(scene, scene->player, TAG_POSITION));
 
-    const CPosition* playerPosition = SCENE_GET_COMPONENT_PTR(scene, playerPosition, scene->player);
-    CPosition* position = SCENE_GET_COMPONENT_PTR(scene, position, entity);
-    CKinetic* kinetic = SCENE_GET_COMPONENT_PTR(scene, kinetic, entity);
+    const CPosition* playerPosition = &scene->components.positions[scene->player];
+    CPosition* position = &scene->components.positions[entity];
+    CKinetic* kinetic = &scene->components.kinetics[entity];
 
     const bool hasNotMoved = kinetic->velocity.x == 0;
 
@@ -279,8 +279,8 @@ void FogDraw(const Scene* scene, const usize entity)
         return;
     }
 
-    const CPosition* position = SCENE_GET_COMPONENT_PTR(scene, position, entity);
-    const CSmooth* smooth = SCENE_GET_COMPONENT_PTR(scene, smooth, entity);
+    const CPosition* position = &scene->components.positions[entity];
+    const CSmooth* smooth = &scene->components.smooths[entity];
 
     const Vector2 interpolated = Vector2Lerp(smooth->previous, position->value, ContextGetAlpha());
 
@@ -323,7 +323,7 @@ void FogDebugDraw(const Scene* scene, const usize entity)
         return;
     }
 
-    const CPosition* position = SCENE_GET_COMPONENT_PTR(scene, position, entity);
+    const CPosition* position = &scene->components.positions[entity];
 
     static const i32 padding = 16;
 

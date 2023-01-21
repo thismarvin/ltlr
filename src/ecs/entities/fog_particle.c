@@ -71,10 +71,10 @@ void FogParticleDraw(const Scene* scene, const usize entity)
         return;
     }
 
-    const CPosition* position = SCENE_GET_COMPONENT_PTR(scene, position, entity);
-    const CFleeting* fleeting = SCENE_GET_COMPONENT_PTR(scene, fleeting, entity);
-    const CDimension* dimension = SCENE_GET_COMPONENT_PTR(scene, dimension, entity);
-    const CSmooth* smooth = SCENE_GET_COMPONENT_PTR(scene, smooth, entity);
+    const CPosition* position = &scene->components.positions[entity];
+    const CFleeting* fleeting = &scene->components.fleetings[entity];
+    const CDimension* dimension = &scene->components.dimensions[entity];
+    const CSmooth* smooth = &scene->components.smooths[entity];
 
     const f32 progress = fleeting->age / fleeting->lifetime;
     const f32 scale = -4 * (progress * progress - progress);

@@ -747,11 +747,13 @@ static void SceneUpdateScore(Scene* self)
 
 static void SceneCheckEndCondition(Scene* self)
 {
+    // TODO(thismarvin): Move this to fog.c?
+
     assert(SceneEntityHasDependencies(self, self->player, TAG_POSITION));
     assert(SceneEntityHasDependencies(self, self->fog, TAG_POSITION));
 
-    const CPosition* fogPosition = SCENE_GET_COMPONENT_PTR(self, fogPosition, self->fog);
-    const CPosition* playerPosition = SCENE_GET_COMPONENT_PTR(self, playerPosition, self->player);
+    const CPosition* fogPosition = &self->components.positions[self->fog];
+    const CPosition* playerPosition = &self->components.positions[self->player];
 
     const f32 distance = fogPosition->value.x - playerPosition->value.x;
 

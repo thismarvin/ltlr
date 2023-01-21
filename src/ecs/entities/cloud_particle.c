@@ -8,8 +8,6 @@ static OnResolutionResult CloudParticleOnResolution(const OnResolutionParams* pa
     static const u64 dependencies = TAG_POSITION;
     assert(SceneEntityHasDependencies(params->scene, params->entity, dependencies));
 
-    const CPosition* position = SCENE_GET_COMPONENT_PTR(params->scene, position, params->entity);
-
     // If the aabb is completely within another collider then remove it.
     if (params->overlap.width >= params->aabb.width && params->overlap.height >= params->aabb.height)
     {
@@ -111,10 +109,10 @@ void CloudParticleDraw(const Scene* scene, const usize entity)
         return;
     }
 
-    const CPosition* position = SCENE_GET_COMPONENT_PTR(scene, position, entity);
-    const CFleeting* fleeting = SCENE_GET_COMPONENT_PTR(scene, fleeting, entity);
-    const CDimension* dimension = SCENE_GET_COMPONENT_PTR(scene, dimension, entity);
-    const CSmooth* smooth = SCENE_GET_COMPONENT_PTR(scene, smooth, entity);
+    const CPosition* position = &scene->components.positions[entity];
+    const CFleeting* fleeting = &scene->components.fleetings[entity];
+    const CDimension* dimension = &scene->components.dimensions[entity];
+    const CSmooth* smooth = &scene->components.smooths[entity];
 
     const f32 drawSize = dimension->width * (fleeting->lifetime - fleeting->age) / fleeting->lifetime;
 

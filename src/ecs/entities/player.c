@@ -327,11 +327,12 @@ static void PlayerSpawnJumpParticles(Scene* scene, const usize entity)
 static void PlayerOnDamage(Scene* scene, const usize entity, const usize otherEntity)
 {
     assert(SceneEntityHasDependencies(scene, entity, TAG_PLAYER | TAG_MORTAL));
+    assert(SceneEntityHasDependencies(scene, otherEntity, TAG_DAMAGE));
 
-    CPlayer* player = SCENE_GET_COMPONENT_PTR(scene, player, entity);
-    CMortal* mortal = SCENE_GET_COMPONENT_PTR(scene, mortal, entity);
+    CPlayer* player = &scene->components.players[entity];
+    CMortal* mortal = &scene->components.mortals[entity];
 
-    const CDamage* otherDamage = SCENE_GET_COMPONENT_PTR(scene, otherDamage, otherEntity);
+    const CDamage* otherDamage = &scene->components.damages[otherEntity];
 
     if (!PlayerIsVulnerable(player))
     {
@@ -347,7 +348,7 @@ static void PlayerOnCollision(const OnCollisionParams* params)
     static const u64 dependencies = TAG_PLAYER | TAG_MORTAL;
     assert(SceneEntityHasDependencies(params->scene, params->entity, dependencies));
 
-    CMortal* mortal = SCENE_GET_COMPONENT_PTR(params->scene, mortal, params->entity);
+    CMortal* mortal = &params->scene->components.mortals[params->entity];
 
     // Collision specific logic that will not resolve the player.
     {
@@ -382,12 +383,11 @@ static void PlayerOnCollision(const OnCollisionParams* params)
 
 static OnResolutionResult PlayerOnResolution(const OnResolutionParams* params)
 {
-    static const u64 dependencies = TAG_PLAYER | TAG_POSITION | TAG_KINETIC;
+    static const u64 dependencies = TAG_PLAYER | TAG_KINETIC;
     assert(SceneEntityHasDependencies(params->scene, params->entity, dependencies));
 
-    CPlayer* player = SCENE_GET_COMPONENT_PTR(params->scene, player, params->entity);
-    const CPosition* position = SCENE_GET_COMPONENT_PTR(params->scene, position, params->entity);
-    CKinetic* kinetic = SCENE_GET_COMPONENT_PTR(params->scene, kinetic, params->entity);
+    CPlayer* player = &params->scene->components.players[params->entity];
+    CKinetic* kinetic = &params->scene->components.kinetics[params->entity];
 
     // Collision specific logic that will not resolve the player.
     {
@@ -769,7 +769,7 @@ Direction Facing(const CPlayer* player)
 
 void PlayerInputUpdate(Scene* scene, const usize entity)
 {
-    const u64 dependencies = TAG_PLAYER | TAG_POSITION | TAG_DIMENSION | TAG_KINETIC;
+    const u64 dependencies = TAG_PLAYER | TAG_KINETIC;
 
     if (!SceneEntityHasDependencies(scene, entity, dependencies))
     {
@@ -781,10 +781,8 @@ void PlayerInputUpdate(Scene* scene, const usize entity)
         return;
     }
 
-    CPlayer* player = SCENE_GET_COMPONENT_PTR(scene, player, entity);
-    const CPosition* position = SCENE_GET_COMPONENT_PTR(scene, position, entity);
-    const CDimension* dimension = SCENE_GET_COMPONENT_PTR(scene, dimension, entity);
-    CKinetic* kinetic = SCENE_GET_COMPONENT_PTR(scene, kinetic, entity);
+    CPlayer* player = &scene->components.players[entity];
+    CKinetic* kinetic = &scene->components.kinetics[entity];
 
     if (player->dead)
     {
@@ -859,17 +857,16 @@ void PlayerInputUpdate(Scene* scene, const usize entity)
 
 void PlayerPostCollisionUpdate(Scene* scene, const usize entity)
 {
-    const u64 dependencies = TAG_PLAYER | TAG_POSITION | TAG_DIMENSION | TAG_KINETIC;
+    const u64 dependencies = TAG_PLAYER | TAG_POSITION | TAG_KINETIC;
 
     if (!SceneEntityHasDependencies(scene, entity, dependencies))
     {
         return;
     }
 
-    CPlayer* player = SCENE_GET_COMPONENT_PTR(scene, player, entity);
-    CPosition* position = SCENE_GET_COMPONENT_PTR(scene, position, entity);
-    const CDimension* dimension = SCENE_GET_COMPONENT_PTR(scene, dimension, entity);
-    CKinetic* kinetic = SCENE_GET_COMPONENT_PTR(scene, kinetic, entity);
+    CPlayer* player = &scene->components.players[entity];
+    CPosition* position = &scene->components.positions[entity];
+    CKinetic* kinetic = &scene->components.kinetics[entity];
 
     // General purpose player specific collision logic.
     {
@@ -896,7 +893,7 @@ void PlayerPostCollisionUpdate(Scene* scene, const usize entity)
 
 static void PlayerFlashingLogic(Scene* scene, const usize entity)
 {
-    CPlayer* player = SCENE_GET_COMPONENT_PTR(scene, player, entity);
+    CPlayer* player = &scene->components.players[entity];
 
     player->invulnerableTimer += CTX_DT;
 
@@ -932,10 +929,10 @@ void PlayerMortalUpdate(Scene* scene, const usize entity)
         return;
     }
 
-    CPlayer* player = SCENE_GET_COMPONENT_PTR(scene, player, entity);
-    const CMortal* mortal = SCENE_GET_COMPONENT_PTR(scene, mortal, entity);
-    const CPosition* position = SCENE_GET_COMPONENT_PTR(scene, position, entity);
-    CKinetic* kinetic = SCENE_GET_COMPONENT_PTR(scene, kinetic, entity);
+    CPlayer* player = &scene->components.players[entity];
+    const CMortal* mortal = &scene->components.mortals[entity];
+    const CPosition* position = &scene->components.positions[entity];
+    CKinetic* kinetic = &scene->components.kinetics[entity];
 
     // TODO(thismarvin): This might need to be more involved in the future...
     if (position->value.y > CTX_VIEWPORT_HEIGHT * 2)
@@ -1087,8 +1084,8 @@ void PlayerAnimationUpdate(Scene* scene, const usize entity)
         return;
     }
 
-    CPlayer* player = SCENE_GET_COMPONENT_PTR(scene, player, entity);
-    CAnimation* animation = SCENE_GET_COMPONENT_PTR(scene, animation, entity);
+    CPlayer* player = &scene->components.players[entity];
+    CAnimation* animation = &scene->components.animations[entity];
 
     // Deal with death.
     {
@@ -1198,8 +1195,8 @@ void PlayerDebugDraw(const Scene* scene, usize entity)
         return;
     }
 
-    const CPosition* position = SCENE_GET_COMPONENT_PTR(scene, position, entity);
-    const CDimension* dimension = SCENE_GET_COMPONENT_PTR(scene, dimension, entity);
+    const CPosition* position = &scene->components.positions[entity];
+    const CDimension* dimension = &scene->components.dimensions[entity];
 
     const Rectangle aabb = (Rectangle)
     {

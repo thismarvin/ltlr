@@ -127,31 +127,5 @@ void SceneDestroy(Scene* self);
     CFleeting: mScene->components.fleetings[mEntity], \
     CAnimation: mScene->components.animations[mEntity])
 
-#define SCENE_GET_COMPONENT_PTR(mScene, mValue, mEntity) _Generic((mValue), \
-    const CPosition*: &mScene->components.positions[mEntity], \
-    CPosition*: &mScene->components.positions[mEntity], \
-    const CDimension*: &mScene->components.dimensions[mEntity], \
-    CDimension*: &mScene->components.dimensions[mEntity], \
-    const CColor*: &mScene->components.colors[mEntity], \
-    CColor*: &mScene->components.colors[mEntity], \
-    const CSprite*: &mScene->components.sprites[mEntity], \
-    CSprite*: &mScene->components.sprites[mEntity], \
-    const CKinetic*: &mScene->components.kinetics[mEntity], \
-    CKinetic*: &mScene->components.kinetics[mEntity], \
-    const CSmooth*: &mScene->components.smooths[mEntity], \
-    CSmooth*: &mScene->components.smooths[mEntity], \
-    const CCollider*: &mScene->components.colliders[mEntity], \
-    CCollider*: &mScene->components.colliders[mEntity], \
-    const CPlayer*: &mScene->components.players[mEntity], \
-    CPlayer*: &mScene->components.players[mEntity], \
-    const CMortal*: &mScene->components.mortals[mEntity], \
-    CMortal*: &mScene->components.mortals[mEntity], \
-    const CDamage*: &mScene->components.damages[mEntity], \
-    CDamage*: &mScene->components.damages[mEntity], \
-    const CFleeting*: &mScene->components.fleetings[mEntity], \
-    CFleeting*: &mScene->components.fleetings[mEntity], \
-    const CAnimation*: &mScene->components.animations[mEntity], \
-    CAnimation*: &mScene->components.animations[mEntity])
-
 #define SCENE_SET_COMPONENT(mScene, mEntity, mValue) \
     SCENE_GET_COMPONENT(mScene, mValue, mEntity) = mValue

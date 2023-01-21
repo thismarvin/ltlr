@@ -80,7 +80,7 @@ void BatteryUpdate(Scene* scene, const usize entity)
         return;
     }
 
-    CKinetic* kinetic = SCENE_GET_COMPONENT_PTR(scene, kinetic, entity);
+    CKinetic* kinetic = &scene->components.kinetics[entity];
 
     kinetic->velocity.y = sinf(ContextGetTotalTime() * 3.0f) * 10.0f;
 }
