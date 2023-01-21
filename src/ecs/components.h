@@ -62,15 +62,6 @@ typedef struct
 {
     Scene* scene;
     usize entity;
-    usize otherEntity;
-} OnDamageParams;
-
-typedef void (*OnDamage)(const OnDamageParams*);
-
-typedef struct
-{
-    Scene* scene;
-    usize entity;
     Rectangle aabb;
     usize otherEntity;
     Rectangle otherAabb;
@@ -178,7 +169,6 @@ typedef struct
 typedef struct
 {
     i16 hp;
-    OnDamage onDamage;
 } CMortal;
 
 typedef struct

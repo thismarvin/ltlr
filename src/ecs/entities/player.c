@@ -324,14 +324,14 @@ static void PlayerSpawnJumpParticles(Scene* scene, const usize entity)
     }
 }
 
-static void PlayerOnDamage(const OnDamageParams* params)
+static void PlayerOnDamage(Scene* scene, const usize entity, const usize otherEntity)
 {
-    assert(ENTITY_HAS_DEPS(params->entity, TAG_PLAYER | TAG_MORTAL));
+    assert(SceneEntityHasDependencies(scene, entity, TAG_PLAYER | TAG_MORTAL));
 
-    CPlayer* player = GET_COMPONENT(player, params->entity);
-    CMortal* mortal = GET_COMPONENT(mortal, params->entity);
+    CPlayer* player = SCENE_GET_COMPONENT_PTR(scene, player, entity);
+    CMortal* mortal = SCENE_GET_COMPONENT_PTR(scene, mortal, entity);
 
-    const CDamage* otherDamage = GET_COMPONENT(otherDamage, params->otherEntity);
+    const CDamage* otherDamage = SCENE_GET_COMPONENT_PTR(scene, otherDamage, otherEntity);
 
     if (!PlayerIsVulnerable(player))
     {
@@ -352,14 +352,7 @@ static void PlayerOnCollision(const OnCollisionParams* params)
     {
         if (ENTITY_HAS_DEPS(params->otherEntity, TAG_DAMAGE))
         {
-            const OnDamageParams onDamageParams = (OnDamageParams)
-            {
-                .scene = params->scene,
-                .entity = params->entity,
-                .otherEntity = params->otherEntity,
-            };
-
-            mortal->onDamage(&onDamageParams);
+            PlayerOnDamage(params->scene, params->entity, params->otherEntity);
         }
 
         if (ENTITY_HAS_DEPS(params->otherEntity, TAG_BATTERY))
@@ -548,7 +541,6 @@ EntityBuilder PlayerCreate(const f32 x, const f32 y)
     ADD_COMPONENT(CMortal, ((CMortal)
     {
         .hp = 2,
-        .onDamage = PlayerOnDamage,
     }));
 
     static const f32 coyoteDuration = CTX_DT * 6;
