@@ -458,7 +458,7 @@ void SFleetingUpdate(Scene* scene, const usize entity)
 
     fleeting->age += CTX_DT;
 
-    if (fleeting->age > fleeting->lifetime)
+    if (fleeting->age >= fleeting->lifetime)
     {
         SceneDeferDeallocateEntity(scene, entity);
     }
