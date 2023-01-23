@@ -8,7 +8,7 @@
     nixpkgs,
   }: let
     pname = "ltlr";
-    version = "2023-01-16";
+    version = "2023-01-23";
     system = "x86_64-linux";
     pkgs = import nixpkgs {inherit system;};
   in {
