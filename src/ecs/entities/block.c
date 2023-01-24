@@ -1,41 +1,38 @@
 #include "block.h"
-#include "common.h"
 
-EntityBuilder BlockCreate(const Rectangle aabb, const u8 resolutionSchema, const u64 layer)
+void BlockCreate(Scene* scene, const void* params)
 {
-    Deque components = DEQUE_OF(Component);
+    const BlockBuilder* builder = params;
 
-    const u64 tags =
+    const Vector2 position = (Vector2)
+    {
+        .x = builder->aabb.x,
+        .y = builder->aabb.y,
+    };
+
+    scene->components.tags[builder->entity] =
         TAG_NONE
         | TAG_POSITION
         | TAG_DIMENSION
         | TAG_COLLIDER;
 
-    const Vector2 position = Vector2Create(aabb.x, aabb.y);
-
-    ADD_COMPONENT(CPosition, ((CPosition)
+    scene->components.positions[builder->entity] = (CPosition)
     {
         .value = position,
-    }));
+    };
 
-    ADD_COMPONENT(CDimension, ((CDimension)
+    scene->components.dimensions[builder->entity] = (CDimension)
     {
-        .width = aabb.width,
-        .height = aabb.height,
-    }));
+        .width = builder->aabb.width,
+        .height = builder->aabb.height,
+    };
 
-    ADD_COMPONENT(CCollider, ((CCollider)
+    scene->components.colliders[builder->entity] = (CCollider)
     {
-        .resolutionSchema = resolutionSchema,
-        .layer = layer,
+        .resolutionSchema = builder->resolutionSchema,
+        .layer = builder->layer,
         .mask = LAYER_NONE,
         .onCollision = OnCollisionNoop,
         .onResolution = OnResolutionNoop,
-    }));
-
-    return (EntityBuilder)
-    {
-        .tags = tags,
-        .components = components,
     };
 }

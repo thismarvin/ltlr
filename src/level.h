@@ -1,15 +1,14 @@
 #pragma once
 
-#include "./collections/deque.h"
 #include "atlas.h"
 #include "common.h"
 
 #define MAX_LEVEL_SEGMENTS (8)
 
+typedef struct Scene Scene;
+
 typedef struct
 {
-    // `Deque<EntityBuilder>`
-    Deque entities;
     u16 width;
 } LevelSegmentBuilder;
 
@@ -25,6 +24,6 @@ typedef struct
     usize segmentsLength;
 } Level;
 
-LevelSegmentBuilder LevelSegmentBuilderCreate(u16 type, Vector2 offset);
+LevelSegmentBuilder LevelSegmentBuilderCreate(Scene* scene, u16 type, Vector2 offset);
 
 void LevelSegmentDraw(const LevelSegment* self, const Atlas* atlas, Vector2 offset);

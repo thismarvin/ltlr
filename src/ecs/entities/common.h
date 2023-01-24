@@ -4,9 +4,6 @@
 #include "../../context.h"
 #include "../../scene.h"
 #include "../components.h"
-#include <assert.h>
-
-#define ADD_COMPONENT(mType, mValue) DEQUE_PUSH_FRONT(&components, Component, ComponentCreate##mType(mValue))
 
 Rectangle ApplyResolutionPerfectly
 (

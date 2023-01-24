@@ -1,8 +1,7 @@
 #include "../../palette/p8.h"
-#include "../components.h"
-#include "common.h"
 #include "fog.h"
-#include <math.h>
+#include "fog_particle.h"
+#include <assert.h>
 #include <raymath.h>
 
 #define FOG_HEIGHT (CTX_VIEWPORT_HEIGHT * 2)
@@ -52,39 +51,33 @@ static void FogReset(void)
     decelerationTimer = 0.0;
 }
 
-EntityBuilder FogCreate(void)
+void FogCreate(Scene* scene, const void* params)
 {
     FogReset();
 
-    Deque components = DEQUE_OF(Component);
+    const FogBuilder* builder = params;
 
-    const u64 tags =
+    scene->components.tags[builder->entity] =
         TAG_NONE
         | TAG_POSITION
         | TAG_KINETIC
         | TAG_SMOOTH
         | TAG_FOG;
 
-    ADD_COMPONENT(CPosition, ((CPosition)
+    scene->components.positions[builder->entity] = (CPosition)
     {
         .value = FOG_INITIAL_POSITION,
-    }));
+    };
 
-    ADD_COMPONENT(CKinetic, ((CKinetic)
+    scene->components.kinetics[builder->entity] = (CKinetic)
     {
         .velocity = VECTOR2_ZERO,
         .acceleration = VECTOR2_ZERO,
-    }));
+    };
 
-    ADD_COMPONENT(CSmooth, ((CSmooth)
+    scene->components.smooths[builder->entity] = (CSmooth)
     {
         .previous = FOG_INITIAL_POSITION,
-    }));
-
-    return (EntityBuilder)
-    {
-        .tags = tags,
-        .components = components,
     };
 }
 
@@ -115,9 +108,15 @@ static void SpawnMovingParticles(Scene* scene, const CPosition* position, const 
 
     const f32 radius = GetRandomValue(minSize, maxSize);
     const f32 lifetime = 0.1f * GetRandomValue(minLifetime, maxLifetime);
-    const EntityBuilder builder = FogParticleCreate(spawnPosition, velocity, radius, lifetime);
 
-    SceneDeferAddEntity(scene, builder);
+    FogParticleBuilder* builder = malloc(sizeof(FogParticleBuilder));
+    builder->entity = SceneAllocateEntity(scene);
+    builder->position = spawnPosition;
+    builder->velocity = velocity;
+    builder->radius = radius;
+    builder->lifetime = lifetime;
+
+    SceneDefer(scene, FogParticleCreate, builder);
 }
 
 static void ShiftBreathingPhase()
@@ -190,7 +189,7 @@ static void ShiftBreathingPhase()
 
 void FogUpdate(Scene* scene, const usize entity)
 {
-    const u64 dependencies = TAG_FOG | TAG_POSITION | TAG_KINETIC;
+    static const u64 dependencies = TAG_FOG | TAG_POSITION | TAG_KINETIC;
 
     if (!SceneEntityHasDependencies(scene, entity, dependencies))
     {
@@ -272,7 +271,7 @@ void FogUpdate(Scene* scene, const usize entity)
 
 void FogDraw(const Scene* scene, const usize entity)
 {
-    const u64 dependencies = TAG_FOG | TAG_POSITION | TAG_SMOOTH;
+    static const u64 dependencies = TAG_FOG | TAG_POSITION | TAG_SMOOTH;
 
     if (!SceneEntityHasDependencies(scene, entity, dependencies))
     {
@@ -316,7 +315,7 @@ void FogDraw(const Scene* scene, const usize entity)
 
 void FogDebugDraw(const Scene* scene, const usize entity)
 {
-    const u64 dependencies = TAG_FOG | TAG_POSITION;
+    static const u64 dependencies = TAG_FOG | TAG_POSITION;
 
     if (!SceneEntityHasDependencies(scene, entity, dependencies))
     {

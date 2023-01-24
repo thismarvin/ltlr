@@ -1,6 +1,5 @@
-#include "../../animation.h"
-#include "common.h"
 #include "walker.h"
+#include <assert.h>
 
 static OnResolutionResult WalkerOnResolution(const OnResolutionParams* params)
 {
@@ -32,11 +31,20 @@ static OnResolutionResult WalkerOnResolution(const OnResolutionParams* params)
     };
 }
 
-EntityBuilder WalkerCreate(const f32 x, const f32 y)
+void WalkerCreate(Scene* scene, const void* params)
 {
-    Deque components = DEQUE_OF(Component);
+    const WalkerBuilder* builder = params;
 
-    const u64 tags =
+    const Vector2 position = Vector2Create(builder->x, builder->y);
+    const Rectangle intramural = (Rectangle)
+    {
+        .x = 14,
+        .y = 0,
+        .width = 20,
+        .height = 16,
+    };
+
+    scene->components.tags[builder->entity] =
         TAG_NONE
         | TAG_POSITION
         | TAG_DIMENSION
@@ -47,28 +55,19 @@ EntityBuilder WalkerCreate(const f32 x, const f32 y)
         | TAG_WALKER
         | TAG_DAMAGE;
 
-    const Vector2 position = Vector2Create(x, y);
-    const Rectangle intramural = (Rectangle)
-    {
-        .x = 14,
-        .y = 0,
-        .width = 20,
-        .height = 16,
-    };
-
-    ADD_COMPONENT(CPosition, ((CPosition)
+    scene->components.positions[builder->entity] = (CPosition)
     {
         .value = position,
-    }));
+    };
 
-    ADD_COMPONENT(CDimension, ((CDimension)
+    scene->components.dimensions[builder->entity] = (CDimension)
     {
         .width = intramural.width,
         .height = intramural.height,
-    }));
+    };
 
     // TODO(thismarvin): Add CAnimationFromWalkerIdle() somewhere.
-    ADD_COMPONENT(CAnimation, ((CAnimation)
+    scene->components.animations[builder->entity] = (CAnimation)
     {
         .frameTimer = 0,
         .frameDuration = ANIMATION_WALKER_IDLE_FRAME_DURATION,
@@ -77,36 +76,30 @@ EntityBuilder WalkerCreate(const f32 x, const f32 y)
         .frame = 0,
         .length = ANIMATION_WALKER_IDLE_LENGTH,
         .type = ANIMATION_WALKER_IDLE,
-    }));
+    };
 
-    ADD_COMPONENT(CKinetic, ((CKinetic)
+    scene->components.kinetics[builder->entity] = (CKinetic)
     {
         .velocity = Vector2Create(50, 0),
         .acceleration = Vector2Create(0, 1000),
-    }));
+    };
 
-    ADD_COMPONENT(CSmooth, ((CSmooth)
+    scene->components.smooths[builder->entity] = (CSmooth)
     {
         .previous = position,
-    }));
+    };
 
-    ADD_COMPONENT(CCollider, ((CCollider)
+    scene->components.colliders[builder->entity] = (CCollider)
     {
         .resolutionSchema = RESOLVE_ALL,
         .layer = LAYER_LETHAL,
         .mask = LAYER_TERRAIN | LAYER_INVISIBLE | LAYER_LETHAL,
         .onCollision = OnCollisionNoop,
         .onResolution = WalkerOnResolution,
-    }));
+    };
 
-    ADD_COMPONENT(CDamage, ((CDamage)
+    scene->components.damages[builder->entity] = (CDamage)
     {
         .value = 1,
-    }));
-
-    return (EntityBuilder)
-    {
-        .tags = tags,
-        .components = components,
     };
 }

@@ -5,58 +5,58 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-LevelSegmentBuilder LevelSegmentBuilderCreate(const u16 type, const Vector2 offset)
+LevelSegmentBuilder LevelSegmentBuilderCreate(Scene* scene, const u16 type, const Vector2 offset)
 {
     switch (type)
     {
         case 0:
         {
-            return LevelSegmentBuilderCreate_battery_0(offset);
+            return LevelSegmentBuilderCreate_battery_0(scene, offset);
         }
 
         case 1:
         {
-            return LevelSegmentBuilderCreate_battery_1(offset);
+            return LevelSegmentBuilderCreate_battery_1(scene, offset);
         }
 
         case 2:
         {
-            return LevelSegmentBuilderCreate_battery_2(offset);
+            return LevelSegmentBuilderCreate_battery_2(scene, offset);
         }
 
         case 3:
         {
-            return LevelSegmentBuilderCreate_filler_0(offset);
+            return LevelSegmentBuilderCreate_filler_0(scene, offset);
         }
 
         case 4:
         {
-            return LevelSegmentBuilderCreate_filler_1(offset);
+            return LevelSegmentBuilderCreate_filler_1(scene, offset);
         }
 
         case 5:
         {
-            return LevelSegmentBuilderCreate_filler_2(offset);
+            return LevelSegmentBuilderCreate_filler_2(scene, offset);
         }
 
         case 6:
         {
-            return LevelSegmentBuilderCreate_filler_3(offset);
+            return LevelSegmentBuilderCreate_filler_3(scene, offset);
         }
 
         case 7:
         {
-            return LevelSegmentBuilderCreate_solar_0(offset);
+            return LevelSegmentBuilderCreate_solar_0(scene, offset);
         }
 
         case 8:
         {
-            return LevelSegmentBuilderCreate_starter_0(offset);
+            return LevelSegmentBuilderCreate_starter_0(scene, offset);
         }
 
         case 9:
         {
-            return LevelSegmentBuilderCreate_starter_1(offset);
+            return LevelSegmentBuilderCreate_starter_1(scene, offset);
         }
     }
 

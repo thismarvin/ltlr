@@ -1,12 +1,17 @@
 #pragma once
 
-#include "../../scene.h"
-#include "../entity_builder.h"
+#include "common.h"
 
 #define FOG_LETHAL_DISTANCE (CTX_VIEWPORT_WIDTH * 0.75)
 
-EntityBuilder FogCreate(void);
+typedef struct
+{
+    usize entity;
+} FogBuilder;
+
+void FogCreate(Scene* scene, const void* params);
 
 void FogUpdate(Scene* scene, usize entity);
+
 void FogDraw(const Scene* scene, usize entity);
 void FogDebugDraw(const Scene* scene, usize entity);

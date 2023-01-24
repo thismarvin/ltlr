@@ -1,10 +1,6 @@
-#include "../animation.h"
 #include "../context.h"
-#include "../geometry/collider.h"
 #include "../palette/p8.h"
 #include "components.h"
-#include "entities.h"
-#include "events.h"
 #include "systems.h"
 #include <assert.h>
 #include <raymath.h>

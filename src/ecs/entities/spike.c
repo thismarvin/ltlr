@@ -1,29 +1,19 @@
-#include "../components.h"
-#include "common.h"
 #include "spike.h"
 
-EntityBuilder SpikeCreate(const f32 x, const f32 y, const SpikeRotation rotation)
+void SpikeCreate(Scene* scene, const void* params)
 {
-    Deque components = DEQUE_OF(Component);
-
-    const u64 tags =
-        TAG_NONE
-        | TAG_POSITION
-        | TAG_DIMENSION
-        | TAG_COLLIDER
-        | TAG_DAMAGE
-        | TAG_SPRITE;
+    const SpikeBuilder* builder = params;
 
     Vector2 position;
     Rectangle intramural;
     Sprite spriteType;
 
-    switch (rotation)
+    switch (builder->rotation)
     {
         default:
         case SPIKE_ROTATE_0:
         {
-            position = Vector2Create(x + 2, y + 13);
+            position = Vector2Create(builder->x + 2, builder->y + 13);
             intramural = (Rectangle)
             {
                 2, 13, 12, 3
@@ -34,7 +24,7 @@ EntityBuilder SpikeCreate(const f32 x, const f32 y, const SpikeRotation rotation
 
         case SPIKE_ROTATE_90:
         {
-            position = Vector2Create(x, y + 2);
+            position = Vector2Create(builder->x, builder->y + 2);
             intramural = (Rectangle)
             {
                 0, 2, 3, 12
@@ -45,7 +35,7 @@ EntityBuilder SpikeCreate(const f32 x, const f32 y, const SpikeRotation rotation
 
         case SPIKE_ROTATE_180:
         {
-            position = Vector2Create(x + 2, y);
+            position = Vector2Create(builder->x + 2, builder->y);
             intramural = (Rectangle)
             {
                 2, 0, 12, 3
@@ -56,7 +46,7 @@ EntityBuilder SpikeCreate(const f32 x, const f32 y, const SpikeRotation rotation
 
         case SPIKE_ROTATE_270:
         {
-            position = Vector2Create(x + 13, y + 2);
+            position = Vector2Create(builder->x + 13, builder->y + 2);
             intramural = (Rectangle)
             {
                 13, 2, 3, 12
@@ -66,41 +56,43 @@ EntityBuilder SpikeCreate(const f32 x, const f32 y, const SpikeRotation rotation
         }
     }
 
-    ADD_COMPONENT(CPosition, ((CPosition)
+    scene->components.tags[builder->entity] =
+        TAG_NONE
+        | TAG_POSITION
+        | TAG_DIMENSION
+        | TAG_COLLIDER
+        | TAG_DAMAGE
+        | TAG_SPRITE;
+
+    scene->components.positions[builder->entity] = (CPosition)
     {
         .value = position,
-    }));
+    };
 
-    ADD_COMPONENT(CSprite, ((CSprite)
+    scene->components.sprites[builder->entity] = (CSprite)
     {
         .intramural = intramural,
         .reflection = REFLECTION_NONE,
         .type = spriteType,
-    }));
+    };
 
-    ADD_COMPONENT(CDimension, ((CDimension)
+    scene->components.dimensions[builder->entity] = (CDimension)
     {
         .width = intramural.width,
         .height = intramural.height,
-    }));
+    };
 
-    ADD_COMPONENT(CCollider, ((CCollider)
+    scene->components.colliders[builder->entity] = (CCollider)
     {
         .resolutionSchema = RESOLVE_NONE,
         .layer = LAYER_LETHAL,
         .mask = LAYER_NONE,
         .onCollision = OnCollisionNoop,
         .onResolution = OnResolutionNoop,
-    }));
+    };
 
-    ADD_COMPONENT(CDamage, ((CDamage)
+    scene->components.damages[builder->entity] = (CDamage)
     {
         .value = 1,
-    }));
-
-    return (EntityBuilder)
-    {
-        .tags = tags,
-        .components = components,
     };
 }

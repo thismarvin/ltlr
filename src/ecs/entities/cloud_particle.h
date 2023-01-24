@@ -1,15 +1,17 @@
 #pragma once
 
-#include "../../scene.h"
-#include "../entity_builder.h"
+#include "common.h"
 
-EntityBuilder CloudParticleCreate
-(
-    Vector2 position,
-    f32 radius,
-    Vector2 initialVelocity,
-    Vector2 acceleration,
-    f32 lifetime
-);
+typedef struct
+{
+    usize entity;
+    Vector2 position;
+    f32 radius;
+    Vector2 initialVelocity;
+    Vector2 acceleration;
+    f32 lifetime;
+} CloudParticleBuilder;
+
+void CloudParticleCreate(Scene* scene, const void* params);
 
 void CloudParticleDraw(const Scene* scene, usize entity);

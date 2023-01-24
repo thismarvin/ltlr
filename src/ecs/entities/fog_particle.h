@@ -1,8 +1,18 @@
 #pragma once
 
-#include "../../scene.h"
-#include "../entity_builder.h"
+#include "common.h"
 
-EntityBuilder FogParticleCreate(Vector2 position, Vector2 velocity, f32 radius, f32 lifetime);
+typedef struct
+{
+    usize entity;
+    Vector2 position;
+    Vector2 velocity;
+    f32 radius;
+    f32 lifetime;
+} FogParticleBuilder;
+
+void FogParticleCreate(Scene* scene, const void* params);
+
 void FogParticleUpdate(Scene* scene, const usize entity);
+
 void FogParticleDraw(const Scene* scene, usize entity);

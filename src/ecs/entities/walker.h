@@ -1,6 +1,12 @@
 #pragma once
 
-#include "../../scene.h"
-#include "../entity_builder.h"
+#include "common.h"
 
-EntityBuilder WalkerCreate(f32 x, f32 y);
+typedef struct
+{
+    usize entity;
+    f32 x;
+    f32 y;
+} WalkerBuilder;
+
+void WalkerCreate(Scene* scene, const void* params);

@@ -4,9 +4,8 @@
 #include "../segments_generated.h"
 #include "../segments_helper.h"
 
-LevelSegmentBuilder LevelSegmentBuilderCreate_solar_0(const Vector2 offset)
+LevelSegmentBuilder LevelSegmentBuilderCreate_solar_0(Scene* scene, const Vector2 offset)
 {
-    Deque entities = DEQUE_WITH_CAPACITY(EntityBuilder, 8);
     CREATE_SOLID_BLOCK(0, 160, 320, 96);
     CREATE_ONE_WAY_BLOCK(32, 128, 96, 16);
     CREATE_ONE_WAY_BLOCK(128, 112, 80, 16);
@@ -15,11 +14,10 @@ LevelSegmentBuilder LevelSegmentBuilderCreate_solar_0(const Vector2 offset)
     CREATE_SOLAR_PANEL(256, 80);
     CREATE_SOLAR_PANEL(160, 96);
     CREATE_SOLAR_PANEL(64, 112);
-    const u16 width = 320;
+
     return (LevelSegmentBuilder)
     {
-        .entities = entities,
-        .width = width,
+        .width = 320,
     };
 }
 

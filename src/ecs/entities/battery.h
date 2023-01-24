@@ -1,8 +1,14 @@
 #pragma once
 
-#include "../../atlas.h"
-#include "../../scene.h"
-#include "../entity_builder.h"
+#include "common.h"
 
-EntityBuilder BatteryCreate(f32 x, f32 y);
+typedef struct
+{
+    usize entity;
+    f32 x;
+    f32 y;
+} BatteryBuilder;
+
+void BatteryCreate(Scene* scene, const void* params);
+
 void BatteryUpdate(Scene* scene, usize entity);

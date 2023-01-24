@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../entity_builder.h"
+#include "common.h"
 
 typedef enum
 {
@@ -10,4 +10,12 @@ typedef enum
     SPIKE_ROTATE_270,
 } SpikeRotation;
 
-EntityBuilder SpikeCreate(f32 x, f32 y, SpikeRotation rotation);
+typedef struct
+{
+    usize entity;
+    f32 x;
+    f32 y;
+    SpikeRotation rotation;
+} SpikeBuilder;
+
+void SpikeCreate(Scene* scene, const void* params);

@@ -1,6 +1,13 @@
 #pragma once
 
-#include "../../scene.h"
-#include "../entity_builder.h"
+#include "common.h"
 
-EntityBuilder BlockCreate(Rectangle aabb, u8 resolutionSchema, u64 layer);
+typedef struct
+{
+    usize entity;
+    Rectangle aabb;
+    u8 resolutionSchema;
+    u64 layer;
+} BlockBuilder;
+
+void BlockCreate(Scene* scene, const void* params);

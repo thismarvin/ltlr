@@ -181,36 +181,3 @@ typedef struct
     f32 lifetime;
     f32 age;
 } CFleeting;
-
-typedef struct
-{
-    u64 tag;
-    union
-    {
-        CPosition position;
-        CDimension dimension;
-        CColor color;
-        CSprite sprite;
-        CKinetic kinetic;
-        CSmooth smooth;
-        CCollider collider;
-        CPlayer player;
-        CMortal mortal;
-        CDamage damage;
-        CFleeting fleeting;
-        CAnimation animation;
-    };
-} Component;
-
-Component ComponentCreateCPosition(CPosition value);
-Component ComponentCreateCDimension(CDimension value);
-Component ComponentCreateCColor(CColor value);
-Component ComponentCreateCSprite(CSprite value);
-Component ComponentCreateCKinetic(CKinetic value);
-Component ComponentCreateCSmooth(CSmooth value);
-Component ComponentCreateCCollider(CCollider value);
-Component ComponentCreateCPlayer(CPlayer value);
-Component ComponentCreateCMortal(CMortal value);
-Component ComponentCreateCDamage(CDamage value);
-Component ComponentCreateCFleeting(CFleeting value);
-Component ComponentCreateCAnimation(CAnimation value);

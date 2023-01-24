@@ -1,12 +1,9 @@
-#include "../../animation.h"
 #include "../../palette/p8.h"
-#include "../events.h"
-#include "common.h"
+#include "cloud_particle.h"
 #include "player.h"
-#include <math.h>
+#include <assert.h>
 #include <raymath.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 static const f32 moveSpeed = 200;
 static const f32 jumpHeight = 16 * 3 + 6;
@@ -30,6 +27,26 @@ static void PlayerStandstill(CPlayer* player, CKinetic* kinetic)
 static bool PlayerIsVulnerable(const CPlayer* player)
 {
     return player->invulnerableTimer >= player->invulnerableDuration;
+}
+
+static void SpawnCloudParticle
+(
+    Scene* scene,
+    const Vector2 position,
+    const f32 radius,
+    const Vector2 velocity,
+    const Vector2 acceleration,
+    const f32 lifetime
+)
+{
+    CloudParticleBuilder* builder = malloc(sizeof(CloudParticleBuilder));
+    builder->entity = SceneAllocateEntity(scene);
+    builder->position = position;
+    builder->radius = radius;
+    builder->initialVelocity = velocity;
+    builder->acceleration = acceleration;
+    builder->lifetime = lifetime;
+    SceneDefer(scene, CloudParticleCreate, builder);
 }
 
 static void PlayerSpawnImpactParticles(Scene* scene, const usize entity, const f32 groundY)
@@ -87,7 +104,7 @@ static void PlayerSpawnImpactParticles(Scene* scene, const usize entity, const f
                     .y = gravity,
                 };
 
-                SceneDeferAddEntity(scene, CloudParticleCreate(cloudPosition, radius, vo, ao, lifetime));
+                SpawnCloudParticle(scene, cloudPosition, radius, vo, ao, lifetime);
             }
 
             // Right pocket.
@@ -111,7 +128,7 @@ static void PlayerSpawnImpactParticles(Scene* scene, const usize entity, const f
                     .y = gravity,
                 };
 
-                SceneDeferAddEntity(scene, CloudParticleCreate(cloudPosition, radius, vo, ao, lifetime));
+                SpawnCloudParticle(scene, cloudPosition, radius, vo, ao, lifetime);
             }
         }
     }
@@ -157,7 +174,7 @@ static void PlayerSpawnImpactParticles(Scene* scene, const usize entity, const f
                     .y = gravity,
                 };
 
-                SceneDeferAddEntity(scene, CloudParticleCreate(cloudPosition, radius, vo, ao, lifetime));
+                SpawnCloudParticle(scene, cloudPosition, radius, vo, ao, lifetime);
             }
             else
             {
@@ -180,7 +197,7 @@ static void PlayerSpawnImpactParticles(Scene* scene, const usize entity, const f
                     .y = gravity,
                 };
 
-                SceneDeferAddEntity(scene, CloudParticleCreate(cloudPosition, radius, vo, ao, lifetime));
+                SpawnCloudParticle(scene, cloudPosition, radius, vo, ao, lifetime);
             }
         }
     }
@@ -234,7 +251,7 @@ static void PlayerSpawnJumpParticles(Scene* scene, const usize entity)
                     .y = gravity,
                 };
 
-                SceneDeferAddEntity(scene, CloudParticleCreate(cloudPosition, radius, vo, ao, lifetime));
+                SpawnCloudParticle(scene, cloudPosition, radius, vo, ao, lifetime);
             }
 
             // Right pocket.
@@ -258,7 +275,7 @@ static void PlayerSpawnJumpParticles(Scene* scene, const usize entity)
                     .y = gravity,
                 };
 
-                SceneDeferAddEntity(scene, CloudParticleCreate(cloudPosition, radius, vo, ao, lifetime));
+                SpawnCloudParticle(scene, cloudPosition, radius, vo, ao, lifetime);
             }
         }
     }
@@ -319,7 +336,7 @@ static void PlayerSpawnJumpParticles(Scene* scene, const usize entity)
                 .y = gravity,
             };
 
-            SceneDeferAddEntity(scene, CloudParticleCreate(cloudPosition, radius, vo, ao, lifetime));
+            SpawnCloudParticle(scene, cloudPosition, radius, vo, ao, lifetime);
         }
     }
 }
@@ -376,7 +393,7 @@ static void PlayerOnCollision(const OnCollisionParams* params)
 
             otherSprite->type = SPRITE_SOLAR_0001;
 
-            SceneDeferDisableComponent(params->scene, params->otherEntity, TAG_SOLAR_PANEL);
+            SceneDeferDisableTag(params->scene, params->otherEntity, TAG_SOLAR_PANEL);
         }
     }
 }
@@ -474,11 +491,20 @@ static OnResolutionResult PlayerOnResolution(const OnResolutionParams* params)
     };
 }
 
-EntityBuilder PlayerCreate(const f32 x, const f32 y)
+void PlayerCreate(Scene* scene, const void* params)
 {
-    Deque components = DEQUE_OF(Component);
+    const PlayerBuilder* builder = params;
 
-    const u64 tags =
+    const Vector2 position = Vector2Create(builder->x, builder->y);
+    const Rectangle intramural = (Rectangle)
+    {
+        .x = 24,
+        .y = 29,
+        .width = 15,
+        .height = 35,
+    };
+
+    scene->components.tags[builder->entity] =
         TAG_NONE
         | TAG_POSITION
         | TAG_DIMENSION
@@ -489,27 +515,18 @@ EntityBuilder PlayerCreate(const f32 x, const f32 y)
         | TAG_PLAYER
         | TAG_MORTAL;
 
-    const Vector2 position = Vector2Create(x, y);
-    const Rectangle intramural = (Rectangle)
-    {
-        .x = 24,
-        .y = 29,
-        .width = 15,
-        .height = 35,
-    };
-
-    ADD_COMPONENT(CPosition, ((CPosition)
+    scene->components.positions[builder->entity] = (CPosition)
     {
         .value = position,
-    }));
+    };
 
-    ADD_COMPONENT(CDimension, ((CDimension)
+    scene->components.dimensions[builder->entity] = (CDimension)
     {
         .width = intramural.width,
         .height = intramural.height,
-    }));
+    };
 
-    ADD_COMPONENT(CAnimation, ((CAnimation)
+    scene->components.animations[builder->entity] = (CAnimation)
     {
         .frameTimer = 0,
         .frameDuration = ANIMATION_PLAYER_STILL_FRAME_DURATION,
@@ -518,37 +535,37 @@ EntityBuilder PlayerCreate(const f32 x, const f32 y)
         .type = ANIMATION_PLAYER_STILL,
         .frame = 0,
         .length = ANIMATION_PLAYER_STILL_LENGTH,
-    }));
+    };
 
-    ADD_COMPONENT(CKinetic, ((CKinetic)
+    scene->components.kinetics[builder->entity] = (CKinetic)
     {
         .velocity = VECTOR2_ZERO,
         .acceleration = VECTOR2_ZERO,
-    }));
+    };
 
-    ADD_COMPONENT(CSmooth, ((CSmooth)
+    scene->components.smooths[builder->entity] = (CSmooth)
     {
         .previous = position,
-    }));
+    };
 
-    ADD_COMPONENT(CCollider, ((CCollider)
+    scene->components.colliders[builder->entity] = (CCollider)
     {
         .resolutionSchema = RESOLVE_NONE,
         .layer = LAYER_NONE,
         .mask = LAYER_TERRAIN | LAYER_LETHAL | LAYER_INTERACTABLE,
         .onCollision = PlayerOnCollision,
         .onResolution = PlayerOnResolution,
-    }));
+    };
 
-    ADD_COMPONENT(CMortal, ((CMortal)
+    scene->components.mortals[builder->entity] = (CMortal)
     {
         .hp = 2,
-    }));
+    };
 
     static const f32 coyoteDuration = CTX_DT * 6;
     static const f32 invulnerableDuration = 1.5f;
 
-    ADD_COMPONENT(CPlayer, ((CPlayer)
+    scene->components.players[builder->entity] = (CPlayer)
     {
         .groundedLastFrame = false,
         .grounded = false,
@@ -566,12 +583,6 @@ EntityBuilder PlayerCreate(const f32 x, const f32 y)
         .sprintDuration = 0,
         .sprintForce = VECTOR2_ZERO,
         .animationState = PLAYER_ANIMATION_STATE_STILL,
-    }));
-
-    return (EntityBuilder)
-    {
-        .tags = tags,
-        .components = components,
     };
 }
 
@@ -769,7 +780,7 @@ Direction Facing(const CPlayer* player)
 
 void PlayerInputUpdate(Scene* scene, const usize entity)
 {
-    const u64 dependencies = TAG_PLAYER | TAG_KINETIC;
+    static const u64 dependencies = TAG_PLAYER | TAG_KINETIC;
 
     if (!SceneEntityHasDependencies(scene, entity, dependencies))
     {
@@ -857,7 +868,7 @@ void PlayerInputUpdate(Scene* scene, const usize entity)
 
 void PlayerPostCollisionUpdate(Scene* scene, const usize entity)
 {
-    const u64 dependencies = TAG_PLAYER | TAG_POSITION | TAG_KINETIC;
+    static const u64 dependencies = TAG_PLAYER | TAG_POSITION | TAG_KINETIC;
 
     if (!SceneEntityHasDependencies(scene, entity, dependencies))
     {
@@ -906,23 +917,23 @@ static void PlayerFlashingLogic(Scene* scene, const usize entity)
 
         if (passedSlices % 2 == 0)
         {
-            SceneDeferDisableComponent(scene, entity, TAG_ANIMATION);
+            SceneDeferDisableTag(scene, entity, TAG_ANIMATION);
         }
         else
         {
-            SceneDeferEnableComponent(scene, entity, TAG_ANIMATION);
+            SceneDeferEnableTag(scene, entity, TAG_ANIMATION);
         }
     }
     else
     {
         // This is a pre-caution to make sure the last state isn't off.
-        SceneDeferEnableComponent(scene, entity, TAG_ANIMATION);
+        SceneDeferEnableTag(scene, entity, TAG_ANIMATION);
     }
 }
 
 void PlayerMortalUpdate(Scene* scene, const usize entity)
 {
-    const u64 dependencies = TAG_PLAYER | TAG_MORTAL | TAG_POSITION | TAG_KINETIC;
+    static const u64 dependencies = TAG_PLAYER | TAG_MORTAL | TAG_POSITION | TAG_KINETIC;
 
     if (!SceneEntityHasDependencies(scene, entity, dependencies))
     {
@@ -952,7 +963,7 @@ void PlayerMortalUpdate(Scene* scene, const usize entity)
     {
         player->dead = true;
 
-        SceneDeferDisableComponent(scene, entity, TAG_COLLIDER);
+        SceneDeferDisableTag(scene, entity, TAG_COLLIDER);
 
         kinetic->velocity.x = 0;
         kinetic->acceleration.x = 0;
@@ -965,8 +976,8 @@ void PlayerMortalUpdate(Scene* scene, const usize entity)
     {
         player->dead = true;
 
-        SceneDeferEnableComponent(scene, entity, TAG_ANIMATION);
-        SceneDeferDisableComponent(scene, entity, TAG_COLLIDER);
+        SceneDeferEnableTag(scene, entity, TAG_ANIMATION);
+        SceneDeferDisableTag(scene, entity, TAG_COLLIDER);
 
         if (kinetic->velocity.y >= 0)
         {
@@ -1077,7 +1088,7 @@ static void EnableAnimation(Scene* scene, usize entity, CPlayer* player, Animati
 
 void PlayerAnimationUpdate(Scene* scene, const usize entity)
 {
-    const u64 dependencies = TAG_PLAYER;
+    static const u64 dependencies = TAG_PLAYER;
 
     if (!SceneEntityHasDependencies(scene, entity, dependencies))
     {
@@ -1188,7 +1199,7 @@ void PlayerAnimationUpdate(Scene* scene, const usize entity)
 
 void PlayerDebugDraw(const Scene* scene, usize entity)
 {
-    const u64 dependencies = TAG_PLAYER | TAG_POSITION | TAG_DIMENSION;
+    static const u64 dependencies = TAG_PLAYER | TAG_POSITION | TAG_DIMENSION;
 
     if (!SceneEntityHasDependencies(scene, entity, dependencies))
     {

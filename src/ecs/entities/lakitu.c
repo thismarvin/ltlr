@@ -1,15 +1,8 @@
-#include "common.h"
 #include "lakitu.h"
 
-EntityBuilder LakituCreate(void)
+void LakituCreate(Scene* scene, const void* params)
 {
-    Deque components = DEQUE_OF(Component);
-
-    const u64 tags =
-        TAG_NONE
-        | TAG_POSITION
-        | TAG_KINETIC
-        | TAG_SMOOTH;
+    const LakituBuilder* builder = params;
 
     const Vector2 position = (Vector2)
     {
@@ -17,25 +10,25 @@ EntityBuilder LakituCreate(void)
         .y = CTX_VIEWPORT_HEIGHT * 0.5,
     };
 
-    ADD_COMPONENT(CPosition, ((CPosition)
+    scene->components.tags[builder->entity] =
+        TAG_NONE
+        | TAG_POSITION
+        | TAG_KINETIC
+        | TAG_SMOOTH;
+
+    scene->components.positions[builder->entity] = (CPosition)
     {
         .value = position,
-    }));
+    };
 
-    ADD_COMPONENT(CKinetic, ((CKinetic)
+    scene->components.kinetics[builder->entity] = (CKinetic)
     {
         .velocity = Vector2Create(100, 0),
         .acceleration = VECTOR2_ZERO,
-    }));
+    };
 
-    ADD_COMPONENT(CSmooth, ((CSmooth)
+    scene->components.smooths[builder->entity] = (CSmooth)
     {
         .previous = position,
-    }));
-
-    return (EntityBuilder)
-    {
-        .tags = tags,
-        .components = components,
     };
 }

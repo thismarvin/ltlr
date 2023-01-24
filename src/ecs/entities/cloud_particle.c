@@ -1,5 +1,5 @@
 #include "cloud_particle.h"
-#include "common.h"
+#include <assert.h>
 #include <raymath.h>
 
 // TODO(thismarvin): The collider no longer scales...
@@ -29,18 +29,11 @@ static OnResolutionResult CloudParticleOnResolution(const OnResolutionParams* pa
     };
 }
 
-EntityBuilder CloudParticleCreate
-(
-    const Vector2 position,
-    const f32 radius,
-    const Vector2 initialVelocity,
-    const Vector2 acceleration,
-    const f32 lifetime
-)
+void CloudParticleCreate(Scene* scene, const void* params)
 {
-    Deque components = DEQUE_OF(Component);
+    const CloudParticleBuilder* builder = params;
 
-    const u64 tags =
+    scene->components.tags[builder->entity] =
         TAG_NONE
         | TAG_POSITION
         | TAG_DIMENSION
@@ -50,53 +43,47 @@ EntityBuilder CloudParticleCreate
         | TAG_FLEETING
         | TAG_CLOUD_PARTICLE;
 
-    ADD_COMPONENT(CPosition, ((CPosition)
+    scene->components.positions[builder->entity] = (CPosition)
     {
-        .value = position,
-    }));
+        .value = builder->position,
+    };
 
-    ADD_COMPONENT(CDimension, ((CDimension)
+    scene->components.dimensions[builder->entity] = (CDimension)
     {
-        .width = radius * 2,
-        .height = radius * 2,
-    }));
+        .width = builder->radius * 2,
+        .height = builder->radius * 2,
+    };
 
-    ADD_COMPONENT(CKinetic, ((CKinetic)
+    scene->components.kinetics[builder->entity] = (CKinetic)
     {
-        .velocity = initialVelocity,
-        .acceleration = acceleration,
-    }));
+        .velocity = builder->initialVelocity,
+        .acceleration = builder->acceleration,
+    };
 
-    ADD_COMPONENT(CSmooth, ((CSmooth)
+    scene->components.smooths[builder->entity] = (CSmooth)
     {
-        .previous = position,
-    }));
+        .previous = builder->position,
+    };
 
-    ADD_COMPONENT(CCollider, ((CCollider)
+    scene->components.colliders[builder->entity] = (CCollider)
     {
         .resolutionSchema = RESOLVE_NONE,
         .layer = LAYER_NONE,
         .mask = LAYER_TERRAIN,
         .onCollision = OnCollisionNoop,
         .onResolution = CloudParticleOnResolution,
-    }));
+    };
 
-    ADD_COMPONENT(CFleeting, ((CFleeting)
+    scene->components.fleetings[builder->entity] = (CFleeting)
     {
-        .lifetime = lifetime,
+        .lifetime = builder->lifetime,
         .age = 0,
-    }));
-
-    return (EntityBuilder)
-    {
-        .tags = tags,
-        .components = components,
     };
 }
 
 void CloudParticleDraw(const Scene* scene, const usize entity)
 {
-    const u64 dependencies =
+    static const u64 dependencies =
         TAG_NONE
         | TAG_POSITION
         | TAG_DIMENSION

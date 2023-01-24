@@ -1,6 +1,10 @@
 #pragma once
 
-#include "../../scene.h"
-#include "../entity_builder.h"
+#include "common.h"
 
-EntityBuilder LakituCreate(void);
+typedef struct
+{
+    usize entity;
+} LakituBuilder;
+
+void LakituCreate(Scene* scene, const void* params);

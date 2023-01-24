@@ -9,17 +9,36 @@
 #include <stdio.h>
 #include <string.h>
 
-void SceneDeferEnableComponent(Scene* self, const usize entity, const usize tag)
+typedef struct
 {
-    SceneSubmitCommand(self, CommandCreateEnableComponent(entity, tag));
-}
+    OnDefer fn;
+    void* params;
+} SceneDeferParams;
 
-void SceneDeferDisableComponent(Scene* self, const usize entity, const usize tag)
+typedef struct
 {
-    SceneSubmitCommand(self, CommandCreateDisableComponent(entity, tag));
-}
+    usize entity;
+} DeallocateEntityParams;
 
-static usize SceneAllocateEntity(Scene* self)
+typedef struct
+{
+    usize entity;
+    u64 tag;
+} EnableComponentParams;
+
+typedef struct
+{
+    usize entity;
+    u64 tag;
+} DisableComponentParams;
+
+typedef struct
+{
+    usize entity;
+    u64 tag;
+} SetTagParams;
+
+usize SceneAllocateEntity(Scene* self)
 {
     EntityManager* entityManager = &self->m_entityManager;
 
@@ -42,27 +61,38 @@ static usize SceneAllocateEntity(Scene* self)
     return next;
 }
 
-usize SceneDeferAddEntity(Scene* self, EntityBuilder entityBuilder)
+static void SceneDeallocateEntity(Scene* self, const void* params)
 {
-    const usize entity = SceneAllocateEntity(self);
+    const DeallocateEntityParams* data = params;
 
-    SceneSubmitCommand(self, CommandCreateSetTag(entity, entityBuilder.tags));
-
-    for (usize i = 0; i < DequeGetSize(&entityBuilder.components); ++i)
-    {
-        const Component* component = &DEQUE_GET_UNCHECKED(&entityBuilder.components, Component, i);
-
-        SceneSubmitCommand(self, CommandCreateSetComponent(entity, *component));
-    }
-
-    DequeDestroy(&entityBuilder.components);
-
-    return entity;
+    self->components.tags[data->entity] = TAG_NONE;
+    DequePushFront(&self->m_entityManager.m_recycledEntityIndices, &data->entity);
 }
 
-void SceneDeferDeallocateEntity(Scene* self, const usize entity)
+static void SceneEnableComponent(Scene* self, const void* params)
 {
-    SceneSubmitCommand(self, CommandCreateDeallocateEntity(entity));
+    const EnableComponentParams* data = params;
+
+    self->components.tags[data->entity] |= data->tag;
+}
+
+static void SceneDisableComponent(Scene* self, const void* params)
+{
+    const DisableComponentParams* data = params;
+
+    self->components.tags[data->entity] &= ~data->tag;
+}
+
+static void SceneSetTag(Scene* self, const void* params)
+{
+    const SetTagParams* data = params;
+
+    self->components.tags[data->entity] = data->tag;
+}
+
+usize SceneGetTotalAllocatedEntities(const Scene* self)
+{
+    return self->m_entityManager.m_nextFreshEntityIndex;
 }
 
 bool SceneEntityHasDependencies(const Scene* self, usize entity, u64 dependencies)
@@ -70,180 +100,60 @@ bool SceneEntityHasDependencies(const Scene* self, usize entity, u64 dependencie
     return (self->components.tags[entity] & dependencies) == dependencies;
 }
 
-void SceneSubmitCommand(Scene* self, Command command)
+void SceneDefer(Scene* self, const OnDefer fn, const void* params)
 {
-    DequePushFront(&self->commands, &command);
-}
-
-static void SceneExecuteSetTag(Scene* self, const CommandSetTag* setTag)
-{
-    self->components.tags[setTag->entity] = setTag->tag;
-}
-
-static void SceneExecuteSetComponent(Scene* self, const CommandSetComponent* setCommand)
-{
-    const usize entity = setCommand->entity;
-    const Component* component = &setCommand->component;
-
-    switch (component->tag)
+    const SceneDeferParams args = (SceneDeferParams)
     {
-        case TAG_NONE:
-        {
-            break;
-        }
+        .fn = fn,
+        .params = (void*)params,
+    };
 
-        case TAG_POSITION:
-        {
-            self->components.positions[entity] = component->position;
-
-            break;
-        }
-
-        case TAG_DIMENSION:
-        {
-            self->components.dimensions[entity] = component->dimension;
-
-            break;
-        }
-
-        case TAG_COLOR:
-        {
-            self->components.colors[entity] = component->color;
-
-            break;
-        }
-
-        case TAG_SPRITE:
-        {
-            self->components.sprites[entity] = component->sprite;
-
-            break;
-        }
-
-        case TAG_KINETIC:
-        {
-            self->components.kinetics[entity] = component->kinetic;
-
-            break;
-        }
-
-        case TAG_SMOOTH:
-        {
-            self->components.smooths[entity] = component->smooth;
-
-            break;
-        }
-
-        case TAG_PLAYER:
-        {
-            self->components.players[entity] = component->player;
-
-            break;
-        }
-
-        case TAG_COLLIDER:
-        {
-            self->components.colliders[entity] = component->collider;
-
-            break;
-        }
-
-        case TAG_MORTAL:
-        {
-            self->components.mortals[entity] = component->mortal;
-
-            break;
-        }
-
-        case TAG_DAMAGE:
-        {
-            self->components.damages[entity] = component->damage;
-
-            break;
-        }
-
-        case TAG_FLEETING:
-        {
-            self->components.fleetings[entity] = component->fleeting;
-
-            break;
-        }
-
-        case TAG_ANIMATION:
-        {
-            self->components.animations[entity] = component->animation;
-
-            break;
-        }
-    }
+    DEQUE_PUSH_BACK(&self->deferred, SceneDeferParams, args);
 }
 
-void SceneExecuteDeallocateEntity(Scene* self, const CommandDeallocateEntity* deallocateEntity)
+void SceneDeferDeallocateEntity(Scene* self, const usize entity)
 {
-    const usize entity = deallocateEntity->entity;
-
-    self->components.tags[entity] = TAG_NONE;
-    DequePushFront(&self->m_entityManager.m_recycledEntityIndices, &entity);
+    DeallocateEntityParams* params = malloc(sizeof(DeallocateEntityParams));
+    params->entity = entity;
+    SceneDefer(self, SceneDeallocateEntity, params);
 }
 
-void SceneExecuteEnableComponent(Scene* self, const CommandEnableComponent* enableCommand)
+void SceneDeferEnableTag(Scene* self, const usize entity, const u64 tag)
 {
-    self->components.tags[enableCommand->entity] |= enableCommand->componentTag;
+    EnableComponentParams* params = malloc(sizeof(EnableComponentParams));
+    params->entity = entity;
+    params->tag = tag;
+    SceneDefer(self, SceneEnableComponent, params);
 }
 
-void SceneExecuteRemoveComponent(Scene* self, const CommandDisableComponent* removeCommand)
+void SceneDeferDisableTag(Scene* self, const usize entity, const u64 tag)
 {
-    self->components.tags[removeCommand->entity] &= ~removeCommand->componentTag;
+    DisableComponentParams* params = malloc(sizeof(DisableComponentParams));
+    params->entity = entity;
+    params->tag = tag;
+    SceneDefer(self, SceneDisableComponent, params);
 }
 
-static void SceneExecuteCommands(Scene* self)
+void SceneDeferSetTag(Scene* self, const usize entity, const u64 tag)
 {
-    Deque* commands = &self->commands;
+    SetTagParams* params = malloc(sizeof(SetTagParams));
+    params->entity = entity;
+    params->tag = tag;
+    SceneDefer(self, SceneSetTag, params);
+}
 
-    for (usize i = 0; i < DequeGetSize(commands); ++i)
+static void SceneFlush(Scene* self)
+{
+    for (usize i = 0; i < DequeGetSize(&self->deferred); ++i)
     {
-        const Command* command = &DEQUE_GET_UNCHECKED(commands, Command, i);
+        SceneDeferParams* params = &DEQUE_GET_UNCHECKED(&self->deferred, SceneDeferParams, i);
 
-        switch (command->type)
-        {
-            case CT_SET_TAG:
-            {
-                SceneExecuteSetTag(self, &command->setTag);
-                break;
-            }
+        params->fn(self, params->params);
 
-            case CT_SET_COMPONENT:
-            {
-                SceneExecuteSetComponent(self, &command->setComponent);
-                break;
-            }
-
-            case CT_DEALLOCATE_ENTITY:
-            {
-                SceneExecuteDeallocateEntity(self, &command->deallocateEntity);
-                break;
-            }
-
-            case CT_ENABLE_COMPONENT:
-            {
-                SceneExecuteEnableComponent(self, &command->enableComponent);
-                break;
-            }
-
-            case CT_DISABLE_COMPONENT:
-            {
-                SceneExecuteRemoveComponent(self, &command->disableComponent);
-                break;
-            }
-        }
+        free(params->params);
     }
 
-    DequeClear(commands);
-}
-
-usize SceneGetTotalAllocatedEntities(const Scene* self)
-{
-    return self->m_entityManager.m_nextFreshEntityIndex;
+    DequeClear(&self->deferred);
 }
 
 static void SceneSetupContent(Scene* self)
@@ -564,19 +474,11 @@ static void ScenePopulateLevel(Scene* self)
     for (usize i = 0; i < self->level.segmentsLength; ++i)
     {
         LevelSegment* segment = &self->level.segments[i];
-        LevelSegmentBuilder segmentBuilder = LevelSegmentBuilderCreate(segment->type, offset);
-
-        for (usize i = 0; i < DequeGetSize(&segmentBuilder.entities); ++i)
-        {
-            const EntityBuilder builder = DEQUE_GET_UNCHECKED(&segmentBuilder.entities, EntityBuilder, i);
-            SceneDeferAddEntity(self, builder);
-        }
+        LevelSegmentBuilder segmentBuilder = LevelSegmentBuilderCreate(self, segment->type, offset);
 
         segment->width = segmentBuilder.width;
         offset.x += segmentBuilder.width;
         self->bounds.width += segmentBuilder.width;
-
-        DequeDestroy(&segmentBuilder.entities);
     }
 
     // Extend the end of the level so the player doesn't visibly fall out-of-bounds.
@@ -588,12 +490,37 @@ static void ScenePopulateLevel(Scene* self)
             .width = 16 * 5,
             .height = 16 * (2 + 4),
         };
-        SceneDeferAddEntity(self, BlockCreate(aabb, RESOLVE_ALL, LAYER_TERRAIN));
+
+        BlockBuilder* builder = malloc(sizeof(BlockBuilder));
+        builder->entity = SceneAllocateEntity(self);
+        builder->aabb = aabb;
+        builder->resolutionSchema = RESOLVE_ALL;
+        builder->layer = LAYER_TERRAIN;
+        SceneDefer(self, BlockCreate, builder);
     }
 
-    self->player = SceneDeferAddEntity(self, PlayerCreate(16 * 1, 16 * -4));
-    self->fog = SceneDeferAddEntity(self, FogCreate());
-    self->lakitu = SceneDeferAddEntity(self, LakituCreate());
+    {
+        self->player = SceneAllocateEntity(self);
+        PlayerBuilder* builder = malloc(sizeof(PlayerBuilder));
+        builder->entity = self->player;
+        builder->x = 16 * 5;
+        builder->y = 16 * -4;
+        SceneDefer(self, PlayerCreate, builder);
+    }
+
+    {
+        self->fog = SceneAllocateEntity(self);
+        FogBuilder* builder = malloc(sizeof(FogBuilder));
+        builder->entity = self->fog;
+        SceneDefer(self, FogCreate, builder);
+    }
+
+    {
+        self->lakitu = SceneAllocateEntity(self);
+        LakituBuilder* builder = malloc(sizeof(LakituBuilder));
+        builder->entity = self->lakitu;
+        SceneDefer(self, LakituCreate, builder);
+    }
 }
 
 static void ScenePlantTrees(Scene* self)
@@ -641,16 +568,31 @@ static void SceneBeginFadeOut(Scene* self)
     self->fader.easer.duration = CTX_DT * 40;
 }
 
+static void SceneResetEcs(Scene* self)
+{
+    // We don't have to zero out each component array; just resetting the tags is sufficient.
+    memset(&self->components.tags, 0, sizeof(u64) * MAX_ENTITIES);
+
+    // Deferred function arguments use malloc; it's our responsibility to free them.
+    {
+        for (usize i = 0; i < DequeGetSize(&self->deferred); ++i)
+        {
+            SceneDeferParams* params = &DEQUE_GET_UNCHECKED(&self->deferred, SceneDeferParams, i);
+            free(params->params);
+        }
+
+        DequeClear(&self->deferred);
+    }
+
+    self->m_entityManager.m_nextFreshEntityIndex = 0;
+    DequeClear(&self->m_entityManager.m_recycledEntityIndices);
+}
+
 static void SceneBuildStage(Scene* self)
 {
     SceneBeginFadeIn(self);
 
-    memset(&self->components.tags, 0, sizeof(u64) * MAX_ENTITIES);
-
-    DequeClear(&self->commands);
-
-    self->m_entityManager.m_nextFreshEntityIndex = 0;
-    DequeClear(&self->m_entityManager.m_recycledEntityIndices);
+    SceneResetEcs(self);
 
     ScenePopulateLevel(self);
     ScenePlantTrees(self);
@@ -658,7 +600,7 @@ static void SceneBuildStage(Scene* self)
     self->resetRequested = false;
     self->advanceStageRequested = false;
 
-    SceneExecuteCommands(self);
+    SceneFlush(self);
 }
 
 static void SceneReset(Scene* self)
@@ -694,11 +636,12 @@ void SceneInit(Scene* self)
     SceneSetupInput(self);
     SceneSetupLayers(self);
 
+    self->deferred = DEQUE_OF(SceneDeferParams);
+
     self->state = SCENE_STATE_MENU;
 
     self->debugging = false;
 
-    self->commands = DEQUE_OF(Command);
     self->m_entityManager = (EntityManager)
     {
         .m_nextFreshEntityIndex = 0,
@@ -925,7 +868,7 @@ void SceneUpdate(Scene* self)
 
     SceneUpdateDirector(self);
 
-    SceneExecuteCommands(self);
+    SceneFlush(self);
 }
 
 // Return a Rectangle that is within the scene's bounds and centered on a given entity.
@@ -1366,7 +1309,7 @@ void SceneDestroy(Scene* self)
 {
     AtlasDestroy(&self->atlas);
 
-    DequeDestroy(&self->commands);
+    DequeDestroy(&self->deferred);
     DequeDestroy(&self->m_entityManager.m_recycledEntityIndices);
     DequeDestroy(&self->treePositionsBack);
     DequeDestroy(&self->treePositionsFront);

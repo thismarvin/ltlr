@@ -4,20 +4,18 @@
 #include "../segments_generated.h"
 #include "../segments_helper.h"
 
-LevelSegmentBuilder LevelSegmentBuilderCreate_starter_1(const Vector2 offset)
+LevelSegmentBuilder LevelSegmentBuilderCreate_starter_1(Scene* scene, const Vector2 offset)
 {
-    Deque entities = DEQUE_WITH_CAPACITY(EntityBuilder, 6);
     CREATE_SOLID_BLOCK(0, 112, 48, 144);
     CREATE_SOLID_BLOCK(48, 144, 16, 112);
     CREATE_SOLID_BLOCK(64, 160, 48, 96);
     CREATE_SOLID_BLOCK(112, 128, 48, 128);
     CREATE_SOLID_BLOCK(160, 112, 48, 144);
     CREATE_SOLID_BLOCK(208, 160, 32, 96);
-    const u16 width = 240;
+
     return (LevelSegmentBuilder)
     {
-        .entities = entities,
-        .width = width,
+        .width = 240,
     };
 }
 

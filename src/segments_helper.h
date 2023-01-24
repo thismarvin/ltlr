@@ -9,7 +9,12 @@
         .width = mWidth, \
         .height = mHeight, \
     }; \
-    DEQUE_PUSH_BACK(&entities, EntityBuilder, BlockCreate(aabb, RESOLVE_ALL, LAYER_TERRAIN)); \
+    BlockBuilder* builder = malloc(sizeof(BlockBuilder)); \
+    builder->entity = SceneAllocateEntity(scene); \
+    builder->aabb = aabb; \
+    builder->resolutionSchema = RESOLVE_ALL; \
+    builder->layer = LAYER_TERRAIN; \
+    SceneDefer(scene, BlockCreate, builder); \
 }
 
 #define CREATE_ONE_WAY_BLOCK(mX, mY, mWidth, mHeight) \
@@ -21,7 +26,12 @@
         .width = mWidth, \
         .height = mHeight, \
     }; \
-    DEQUE_PUSH_BACK(&entities, EntityBuilder, BlockCreate(aabb, RESOLVE_UP, LAYER_TERRAIN)); \
+    BlockBuilder* builder = malloc(sizeof(BlockBuilder)); \
+    builder->entity = SceneAllocateEntity(scene); \
+    builder->aabb = aabb; \
+    builder->resolutionSchema = RESOLVE_UP; \
+    builder->layer = LAYER_TERRAIN; \
+    SceneDefer(scene, BlockCreate, builder); \
 }
 
 #define CREATE_INVISIBLE_BLOCK(mX, mY, mWidth, mHeight) \
@@ -33,35 +43,57 @@
         .width = mWidth, \
         .height = mHeight, \
     }; \
-    DEQUE_PUSH_BACK(&entities, EntityBuilder, BlockCreate(aabb, RESOLVE_ALL, LAYER_INVISIBLE)); \
+    BlockBuilder* builder = malloc(sizeof(BlockBuilder)); \
+    builder->entity = SceneAllocateEntity(scene); \
+    builder->aabb = aabb; \
+    builder->resolutionSchema = RESOLVE_ALL; \
+    builder->layer = LAYER_INVISIBLE; \
+    SceneDefer(scene, BlockCreate, builder); \
 }
 
 #define CREATE_SPIKE(mX, mY, mRotation) \
 { \
     const f32 x = mX + offset.x; \
     const f32 y = mY + offset.y; \
-    DEQUE_PUSH_BACK(&entities, EntityBuilder, SpikeCreate(x, y, mRotation)); \
+    SpikeBuilder* builder = malloc(sizeof(SpikeBuilder)); \
+    builder->entity = SceneAllocateEntity(scene); \
+    builder->x = x; \
+    builder->y = y; \
+    builder->rotation = mRotation; \
+    SceneDefer(scene, SpikeCreate, builder); \
 }
 
 #define CREATE_WALKER(mX, mY) \
 { \
     const f32 x = mX + offset.x; \
     const f32 y = mY + offset.y; \
-    DEQUE_PUSH_BACK(&entities, EntityBuilder, WalkerCreate(x, y)); \
+    WalkerBuilder* builder = malloc(sizeof(WalkerBuilder)); \
+    builder->entity = SceneAllocateEntity(scene); \
+    builder->x = x; \
+    builder->y = y; \
+    SceneDefer(scene, WalkerCreate, builder); \
 }
 
 #define CREATE_BATTERY(mX, mY) \
 { \
     const f32 x = mX + offset.x + 1; \
     const f32 y = mY + offset.y; \
-    DEQUE_PUSH_BACK(&entities, EntityBuilder, BatteryCreate(x, y)); \
+    BatteryBuilder* builder = malloc(sizeof(BatteryBuilder)); \
+    builder->entity = SceneAllocateEntity(scene); \
+    builder->x = x; \
+    builder->y = y; \
+    SceneDefer(scene, BatteryCreate, builder); \
 }
 
 #define CREATE_SOLAR_PANEL(mX, mY) \
 { \
     const f32 x = mX + offset.x - 36; \
     const f32 y = mY + offset.y - 24; \
-    DEQUE_PUSH_BACK(&entities, EntityBuilder, SolarPanelCreate(x, y)); \
+    SolarPanelBuilder* builder = malloc(sizeof(SolarPanelBuilder)); \
+    builder->entity = SceneAllocateEntity(scene); \
+    builder->x = x; \
+    builder->y = y; \
+    SceneDefer(scene, SolarPanelCreate, builder); \
 }
 
 #define DRAW_SPRITE(mSprite, mX, mY) \

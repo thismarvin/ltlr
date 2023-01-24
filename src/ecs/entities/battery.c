@@ -1,13 +1,24 @@
-#include "../../atlas.h"
 #include "battery.h"
-#include "common.h"
-#include <raymath.h>
+#include <math.h>
 
-EntityBuilder BatteryCreate(const f32 x, const f32 y)
+void BatteryCreate(Scene* scene, const void* params)
 {
-    Deque components = DEQUE_OF(Component);
+    const BatteryBuilder* builder = params;
 
-    const u64 tags =
+    const Vector2 position = (Vector2)
+    {
+        .x = builder->x,
+        .y = builder->y,
+    };
+    const Rectangle intramural = (Rectangle)
+    {
+        .x = 1,
+        .y = 0,
+        .width = 14,
+        .height = 32,
+    };
+
+    scene->components.tags[builder->entity] =
         TAG_NONE
         | TAG_POSITION
         | TAG_DIMENSION
@@ -17,63 +28,48 @@ EntityBuilder BatteryCreate(const f32 x, const f32 y)
         | TAG_KINETIC
         | TAG_BATTERY;
 
-    const Vector2 position = Vector2Create(x, y);
-    const Rectangle intramural = (Rectangle)
-    {
-        .x = 1,
-        .y = 0,
-        .width = 14,
-        .height = 32,
-    };
-
-    ADD_COMPONENT(CPosition, ((CPosition)
+    scene->components.positions[builder->entity] = (CPosition)
     {
         .value = position,
-    }));
+    };
 
-    ADD_COMPONENT(CDimension, ((CDimension)
+    scene->components.dimensions[builder->entity] = (CDimension)
     {
         .width = intramural.width,
         .height = intramural.height,
-    }));
+    };
 
-    ADD_COMPONENT(CSprite, ((CSprite)
+    scene->components.sprites[builder->entity] = (CSprite)
     {
         .type = SPRITE_BATTERY,
         .intramural = intramural,
         .reflection = REFLECTION_NONE,
-    }));
+    };
 
-    ADD_COMPONENT(CCollider, ((CCollider)
+    scene->components.colliders[builder->entity] = (CCollider)
     {
         .resolutionSchema = RESOLVE_NONE,
         .layer = LAYER_INTERACTABLE,
         .mask = LAYER_NONE,
         .onCollision = OnCollisionNoop,
         .onResolution = OnResolutionNoop,
-    }));
+    };
 
-    ADD_COMPONENT(CSmooth, ((CSmooth)
+    scene->components.smooths[builder->entity] = (CSmooth)
     {
         .previous = position,
-    }));
+    };
 
-    ADD_COMPONENT(CKinetic, ((CKinetic)
+    scene->components.kinetics[builder->entity] = (CKinetic)
     {
         .velocity = VECTOR2_ZERO,
         .acceleration = VECTOR2_ZERO,
-    }));
-
-    return (EntityBuilder)
-    {
-        .tags = tags,
-        .components = components,
     };
 }
 
 void BatteryUpdate(Scene* scene, const usize entity)
 {
-    const u64 dependencies = TAG_BATTERY | TAG_KINETIC;
+    static const u64 dependencies = TAG_BATTERY | TAG_KINETIC;
 
     if (!SceneEntityHasDependencies(scene, entity, dependencies))
     {

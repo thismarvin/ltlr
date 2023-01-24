@@ -1,9 +1,7 @@
 #pragma once
 
 #include "./collections/deque.h"
-#include "./ecs/command.h"
 #include "./ecs/components.h"
-#include "./ecs/entities.h"
 #include "atlas.h"
 #include "common.h"
 #include "fader.h"
@@ -14,6 +12,8 @@
 
 #define MAX_SCORE_DIGITS (6 + 1)
 #define MAX_SCORE (999999)
+
+typedef void (*OnDefer)(Scene*, const void*);
 
 typedef enum
 {
@@ -85,8 +85,6 @@ struct Scene
     InputProfile defaultMenuProfile;
     InputProfile defaultActionProfile;
     InputHandler input;
-    // `Deque<Command>`
-    Deque commands;
     bool resetRequested;
     bool advanceStageRequested;
     Vector2 actionCameraPosition;
@@ -95,20 +93,27 @@ struct Scene
     Deque treePositionsBack;
     // `Deque<Vector2>`
     Deque treePositionsFront;
+    // `Deque<SceneDeferParams>`
+    Deque deferred;
 };
 
 void SceneInit(Scene* self);
-void SceneDeferEnableComponent(Scene* self, usize entity, usize tag);
-void SceneDeferDisableComponent(Scene* self, usize entity, usize tag);
-// Defer the creation of a given entity (note that the EntityBuilder's Deque will be destroyed)
-usize SceneDeferAddEntity(Scene* self, EntityBuilder entityBuilder);
-void SceneDeferDeallocateEntity(Scene* self, usize entity);
-bool SceneEntityHasDependencies(const Scene* self, usize entity, u64 dependencies);
+
+usize SceneAllocateEntity(Scene* self);
 usize SceneGetTotalAllocatedEntities(const Scene* self);
-void SceneSubmitCommand(Scene* self, Command command);
+bool SceneEntityHasDependencies(const Scene* self, usize entity, u64 dependencies);
+
 void SceneIncrementScore(Scene* self, u32 value);
+
+void SceneDefer(Scene* self, const OnDefer fn, const void* params);
+void SceneDeferDeallocateEntity(Scene* self, usize entity);
+void SceneDeferEnableTag(Scene* self, usize entity, u64 tag);
+void SceneDeferDisableTag(Scene* self, usize entity, u64 tag);
+void SceneDeferSetTag(Scene* self, usize entity, u64 tag);
 void SceneDeferReset(Scene* self);
 void SceneDeferAdvanceStage(Scene* self);
+
 void SceneUpdate(Scene* self);
 void SceneDraw(Scene* self);
+
 void SceneDestroy(Scene* self);

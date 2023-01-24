@@ -1,7 +1,5 @@
 #pragma once
 
-#include "entity_builder.h"
-
 #include "./entities/battery.h"
 #include "./entities/block.h"
 #include "./entities/cloud_particle.h"

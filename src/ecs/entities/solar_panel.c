@@ -1,19 +1,8 @@
-#include "../../atlas.h"
 #include "solar_panel.h"
-#include "common.h"
-#include <raymath.h>
 
-EntityBuilder SolarPanelCreate(const f32 x, const f32 y)
+void SolarPanelCreate(Scene* scene, const void* params)
 {
-    Deque components = DEQUE_OF(Component);
-
-    const u64 tags =
-        TAG_NONE
-        | TAG_POSITION
-        | TAG_DIMENSION
-        | TAG_SPRITE
-        | TAG_COLLIDER
-        | TAG_SOLAR_PANEL;
+    const SolarPanelBuilder* builder = params;
 
     const Rectangle intramural = (Rectangle)
     {
@@ -23,36 +12,38 @@ EntityBuilder SolarPanelCreate(const f32 x, const f32 y)
         .height = 40,
     };
 
-    ADD_COMPONENT(CPosition, ((CPosition)
-    {
-        .value = Vector2Create(x, y),
-    }));
+    scene->components.tags[builder->entity] =
+        TAG_NONE
+        | TAG_POSITION
+        | TAG_DIMENSION
+        | TAG_SPRITE
+        | TAG_COLLIDER
+        | TAG_SOLAR_PANEL;
 
-    ADD_COMPONENT(CDimension, ((CDimension)
+    scene->components.positions[builder->entity] = (CPosition)
+    {
+        .value = Vector2Create(builder->x, builder->y),
+    };
+
+    scene->components.dimensions[builder->entity] = (CDimension)
     {
         .width = intramural.width,
         .height = intramural.height,
-    }));
+    };
 
-    ADD_COMPONENT(CSprite, ((CSprite)
+    scene->components.sprites[builder->entity] = (CSprite)
     {
         .type = SPRITE_SOLAR_0000,
         .intramural = intramural,
         .reflection = REFLECTION_NONE,
-    }));
+    };
 
-    ADD_COMPONENT(CCollider, ((CCollider)
+    scene->components.colliders[builder->entity] = (CCollider)
     {
         .resolutionSchema = RESOLVE_NONE,
         .layer = LAYER_INTERACTABLE,
         .mask = LAYER_NONE,
         .onCollision = OnCollisionNoop,
         .onResolution = OnResolutionNoop,
-    }));
-
-    return (EntityBuilder)
-    {
-        .tags = tags,
-        .components = components,
     };
 }
