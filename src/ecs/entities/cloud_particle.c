@@ -29,10 +29,8 @@ static OnResolutionResult CloudParticleOnResolution(const OnResolutionParams* pa
     };
 }
 
-void CloudParticleCreate(Scene* scene, const void* params)
+static void CloudParticleCreateHelper(Scene* scene, const CloudParticleBuilder* builder)
 {
-    const CloudParticleBuilder* builder = params;
-
     scene->components.tags[builder->entity] =
         TAG_NONE
         | TAG_POSITION
@@ -79,6 +77,11 @@ void CloudParticleCreate(Scene* scene, const void* params)
         .lifetime = builder->lifetime,
         .age = 0,
     };
+}
+
+void CloudParticleCreate(Scene* scene, const void* params)
+{
+    CloudParticleCreateHelper(scene, params);
 }
 
 void CloudParticleDraw(const Scene* scene, const usize entity)

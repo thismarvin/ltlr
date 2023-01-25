@@ -1,9 +1,7 @@
 #include "spike.h"
 
-void SpikeCreate(Scene* scene, const void* params)
+void SpikeCreateHelper(Scene* scene, const SpikeBuilder* builder)
 {
-    const SpikeBuilder* builder = params;
-
     Vector2 position;
     Rectangle intramural;
     Sprite spriteType;
@@ -95,4 +93,9 @@ void SpikeCreate(Scene* scene, const void* params)
     {
         .value = 1,
     };
+}
+
+void SpikeCreate(Scene* scene, const void* params)
+{
+    SpikeCreateHelper(scene, params);
 }

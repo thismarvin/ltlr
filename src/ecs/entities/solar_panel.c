@@ -1,9 +1,7 @@
 #include "solar_panel.h"
 
-void SolarPanelCreate(Scene* scene, const void* params)
+void SolarPanelCreateHelper(Scene* scene, const SolarPanelBuilder* builder)
 {
-    const SolarPanelBuilder* builder = params;
-
     const Rectangle intramural = (Rectangle)
     {
         .x = 4,
@@ -46,4 +44,9 @@ void SolarPanelCreate(Scene* scene, const void* params)
         .onResolution = OnResolutionNoop,
         .onCollision = OnCollisionNoop,
     };
+}
+
+void SolarPanelCreate(Scene* scene, const void* params)
+{
+    SolarPanelCreateHelper(scene, params);
 }

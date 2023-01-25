@@ -51,11 +51,9 @@ static void FogReset(void)
     decelerationTimer = 0.0;
 }
 
-void FogCreate(Scene* scene, const void* params)
+void FogCreateHelper(Scene* scene, const FogBuilder* builder)
 {
     FogReset();
-
-    const FogBuilder* builder = params;
 
     scene->components.tags[builder->entity] =
         TAG_NONE
@@ -79,6 +77,11 @@ void FogCreate(Scene* scene, const void* params)
     {
         .previous = FOG_INITIAL_POSITION,
     };
+}
+
+void FogCreate(Scene* scene, const void* params)
+{
+    FogCreateHelper(scene, params);
 }
 
 static void SpawnMovingParticles(Scene* scene, const CPosition* position, const CKinetic* kinetic)

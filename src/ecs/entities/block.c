@@ -1,9 +1,7 @@
 #include "block.h"
 
-void BlockCreate(Scene* scene, const void* params)
+void BlockCreateHelper(Scene* scene, const BlockBuilder* builder)
 {
-    const BlockBuilder* builder = params;
-
     const Vector2 position = (Vector2)
     {
         .x = builder->aabb.x,
@@ -35,4 +33,9 @@ void BlockCreate(Scene* scene, const void* params)
         .onResolution = OnResolutionNoop,
         .onCollision = OnCollisionNoop,
     };
+}
+
+void BlockCreate(Scene* scene, const void* params)
+{
+    BlockCreateHelper(scene, params);
 }

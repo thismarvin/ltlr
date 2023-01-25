@@ -1,9 +1,7 @@
 #include "lakitu.h"
 
-void LakituCreate(Scene* scene, const void* params)
+void LakituCreateHelper(Scene* scene, const LakituBuilder* builder)
 {
-    const LakituBuilder* builder = params;
-
     const Vector2 position = (Vector2)
     {
         .x = CTX_VIEWPORT_WIDTH * 0.5,
@@ -31,4 +29,9 @@ void LakituCreate(Scene* scene, const void* params)
     {
         .previous = position,
     };
+}
+
+void LakituCreate(Scene* scene, const void* params)
+{
+    LakituCreateHelper(scene, params);
 }

@@ -1,10 +1,8 @@
 #include "battery.h"
 #include <math.h>
 
-void BatteryCreate(Scene* scene, const void* params)
+static void BatteryCreateHelper(Scene* scene, const BatteryBuilder* builder)
 {
-    const BatteryBuilder* builder = params;
-
     const Vector2 position = (Vector2)
     {
         .x = builder->x,
@@ -65,6 +63,11 @@ void BatteryCreate(Scene* scene, const void* params)
         .velocity = VECTOR2_ZERO,
         .acceleration = VECTOR2_ZERO,
     };
+}
+
+void BatteryCreate(Scene* scene, const void* params)
+{
+    BatteryCreateHelper(scene, params);
 }
 
 void BatteryUpdate(Scene* scene, const usize entity)

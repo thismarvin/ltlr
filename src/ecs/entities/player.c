@@ -488,10 +488,8 @@ static void PlayerOnCollision(const OnCollisionParams* params)
     }
 }
 
-void PlayerCreate(Scene* scene, const void* params)
+void PlayerCreateHelper(Scene* scene, const PlayerBuilder* builder)
 {
-    const PlayerBuilder* builder = params;
-
     const Vector2 position = Vector2Create(builder->x, builder->y);
     const Rectangle intramural = (Rectangle)
     {
@@ -581,6 +579,11 @@ void PlayerCreate(Scene* scene, const void* params)
         .sprintForce = VECTOR2_ZERO,
         .animationState = PLAYER_ANIMATION_STATE_STILL,
     };
+}
+
+void PlayerCreate(Scene* scene, const void* params)
+{
+    PlayerCreateHelper(scene, params);
 }
 
 static void PlayerDecelerate(CPlayer* player, const CKinetic* kinetic)

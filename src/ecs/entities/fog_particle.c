@@ -1,10 +1,8 @@
 #include "fog_particle.h"
 #include <raymath.h>
 
-void FogParticleCreate(Scene* scene, const void* params)
+void FogParticleCreateHelper(Scene* scene, const FogParticleBuilder* builder)
 {
-    const FogParticleBuilder* builder = params;
-
     scene->components.tags[builder->entity] =
         TAG_NONE
         | TAG_POSITION
@@ -41,6 +39,11 @@ void FogParticleCreate(Scene* scene, const void* params)
         .lifetime = builder->lifetime,
         .age = 0,
     };
+}
+
+void FogParticleCreate(Scene* scene, const void* params)
+{
+    FogParticleCreateHelper(scene, params);
 }
 
 void FogParticleDraw(const Scene* scene, const usize entity)
