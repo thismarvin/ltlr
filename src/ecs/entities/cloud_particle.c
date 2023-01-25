@@ -70,8 +70,8 @@ void CloudParticleCreate(Scene* scene, const void* params)
         .resolutionSchema = RESOLVE_NONE,
         .layer = LAYER_NONE,
         .mask = LAYER_TERRAIN,
-        .onCollision = OnCollisionNoop,
         .onResolution = CloudParticleOnResolution,
+        .onCollision = OnCollisionNoop,
     };
 
     scene->components.fleetings[builder->entity] = (CFleeting)

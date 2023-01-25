@@ -87,8 +87,8 @@ void SpikeCreate(Scene* scene, const void* params)
         .resolutionSchema = RESOLVE_NONE,
         .layer = LAYER_LETHAL,
         .mask = LAYER_NONE,
-        .onCollision = OnCollisionNoop,
         .onResolution = OnResolutionNoop,
+        .onCollision = OnCollisionNoop,
     };
 
     scene->components.damages[builder->entity] = (CDamage)

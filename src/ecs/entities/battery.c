@@ -51,8 +51,8 @@ void BatteryCreate(Scene* scene, const void* params)
         .resolutionSchema = RESOLVE_NONE,
         .layer = LAYER_INTERACTABLE,
         .mask = LAYER_NONE,
-        .onCollision = OnCollisionNoop,
         .onResolution = OnResolutionNoop,
+        .onCollision = OnCollisionNoop,
     };
 
     scene->components.smooths[builder->entity] = (CSmooth)

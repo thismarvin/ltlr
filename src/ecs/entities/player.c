@@ -360,44 +360,6 @@ static void PlayerOnDamage(Scene* scene, const usize entity, const usize otherEn
     player->invulnerableTimer = 0;
 }
 
-static void PlayerOnCollision(const OnCollisionParams* params)
-{
-    static const u64 dependencies = TAG_PLAYER | TAG_MORTAL;
-    assert(SceneEntityHasDependencies(params->scene, params->entity, dependencies));
-
-    CMortal* mortal = &params->scene->components.mortals[params->entity];
-
-    // Collision specific logic that will not resolve the player.
-    {
-        if (SceneEntityHasDependencies(params->scene, params->otherEntity, TAG_DAMAGE))
-        {
-            PlayerOnDamage(params->scene, params->entity, params->otherEntity);
-        }
-
-        if (SceneEntityHasDependencies(params->scene, params->otherEntity, TAG_BATTERY))
-        {
-            // TODO(thismarvin): Add a static PlayerIncrementHealth method?
-            mortal->hp += 1;
-            mortal->hp = MIN(mortal->hp, PLAYER_MAX_HIT_POINTS);
-
-            SceneIncrementScore(params->scene, 100);
-
-            SceneDeferDeallocateEntity(params->scene, params->otherEntity);
-        }
-
-        if (SceneEntityHasDependencies(params->scene, params->otherEntity, TAG_SOLAR_PANEL | TAG_SPRITE))
-        {
-            // TODO(thismarvin): Check if we have a battery.
-
-            CSprite* otherSprite = &params->scene->components.sprites[params->otherEntity];
-
-            otherSprite->type = SPRITE_SOLAR_0001;
-
-            SceneDeferDisableTag(params->scene, params->otherEntity, TAG_SOLAR_PANEL);
-        }
-    }
-}
-
 static OnResolutionResult PlayerOnResolution(const OnResolutionParams* params)
 {
     static const u64 dependencies = TAG_PLAYER | TAG_KINETIC;
@@ -491,6 +453,41 @@ static OnResolutionResult PlayerOnResolution(const OnResolutionParams* params)
     };
 }
 
+static void PlayerOnCollision(const OnCollisionParams* params)
+{
+    static const u64 dependencies = TAG_PLAYER | TAG_MORTAL;
+    assert(SceneEntityHasDependencies(params->scene, params->entity, dependencies));
+
+    CMortal* mortal = &params->scene->components.mortals[params->entity];
+
+    if (SceneEntityHasDependencies(params->scene, params->otherEntity, TAG_DAMAGE))
+    {
+        PlayerOnDamage(params->scene, params->entity, params->otherEntity);
+    }
+
+    if (SceneEntityHasDependencies(params->scene, params->otherEntity, TAG_BATTERY))
+    {
+        // TODO(thismarvin): Add a static PlayerIncrementHealth method?
+        mortal->hp += 1;
+        mortal->hp = MIN(mortal->hp, PLAYER_MAX_HIT_POINTS);
+
+        SceneIncrementScore(params->scene, 100);
+
+        SceneDeferDeallocateEntity(params->scene, params->otherEntity);
+    }
+
+    if (SceneEntityHasDependencies(params->scene, params->otherEntity, TAG_SOLAR_PANEL | TAG_SPRITE))
+    {
+        // TODO(thismarvin): Check if we have a battery.
+
+        CSprite* otherSprite = &params->scene->components.sprites[params->otherEntity];
+
+        otherSprite->type = SPRITE_SOLAR_0001;
+
+        SceneDeferDisableTag(params->scene, params->otherEntity, TAG_SOLAR_PANEL);
+    }
+}
+
 void PlayerCreate(Scene* scene, const void* params)
 {
     const PlayerBuilder* builder = params;
@@ -553,8 +550,8 @@ void PlayerCreate(Scene* scene, const void* params)
         .resolutionSchema = RESOLVE_NONE,
         .layer = LAYER_NONE,
         .mask = LAYER_TERRAIN | LAYER_LETHAL | LAYER_INTERACTABLE,
-        .onCollision = PlayerOnCollision,
         .onResolution = PlayerOnResolution,
+        .onCollision = PlayerOnCollision,
     };
 
     scene->components.mortals[builder->entity] = (CMortal)

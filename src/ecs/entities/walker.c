@@ -94,8 +94,8 @@ void WalkerCreate(Scene* scene, const void* params)
         .resolutionSchema = RESOLVE_ALL,
         .layer = LAYER_LETHAL,
         .mask = LAYER_TERRAIN | LAYER_INVISIBLE | LAYER_LETHAL,
-        .onCollision = OnCollisionNoop,
         .onResolution = WalkerOnResolution,
+        .onCollision = OnCollisionNoop,
     };
 
     scene->components.damages[builder->entity] = (CDamage)

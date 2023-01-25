@@ -137,12 +137,16 @@ typedef struct
 {
     // The directions other entities will resolve against.
     u8 resolutionSchema;
-    // Layer you exist on.
+    // The layer you exist on.
     u64 layer;
-    // Layers you collide with.
+    // The layers you collide with.
     u64 mask;
-    OnCollision onCollision;
+    // The first pass of the collision system uses this callback as a strategy to resolve the
+    // current entity's aabb with other colliders.
     OnResolution onResolution;
+    // The second pass of the collision system uses this callback to compare the resolved aabb of
+    // the current entity against other colliders.
+    OnCollision onCollision;
 } CCollider;
 
 // TODO(thismarvin): Should this be in some sort of Singleton?

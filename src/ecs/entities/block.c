@@ -32,7 +32,7 @@ void BlockCreate(Scene* scene, const void* params)
         .resolutionSchema = builder->resolutionSchema,
         .layer = builder->layer,
         .mask = LAYER_NONE,
-        .onCollision = OnCollisionNoop,
         .onResolution = OnResolutionNoop,
+        .onCollision = OnCollisionNoop,
     };
 }
