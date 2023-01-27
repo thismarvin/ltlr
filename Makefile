@@ -1,5 +1,4 @@
 NU ?= nu
-ASTYLE ?= astyle
 GPROF ?= gprof
 
 SRC_DIRS := $(shell find src -type d)
@@ -48,8 +47,7 @@ Makefile.Web: scripts/generate.nu $(SRC_DIRS)
 
 .PHONY: @format
 @format:
-	$(ASTYLE) -n --project=.astylerc --recursive "src/*.c,*.h"
-	$(ASTYLE) -n --project=.astylerc --recursive "tests/*.c,*.h"
+	$(NU) -c "use scripts/ci.nu; ci format"
 
 .PHONY: @clean
 @clean:

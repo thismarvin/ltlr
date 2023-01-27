@@ -48,7 +48,7 @@
       minimal = pkgs.mkShell {
         inputsFrom = [self.packages."${system}".default];
         packages = with pkgs; [
-          astyle
+          clang-tools
         ];
       };
       extra = pkgs.mkShell {
