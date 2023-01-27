@@ -9,6 +9,6 @@ typedef struct
     f32 y;
 } BatteryBuilder;
 
-void BatteryCreate(Scene* scene, const void* params);
+void BatteryBuild(Scene* scene, const void* params);
 
 void BatteryUpdate(Scene* scene, usize entity);

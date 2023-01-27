@@ -14,7 +14,7 @@
     builder->aabb = aabb; \
     builder->resolutionSchema = RESOLVE_ALL; \
     builder->layer = LAYER_TERRAIN; \
-    SceneDefer(scene, BlockCreate, builder); \
+    SceneDefer(scene, BlockBuild, builder); \
 }
 
 #define CREATE_ONE_WAY_BLOCK(mX, mY, mWidth, mHeight) \
@@ -31,7 +31,7 @@
     builder->aabb = aabb; \
     builder->resolutionSchema = RESOLVE_UP; \
     builder->layer = LAYER_TERRAIN; \
-    SceneDefer(scene, BlockCreate, builder); \
+    SceneDefer(scene, BlockBuild, builder); \
 }
 
 #define CREATE_INVISIBLE_BLOCK(mX, mY, mWidth, mHeight) \
@@ -48,7 +48,7 @@
     builder->aabb = aabb; \
     builder->resolutionSchema = RESOLVE_ALL; \
     builder->layer = LAYER_INVISIBLE; \
-    SceneDefer(scene, BlockCreate, builder); \
+    SceneDefer(scene, BlockBuild, builder); \
 }
 
 #define CREATE_SPIKE(mX, mY, mRotation) \
@@ -60,7 +60,7 @@
     builder->x = x; \
     builder->y = y; \
     builder->rotation = mRotation; \
-    SceneDefer(scene, SpikeCreate, builder); \
+    SceneDefer(scene, SpikeBuild, builder); \
 }
 
 #define CREATE_WALKER(mX, mY) \
@@ -71,7 +71,7 @@
     builder->entity = SceneAllocateEntity(scene); \
     builder->x = x; \
     builder->y = y; \
-    SceneDefer(scene, WalkerCreate, builder); \
+    SceneDefer(scene, WalkerBuild, builder); \
 }
 
 #define CREATE_BATTERY(mX, mY) \
@@ -82,7 +82,7 @@
     builder->entity = SceneAllocateEntity(scene); \
     builder->x = x; \
     builder->y = y; \
-    SceneDefer(scene, BatteryCreate, builder); \
+    SceneDefer(scene, BatteryBuild, builder); \
 }
 
 #define CREATE_SOLAR_PANEL(mX, mY) \
@@ -93,7 +93,7 @@
     builder->entity = SceneAllocateEntity(scene); \
     builder->x = x; \
     builder->y = y; \
-    SceneDefer(scene, SolarPanelCreate, builder); \
+    SceneDefer(scene, SolarPanelBuild, builder); \
 }
 
 #define DRAW_SPRITE(mSprite, mX, mY) \

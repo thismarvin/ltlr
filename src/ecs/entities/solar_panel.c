@@ -1,6 +1,6 @@
 #include "solar_panel.h"
 
-void SolarPanelCreateHelper(Scene* scene, const SolarPanelBuilder* builder)
+void SolarPanelBuildHelper(Scene* scene, const SolarPanelBuilder* builder)
 {
     const Rectangle intramural = (Rectangle)
     {
@@ -46,7 +46,7 @@ void SolarPanelCreateHelper(Scene* scene, const SolarPanelBuilder* builder)
     };
 }
 
-void SolarPanelCreate(Scene* scene, const void* params)
+void SolarPanelBuild(Scene* scene, const void* params)
 {
-    SolarPanelCreateHelper(scene, params);
+    SolarPanelBuildHelper(scene, params);
 }

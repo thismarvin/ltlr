@@ -1,6 +1,6 @@
 #include "lakitu.h"
 
-void LakituCreateHelper(Scene* scene, const LakituBuilder* builder)
+void LakituBuildHelper(Scene* scene, const LakituBuilder* builder)
 {
     const Vector2 position = (Vector2)
     {
@@ -31,7 +31,7 @@ void LakituCreateHelper(Scene* scene, const LakituBuilder* builder)
     };
 }
 
-void LakituCreate(Scene* scene, const void* params)
+void LakituBuild(Scene* scene, const void* params)
 {
-    LakituCreateHelper(scene, params);
+    LakituBuildHelper(scene, params);
 }

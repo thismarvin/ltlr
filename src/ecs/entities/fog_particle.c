@@ -1,7 +1,7 @@
 #include "fog_particle.h"
 #include <raymath.h>
 
-void FogParticleCreateHelper(Scene* scene, const FogParticleBuilder* builder)
+void FogParticleBuildHelper(Scene* scene, const FogParticleBuilder* builder)
 {
     scene->components.tags[builder->entity] =
         TAG_NONE
@@ -41,9 +41,9 @@ void FogParticleCreateHelper(Scene* scene, const FogParticleBuilder* builder)
     };
 }
 
-void FogParticleCreate(Scene* scene, const void* params)
+void FogParticleBuild(Scene* scene, const void* params)
 {
-    FogParticleCreateHelper(scene, params);
+    FogParticleBuildHelper(scene, params);
 }
 
 void FogParticleDraw(const Scene* scene, const usize entity)

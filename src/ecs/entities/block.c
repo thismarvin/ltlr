@@ -1,6 +1,6 @@
 #include "block.h"
 
-void BlockCreateHelper(Scene* scene, const BlockBuilder* builder)
+void BlockBuildHelper(Scene* scene, const BlockBuilder* builder)
 {
     const Vector2 position = (Vector2)
     {
@@ -35,7 +35,7 @@ void BlockCreateHelper(Scene* scene, const BlockBuilder* builder)
     };
 }
 
-void BlockCreate(Scene* scene, const void* params)
+void BlockBuild(Scene* scene, const void* params)
 {
-    BlockCreateHelper(scene, params);
+    BlockBuildHelper(scene, params);
 }

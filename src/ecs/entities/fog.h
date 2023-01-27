@@ -9,7 +9,7 @@ typedef struct
     usize entity;
 } FogBuilder;
 
-void FogCreate(Scene* scene, const void* params);
+void FogBuild(Scene* scene, const void* params);
 
 void FogUpdate(Scene* scene, usize entity);
 

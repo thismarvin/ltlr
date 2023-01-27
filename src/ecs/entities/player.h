@@ -11,7 +11,7 @@ typedef struct
     f32 y;
 } PlayerBuilder;
 
-void PlayerCreate(Scene* scene, const void* params);
+void PlayerBuild(Scene* scene, const void* params);
 
 void PlayerInputUpdate(Scene* scene, usize entity);
 void PlayerPostCollisionUpdate(Scene* scene, usize entity);

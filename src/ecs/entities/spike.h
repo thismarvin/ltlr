@@ -18,4 +18,4 @@ typedef struct
     SpikeRotation rotation;
 } SpikeBuilder;
 
-void SpikeCreate(Scene* scene, const void* params);
+void SpikeBuild(Scene* scene, const void* params);

@@ -46,7 +46,7 @@ static void SpawnCloudParticle
     builder->initialVelocity = velocity;
     builder->acceleration = acceleration;
     builder->lifetime = lifetime;
-    SceneDefer(scene, CloudParticleCreate, builder);
+    SceneDefer(scene, CloudParticleBuild, builder);
 }
 
 static void PlayerSpawnImpactParticles(Scene* scene, const usize entity, const f32 groundY)
@@ -488,7 +488,7 @@ static void PlayerOnCollision(const OnCollisionParams* params)
     }
 }
 
-void PlayerCreateHelper(Scene* scene, const PlayerBuilder* builder)
+void PlayerBuildHelper(Scene* scene, const PlayerBuilder* builder)
 {
     const Vector2 position = Vector2Create(builder->x, builder->y);
     const Rectangle intramural = (Rectangle)
@@ -581,9 +581,9 @@ void PlayerCreateHelper(Scene* scene, const PlayerBuilder* builder)
     };
 }
 
-void PlayerCreate(Scene* scene, const void* params)
+void PlayerBuild(Scene* scene, const void* params)
 {
-    PlayerCreateHelper(scene, params);
+    PlayerBuildHelper(scene, params);
 }
 
 static void PlayerDecelerate(CPlayer* player, const CKinetic* kinetic)

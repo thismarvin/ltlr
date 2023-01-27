@@ -51,7 +51,7 @@ static void FogReset(void)
     decelerationTimer = 0.0;
 }
 
-void FogCreateHelper(Scene* scene, const FogBuilder* builder)
+void FogBuildHelper(Scene* scene, const FogBuilder* builder)
 {
     FogReset();
 
@@ -79,9 +79,9 @@ void FogCreateHelper(Scene* scene, const FogBuilder* builder)
     };
 }
 
-void FogCreate(Scene* scene, const void* params)
+void FogBuild(Scene* scene, const void* params)
 {
-    FogCreateHelper(scene, params);
+    FogBuildHelper(scene, params);
 }
 
 static void SpawnMovingParticles(Scene* scene, const CPosition* position, const CKinetic* kinetic)
@@ -119,7 +119,7 @@ static void SpawnMovingParticles(Scene* scene, const CPosition* position, const 
     builder->radius = radius;
     builder->lifetime = lifetime;
 
-    SceneDefer(scene, FogParticleCreate, builder);
+    SceneDefer(scene, FogParticleBuild, builder);
 }
 
 static void ShiftBreathingPhase()

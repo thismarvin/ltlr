@@ -29,7 +29,7 @@ static OnResolutionResult CloudParticleOnResolution(const OnResolutionParams* pa
     };
 }
 
-static void CloudParticleCreateHelper(Scene* scene, const CloudParticleBuilder* builder)
+static void CloudParticleBuildHelper(Scene* scene, const CloudParticleBuilder* builder)
 {
     scene->components.tags[builder->entity] =
         TAG_NONE
@@ -79,9 +79,9 @@ static void CloudParticleCreateHelper(Scene* scene, const CloudParticleBuilder* 
     };
 }
 
-void CloudParticleCreate(Scene* scene, const void* params)
+void CloudParticleBuild(Scene* scene, const void* params)
 {
-    CloudParticleCreateHelper(scene, params);
+    CloudParticleBuildHelper(scene, params);
 }
 
 void CloudParticleDraw(const Scene* scene, const usize entity)

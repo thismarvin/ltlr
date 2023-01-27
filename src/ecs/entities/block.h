@@ -10,4 +10,4 @@ typedef struct
     u64 layer;
 } BlockBuilder;
 
-void BlockCreate(Scene* scene, const void* params);
+void BlockBuild(Scene* scene, const void* params);

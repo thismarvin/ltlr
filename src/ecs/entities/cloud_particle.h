@@ -12,6 +12,6 @@ typedef struct
     f32 lifetime;
 } CloudParticleBuilder;
 
-void CloudParticleCreate(Scene* scene, const void* params);
+void CloudParticleBuild(Scene* scene, const void* params);
 
 void CloudParticleDraw(const Scene* scene, usize entity);

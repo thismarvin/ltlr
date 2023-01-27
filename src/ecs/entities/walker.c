@@ -31,7 +31,7 @@ static OnResolutionResult WalkerOnResolution(const OnResolutionParams* params)
     };
 }
 
-void WalkerCreateHelper(Scene* scene, const WalkerBuilder* builder)
+void WalkerBuildHelper(Scene* scene, const WalkerBuilder* builder)
 {
     const Vector2 position = Vector2Create(builder->x, builder->y);
     const Rectangle intramural = (Rectangle)
@@ -102,7 +102,7 @@ void WalkerCreateHelper(Scene* scene, const WalkerBuilder* builder)
     };
 }
 
-void WalkerCreate(Scene* scene, const void* params)
+void WalkerBuild(Scene* scene, const void* params)
 {
-    WalkerCreateHelper(scene, params);
+    WalkerBuildHelper(scene, params);
 }

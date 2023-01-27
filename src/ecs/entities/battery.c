@@ -1,7 +1,7 @@
 #include "battery.h"
 #include <math.h>
 
-static void BatteryCreateHelper(Scene* scene, const BatteryBuilder* builder)
+static void BatteryBuildHelper(Scene* scene, const BatteryBuilder* builder)
 {
     const Vector2 position = (Vector2)
     {
@@ -65,9 +65,9 @@ static void BatteryCreateHelper(Scene* scene, const BatteryBuilder* builder)
     };
 }
 
-void BatteryCreate(Scene* scene, const void* params)
+void BatteryBuild(Scene* scene, const void* params)
 {
-    BatteryCreateHelper(scene, params);
+    BatteryBuildHelper(scene, params);
 }
 
 void BatteryUpdate(Scene* scene, const usize entity)

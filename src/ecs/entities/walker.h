@@ -9,4 +9,4 @@ typedef struct
     f32 y;
 } WalkerBuilder;
 
-void WalkerCreate(Scene* scene, const void* params);
+void WalkerBuild(Scene* scene, const void* params);

@@ -496,7 +496,7 @@ static void ScenePopulateLevel(Scene* self)
         builder->aabb = aabb;
         builder->resolutionSchema = RESOLVE_ALL;
         builder->layer = LAYER_TERRAIN;
-        SceneDefer(self, BlockCreate, builder);
+        SceneDefer(self, BlockBuild, builder);
     }
 
     {
@@ -505,21 +505,21 @@ static void ScenePopulateLevel(Scene* self)
         builder->entity = self->player;
         builder->x = 16 * 5;
         builder->y = 16 * -4;
-        SceneDefer(self, PlayerCreate, builder);
+        SceneDefer(self, PlayerBuild, builder);
     }
 
     {
         self->fog = SceneAllocateEntity(self);
         FogBuilder* builder = malloc(sizeof(FogBuilder));
         builder->entity = self->fog;
-        SceneDefer(self, FogCreate, builder);
+        SceneDefer(self, FogBuild, builder);
     }
 
     {
         self->lakitu = SceneAllocateEntity(self);
         LakituBuilder* builder = malloc(sizeof(LakituBuilder));
         builder->entity = self->lakitu;
-        SceneDefer(self, LakituCreate, builder);
+        SceneDefer(self, LakituBuild, builder);
     }
 }
 
