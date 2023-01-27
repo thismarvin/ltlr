@@ -1,4 +1,5 @@
 #include "testing.h"
+
 #include <stdio.h>
 
 const char* evalPrompt = "\x1b[43m\x1b[30m EVAL \x1b[0m";
@@ -9,65 +10,63 @@ const char* doneFailPrompt = "\x1b[41m\x1b[30m DONE \x1b[0m";
 
 TestSuite TestSuiteCreate(const char* name)
 {
-    return (TestSuite)
-    {
-        .name = (char*)name,
-        .records = DEQUE_OF(TestRecord),
-        .passed = 0,
-        .failed = 0,
-    };
+	return (TestSuite) {
+		.name = (char*)name,
+		.records = DEQUE_OF(TestRecord),
+		.passed = 0,
+		.failed = 0,
+	};
 }
 
 void TestSuiteAdd(TestSuite* self, const char* name, TestFn fn)
 {
-    const bool passed = fn();
+	const bool passed = fn();
 
-    const TestRecord record = (TestRecord)
-    {
-        .name = (char*)name,
-        .passed = passed,
-    };
+	const TestRecord record = (TestRecord) {
+		.name = (char*)name,
+		.passed = passed,
+	};
 
-    DequePushFront(&self->records, &record);
+	DequePushFront(&self->records, &record);
 
-    if (passed)
-    {
-        self->passed += 1;
-    }
-    else
-    {
-        self->failed += 1;
-    }
+	if (passed)
+	{
+		self->passed += 1;
+	}
+	else
+	{
+		self->failed += 1;
+	}
 }
 
 bool TestSuitePresentResults(TestSuite* self)
 {
-    printf("%s %s\n", evalPrompt, self->name);
+	printf("%s %s\n", evalPrompt, self->name);
 
-    for (usize i = 0; i < DequeGetSize(&self->records); ++i)
-    {
-        const TestRecord* record = &DEQUE_GET_UNCHECKED(&self->records, TestRecord, i);
+	for (usize i = 0; i < DequeGetSize(&self->records); ++i)
+	{
+		const TestRecord* record = &DEQUE_GET_UNCHECKED(&self->records, TestRecord, i);
 
-        if (record->passed)
-        {
-            printf("%s %s\n", passPrompt, record->name);
-        }
-        else
-        {
-            printf("%s %s\n", failPrompt, record->name);
-        }
-    }
+		if (record->passed)
+		{
+			printf("%s %s\n", passPrompt, record->name);
+		}
+		else
+		{
+			printf("%s %s\n", failPrompt, record->name);
+		}
+	}
 
-    DequeDestroy(&self->records);
+	DequeDestroy(&self->records);
 
-    if (self->failed == 0)
-    {
-        printf("%s %lu passed; %lu failed\n\n", donePassPrompt, self->passed, self->failed);
-        return true;
-    }
-    else
-    {
-        printf("%s %lu passed; %lu failed\n\n", doneFailPrompt, self->passed, self->failed);
-        return false;
-    }
+	if (self->failed == 0)
+	{
+		printf("%s %lu passed; %lu failed\n\n", donePassPrompt, self->passed, self->failed);
+		return true;
+	}
+	else
+	{
+		printf("%s %lu passed; %lu failed\n\n", doneFailPrompt, self->passed, self->failed);
+		return false;
+	}
 }

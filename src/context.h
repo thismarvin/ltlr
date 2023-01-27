@@ -15,8 +15,8 @@
 
 typedef struct
 {
-    void* scene;
-    Rectangle cameraBounds;
+	void* scene;
+	Rectangle cameraBounds;
 } RenderFnParams;
 
 typedef void (*RenderFn)(const RenderFnParams*);
@@ -33,10 +33,9 @@ Rectangle GetScreenResolution(void);
 Rectangle RectangleFromRenderTexture(const RenderTexture* renderTexture);
 f32 CalculateZoom(Rectangle region, Rectangle container);
 
-void RenderLayer
-(
-    const RenderTexture* renderTexture,
-    const RenderFn fn,
-    const RenderFnParams* params
+void RenderLayer(
+	const RenderTexture* renderTexture,
+	const RenderFn fn,
+	const RenderFnParams* params
 );
 void DrawLayers(const RenderTexture* renderTextures, usize renderTexturesLength);

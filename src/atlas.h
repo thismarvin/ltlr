@@ -5,31 +5,31 @@
 
 typedef struct
 {
-    u16 width;
-    u16 height;
+	u16 width;
+	u16 height;
 } AtlasEntryDimension;
 
 typedef struct
 {
-    AtlasEntryDimension untrimmed;
-    Rectangle source;
-    Rectangle destination;
+	AtlasEntryDimension untrimmed;
+	Rectangle source;
+	Rectangle destination;
 } AtlasEntry;
 
 typedef struct
 {
-    Texture2D texture;
-    AtlasEntry* entries;
-    usize entriesLength;
+	Texture2D texture;
+	AtlasEntry* entries;
+	usize entriesLength;
 } Atlas;
 
 typedef struct
 {
-    Sprite sprite;
-    Vector2 position;
-    Rectangle intramural;
-    Reflection reflection;
-    Color tint;
+	Sprite sprite;
+	Vector2 position;
+	Rectangle intramural;
+	Reflection reflection;
+	Color tint;
 } AtlasDrawParams;
 
 Atlas AtlasCreate(const char* path);

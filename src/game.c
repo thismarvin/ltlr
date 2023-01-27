@@ -1,10 +1,11 @@
 #include "common.h"
 #include "context.h"
 #include "scene.h"
+
 #include <math.h>
 
 #if defined(PLATFORM_WEB)
-    #include <emscripten/emscripten.h>
+	#include <emscripten/emscripten.h>
 #endif
 
 #define FRAMERATE_SAMPLING_FREQUENCY (0.1f)
@@ -32,163 +33,162 @@ static Scene scene;
 
 static void Timestep(void)
 {
-    const f64 currentTime = GetTime();
+	const f64 currentTime = GetTime();
 
-    f32 deltaTime = currentTime - previousTime;
+	f32 deltaTime = currentTime - previousTime;
 
-    // Calculate the average frames per second.
-    {
-        currentFrame += 1;
+	// Calculate the average frames per second.
+	{
+		currentFrame += 1;
 
-        if ((currentTime - sampleTime) >= FRAMERATE_SAMPLING_FREQUENCY)
-        {
-            averageFps = (currentFrame - sampleFrame) / (currentTime - sampleTime);
+		if ((currentTime - sampleTime) >= FRAMERATE_SAMPLING_FREQUENCY)
+		{
+			averageFps = (currentFrame - sampleFrame) / (currentTime - sampleTime);
 
-            sampleFrame = currentFrame;
-            sampleTime = currentTime;
-        }
-    }
+			sampleFrame = currentFrame;
+			sampleTime = currentTime;
+		}
+	}
 
-    // Set a maximum delta time in order to avoid a "spiral of death."
-    if (deltaTime > maxDeltaTime)
-    {
-        deltaTime = maxDeltaTime;
-    }
+	// Set a maximum delta time in order to avoid a "spiral of death."
+	if (deltaTime > maxDeltaTime)
+	{
+		deltaTime = maxDeltaTime;
+	}
 
-    previousTime = currentTime;
+	previousTime = currentTime;
 
-    accumulator += deltaTime;
+	accumulator += deltaTime;
 
-    while (accumulator >= targetFrameTime)
-    {
-        Update();
+	while (accumulator >= targetFrameTime)
+	{
+		Update();
 
-        accumulator -= targetFrameTime;
-        ContextSetTotalTime(ContextGetTotalTime() + targetFrameTime);
+		accumulator -= targetFrameTime;
+		ContextSetTotalTime(ContextGetTotalTime() + targetFrameTime);
 
-        PollInputEvents();
-    }
+		PollInputEvents();
+	}
 
-    ContextSetAlpha(accumulator / targetFrameTime);
+	ContextSetAlpha(accumulator / targetFrameTime);
 
-    Draw();
+	Draw();
 
-    SwapScreenBuffer();
+	SwapScreenBuffer();
 }
 
 int main(void)
 {
-    // TODO(thismarvin): Incorporate a config file or cli options for window resolution.
-    InitWindow(DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT, "Larry the Light-bulb Redux");
-    InitAudioDevice();
+	// TODO(thismarvin): Incorporate a config file or cli options for window resolution.
+	InitWindow(DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT, "Larry the Light-bulb Redux");
+	InitAudioDevice();
 
-    SetWindowState(FLAG_VSYNC_HINT | FLAG_WINDOW_RESIZABLE);
-    SetWindowMinSize(CTX_VIEWPORT_WIDTH, CTX_VIEWPORT_HEIGHT);
+	SetWindowState(FLAG_VSYNC_HINT | FLAG_WINDOW_RESIZABLE);
+	SetWindowMinSize(CTX_VIEWPORT_WIDTH, CTX_VIEWPORT_HEIGHT);
 
-    icon = LoadImage("./content/icon.png");
+	icon = LoadImage("./content/icon.png");
 
-    SetWindowIcon(icon);
+	SetWindowIcon(icon);
 
-    Initialize();
+	Initialize();
 
-    previousTime = GetTime();
+	previousTime = GetTime();
 
 #if defined(PLATFORM_WEB)
-    emscripten_set_main_loop(Timestep, 0, 1);
+	emscripten_set_main_loop(Timestep, 0, 1);
 #else
 
-    while (!WindowShouldClose()) // Detect window close button or ESC key
-    {
-        Timestep();
-    }
+	// Detect window close button or ESC key.
+	while (!WindowShouldClose())
+	{
+		Timestep();
+	}
 
 #endif
 
-    SceneDestroy(&scene);
+	SceneDestroy(&scene);
 
-    CloseAudioDevice();
-    CloseWindow();
+	CloseAudioDevice();
+	CloseWindow();
 
-    UnloadImage(icon);
+	UnloadImage(icon);
 
-    return 0;
+	return 0;
 }
 
 static void Initialize(void)
 {
-    ContextInit();
+	ContextInit();
 
-    SceneInit(&scene);
+	SceneInit(&scene);
 }
 
 static void Update(void)
 {
-    if (IsKeyPressed(KEY_EQUAL))
-    {
-        debugging = !debugging;
-    }
+	if (IsKeyPressed(KEY_EQUAL))
+	{
+		debugging = !debugging;
+	}
 
-    SceneUpdate(&scene);
+	SceneUpdate(&scene);
 }
 
 static void DrawDebugInformation(void)
 {
-    if (!debugging)
-    {
-        return;
-    }
+	if (!debugging)
+	{
+		return;
+	}
 
-    const f32 screenWidth = GetScreenWidth();
-    const f32 screenHeight = GetScreenHeight();
+	const f32 screenWidth = GetScreenWidth();
+	const f32 screenHeight = GetScreenHeight();
 
-    // Assume we need letterboxing.
-    f32 zoom = screenWidth / CTX_VIEWPORT_WIDTH;
+	// Assume we need letterboxing.
+	f32 zoom = screenWidth / CTX_VIEWPORT_WIDTH;
 
-    // Check if pillarboxing is more appropriate.
-    if (CTX_VIEWPORT_HEIGHT * zoom > screenHeight)
-    {
-        zoom = screenHeight / CTX_VIEWPORT_HEIGHT;
-    }
+	// Check if pillarboxing is more appropriate.
+	if (CTX_VIEWPORT_HEIGHT * zoom > screenHeight)
+	{
+		zoom = screenHeight / CTX_VIEWPORT_HEIGHT;
+	}
 
-    zoom = floor(zoom);
+	zoom = floor(zoom);
 
-    const Camera2D camera = (Camera2D)
-    {
-        .offset = VECTOR2_ZERO,
-        .target = VECTOR2_ZERO,
-        .rotation = 0.0f,
-        .zoom = zoom * 0.5f,
-    };
+	const Camera2D camera = (Camera2D) {
+		.offset = VECTOR2_ZERO,
+		.target = VECTOR2_ZERO,
+		.rotation = 0.0f,
+		.zoom = zoom * 0.5f,
+	};
 
-    BeginMode2D(camera);
-    {
-        static const usize fontSize = 20;
-        static const f32 x = 0;
-        static const f32 y = 0;
-        static const usize xPadding = 8;
-        static const usize yPadding = 8;
+	BeginMode2D(camera);
+	{
+		static const usize fontSize = 20;
+		static const f32 x = 0;
+		static const f32 y = 0;
+		static const usize xPadding = 8;
+		static const usize yPadding = 8;
 
-        const char* text = TextFormat("%.f FPS", averageFps);
-        const usize textWidth = MeasureText(text, fontSize);
+		const char* text = TextFormat("%.f FPS", averageFps);
+		const usize textWidth = MeasureText(text, fontSize);
 
-        const Color backgroundColor = (Color)
-        {
-            .r = 0,
-            .g = 0,
-            .b = 0,
-            .a = 150,
-        };
-        DrawRectangle(x, y, textWidth + xPadding * 2, fontSize + yPadding * 2 - 1, backgroundColor);
+		const Color backgroundColor = (Color) {
+			.r = 0,
+			.g = 0,
+			.b = 0,
+			.a = 150,
+		};
+		DrawRectangle(x, y, textWidth + xPadding * 2, fontSize + yPadding * 2 - 1, backgroundColor);
 
-        DrawText(text, x + xPadding + 2, y + yPadding + 2, fontSize, COLOR_BLACK);
-        DrawText(text, x + xPadding, y + yPadding, fontSize, COLOR_WHITE);
-    }
-    EndMode2D();
+		DrawText(text, x + xPadding + 2, y + yPadding + 2, fontSize, COLOR_BLACK);
+		DrawText(text, x + xPadding, y + yPadding, fontSize, COLOR_WHITE);
+	}
+	EndMode2D();
 }
 
 static void Draw(void)
 {
-    SceneDraw(&scene);
+	SceneDraw(&scene);
 
-    DrawDebugInformation();
+	DrawDebugInformation();
 }

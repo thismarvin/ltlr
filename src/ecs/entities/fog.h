@@ -6,7 +6,7 @@
 
 typedef struct
 {
-    usize entity;
+	usize entity;
 } FogBuilder;
 
 void FogBuild(Scene* scene, const void* params);

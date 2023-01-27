@@ -5,17 +5,17 @@
 
 typedef enum
 {
-    FADE_IN,
-    FADE_OUT,
+	FADE_IN,
+	FADE_OUT,
 } FadeType;
 
 typedef struct
 {
-    Easer easer;
-    Color color;
-    f32 previous;
-    f32 current;
-    FadeType type;
+	Easer easer;
+	Color color;
+	f32 previous;
+	f32 current;
+	FadeType type;
 } Fader;
 
 Fader FaderDefault(void);

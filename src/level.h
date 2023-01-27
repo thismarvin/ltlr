@@ -9,19 +9,19 @@ typedef struct Scene Scene;
 
 typedef struct
 {
-    u16 width;
+	u16 width;
 } LevelSegmentBuilder;
 
 typedef struct
 {
-    u16 type;
-    u16 width;
+	u16 type;
+	u16 width;
 } LevelSegment;
 
 typedef struct
 {
-    LevelSegment segments[MAX_LEVEL_SEGMENTS];
-    usize segmentsLength;
+	LevelSegment segments[MAX_LEVEL_SEGMENTS];
+	usize segmentsLength;
 } Level;
 
 LevelSegmentBuilder LevelSegmentBuilderCreate(Scene* scene, u16 type, Vector2 offset);

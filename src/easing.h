@@ -6,7 +6,7 @@ typedef double f64;
 
 typedef struct
 {
-    f64 value;
+	f64 value;
 } EasingFnParams;
 
 typedef f64 (*EasingFn)(const EasingFnParams*);
@@ -19,10 +19,10 @@ f64 EaseInOutQuad(const EasingFnParams* params);
 
 typedef struct
 {
-    f64 elapsed;
-    f64 duration;
-    f64 value;
-    EasingFn ease;
+	f64 elapsed;
+	f64 duration;
+	f64 value;
+	EasingFn ease;
 } Easer;
 
 Easer EaserCreate(const EasingFn ease, f64 duration);

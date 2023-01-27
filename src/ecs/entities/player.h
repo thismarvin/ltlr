@@ -6,9 +6,9 @@
 
 typedef struct
 {
-    usize entity;
-    f32 x;
-    f32 y;
+	usize entity;
+	f32 x;
+	f32 y;
 } PlayerBuilder;
 
 void PlayerBuild(Scene* scene, const void* params);

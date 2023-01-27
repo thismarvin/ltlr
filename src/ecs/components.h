@@ -43,145 +43,145 @@ typedef struct Scene Scene;
 
 typedef enum
 {
-    SPRINT_STATE_NONE,
-    SPRINT_STATE_ACCELERATING,
-    SPRINT_STATE_TERMINAL,
-    SPRINT_STATE_DECELERATING,
+	SPRINT_STATE_NONE,
+	SPRINT_STATE_ACCELERATING,
+	SPRINT_STATE_TERMINAL,
+	SPRINT_STATE_DECELERATING,
 } SprintState;
 
 typedef enum
 {
-    PLAYER_ANIMATION_STATE_STILL,
-    PLAYER_ANIMATION_STATE_RUNNING,
-    PLAYER_ANIMATION_STATE_JUMPING,
-    PLAYER_ANIMATION_STATE_SPINNING,
-    PLAYER_ANIMATION_STATE_DYING,
+	PLAYER_ANIMATION_STATE_STILL,
+	PLAYER_ANIMATION_STATE_RUNNING,
+	PLAYER_ANIMATION_STATE_JUMPING,
+	PLAYER_ANIMATION_STATE_SPINNING,
+	PLAYER_ANIMATION_STATE_DYING,
 } PlayerAnimationState;
 
 typedef struct
 {
-    Scene* scene;
-    usize entity;
-    Rectangle aabb;
-    usize otherEntity;
-    Rectangle otherAabb;
-    Rectangle overlap;
+	Scene* scene;
+	usize entity;
+	Rectangle aabb;
+	usize otherEntity;
+	Rectangle otherAabb;
+	Rectangle overlap;
 } OnCollisionParams;
 
 typedef void (*OnCollision)(const OnCollisionParams*);
 
 typedef struct
 {
-    Rectangle aabb;
+	Rectangle aabb;
 } OnResolutionResult;
 
 typedef struct
 {
-    Scene* scene;
-    usize entity;
-    Rectangle aabb;
-    usize otherEntity;
-    Rectangle otherAabb;
-    Rectangle overlap;
-    Vector2 resolution;
+	Scene* scene;
+	usize entity;
+	Rectangle aabb;
+	usize otherEntity;
+	Rectangle otherAabb;
+	Rectangle overlap;
+	Vector2 resolution;
 } OnResolutionParams;
 
 typedef OnResolutionResult (*OnResolution)(const OnResolutionParams*);
 
 typedef struct
 {
-    Vector2 value;
+	Vector2 value;
 } CPosition;
 
 typedef struct
 {
-    f32 width;
-    f32 height;
+	f32 width;
+	f32 height;
 } CDimension;
 
 typedef struct
 {
-    Color value;
+	Color value;
 } CColor;
 
 typedef struct
 {
-    Rectangle intramural;
-    Reflection reflection;
-    Sprite type;
+	Rectangle intramural;
+	Reflection reflection;
+	Sprite type;
 } CSprite;
 
 typedef struct
 {
-    f32 frameTimer;
-    f32 frameDuration;
-    Rectangle intramural;
-    Reflection reflection;
-    Animation type;
-    u16 frame;
-    u16 length;
+	f32 frameTimer;
+	f32 frameDuration;
+	Rectangle intramural;
+	Reflection reflection;
+	Animation type;
+	u16 frame;
+	u16 length;
 } CAnimation;
 
 typedef struct
 {
-    Vector2 velocity;
-    Vector2 acceleration;
+	Vector2 velocity;
+	Vector2 acceleration;
 } CKinetic;
 
 typedef struct
 {
-    Vector2 previous;
+	Vector2 previous;
 } CSmooth;
 
 typedef struct
 {
-    // The directions other entities will resolve against.
-    u8 resolutionSchema;
-    // The layer you exist on.
-    u64 layer;
-    // The layers you collide with.
-    u64 mask;
-    // The first pass of the collision system uses this callback as a strategy to resolve the
-    // current entity's aabb with other colliders.
-    OnResolution onResolution;
-    // The second pass of the collision system uses this callback to compare the resolved aabb of
-    // the current entity against other colliders.
-    OnCollision onCollision;
+	// The directions other entities will resolve against.
+	u8 resolutionSchema;
+	// The layer you exist on.
+	u64 layer;
+	// The layers you collide with.
+	u64 mask;
+	// The first pass of the collision system uses this callback as a strategy to resolve the
+	// current entity's aabb with other colliders.
+	OnResolution onResolution;
+	// The second pass of the collision system uses this callback to compare the resolved aabb of
+	// the current entity against other colliders.
+	OnCollision onCollision;
 } CCollider;
 
 // TODO(thismarvin): Should this be in some sort of Singleton?
 typedef struct
 {
-    bool groundedLastFrame;
-    bool grounded;
-    f32 coyoteTimer;
-    f32 coyoteDuration;
-    bool jumping;
-    bool dead;
-    Vector2 gravityForce;
-    f32 invulnerableTimer;
-    f32 invulnerableDuration;
-    Direction initialDirection;
-    Direction sprintDirection;
-    SprintState sprintState;
-    f32 sprintTimer;
-    f32 sprintDuration;
-    Vector2 sprintForce;
-    PlayerAnimationState animationState;
+	bool groundedLastFrame;
+	bool grounded;
+	f32 coyoteTimer;
+	f32 coyoteDuration;
+	bool jumping;
+	bool dead;
+	Vector2 gravityForce;
+	f32 invulnerableTimer;
+	f32 invulnerableDuration;
+	Direction initialDirection;
+	Direction sprintDirection;
+	SprintState sprintState;
+	f32 sprintTimer;
+	f32 sprintDuration;
+	Vector2 sprintForce;
+	PlayerAnimationState animationState;
 } CPlayer;
 
 typedef struct
 {
-    i16 hp;
+	i16 hp;
 } CMortal;
 
 typedef struct
 {
-    i16 value;
+	i16 value;
 } CDamage;
 
 typedef struct
 {
-    f32 lifetime;
-    f32 age;
+	f32 lifetime;
+	f32 age;
 } CFleeting;

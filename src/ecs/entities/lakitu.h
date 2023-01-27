@@ -4,7 +4,7 @@
 
 typedef struct
 {
-    usize entity;
+	usize entity;
 } LakituBuilder;
 
 void LakituBuild(Scene* scene, const void* params);

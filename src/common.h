@@ -18,40 +18,68 @@ typedef double f64;
 
 #define UNUSED __attribute__((unused))
 
-#define MAX(mA,mB) (((mA) > (mB)) ? (mA) : (mB))
-#define MIN(mA,mB) (((mA) < (mB)) ? (mA) : (mB))
+#define MAX(mA, mB) (((mA) > (mB)) ? (mA) : (mB))
+#define MIN(mA, mB) (((mA) < (mB)) ? (mA) : (mB))
 #define SIGN(mA) ((mA) == 0 ? 0 : (mA) < 0 ? -1 : 1)
 
-#define VECTOR2_ZERO (Vector2) { 0.0f, 0.0f }
+#define VECTOR2_ZERO \
+	(Vector2) \
+	{ \
+		0.0f, 0.0f \
+	}
 
-#define COLOR_TRANSPARENT (Color) { 0, 0, 0, 0 }
-#define COLOR_BLACK (Color) { 0, 0, 0, 255 }
-#define COLOR_WHITE (Color) { 255, 255, 255, 255 }
-#define COLOR_RED (Color) { 255, 0, 0, 255 }
-#define COLOR_GREEN (Color) { 0, 255, 0, 255 }
-#define COLOR_BLUE (Color) { 0, 0, 255, 255 }
+#define COLOR_TRANSPARENT \
+	(Color) \
+	{ \
+		0, 0, 0, 0 \
+	}
+#define COLOR_BLACK \
+	(Color) \
+	{ \
+		0, 0, 0, 255 \
+	}
+#define COLOR_WHITE \
+	(Color) \
+	{ \
+		255, 255, 255, 255 \
+	}
+#define COLOR_RED \
+	(Color) \
+	{ \
+		255, 0, 0, 255 \
+	}
+#define COLOR_GREEN \
+	(Color) \
+	{ \
+		0, 255, 0, 255 \
+	}
+#define COLOR_BLUE \
+	(Color) \
+	{ \
+		0, 0, 255, 255 \
+	}
 
 typedef enum
 {
-    ORD_LESS,
-    ORD_EQUAL,
-    ORD_GREATER,
+	ORD_LESS,
+	ORD_EQUAL,
+	ORD_GREATER,
 } Ordering;
 
 typedef enum
 {
-    DIR_NONE = 0,
-    DIR_LEFT = 1 << 0,
-    DIR_UP = 1 << 1,
-    DIR_RIGHT = 1 << 2,
-    DIR_DOWN = 1 << 3,
+	DIR_NONE = 0,
+	DIR_LEFT = 1 << 0,
+	DIR_UP = 1 << 1,
+	DIR_RIGHT = 1 << 2,
+	DIR_DOWN = 1 << 3,
 } Direction;
 
 typedef enum
 {
-    REFLECTION_NONE = 0,
-    REFLECTION_REVERSE_X_AXIS = 1 << 0,
-    REFLECTION_REVERSE_Y_AXIS = 1 << 1,
+	REFLECTION_NONE = 0,
+	REFLECTION_REVERSE_X_AXIS = 1 << 0,
+	REFLECTION_REVERSE_Y_AXIS = 1 << 1,
 } Reflection;
 
 Vector2 Vector2Create(f32 x, f32 y);
