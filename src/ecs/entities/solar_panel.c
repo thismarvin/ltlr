@@ -12,12 +12,16 @@ void SolarPanelBuildHelper(Scene* scene, const SolarPanelBuilder* builder)
 	// clang-format off
 	scene->components.tags[builder->entity] =
 		TAG_NONE
+		| TAG_IDENTIFIER
 		| TAG_POSITION
 		| TAG_DIMENSION
 		| TAG_SPRITE
-		| TAG_COLLIDER
-		| TAG_SOLAR_PANEL;
+		| TAG_COLLIDER;
 	// clang-format on
+
+	scene->components.identifiers[builder->entity] = (CIdentifier) {
+		.type = ENTITY_TYPE_SOLAR_PANEL,
+	};
 
 	scene->components.positions[builder->entity] = (CPosition) {
 		.value = Vector2Create(builder->x, builder->y),

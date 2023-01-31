@@ -31,18 +31,19 @@ typedef enum
 typedef struct
 {
 	u64 tags[MAX_ENTITIES];
+	CIdentifier identifiers[MAX_ENTITIES];
 	CPosition positions[MAX_ENTITIES];
 	CDimension dimensions[MAX_ENTITIES];
 	CColor colors[MAX_ENTITIES];
 	CSprite sprites[MAX_ENTITIES];
+	CAnimation animations[MAX_ENTITIES];
 	CKinetic kinetics[MAX_ENTITIES];
 	CSmooth smooths[MAX_ENTITIES];
 	CCollider colliders[MAX_ENTITIES];
-	CPlayer players[MAX_ENTITIES];
 	CMortal mortals[MAX_ENTITIES];
 	CDamage damages[MAX_ENTITIES];
 	CFleeting fleetings[MAX_ENTITIES];
-	CAnimation animations[MAX_ENTITIES];
+	CPlayer players[MAX_ENTITIES];
 } Components;
 
 typedef struct
@@ -101,6 +102,7 @@ void SceneInit(Scene* self);
 usize SceneAllocateEntity(Scene* self);
 usize SceneGetTotalAllocatedEntities(const Scene* self);
 bool SceneEntityHasDependencies(const Scene* self, usize entity, u64 dependencies);
+bool SceneEntityIs(const Scene* self, usize entity, EntityType type);
 
 void SceneIncrementScore(Scene* self, u32 value);
 

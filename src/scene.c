@@ -98,9 +98,15 @@ usize SceneGetTotalAllocatedEntities(const Scene* self)
 	return self->m_entityManager.m_nextFreshEntityIndex;
 }
 
-bool SceneEntityHasDependencies(const Scene* self, usize entity, u64 dependencies)
+bool SceneEntityHasDependencies(const Scene* self, const usize entity, const u64 dependencies)
 {
 	return (self->components.tags[entity] & dependencies) == dependencies;
+}
+
+bool SceneEntityIs(const Scene* self, const usize entity, const EntityType type)
+{
+	return (self->components.tags[entity] & TAG_IDENTIFIER) == TAG_IDENTIFIER
+		   && self->components.identifiers[entity].type == type;
 }
 
 void SceneDefer(Scene* self, const OnDefer fn, const void* params)

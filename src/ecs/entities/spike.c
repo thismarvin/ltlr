@@ -41,12 +41,17 @@ void SpikeBuildHelper(Scene* scene, const SpikeBuilder* builder)
 	// clang-format off
 	scene->components.tags[builder->entity] =
 		TAG_NONE
+		| TAG_IDENTIFIER
 		| TAG_POSITION
 		| TAG_DIMENSION
 		| TAG_COLLIDER
 		| TAG_DAMAGE
 		| TAG_SPRITE;
 	// clang-format on
+
+	scene->components.identifiers[builder->entity] = (CIdentifier) {
+		.type = ENTITY_TYPE_SPIKE,
+	};
 
 	scene->components.positions[builder->entity] = (CPosition) {
 		.value = position,

@@ -60,11 +60,15 @@ void FogBuildHelper(Scene* scene, const FogBuilder* builder)
 	// clang-format off
 	scene->components.tags[builder->entity] =
 		TAG_NONE
+		| TAG_IDENTIFIER
 		| TAG_POSITION
 		| TAG_KINETIC
-		| TAG_SMOOTH
-		| TAG_FOG;
+		| TAG_SMOOTH;
 	// clang-format on
+
+	scene->components.identifiers[builder->entity] = (CIdentifier) {
+		.type = ENTITY_TYPE_FOG,
+	};
 
 	scene->components.positions[builder->entity] = (CPosition) {
 		.value = FOG_INITIAL_POSITION,
@@ -187,9 +191,10 @@ static void ShiftBreathingPhase()
 
 void FogUpdate(Scene* scene, const usize entity)
 {
-	static const u64 dependencies = TAG_FOG | TAG_POSITION | TAG_KINETIC;
+	static const u64 dependencies = TAG_POSITION | TAG_KINETIC;
 
-	if (!SceneEntityHasDependencies(scene, entity, dependencies))
+	if (!SceneEntityIs(scene, entity, ENTITY_TYPE_FOG)
+		|| !SceneEntityHasDependencies(scene, entity, dependencies))
 	{
 		return;
 	}
@@ -269,9 +274,10 @@ void FogUpdate(Scene* scene, const usize entity)
 
 void FogDraw(const Scene* scene, const usize entity)
 {
-	static const u64 dependencies = TAG_FOG | TAG_POSITION | TAG_SMOOTH;
+	static const u64 dependencies = TAG_POSITION | TAG_SMOOTH;
 
-	if (!SceneEntityHasDependencies(scene, entity, dependencies))
+	if (!SceneEntityIs(scene, entity, ENTITY_TYPE_FOG)
+		|| !SceneEntityHasDependencies(scene, entity, dependencies))
 	{
 		return;
 	}
@@ -315,9 +321,10 @@ void FogDraw(const Scene* scene, const usize entity)
 
 void FogDebugDraw(const Scene* scene, const usize entity)
 {
-	static const u64 dependencies = TAG_FOG | TAG_POSITION;
+	static const u64 dependencies = TAG_POSITION;
 
-	if (!SceneEntityHasDependencies(scene, entity, dependencies))
+	if (!SceneEntityIs(scene, entity, ENTITY_TYPE_FOG)
+		|| !SceneEntityHasDependencies(scene, entity, dependencies))
 	{
 		return;
 	}

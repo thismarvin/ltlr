@@ -18,14 +18,18 @@ static void BatteryBuildHelper(Scene* scene, const BatteryBuilder* builder)
 	// clang-format off
 	scene->components.tags[builder->entity] =
 		TAG_NONE
+		| TAG_IDENTIFIER
 		| TAG_POSITION
 		| TAG_DIMENSION
 		| TAG_SPRITE
 		| TAG_COLLIDER
 		| TAG_SMOOTH
-		| TAG_KINETIC
-		| TAG_BATTERY;
+		| TAG_KINETIC;
 	// clang-format on
+
+	scene->components.identifiers[builder->entity] = (CIdentifier) {
+		.type = ENTITY_TYPE_BATTERY,
+	};
 
 	scene->components.positions[builder->entity] = (CPosition) {
 		.value = position,
@@ -67,9 +71,10 @@ void BatteryBuild(Scene* scene, const void* params)
 
 void BatteryUpdate(Scene* scene, const usize entity)
 {
-	static const u64 dependencies = TAG_BATTERY | TAG_KINETIC;
+	static const u64 dependencies = TAG_KINETIC;
 
-	if (!SceneEntityHasDependencies(scene, entity, dependencies))
+	if (!SceneEntityIs(scene, entity, ENTITY_TYPE_BATTERY)
+		|| !SceneEntityHasDependencies(scene, entity, dependencies))
 	{
 		return;
 	}

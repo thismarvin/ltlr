@@ -44,15 +44,19 @@ void WalkerBuildHelper(Scene* scene, const WalkerBuilder* builder)
 	// clang-format off
 	scene->components.tags[builder->entity] = 
 		TAG_NONE
+		| TAG_IDENTIFIER
 		| TAG_POSITION
 		| TAG_DIMENSION
 		| TAG_ANIMATION
 		| TAG_KINETIC
 		| TAG_SMOOTH
 		| TAG_COLLIDER
-		| TAG_WALKER
 		| TAG_DAMAGE;
 	// clang-format on
+
+	scene->components.identifiers[builder->entity] = (CIdentifier) {
+		.type = ENTITY_TYPE_WALKER,
+	};
 
 	scene->components.positions[builder->entity] = (CPosition) {
 		.value = position,

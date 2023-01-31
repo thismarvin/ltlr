@@ -5,24 +5,19 @@
 #include "../sprites_generated.h"
 
 #define TAG_NONE ((u64)0)
-#define TAG_POSITION ((u64)1 << 0)
-#define TAG_DIMENSION ((u64)1 << 1)
-#define TAG_COLOR ((u64)1 << 2)
-#define TAG_SPRITE ((u64)1 << 3)
-#define TAG_KINETIC ((u64)1 << 4)
-#define TAG_SMOOTH ((u64)1 << 5)
-#define TAG_PLAYER ((u64)1 << 6)
-#define TAG_COLLIDER ((u64)1 << 7)
-#define TAG_WALKER ((u64)1 << 8)
+#define TAG_IDENTIFIER ((u64)1 << 0)
+#define TAG_POSITION ((u64)1 << 1)
+#define TAG_DIMENSION ((u64)1 << 2)
+#define TAG_COLOR ((u64)1 << 3)
+#define TAG_SPRITE ((u64)1 << 4)
+#define TAG_ANIMATION ((u64)1 << 5)
+#define TAG_KINETIC ((u64)1 << 6)
+#define TAG_SMOOTH ((u64)1 << 7)
+#define TAG_COLLIDER ((u64)1 << 8)
 #define TAG_MORTAL ((u64)1 << 9)
 #define TAG_DAMAGE ((u64)1 << 10)
 #define TAG_FLEETING ((u64)1 << 11)
-#define TAG_FOG ((u64)1 << 12)
-#define TAG_FOG_PARTICLE ((u64)1 << 13)
-#define TAG_CLOUD_PARTICLE ((u64)1 << 14)
-#define TAG_ANIMATION ((u64)1 << 15)
-#define TAG_BATTERY ((u64)1 << 16)
-#define TAG_SOLAR_PANEL ((u64)1 << 17)
+#define TAG_PLAYER ((u64)1 << 12)
 
 #define RESOLVE_NONE ((u8)0)
 #define RESOLVE_UP ((u8)1 << 0)
@@ -37,9 +32,22 @@
 #define LAYER_INTERACTABLE ((u64)1 << 2)
 #define LAYER_INVISIBLE ((u64)1 << 3)
 
-// TODO(thismarvin): Naming components is hard...
-
 typedef struct Scene Scene;
+
+typedef enum
+{
+	ENTITY_TYPE_NONE,
+	ENTITY_TYPE_BATTERY,
+	ENTITY_TYPE_BLOCK,
+	ENTITY_TYPE_CLOUD_PARTICLE,
+	ENTITY_TYPE_FOG,
+	ENTITY_TYPE_FOG_PARTICLE,
+	ENTITY_TYPE_LAKITU,
+	ENTITY_TYPE_PLAYER,
+	ENTITY_TYPE_SOLAR_PANEL,
+	ENTITY_TYPE_SPIKE,
+	ENTITY_TYPE_WALKER,
+} EntityType;
 
 typedef enum
 {
@@ -87,6 +95,11 @@ typedef struct
 } OnResolutionParams;
 
 typedef OnResolutionResult (*OnResolution)(const OnResolutionParams*);
+
+typedef struct
+{
+	u8 type;
+} CIdentifier;
 
 typedef struct
 {
@@ -149,6 +162,22 @@ typedef struct
 	OnCollision onCollision;
 } CCollider;
 
+typedef struct
+{
+	i16 hp;
+} CMortal;
+
+typedef struct
+{
+	i16 value;
+} CDamage;
+
+typedef struct
+{
+	f32 lifetime;
+	f32 age;
+} CFleeting;
+
 // TODO(thismarvin): Should this be in some sort of Singleton?
 typedef struct
 {
@@ -169,19 +198,3 @@ typedef struct
 	Vector2 sprintForce;
 	PlayerAnimationState animationState;
 } CPlayer;
-
-typedef struct
-{
-	i16 hp;
-} CMortal;
-
-typedef struct
-{
-	i16 value;
-} CDamage;
-
-typedef struct
-{
-	f32 lifetime;
-	f32 age;
-} CFleeting;

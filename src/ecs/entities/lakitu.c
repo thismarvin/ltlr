@@ -10,10 +10,15 @@ void LakituBuildHelper(Scene* scene, const LakituBuilder* builder)
 	// clang-format off
 	scene->components.tags[builder->entity] =
 		TAG_NONE
+		| TAG_IDENTIFIER
 		| TAG_POSITION
 		| TAG_KINETIC
 		| TAG_SMOOTH;
 	// clang-format on
+
+	scene->components.identifiers[builder->entity] = (CIdentifier) {
+		.type = ENTITY_TYPE_LAKITU,
+	};
 
 	scene->components.positions[builder->entity] = (CPosition) {
 		.value = position,

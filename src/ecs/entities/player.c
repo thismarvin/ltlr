@@ -349,7 +349,7 @@ static OnResolutionResult PlayerOnResolution(const OnResolutionParams* params)
 
 	// Collision specific logic that will not resolve the player.
 	{
-		if (SceneEntityHasDependencies(params->scene, params->otherEntity, TAG_WALKER))
+		if (SceneEntityIs(params->scene, params->otherEntity, ENTITY_TYPE_WALKER))
 		{
 			return (OnResolutionResult) {
 				.aabb = params->aabb,
@@ -442,10 +442,15 @@ static void PlayerOnCollision(const OnCollisionParams* params)
 
 	if (SceneEntityHasDependencies(params->scene, params->otherEntity, TAG_DAMAGE))
 	{
+		// if otherEntity is Spike
+		//   if player is falling and their lower half collides with otherEntity
+		//     take damage
+		// else
+
 		PlayerOnDamage(params->scene, params->entity, params->otherEntity);
 	}
 
-	if (SceneEntityHasDependencies(params->scene, params->otherEntity, TAG_BATTERY))
+	if (SceneEntityIs(params->scene, params->otherEntity, ENTITY_TYPE_BATTERY))
 	{
 		// TODO(thismarvin): Add a static PlayerIncrementHealth method?
 		mortal->hp += 1;
@@ -456,19 +461,13 @@ static void PlayerOnCollision(const OnCollisionParams* params)
 		SceneDeferDeallocateEntity(params->scene, params->otherEntity);
 	}
 
-	if (SceneEntityHasDependencies(
-			params->scene,
-			params->otherEntity,
-			TAG_SOLAR_PANEL | TAG_SPRITE
-		))
+	if (SceneEntityIs(params->scene, params->otherEntity, ENTITY_TYPE_SOLAR_PANEL))
 	{
-		// TODO(thismarvin): Check if we have a battery.
+		// TODO(thismarvin): Check if we have a battery and the solar panel is off.
 
 		CSprite* otherSprite = &params->scene->components.sprites[params->otherEntity];
 
 		otherSprite->type = SPRITE_SOLAR_0001;
-
-		SceneDeferDisableTag(params->scene, params->otherEntity, TAG_SOLAR_PANEL);
 	}
 }
 
@@ -485,6 +484,7 @@ void PlayerBuildHelper(Scene* scene, const PlayerBuilder* builder)
 	// clang-format off
 	scene->components.tags[builder->entity] =
 		TAG_NONE
+		| TAG_IDENTIFIER
 		| TAG_POSITION
 		| TAG_DIMENSION
 		| TAG_ANIMATION
@@ -494,6 +494,10 @@ void PlayerBuildHelper(Scene* scene, const PlayerBuilder* builder)
 		| TAG_PLAYER
 		| TAG_MORTAL;
 	// clang-format on
+
+	scene->components.identifiers[builder->entity] = (CIdentifier) {
+		.type = ENTITY_TYPE_PLAYER,
+	};
 
 	scene->components.positions[builder->entity] = (CPosition) {
 		.value = position,
@@ -753,7 +757,8 @@ void PlayerInputUpdate(Scene* scene, const usize entity)
 {
 	static const u64 dependencies = TAG_PLAYER | TAG_KINETIC;
 
-	if (!SceneEntityHasDependencies(scene, entity, dependencies))
+	if (!SceneEntityIs(scene, entity, ENTITY_TYPE_PLAYER)
+		|| !SceneEntityHasDependencies(scene, entity, dependencies))
 	{
 		return;
 	}
@@ -840,7 +845,8 @@ void PlayerPostCollisionUpdate(Scene* scene, const usize entity)
 {
 	static const u64 dependencies = TAG_PLAYER | TAG_POSITION | TAG_KINETIC;
 
-	if (!SceneEntityHasDependencies(scene, entity, dependencies))
+	if (!SceneEntityIs(scene, entity, ENTITY_TYPE_PLAYER)
+		|| !SceneEntityHasDependencies(scene, entity, dependencies))
 	{
 		return;
 	}
@@ -905,7 +911,8 @@ void PlayerMortalUpdate(Scene* scene, const usize entity)
 {
 	static const u64 dependencies = TAG_PLAYER | TAG_MORTAL | TAG_POSITION | TAG_KINETIC;
 
-	if (!SceneEntityHasDependencies(scene, entity, dependencies))
+	if (!SceneEntityIs(scene, entity, ENTITY_TYPE_PLAYER)
+		|| !SceneEntityHasDependencies(scene, entity, dependencies))
 	{
 		return;
 	}
@@ -1051,7 +1058,8 @@ void PlayerAnimationUpdate(Scene* scene, const usize entity)
 {
 	static const u64 dependencies = TAG_PLAYER;
 
-	if (!SceneEntityHasDependencies(scene, entity, dependencies))
+	if (!SceneEntityIs(scene, entity, ENTITY_TYPE_PLAYER)
+		|| !SceneEntityHasDependencies(scene, entity, dependencies))
 	{
 		return;
 	}
@@ -1158,7 +1166,8 @@ void PlayerDebugDraw(const Scene* scene, usize entity)
 {
 	static const u64 dependencies = TAG_PLAYER | TAG_POSITION | TAG_DIMENSION;
 
-	if (!SceneEntityHasDependencies(scene, entity, dependencies))
+	if (!SceneEntityIs(scene, entity, ENTITY_TYPE_PLAYER)
+		|| !SceneEntityHasDependencies(scene, entity, dependencies))
 	{
 		return;
 	}

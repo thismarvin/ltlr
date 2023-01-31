@@ -34,14 +34,18 @@ static void CloudParticleBuildHelper(Scene* scene, const CloudParticleBuilder* b
 	// clang-format off
 	scene->components.tags[builder->entity] = 
 		TAG_NONE
+		| TAG_IDENTIFIER
 		| TAG_POSITION
 		| TAG_DIMENSION
 		| TAG_KINETIC
 		| TAG_SMOOTH
 		| TAG_COLLIDER
-		| TAG_FLEETING
-		| TAG_CLOUD_PARTICLE;
+		| TAG_FLEETING;
 	// clang-format on
+
+	scene->components.identifiers[builder->entity] = (CIdentifier) {
+		.type = ENTITY_TYPE_CLOUD_PARTICLE,
+	};
 
 	scene->components.positions[builder->entity] = (CPosition) {
 		.value = builder->position,
@@ -88,11 +92,11 @@ void CloudParticleDraw(const Scene* scene, const usize entity)
 		| TAG_POSITION
 		| TAG_DIMENSION
 		| TAG_FLEETING
-		| TAG_SMOOTH
-		| TAG_CLOUD_PARTICLE;
+		| TAG_SMOOTH;
 	// clang-format on
 
-	if (!SceneEntityHasDependencies((Scene*)scene, entity, dependencies))
+	if (!SceneEntityIs(scene, entity, ENTITY_TYPE_CLOUD_PARTICLE)
+		|| !SceneEntityHasDependencies(scene, entity, dependencies))
 	{
 		return;
 	}

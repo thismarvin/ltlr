@@ -10,10 +10,15 @@ void BlockBuildHelper(Scene* scene, const BlockBuilder* builder)
 	// clang-format off
 	scene->components.tags[builder->entity] =
 		TAG_NONE
+		| TAG_IDENTIFIER
 		| TAG_POSITION
 		| TAG_DIMENSION
 		| TAG_COLLIDER;
 	// clang-format on
+
+	scene->components.identifiers[builder->entity] = (CIdentifier) {
+		.type = ENTITY_TYPE_BLOCK,
+	};
 
 	scene->components.positions[builder->entity] = (CPosition) {
 		.value = position,

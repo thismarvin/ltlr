@@ -7,13 +7,17 @@ void FogParticleBuildHelper(Scene* scene, const FogParticleBuilder* builder)
 	// clang-format off
 	scene->components.tags[builder->entity] = 
 		TAG_NONE
+		| TAG_IDENTIFIER
 		| TAG_POSITION
 		| TAG_DIMENSION
 		| TAG_KINETIC
 		| TAG_SMOOTH
-		| TAG_FLEETING
-		| TAG_FOG_PARTICLE;
+		| TAG_FLEETING;
 	// clang-format on
+
+	scene->components.identifiers[builder->entity] = (CIdentifier) {
+		.type = ENTITY_TYPE_FOG_PARTICLE,
+	};
 
 	scene->components.positions[builder->entity] = (CPosition) {
 		.value = builder->position,
@@ -46,10 +50,10 @@ void FogParticleBuild(Scene* scene, const void* params)
 
 void FogParticleDraw(const Scene* scene, const usize entity)
 {
-	static const u64 dependencies =
-		TAG_POSITION | TAG_DIMENSION | TAG_FLEETING | TAG_SMOOTH | TAG_FOG_PARTICLE;
+	static const u64 dependencies = TAG_POSITION | TAG_DIMENSION | TAG_FLEETING | TAG_SMOOTH;
 
-	if (!SceneEntityHasDependencies((Scene*)scene, entity, dependencies))
+	if (!SceneEntityIs(scene, entity, ENTITY_TYPE_FOG_PARTICLE)
+		|| !SceneEntityHasDependencies((Scene*)scene, entity, dependencies))
 	{
 		return;
 	}
