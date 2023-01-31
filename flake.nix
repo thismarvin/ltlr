@@ -7,40 +7,32 @@
     self,
     nixpkgs,
   }: let
-    pname = "ltlr";
-    version = "2023-01-30";
     system = "x86_64-linux";
     pkgs = import nixpkgs {inherit system;};
   in {
     formatter."${system}" = pkgs.alejandra;
     packages."${system}" = {
-      ltlr = derivation {
-        name = "${pname}-${version}";
-        inherit pname;
-        inherit version;
+      ltlr = pkgs.stdenv.mkDerivation {
+        pname = "ltlr";
+        version = "2023-01-30";
         src = ./.;
-        inherit system;
-        builder = "${pkgs.nushell}/bin/nu";
-        args = [./builder.nu];
-        buildInputs = with pkgs; [
-          xorg.libX11.dev
-          xorg.libXcursor.dev
-          xorg.libXext.dev
-          xorg.libXfixes.dev
-          xorg.libXi.dev
-          xorg.libXinerama.dev
-          xorg.libXrandr.dev
-          xorg.libXrender.dev
-          xorg.xorgproto
-          libGL.dev
-          coreutils
-          binutils-unwrapped
+        nativeBuildInputs = with pkgs; [
+          makeWrapper
           nushell
           pkg-config
-          gcc
-          patchelf
-          gnumake
         ];
+        buildInputs = with pkgs; [
+          glfw
+        ];
+        buildPhase = ''
+          nu $src/scripts/build_phase.nu
+        '';
+        installPhase = ''
+          mkdir -p $out/bin
+          cp -r $TMP/content $out/bin
+          cp $TMP/ltlr $out/bin
+          wrapProgram $out/bin/ltlr --chdir $out/bin
+        '';
       };
       default = self.packages."${system}".ltlr;
     };

@@ -209,7 +209,7 @@ export def "makefile desktop" [
 	| append $"cflags.debug := -g -pg -Og"
 	| append $"cflags.release := -g -O2"
 	| append $"CFLAGS := -std=c17 $\(cflags.warnings) $\(cflags.$\(BUILD)) -Ivendor/raylib/src -DPLATFORM_DESKTOP"
-	| append $"ldlibs.vendor := $\(shell pkg-config --libs gl)"
+	| append $"ldlibs.vendor := $\(shell pkg-config --libs glfw3)"
 	| append $"LDLIBS := -L$\(DESTDIR)/lib/desktop -lraylib $\(ldlibs.vendor) -lm"
 	| append $""
 	| append $kickstarter

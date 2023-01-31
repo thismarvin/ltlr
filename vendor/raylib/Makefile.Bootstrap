@@ -13,7 +13,8 @@ src/raylib.h:
 	mv raylib/.gitignore .
 	mv raylib/LICENSE .
 	mv raylib/src .
-	$(NU) patch.nu
+	patch -d src < address-glfw-compile-error.patch
+	patch -d src < enable-custom-frame-control.patch
 	rm -rf raylib
 
 .PHONY: @raylib
