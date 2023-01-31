@@ -484,15 +484,15 @@ void PlayerBuildHelper(Scene* scene, const PlayerBuilder* builder)
 
 	// clang-format off
 	scene->components.tags[builder->entity] =
-	  TAG_NONE
-	  | TAG_POSITION
-	  | TAG_DIMENSION
-	  | TAG_ANIMATION
-	  | TAG_KINETIC
-	  | TAG_SMOOTH
-	  | TAG_COLLIDER
-	  | TAG_PLAYER
-	  | TAG_MORTAL;
+		TAG_NONE
+		| TAG_POSITION
+		| TAG_DIMENSION
+		| TAG_ANIMATION
+		| TAG_KINETIC
+		| TAG_SMOOTH
+		| TAG_COLLIDER
+		| TAG_PLAYER
+		| TAG_MORTAL;
 	// clang-format on
 
 	scene->components.positions[builder->entity] = (CPosition) {
