@@ -20,7 +20,7 @@ static const f32 timeToStop = CTX_DT * 6;
 static void PlayerStandstill(CPlayer* player, CKinetic* kinetic)
 {
 	player->sprintTimer = 0;
-	player->sprintState = SPRINT_STATE_NONE;
+	player->sprintState = PLAYER_SPRINT_STATE_NONE;
 	player->sprintForce.x = 0;
 	player->sprintDirection = DIR_NONE;
 	kinetic->velocity.x = 0;
@@ -550,7 +550,7 @@ void PlayerBuildHelper(Scene* scene, const PlayerBuilder* builder)
 		.invulnerableDuration = invulnerableDuration,
 		.initialDirection = DIR_NONE,
 		.sprintDirection = DIR_NONE,
-		.sprintState = SPRINT_STATE_NONE,
+		.sprintState = PLAYER_SPRINT_STATE_NONE,
 		.sprintTimer = 0,
 		.sprintDuration = 0,
 		.sprintForce = VECTOR2_ZERO,
@@ -568,7 +568,7 @@ static void PlayerDecelerate(CPlayer* player, const CKinetic* kinetic)
 	if (kinetic->velocity.x == 0)
 	{
 		player->sprintTimer = 0;
-		player->sprintState = SPRINT_STATE_NONE;
+		player->sprintState = PLAYER_SPRINT_STATE_NONE;
 		player->sprintForce.x = 0;
 		player->sprintDirection = DIR_NONE;
 
@@ -583,7 +583,7 @@ static void PlayerDecelerate(CPlayer* player, const CKinetic* kinetic)
 
 	player->sprintTimer = 0;
 	player->sprintDuration = t;
-	player->sprintState = SPRINT_STATE_DECELERATING;
+	player->sprintState = PLAYER_SPRINT_STATE_DECELERATING;
 	// vf = vo + a * t
 	// a = (vf - vo) / t
 	player->sprintForce.x = (vf - vo) / t;
@@ -596,7 +596,7 @@ static void PlayerAccelerate(CPlayer* player, const CKinetic* kinetic, const Dir
 		|| (direction == DIR_RIGHT && kinetic->velocity.x >= moveSpeed))
 	{
 		player->sprintTimer = 0;
-		player->sprintState = SPRINT_STATE_TERMINAL;
+		player->sprintState = PLAYER_SPRINT_STATE_TERMINAL;
 		player->sprintForce.x = 0;
 		player->sprintDirection = direction;
 
@@ -623,7 +623,7 @@ static void PlayerAccelerate(CPlayer* player, const CKinetic* kinetic, const Dir
 
 	player->sprintTimer = 0;
 	player->sprintDuration = t;
-	player->sprintState = SPRINT_STATE_ACCELERATING;
+	player->sprintState = PLAYER_SPRINT_STATE_ACCELERATING;
 	// vf = vo + a * t
 	// a = (vf - vo) / t
 	player->sprintForce.x = (vf - vo) / t;
@@ -658,7 +658,7 @@ static void PlayerLateralMovementLogic(const Scene* scene, CPlayer* player, CKin
 	// Handle sprint state.
 	switch (player->sprintState)
 	{
-		case SPRINT_STATE_NONE: {
+		case PLAYER_SPRINT_STATE_NONE: {
 			if (strafe == DIR_NONE)
 			{
 				player->sprintForce.x = 0;
@@ -671,7 +671,7 @@ static void PlayerLateralMovementLogic(const Scene* scene, CPlayer* player, CKin
 			break;
 		}
 
-		case SPRINT_STATE_ACCELERATING: {
+		case PLAYER_SPRINT_STATE_ACCELERATING: {
 			if (strafe == DIR_NONE)
 			{
 				PlayerDecelerate(player, kinetic);
@@ -692,7 +692,7 @@ static void PlayerLateralMovementLogic(const Scene* scene, CPlayer* player, CKin
 			if (player->sprintTimer >= player->sprintDuration)
 			{
 				player->sprintTimer = 0;
-				player->sprintState = SPRINT_STATE_TERMINAL;
+				player->sprintState = PLAYER_SPRINT_STATE_TERMINAL;
 				player->sprintForce.x = 0;
 
 				// const i8 sign = strafe == DIR_RIGHT ? 1 : -1;
@@ -702,7 +702,7 @@ static void PlayerLateralMovementLogic(const Scene* scene, CPlayer* player, CKin
 			break;
 		}
 
-		case SPRINT_STATE_TERMINAL: {
+		case PLAYER_SPRINT_STATE_TERMINAL: {
 			if ((player->sprintDirection == DIR_LEFT && strafe == DIR_RIGHT)
 				|| (player->sprintDirection == DIR_RIGHT && strafe == DIR_LEFT))
 			{
@@ -719,7 +719,7 @@ static void PlayerLateralMovementLogic(const Scene* scene, CPlayer* player, CKin
 			break;
 		}
 
-		case SPRINT_STATE_DECELERATING: {
+		case PLAYER_SPRINT_STATE_DECELERATING: {
 			if (strafe != DIR_NONE)
 			{
 				PlayerAccelerate(player, kinetic, strafe);
@@ -1081,7 +1081,7 @@ void PlayerAnimationUpdate(Scene* scene, const usize entity)
 				break;
 			}
 
-			if (player->sprintState != SPRINT_STATE_NONE)
+			if (player->sprintState != PLAYER_SPRINT_STATE_NONE)
 			{
 				EnableAnimation(scene, entity, player, ANIMATION_PLAYER_RUN);
 
@@ -1101,7 +1101,7 @@ void PlayerAnimationUpdate(Scene* scene, const usize entity)
 				break;
 			}
 
-			if (player->sprintState == SPRINT_STATE_NONE)
+			if (player->sprintState == PLAYER_SPRINT_STATE_NONE)
 			{
 				if (IsFrameJustStarting(animation))
 				{

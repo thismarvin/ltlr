@@ -43,11 +43,11 @@ typedef struct Scene Scene;
 
 typedef enum
 {
-	SPRINT_STATE_NONE,
-	SPRINT_STATE_ACCELERATING,
-	SPRINT_STATE_TERMINAL,
-	SPRINT_STATE_DECELERATING,
-} SprintState;
+	PLAYER_SPRINT_STATE_NONE,
+	PLAYER_SPRINT_STATE_ACCELERATING,
+	PLAYER_SPRINT_STATE_TERMINAL,
+	PLAYER_SPRINT_STATE_DECELERATING,
+} PlayerSprintState;
 
 typedef enum
 {
@@ -163,7 +163,7 @@ typedef struct
 	f32 invulnerableDuration;
 	Direction initialDirection;
 	Direction sprintDirection;
-	SprintState sprintState;
+	PlayerSprintState sprintState;
 	f32 sprintTimer;
 	f32 sprintDuration;
 	Vector2 sprintForce;
