@@ -110,7 +110,7 @@ void SceneDefer(Scene* self, const OnDefer fn, const void* params)
 		.params = (void*)params,
 	};
 
-	DEQUE_PUSH_BACK(&self->deferred, SceneDeferParams, args);
+	DEQUE_PUSH_FRONT(&self->deferred, SceneDeferParams, args);
 }
 
 void SceneDeferDeallocateEntity(Scene* self, const usize entity)
