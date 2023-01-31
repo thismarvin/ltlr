@@ -41,6 +41,18 @@ Makefile.Web: scripts/generate.nu $(SRC_DIRS)
 	cd build/desktop; ./ltlr
 	$(GPROF) build/desktop/ltlr build/desktop/gmon.out > build/desktop/profile
 
+.PHONY: @dev/nixGLNvidia
+@dev/nixGLNvidia:
+	nix run github:guibou/nixGL#nixGLNvidia -- $(MAKE) @dev
+
+.PHONY: @dev/nixGLNvidiaBumblebee
+@dev/nixGLNvidiaBumblebee:
+	nix run github:guibou/nixGL#nixGLNvidiaBumblebee -- $(MAKE) @dev
+
+.PHONY: @dev/nixGLIntel
+@dev/nixGLIntel:
+	nix run github:guibou/nixGL#nixGLIntel -- $(MAKE) @dev
+
 .PHONY: @test
 @test: @vendor/desktop Makefile.Test
 	$(MAKE) -f Makefile.Test @test
