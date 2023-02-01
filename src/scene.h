@@ -66,6 +66,7 @@ struct Scene
 	f32 scoreBufferTimer;
 	i32 scoreBuffer;
 	char scoreString[MAX_SCORE_DIGITS];
+	u8 totalBatteries;
 	usize player;
 	usize fog;
 	usize lakitu;
@@ -105,6 +106,8 @@ bool SceneEntityHasDependencies(const Scene* self, usize entity, u64 dependencie
 bool SceneEntityIs(const Scene* self, usize entity, EntityType type);
 
 void SceneIncrementScore(Scene* self, u32 value);
+void SceneCollectBattery(Scene* self);
+void SceneConsumeBattery(Scene* self);
 
 void SceneDefer(Scene* self, const OnDefer fn, const void* params);
 void SceneDeferDeallocateEntity(Scene* self, usize entity);

@@ -495,16 +495,25 @@ static void PlayerOnCollision(const OnCollisionParams* params)
 
 		SceneIncrementScore(params->scene, 100);
 
+		SceneCollectBattery(params->scene);
 		SceneDeferDeallocateEntity(params->scene, params->otherEntity);
 	}
 
 	if (SceneEntityIs(params->scene, params->otherEntity, ENTITY_TYPE_SOLAR_PANEL))
 	{
-		// TODO(thismarvin): Check if we have a battery and the solar panel is off.
-
 		CSprite* otherSprite = &params->scene->components.sprites[params->otherEntity];
 
-		otherSprite->type = SPRITE_SOLAR_0001;
+		const bool solarPanelIsOff = otherSprite->type == SPRITE_SOLAR_0000;
+		const bool batteryAvailable = params->scene->totalBatteries != 0;
+
+		if (solarPanelIsOff && batteryAvailable)
+		{
+			otherSprite->type = SPRITE_SOLAR_0001;
+
+			SceneConsumeBattery(params->scene);
+
+			// TODO(austin0209): Spawn fireworks.
+		}
 	}
 }
 

@@ -617,6 +617,8 @@ static void SceneReset(Scene* self)
 	self->scoreBufferTimer = 0;
 	self->scoreBuffer = 0;
 
+	self->totalBatteries = 0;
+
 	SceneBuildStage(self);
 }
 
@@ -624,6 +626,8 @@ static void SceneAdvanceStage(Scene* self)
 {
 	self->stage += 1;
 	self->stage = MIN(self->stage, 64);
+
+	self->totalBatteries = 0;
 
 	const CMortal playersMortal = self->components.mortals[self->player];
 
@@ -664,6 +668,22 @@ void SceneIncrementScore(Scene* self, const u32 value)
 {
 	self->scoreBuffer += value;
 	self->scoreBuffer = MIN(self->scoreBuffer, MAX_SCORE);
+}
+
+void SceneCollectBattery(Scene* self)
+{
+	self->totalBatteries += 1;
+	self->totalBatteries = MIN(self->totalBatteries, 3);
+}
+
+void SceneConsumeBattery(Scene* self)
+{
+	if (self->totalBatteries == 0)
+	{
+		return;
+	}
+
+	self->totalBatteries -= 1;
 }
 
 void SceneDeferReset(Scene* self)
