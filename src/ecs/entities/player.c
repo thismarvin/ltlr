@@ -433,21 +433,58 @@ static OnResolutionResult PlayerOnResolution(const OnResolutionParams* params)
 	};
 }
 
+static Rectangle PlayerGetFeetCollider(const Rectangle aabb)
+{
+	static const f32 height = 4;
+
+	return (Rectangle) {
+		.x = aabb.x,
+		.y = RectangleBottom(aabb) - height,
+		.width = aabb.width,
+		.height = height,
+	};
+}
+
 static void PlayerOnCollision(const OnCollisionParams* params)
 {
-	static const u64 dependencies = TAG_PLAYER | TAG_MORTAL;
+	static const u64 dependencies = TAG_PLAYER | TAG_KINETIC | TAG_MORTAL;
 	assert(SceneEntityHasDependencies(params->scene, params->entity, dependencies));
 
+	const CKinetic* kinetic = &params->scene->components.kinetics[params->entity];
 	CMortal* mortal = &params->scene->components.mortals[params->entity];
 
 	if (SceneEntityHasDependencies(params->scene, params->otherEntity, TAG_DAMAGE))
 	{
-		// if otherEntity is Spike
-		//   if player is falling and their lower half collides with otherEntity
-		//     take damage
-		// else
+		if (SceneEntityIs(params->scene, params->otherEntity, ENTITY_TYPE_SPIKE))
+		{
+			assert(SceneEntityHasDependencies(params->scene, params->otherEntity, TAG_SPRITE));
 
-		PlayerOnDamage(params->scene, params->entity, params->otherEntity);
+			const bool theSpikeIsOnTheGround =
+				params->scene->components.sprites[params->otherEntity].type == SPRITE_SPIKE_0000;
+
+			if (theSpikeIsOnTheGround)
+			{
+				const bool thePlayerIsFallingOrGrounded = kinetic->velocity.y >= 0;
+
+				if (thePlayerIsFallingOrGrounded)
+				{
+					const Rectangle collider = PlayerGetFeetCollider(params->aabb);
+
+					if (CheckCollisionRecs(collider, params->otherAabb))
+					{
+						PlayerOnDamage(params->scene, params->entity, params->otherEntity);
+					}
+				}
+			}
+			else
+			{
+				PlayerOnDamage(params->scene, params->entity, params->otherEntity);
+			}
+		}
+		else
+		{
+			PlayerOnDamage(params->scene, params->entity, params->otherEntity);
+		}
 	}
 
 	if (SceneEntityIs(params->scene, params->otherEntity, ENTITY_TYPE_BATTERY))
@@ -1189,5 +1226,14 @@ void PlayerDebugDraw(const Scene* scene, usize entity)
 		const Color color = P8_RED;
 		DrawRectangleRec(aabb, ColorAlpha(color, 0.75));
 		DrawRectangleLinesEx(aabb, 2, color);
+	}
+
+	// Draw smaller feet aabb.
+	{
+		const Rectangle collider = PlayerGetFeetCollider(aabb);
+
+		const Color color = P8_PINK;
+		DrawRectangleRec(collider, ColorAlpha(color, 0.75));
+		DrawRectangleLinesEx(collider, 1, color);
 	}
 }
