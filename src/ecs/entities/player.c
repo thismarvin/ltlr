@@ -1233,7 +1233,9 @@ void PlayerDebugDraw(const Scene* scene, usize entity)
 	// Draw general-purpose aabb.
 	{
 		const Color color = P8_RED;
-		DrawRectangleRec(aabb, ColorAlpha(color, 0.75));
+		const Color premultiplied = ColorMultiply(color, 0.4);
+
+		DrawRectangleRec(aabb, premultiplied);
 		DrawRectangleLinesEx(aabb, 2, color);
 	}
 
@@ -1242,7 +1244,9 @@ void PlayerDebugDraw(const Scene* scene, usize entity)
 		const Rectangle collider = PlayerGetFeetCollider(aabb);
 
 		const Color color = P8_PINK;
-		DrawRectangleRec(collider, ColorAlpha(color, 0.75));
+		const Color premultiplied = ColorMultiply(color, 0.8);
+
+		DrawRectangleRec(collider, premultiplied);
 		DrawRectangleLinesEx(collider, 1, color);
 	}
 }

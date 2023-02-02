@@ -341,9 +341,11 @@ void FogDebugDraw(const Scene* scene, const usize entity)
 			.width = CTX_VIEWPORT_WIDTH * 2,
 			.height = padding + CTX_VIEWPORT_HEIGHT + padding,
 		};
-		const Color color = P8_PINK;
 
-		DrawRectangleRec(aabb, ColorAlpha(color, 0.75));
+		const Color color = P8_PINK;
+		const Color premultiplied = ColorMultiply(color, 0.4);
+
+		DrawRectangleRec(aabb, premultiplied);
 		DrawRectangleLinesEx(aabb, 4, color);
 	}
 

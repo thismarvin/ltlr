@@ -1274,6 +1274,8 @@ static void SceneActionDraw(Scene* self)
 
 void SceneDraw(Scene* self)
 {
+	BeginBlendMode(BLEND_ALPHA_PREMULTIPLY);
+
 	switch (self->state)
 	{
 		case SCENE_STATE_MENU: {
@@ -1286,6 +1288,8 @@ void SceneDraw(Scene* self)
 			break;
 		}
 	}
+
+	EndBlendMode();
 }
 
 void SceneDestroy(Scene* self)

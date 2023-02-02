@@ -576,33 +576,41 @@ void SAnimationDraw(const Scene* scene, const usize entity)
 
 static void ColliderDrawLayerBoundaries(const CCollider* self, const Rectangle aabb)
 {
-	static const f32 alpha = 0.75;
+	static const f32 alpha = 0.4;
 
 	if ((self->layer & LAYER_TERRAIN) == LAYER_TERRAIN)
 	{
 		const Color color = P8_DARK_GREEN;
-		DrawRectangleRec(aabb, ColorAlpha(color, alpha));
+		const Color premultiplied = ColorMultiply(color, alpha);
+
+		DrawRectangleRec(aabb, premultiplied);
 		DrawRectangleLinesEx(aabb, 4, color);
 	}
 
 	if ((self->layer & LAYER_LETHAL) == LAYER_LETHAL)
 	{
 		const Color color = P8_YELLOW;
-		DrawRectangleRec(aabb, ColorAlpha(color, alpha));
+		const Color premultiplied = ColorMultiply(color, alpha);
+
+		DrawRectangleRec(aabb, premultiplied);
 		DrawRectangleLinesEx(aabb, 1, color);
 	}
 
 	if ((self->layer & LAYER_INTERACTABLE) == LAYER_INTERACTABLE)
 	{
 		const Color color = P8_ORANGE;
-		DrawRectangleRec(aabb, ColorAlpha(color, alpha));
+		const Color premultiplied = ColorMultiply(color, alpha);
+
+		DrawRectangleRec(aabb, premultiplied);
 		DrawRectangleLinesEx(aabb, 2, color);
 	}
 
 	if ((self->layer & LAYER_INVISIBLE) == LAYER_INVISIBLE)
 	{
 		const Color color = P8_LAVENDER;
-		DrawRectangleRec(aabb, ColorAlpha(color, alpha));
+		const Color premultiplied = ColorMultiply(color, alpha);
+
+		DrawRectangleRec(aabb, premultiplied);
 		DrawRectangleLinesEx(aabb, 2, color);
 	}
 }
