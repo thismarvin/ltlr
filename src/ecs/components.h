@@ -184,12 +184,10 @@ typedef struct
 	bool groundedLastFrame;
 	bool grounded;
 	f32 coyoteTimer;
-	f32 coyoteDuration;
 	bool jumping;
 	bool dead;
 	Vector2 gravityForce;
 	f32 invulnerableTimer;
-	f32 invulnerableDuration;
 	Direction initialDirection;
 	Direction sprintDirection;
 	PlayerSprintState sprintState;

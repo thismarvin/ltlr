@@ -7,6 +7,20 @@
 #include <raymath.h>
 #include <stdio.h>
 
+#define PLAYER_SPRITE_INTRAMURAL ((Rectangle) { 24, 29, 15, 35 })
+#define COYOTE_DURATION (CTX_DT * 6)
+#define INVULNERABLE_DURATION (1.5f)
+#define TRAIL_DURATION (CTX_DT * 2)
+
+typedef struct
+{
+	usize entity;
+	f32 x;
+	f32 y;
+	Sprite sprite;
+	Reflection reflection;
+} ShadowBuilder;
+
 static const f32 moveSpeed = 200;
 static const f32 jumpHeight = 16 * 3 + 6;
 static const f32 jumpDuration = 0.4;
@@ -28,7 +42,7 @@ static void PlayerStandstill(CPlayer* player, CKinetic* kinetic)
 
 static bool PlayerIsVulnerable(const CPlayer* player)
 {
-	return player->invulnerableTimer >= player->invulnerableDuration;
+	return player->invulnerableTimer >= INVULNERABLE_DURATION;
 }
 
 static void SpawnCloudParticle(
@@ -520,12 +534,7 @@ static void PlayerOnCollision(const OnCollisionParams* params)
 void PlayerBuildHelper(Scene* scene, const PlayerBuilder* builder)
 {
 	const Vector2 position = Vector2Create(builder->x, builder->y);
-	const Rectangle intramural = (Rectangle) {
-		.x = 24,
-		.y = 29,
-		.width = 15,
-		.height = 35,
-	};
+	const Rectangle intramural = PLAYER_SPRITE_INTRAMURAL;
 
 	// clang-format off
 	scene->components.tags[builder->entity] =
@@ -585,19 +594,14 @@ void PlayerBuildHelper(Scene* scene, const PlayerBuilder* builder)
 		.hp = 2,
 	};
 
-	static const f32 coyoteDuration = CTX_DT * 6;
-	static const f32 invulnerableDuration = 1.5f;
-
 	scene->components.players[builder->entity] = (CPlayer) {
 		.groundedLastFrame = false,
 		.grounded = false,
-		.coyoteTimer = coyoteDuration,
-		.coyoteDuration = coyoteDuration,
+		.coyoteTimer = COYOTE_DURATION,
 		.jumping = false,
 		.dead = false,
 		.gravityForce = VECTOR2_ZERO,
-		.invulnerableTimer = invulnerableDuration,
-		.invulnerableDuration = invulnerableDuration,
+		.invulnerableTimer = INVULNERABLE_DURATION,
 		.initialDirection = DIR_NONE,
 		.sprintDirection = DIR_NONE,
 		.sprintState = PLAYER_SPRINT_STATE_NONE,
@@ -822,7 +826,7 @@ void PlayerInputUpdate(Scene* scene, const usize entity)
 		return;
 	}
 
-	const bool coyoteTimeActive = player->coyoteTimer < player->coyoteDuration;
+	const bool coyoteTimeActive = player->coyoteTimer < COYOTE_DURATION;
 
 	// Maintenance.
 	{
@@ -931,7 +935,7 @@ static void PlayerFlashingLogic(Scene* scene, const usize entity)
 	player->invulnerableTimer += CTX_DT;
 
 	static const u32 totalFlashes = 5;
-	const f32 timeSlice = player->invulnerableDuration / (totalFlashes * 2.0f);
+	const f32 timeSlice = INVULNERABLE_DURATION / (totalFlashes * 2.0f);
 
 	if (!player->dead && !PlayerIsVulnerable(player))
 	{
