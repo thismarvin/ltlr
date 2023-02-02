@@ -1085,9 +1085,17 @@ static void RenderTargetLayer(const RenderFnParams* params)
 
 	for (usize i = 0; i < SceneGetTotalAllocatedEntities(scene); ++i)
 	{
+		// Let's manually draw the player last.
+		if (i == scene->player)
+		{
+			continue;
+		}
+
 		SSpriteDraw(scene, i);
 		SAnimationDraw(scene, i);
 	}
+
+	SAnimationDraw(scene, scene->player);
 }
 
 static void RenderMenuInterface(const RenderFnParams* params)
