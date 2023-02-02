@@ -35,3 +35,13 @@ bool RectangleContains(const Rectangle self, const Rectangle other)
 		   && RectangleTop(other) >= RectangleTop(self)
 		   && RectangleBottom(other) <= RectangleBottom(self);
 }
+
+Color ColorMultiply(const Color color, const f32 alpha)
+{
+	return (Color) {
+		.r = color.r * alpha,
+		.g = color.g * alpha,
+		.b = color.b * alpha,
+		.a = color.a * alpha,
+	};
+}

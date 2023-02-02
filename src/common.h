@@ -89,3 +89,5 @@ f32 RectangleRight(Rectangle self);
 f32 RectangleBottom(Rectangle self);
 f32 RectangleTop(Rectangle self);
 bool RectangleContains(Rectangle self, Rectangle other);
+
+Color ColorMultiply(Color color, f32 alpha);
