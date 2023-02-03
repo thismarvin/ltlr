@@ -17,5 +17,7 @@ void PlayerInputUpdate(Scene* scene, usize entity);
 void PlayerPostCollisionUpdate(Scene* scene, usize entity);
 void PlayerMortalUpdate(Scene* scene, usize entity);
 void PlayerAnimationUpdate(Scene* scene, usize entity);
+void PlayerTrailUpdate(Scene* scene, usize entity);
+void PlayerShadowUpdate(Scene* scene, usize entity);
 
 void PlayerDebugDraw(const Scene* scene, usize entity);

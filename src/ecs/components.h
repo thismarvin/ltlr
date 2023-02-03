@@ -44,6 +44,7 @@ typedef enum
 	ENTITY_TYPE_FOG_PARTICLE,
 	ENTITY_TYPE_LAKITU,
 	ENTITY_TYPE_PLAYER,
+	ENTITY_TYPE_PLAYER_SHADOW,
 	ENTITY_TYPE_SOLAR_PANEL,
 	ENTITY_TYPE_SPIKE,
 	ENTITY_TYPE_WALKER,
@@ -195,4 +196,5 @@ typedef struct
 	f32 sprintDuration;
 	Vector2 sprintForce;
 	PlayerAnimationState animationState;
+	f32 trailTimer;
 } CPlayer;

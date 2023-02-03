@@ -31,6 +31,51 @@ static const f32 terminalVelocity = 500;
 static const f32 timeToSprint = CTX_DT * 6;
 static const f32 timeToStop = CTX_DT * 6;
 
+static void ShadowBuildHelper(Scene* scene, const ShadowBuilder* builder)
+{
+	// clang-format off
+	scene->components.tags[builder->entity] =
+		TAG_NONE
+		| TAG_IDENTIFIER
+		| TAG_POSITION
+		| TAG_COLOR
+		| TAG_SPRITE
+		| TAG_FLEETING;
+	// clang-format on
+
+	scene->components.identifiers[builder->entity] = (CIdentifier) {
+		.type = ENTITY_TYPE_PLAYER_SHADOW,
+	};
+
+	scene->components.positions[builder->entity] = (CPosition) {
+		.value =
+			(Vector2) {
+				.x = builder->x,
+				.y = builder->y,
+			},
+	};
+
+	scene->components.colors[builder->entity] = (CColor) {
+		.value = COLOR_WHITE,
+	};
+
+	scene->components.sprites[builder->entity] = (CSprite) {
+		.type = builder->sprite,
+		.intramural = PLAYER_SPRITE_INTRAMURAL,
+		.reflection = builder->reflection,
+	};
+
+	scene->components.fleetings[builder->entity] = (CFleeting) {
+		.lifetime = CTX_DT * 24,
+		.age = 0,
+	};
+}
+
+void ShadowBuild(Scene* scene, const void* params)
+{
+	ShadowBuildHelper(scene, params);
+}
+
 static void PlayerStandstill(CPlayer* player, CKinetic* kinetic)
 {
 	player->sprintTimer = 0;
@@ -609,6 +654,7 @@ void PlayerBuildHelper(Scene* scene, const PlayerBuilder* builder)
 		.sprintDuration = 0,
 		.sprintForce = VECTOR2_ZERO,
 		.animationState = PLAYER_ANIMATION_STATE_STILL,
+		.trailTimer = 0,
 	};
 }
 
@@ -1210,6 +1256,71 @@ void PlayerAnimationUpdate(Scene* scene, const usize entity)
 
 		animation->reflection = reflection;
 	}
+}
+
+void PlayerTrailUpdate(Scene* scene, const usize entity)
+{
+	static const u64 dependencies = TAG_PLAYER | TAG_SMOOTH;
+
+	if (!SceneEntityIs(scene, entity, ENTITY_TYPE_PLAYER)
+		|| !SceneEntityHasDependencies(scene, entity, dependencies))
+	{
+		return;
+	}
+
+	CPlayer* player = &scene->components.players[entity];
+	const CSmooth* smooth = &scene->components.smooths[entity];
+
+	player->trailTimer += CTX_DT;
+
+	if (player->trailTimer >= TRAIL_DURATION)
+	{
+		// TODO(thismarvin): Should the trail care about the player flashing?
+		if (SceneEntityHasDependencies(scene, entity, TAG_ANIMATION))
+		{
+			const CAnimation* animation = &scene->components.animations[entity];
+
+			ShadowBuilder* builder = malloc(sizeof(ShadowBuilder));
+			builder->entity = SceneAllocateEntity(scene);
+			builder->x = smooth->previous.x;
+			builder->y = smooth->previous.y;
+			builder->sprite = ANIMATIONS[animation->type][animation->frame];
+			builder->reflection = animation->reflection;
+			SceneDefer(scene, ShadowBuild, builder);
+		}
+
+		player->trailTimer = 0;
+	}
+}
+
+void PlayerShadowUpdate(Scene* scene, const usize entity)
+{
+	static const u64 dependencies = TAG_FLEETING | TAG_COLOR;
+
+	if (!SceneEntityIs(scene, entity, ENTITY_TYPE_PLAYER_SHADOW)
+		|| !SceneEntityHasDependencies(scene, entity, dependencies))
+	{
+		return;
+	}
+
+	const CFleeting* fleeting = &scene->components.fleetings[entity];
+	CColor* color = &scene->components.colors[entity];
+
+	const f32 value = 1.0 - (fleeting->age / fleeting->lifetime);
+
+	const Color tint = (Color) {
+		.r = 255 * value,
+		.g = 255 * value,
+		.b = 255 * value,
+		.a = 255,
+	};
+
+	const u8 r = tint.r * value;
+	const u8 b = tint.g * value;
+	const u8 g = tint.b * value;
+	const u8 a = tint.a * value;
+
+	color->value = (Color) { r, g, b, a };
 }
 
 void PlayerDebugDraw(const Scene* scene, usize entity)

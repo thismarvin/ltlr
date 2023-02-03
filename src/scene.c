@@ -853,6 +853,9 @@ static void SceneActionUpdate(Scene* self)
 		SAnimationUpdate(self, i);
 
 		PlayerAnimationUpdate(self, i);
+
+		PlayerTrailUpdate(self, i);
+		PlayerShadowUpdate(self, i);
 	}
 
 	SceneUpdateScore(self);
