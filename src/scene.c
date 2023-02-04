@@ -170,112 +170,9 @@ static void SceneSetupContent(Scene* self)
 }
 
 // clang-format off
-static void SceneSetupActionProfile(Scene* self)
+static InputProfile CreateDefaultMenuProfile(void)
 {
-	self->defaultActionProfile = InputProfileCreate(4);
-
-	// Keyboard.
-	{
-		{
-			KeyboardBinding binding = KeyboardBindingCreate("left", 2);
-
-			KeyboardBindingAddKey(&binding, KEY_LEFT);
-			KeyboardBindingAddKey(&binding, KEY_A);
-
-			InputProfileAddKeyboardBinding(&self->defaultActionProfile, binding);
-		}
-		{
-			KeyboardBinding binding = KeyboardBindingCreate("right", 2);
-
-			KeyboardBindingAddKey(&binding, KEY_RIGHT);
-			KeyboardBindingAddKey(&binding, KEY_D);
-
-			InputProfileAddKeyboardBinding(&self->defaultActionProfile, binding);
-		}
-		{
-			KeyboardBinding binding = KeyboardBindingCreate("stomp", 2);
-
-			KeyboardBindingAddKey(&binding, KEY_X);
-			KeyboardBindingAddKey(&binding, KEY_J);
-
-			InputProfileAddKeyboardBinding(&self->defaultActionProfile, binding);
-		}
-		{
-			KeyboardBinding binding = KeyboardBindingCreate("jump", 2);
-
-			KeyboardBindingAddKey(&binding, KEY_Z);
-			KeyboardBindingAddKey(&binding, KEY_SPACE);
-
-			KeyboardBindingSetBuffer(&binding, CTX_DT * 8);
-
-			InputProfileAddKeyboardBinding(&self->defaultActionProfile, binding);
-		}
-	}
-
-	// Gamepad.
-	{
-		// Buttons.
-		{
-			{
-				GamepadBinding binding = GamepadBindingCreate("left", 1);
-
-				GamepadBindingAddButton(&binding, GAMEPAD_BUTTON_LEFT_FACE_LEFT);
-
-				InputProfileAddGamepadBinding(&self->defaultActionProfile, binding);
-			}
-			{
-				GamepadBinding binding = GamepadBindingCreate("right", 1);
-
-				GamepadBindingAddButton(&binding, GAMEPAD_BUTTON_LEFT_FACE_RIGHT);
-
-				InputProfileAddGamepadBinding(&self->defaultActionProfile, binding);
-			}
-			{
-				GamepadBinding binding = GamepadBindingCreate("stomp", 2);
-
-				GamepadBindingAddButton(&binding, GAMEPAD_BUTTON_RIGHT_FACE_LEFT);
-				GamepadBindingAddButton(&binding, GAMEPAD_BUTTON_RIGHT_FACE_RIGHT);
-
-				InputProfileAddGamepadBinding(&self->defaultActionProfile, binding);
-			}
-			{
-				GamepadBinding binding = GamepadBindingCreate("jump", 2);
-
-				GamepadBindingAddButton(&binding, GAMEPAD_BUTTON_RIGHT_FACE_DOWN);
-				GamepadBindingAddButton(&binding, GAMEPAD_BUTTON_RIGHT_FACE_UP);
-
-				GamepadBindingSetBuffer(&binding, CTX_DT * 8);
-
-				InputProfileAddGamepadBinding(&self->defaultActionProfile, binding);
-			}
-		}
-
-		// Axes.
-		{
-			static const f32 threshold = 0.25f;
-			{
-				AxisBinding binding = AxisBindingCreate("left", 2, ORD_LESS, -threshold);
-
-				AxisBindingAddAxis(&binding, GAMEPAD_AXIS_LEFT_X);
-				AxisBindingAddAxis(&binding, GAMEPAD_AXIS_RIGHT_X);
-
-				InputProfileAddAxisBinding(&self->defaultActionProfile, binding);
-			}
-			{
-				AxisBinding binding = AxisBindingCreate("right", 2, ORD_GREATER, threshold);
-
-				AxisBindingAddAxis(&binding, GAMEPAD_AXIS_LEFT_X);
-				AxisBindingAddAxis(&binding, GAMEPAD_AXIS_RIGHT_X);
-
-				InputProfileAddAxisBinding(&self->defaultActionProfile, binding);
-			}
-		}
-	}
-}
-
-static void SceneSetupMenuProfile(Scene* self)
-{
-	self->defaultMenuProfile = InputProfileCreate(1);
+	InputProfile profile = InputProfileCreate(1);
 
 	// Keyboard.
 	{
@@ -285,7 +182,7 @@ static void SceneSetupMenuProfile(Scene* self)
 			KeyboardBindingAddKey(&binding, KEY_SPACE);
 			KeyboardBindingAddKey(&binding, KEY_ENTER);
 
-			InputProfileAddKeyboardBinding(&self->defaultMenuProfile, binding);
+			InputProfileAddKeyboardBinding(&profile, binding);
 		}
 	}
 
@@ -299,22 +196,135 @@ static void SceneSetupMenuProfile(Scene* self)
 				GamepadBindingAddButton(&binding, GAMEPAD_BUTTON_MIDDLE_LEFT);
 				GamepadBindingAddButton(&binding, GAMEPAD_BUTTON_MIDDLE_RIGHT);
 
-				InputProfileAddGamepadBinding(&self->defaultMenuProfile, binding);
+				InputProfileAddGamepadBinding(&profile, binding);
 			}
 		}
 	}
+
+	return profile;
+}
+
+// clang-format on
+
+// clang-format off
+static InputProfile CreateDefaultActionProfile(void)
+{
+	InputProfile profile = InputProfileCreate(4);
+
+	// Keyboard.
+	{
+		{
+			KeyboardBinding binding = KeyboardBindingCreate("left", 2);
+
+			KeyboardBindingAddKey(&binding, KEY_LEFT);
+			KeyboardBindingAddKey(&binding, KEY_A);
+
+			InputProfileAddKeyboardBinding(&profile, binding);
+		}
+		{
+			KeyboardBinding binding = KeyboardBindingCreate("right", 2);
+
+			KeyboardBindingAddKey(&binding, KEY_RIGHT);
+			KeyboardBindingAddKey(&binding, KEY_D);
+
+			InputProfileAddKeyboardBinding(&profile, binding);
+		}
+		{
+			KeyboardBinding binding = KeyboardBindingCreate("stomp", 2);
+
+			KeyboardBindingAddKey(&binding, KEY_X);
+			KeyboardBindingAddKey(&binding, KEY_J);
+
+			InputProfileAddKeyboardBinding(&profile, binding);
+		}
+		{
+			KeyboardBinding binding = KeyboardBindingCreate("jump", 2);
+
+			KeyboardBindingAddKey(&binding, KEY_Z);
+			KeyboardBindingAddKey(&binding, KEY_SPACE);
+
+			KeyboardBindingSetBuffer(&binding, CTX_DT * 8);
+
+			InputProfileAddKeyboardBinding(&profile, binding);
+		}
+	}
+
+	// Gamepad.
+	{
+		// Buttons.
+		{
+			{
+				GamepadBinding binding = GamepadBindingCreate("left", 1);
+
+				GamepadBindingAddButton(&binding, GAMEPAD_BUTTON_LEFT_FACE_LEFT);
+
+				InputProfileAddGamepadBinding(&profile, binding);
+			}
+			{
+				GamepadBinding binding = GamepadBindingCreate("right", 1);
+
+				GamepadBindingAddButton(&binding, GAMEPAD_BUTTON_LEFT_FACE_RIGHT);
+
+				InputProfileAddGamepadBinding(&profile, binding);
+			}
+			{
+				GamepadBinding binding = GamepadBindingCreate("stomp", 2);
+
+				GamepadBindingAddButton(&binding, GAMEPAD_BUTTON_RIGHT_FACE_LEFT);
+				GamepadBindingAddButton(&binding, GAMEPAD_BUTTON_RIGHT_FACE_RIGHT);
+
+				InputProfileAddGamepadBinding(&profile, binding);
+			}
+			{
+				GamepadBinding binding = GamepadBindingCreate("jump", 2);
+
+				GamepadBindingAddButton(&binding, GAMEPAD_BUTTON_RIGHT_FACE_DOWN);
+				GamepadBindingAddButton(&binding, GAMEPAD_BUTTON_RIGHT_FACE_UP);
+
+				GamepadBindingSetBuffer(&binding, CTX_DT * 8);
+
+				InputProfileAddGamepadBinding(&profile, binding);
+			}
+		}
+
+		// Axes.
+		{
+			static const f32 threshold = 0.25f;
+			{
+				AxisBinding binding = AxisBindingCreate("left", 2, ORD_LESS, -threshold);
+
+				AxisBindingAddAxis(&binding, GAMEPAD_AXIS_LEFT_X);
+				AxisBindingAddAxis(&binding, GAMEPAD_AXIS_RIGHT_X);
+
+				InputProfileAddAxisBinding(&profile, binding);
+			}
+			{
+				AxisBinding binding = AxisBindingCreate("right", 2, ORD_GREATER, threshold);
+
+				AxisBindingAddAxis(&binding, GAMEPAD_AXIS_LEFT_X);
+				AxisBindingAddAxis(&binding, GAMEPAD_AXIS_RIGHT_X);
+
+				InputProfileAddAxisBinding(&profile, binding);
+			}
+		}
+	}
+
+	return profile;
 }
 
 // clang-format on
 
 static void SceneSetupInput(Scene* self)
 {
-	self->input = InputHandlerCreate(0);
+	for (usize i = 0; i < MAX_PLAYERS; ++i)
+	{
+		self->inputs[i] = InputHandlerCreate(i);
 
-	SceneSetupMenuProfile(self);
-	SceneSetupActionProfile(self);
+		self->menuProfiles[i] = CreateDefaultMenuProfile();
+		self->actionProfiles[i] = CreateDefaultActionProfile();
 
-	InputHandlerSetProfile(&self->input, &self->defaultMenuProfile);
+		InputHandlerSetProfile(&self->inputs[i], &self->menuProfiles[i]);
+	}
 }
 
 static RenderTexture GenerateTreeTexture(void)
@@ -760,13 +770,18 @@ static void SceneCheckEndCondition(Scene* self)
 
 static void SceneMenuUpdate(Scene* self)
 {
-	if (InputHandlerPressed(&self->input, "select"))
+	// Only give player one control in the menu state.
+	if (InputHandlerPressed(&self->inputs[0], "select"))
 	{
-		InputHandlerConsume(&self->input, "select");
+		InputHandlerConsume(&self->inputs[0], "select");
 
 		// TODO(thismarvin): Defer this somehow...
 		self->state = SCENE_STATE_ACTION;
-		InputHandlerSetProfile(&self->input, &self->defaultActionProfile);
+
+		for (usize i = 0; i < MAX_PLAYERS; ++i)
+		{
+			InputHandlerSetProfile(&self->inputs[i], &self->actionProfiles[i]);
+		}
 
 		// TODO(thismarvin): There should be a bespoke transition into the Action state.
 		self->fader.easer.duration = CTX_DT * 40;
@@ -881,7 +896,10 @@ static void SceneActionUpdate(Scene* self)
 
 void SceneUpdate(Scene* self)
 {
-	InputHandlerUpdate(&self->input);
+	for (usize i = 0; i < MAX_PLAYERS; ++i)
+	{
+		InputHandlerUpdate(&self->inputs[i]);
+	}
 
 	if (IsKeyPressed(KEY_EQUAL))
 	{
@@ -1337,6 +1355,9 @@ void SceneDestroy(Scene* self)
 	UnloadRenderTexture(self->transitionLayer);
 	UnloadRenderTexture(self->debugLayer);
 
-	InputProfileDestroy(&self->defaultMenuProfile);
-	InputProfileDestroy(&self->defaultActionProfile);
+	for (usize i = 0; i < MAX_PLAYERS; ++i)
+	{
+		InputProfileDestroy(&self->menuProfiles[i]);
+		InputProfileDestroy(&self->actionProfiles[i]);
+	}
 }

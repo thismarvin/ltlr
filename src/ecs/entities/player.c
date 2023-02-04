@@ -792,29 +792,27 @@ static void PlayerAccelerate(Player* player, const CKinetic* kinetic, const Dire
 	player->sprintDirection = direction;
 }
 
-static void PlayerLateralMovementLogic(const Scene* scene, Player* player, CKinetic* kinetic)
+static void PlayerLateralMovementLogic(InputHandler* input, Player* player, CKinetic* kinetic)
 {
 	Direction strafe = DIR_NONE;
 
 	// Handle input.
 	{
-		if (!InputHandlerPressing(&scene->input, "right")
-			&& InputHandlerPressing(&scene->input, "left"))
+		if (!InputHandlerPressing(input, "right") && InputHandlerPressing(input, "left"))
 		{
 			player->initialDirection = DIR_LEFT;
 			strafe = DIR_LEFT;
 		}
-		else if (!InputHandlerPressing(&scene->input, "left")
-				&& InputHandlerPressing(&scene->input, "right"))
+		else if (!InputHandlerPressing(input, "left") && InputHandlerPressing(input, "right"))
 		{
 			player->initialDirection = DIR_RIGHT;
 			strafe = DIR_RIGHT;
 		}
-		else if (player->initialDirection == DIR_RIGHT && InputHandlerPressing(&scene->input, "left"))
+		else if (player->initialDirection == DIR_RIGHT && InputHandlerPressing(input, "left"))
 		{
 			strafe = DIR_LEFT;
 		}
-		else if (player->initialDirection == DIR_LEFT && InputHandlerPressing(&scene->input, "right"))
+		else if (player->initialDirection == DIR_LEFT && InputHandlerPressing(input, "right"))
 		{
 			strafe = DIR_RIGHT;
 		}
@@ -910,14 +908,14 @@ static void PlayerLateralMovementLogic(const Scene* scene, Player* player, CKine
 	}
 }
 
-void PlayerStompLogic(Scene* scene, Player* player, CKinetic* kinetic)
+void PlayerStompLogic(InputHandler* input, Player* player, CKinetic* kinetic)
 {
 	static f32 stompAcceleration = 2048;
 
 	switch (player->stompState)
 	{
 		case PLAYER_STOMP_STATE_NONE: {
-			if (!player->grounded && InputHandlerPressed(&scene->input, "stomp"))
+			if (!player->grounded && InputHandlerPressed(input, "stomp"))
 			{
 				player->stompState = PLAYER_STOMP_STATE_STOMPING;
 				player->stompForce.y = stompAcceleration;
@@ -950,7 +948,7 @@ void PlayerStompLogic(Scene* scene, Player* player, CKinetic* kinetic)
 
 				f32 maxVelocity = -jumpVelocity;
 
-				if (InputHandlerPressing(&scene->input, "stomp"))
+				if (InputHandlerPressing(input, "stomp"))
 				{
 					maxVelocity *= 1.5;
 				}
@@ -965,7 +963,7 @@ void PlayerStompLogic(Scene* scene, Player* player, CKinetic* kinetic)
 		}
 
 		case PLAYER_STOMP_STATE_SPRINGING: {
-			if (!player->groundedLastFrame && InputHandlerPressed(&scene->input, "stomp"))
+			if (!player->groundedLastFrame && InputHandlerPressed(input, "stomp"))
 			{
 				player->stompState = PLAYER_STOMP_STATE_STOMPING;
 				player->stompForce.y = stompAcceleration;
@@ -996,7 +994,9 @@ void PlayerInputUpdate(Scene* scene, const usize entity)
 		return;
 	}
 
-	Player* player = &scene->players[scene->components.players[entity].handle];
+	const u8 handle = scene->components.players[entity].handle;
+	InputHandler* input = &scene->inputs[handle];
+	Player* player = &scene->players[handle];
 	CKinetic* kinetic = &scene->components.kinetics[entity];
 
 	if (player->dead)
@@ -1029,16 +1029,16 @@ void PlayerInputUpdate(Scene* scene, const usize entity)
 		}
 	}
 
-	PlayerLateralMovementLogic(scene, player, kinetic);
+	PlayerLateralMovementLogic(input, player, kinetic);
 
 	// Jumping.
 	{
 		if (!PlayerStompInProgress(player))
 		{
 			if ((player->grounded || coyoteTimeActive) && !player->jumping
-				&& InputHandlerPressed(&scene->input, "jump"))
+				&& InputHandlerPressed(input, "jump"))
 			{
-				InputHandlerConsume(&scene->input, "jump");
+				InputHandlerConsume(input, "jump");
 
 				player->grounded = false;
 				player->jumping = true;
@@ -1048,9 +1048,9 @@ void PlayerInputUpdate(Scene* scene, const usize entity)
 			}
 
 			// Variable Jump Height.
-			if (InputHandlerReleased(&scene->input, "jump") && kinetic->velocity.y < 0)
+			if (InputHandlerReleased(input, "jump") && kinetic->velocity.y < 0)
 			{
-				InputHandlerConsume(&scene->input, "jump");
+				InputHandlerConsume(input, "jump");
 
 				player->jumping = false;
 				kinetic->velocity.y = MAX(kinetic->velocity.y, -jumpVelocity * 0.5);
@@ -1058,7 +1058,7 @@ void PlayerInputUpdate(Scene* scene, const usize entity)
 		}
 	}
 
-	PlayerStompLogic(scene, player, kinetic);
+	PlayerStompLogic(input, player, kinetic);
 
 	// Assume that the player is not grounded; prove that it is later.
 	player->grounded = false;

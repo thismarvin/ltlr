@@ -84,9 +84,10 @@ struct Scene
 	RenderTexture2D interfaceLayer;
 	RenderTexture2D transitionLayer;
 	RenderTexture2D debugLayer;
-	InputProfile defaultMenuProfile;
-	InputProfile defaultActionProfile;
-	InputHandler input;
+	InputProfile menuProfiles[MAX_PLAYERS];
+	InputProfile actionProfiles[MAX_PLAYERS];
+	InputHandler inputs[MAX_PLAYERS];
+	Player players[MAX_PLAYERS];
 	bool resetRequested;
 	bool advanceStageRequested;
 	Vector2 actionCameraPosition;
@@ -97,7 +98,6 @@ struct Scene
 	Deque treePositionsFront;
 	// `Deque<SceneDeferParams>`
 	Deque deferred;
-	Player players[MAX_PLAYERS];
 };
 
 void SceneInit(Scene* self);
