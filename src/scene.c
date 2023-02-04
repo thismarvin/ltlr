@@ -522,6 +522,7 @@ static void ScenePopulateLevel(Scene* self)
 		self->player = SceneAllocateEntity(self);
 		PlayerBuilder* builder = malloc(sizeof(PlayerBuilder));
 		builder->entity = self->player;
+		builder->handle = 0;
 		builder->x = 16 * 5;
 		builder->y = 16 * -4;
 		SceneDefer(self, PlayerBuild, builder);

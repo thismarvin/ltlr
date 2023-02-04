@@ -77,7 +77,7 @@ void ShadowBuild(Scene* scene, const void* params)
 	ShadowBuildHelper(scene, params);
 }
 
-static void PlayerStandstill(CPlayer* player, CKinetic* kinetic)
+static void PlayerStandstill(Player* player, CKinetic* kinetic)
 {
 	player->sprintTimer = 0;
 	player->sprintState = PLAYER_SPRINT_STATE_NONE;
@@ -86,12 +86,12 @@ static void PlayerStandstill(CPlayer* player, CKinetic* kinetic)
 	kinetic->velocity.x = 0;
 }
 
-static bool PlayerIsVulnerable(const CPlayer* player)
+static bool PlayerIsVulnerable(const Player* player)
 {
 	return player->invulnerableTimer >= INVULNERABLE_DURATION;
 }
 
-static Direction PlayerFacing(const CPlayer* player)
+static Direction PlayerFacing(const Player* player)
 {
 	if (player->sprintDirection != DIR_NONE)
 	{
@@ -101,7 +101,7 @@ static Direction PlayerFacing(const CPlayer* player)
 	return player->initialDirection;
 }
 
-static bool PlayerStompInProgress(const CPlayer* player)
+static bool PlayerStompInProgress(const Player* player)
 {
 	return player->stompState == PLAYER_STOMP_STATE_STOMPING
 		   || player->stompState == PLAYER_STOMP_STATE_STUCK_IN_GROUND;
@@ -401,7 +401,7 @@ static void PlayerOnDamage(Scene* scene, const usize entity, const usize otherEn
 	assert(SceneEntityHasDependencies(scene, entity, TAG_PLAYER | TAG_MORTAL));
 	assert(SceneEntityHasDependencies(scene, otherEntity, TAG_DAMAGE));
 
-	CPlayer* player = &scene->components.players[entity];
+	Player* player = &scene->players[scene->components.players[entity].handle];
 	CMortal* mortal = &scene->components.mortals[entity];
 
 	const CDamage* otherDamage = &scene->components.damages[otherEntity];
@@ -420,7 +420,8 @@ static OnResolutionResult PlayerOnResolution(const OnResolutionParams* params)
 	static const u64 dependencies = TAG_PLAYER | TAG_KINETIC;
 	assert(SceneEntityHasDependencies(params->scene, params->entity, dependencies));
 
-	CPlayer* player = &params->scene->components.players[params->entity];
+	Player* player =
+		&params->scene->players[params->scene->components.players[params->entity].handle];
 	CKinetic* kinetic = &params->scene->components.kinetics[params->entity];
 
 	// Collision specific logic that will not resolve the player.
@@ -530,7 +531,8 @@ static void PlayerOnCollision(const OnCollisionParams* params)
 	static const u64 otherDependencies = TAG_IDENTIFIER;
 	assert(SceneEntityHasDependencies(params->scene, params->otherEntity, otherDependencies));
 
-	const CPlayer* player = &params->scene->components.players[params->entity];
+	Player* player =
+		&params->scene->players[params->scene->components.players[params->entity].handle];
 	const CKinetic* kinetic = &params->scene->components.kinetics[params->entity];
 	CMortal* mortal = &params->scene->components.mortals[params->entity];
 
@@ -691,23 +693,29 @@ void PlayerBuildHelper(Scene* scene, const PlayerBuilder* builder)
 	};
 
 	scene->components.players[builder->entity] = (CPlayer) {
+		.handle = builder->handle,
+	};
+
+	scene->players[builder->handle] = (Player) {
+		.gravityForce = VECTOR2_ZERO,
 		.groundedLastFrame = false,
 		.grounded = false,
-		.coyoteTimer = COYOTE_DURATION,
 		.jumping = false,
+		.coyoteTimer = COYOTE_DURATION,
 		.dead = false,
-		.gravityForce = VECTOR2_ZERO,
 		.invulnerableTimer = INVULNERABLE_DURATION,
+		.sprintTimer = 0,
+		.sprintDuration = 0,
 		.initialDirection = DIR_NONE,
 		.sprintDirection = DIR_NONE,
 		.sprintState = PLAYER_SPRINT_STATE_NONE,
-		.sprintTimer = 0,
-		.sprintDuration = 0,
 		.sprintForce = VECTOR2_ZERO,
-		.stompForce = VECTOR2_ZERO,
 		.animationState = PLAYER_ANIMATION_STATE_STILL,
-		.trailTimer = 0,
+		.stompTimer = 0,
 		.stompState = PLAYER_STOMP_STATE_STOMPING,
+		.stompForce = VECTOR2_ZERO,
+		.trailTimer = 0,
+		.velocityLastFrame = 0,
 	};
 }
 
@@ -716,7 +724,7 @@ void PlayerBuild(Scene* scene, const void* params)
 	PlayerBuildHelper(scene, params);
 }
 
-static void PlayerDecelerate(CPlayer* player, const CKinetic* kinetic)
+static void PlayerDecelerate(Player* player, const CKinetic* kinetic)
 {
 	if (kinetic->velocity.x == 0)
 	{
@@ -743,7 +751,7 @@ static void PlayerDecelerate(CPlayer* player, const CKinetic* kinetic)
 	player->sprintDirection = DIR_NONE;
 }
 
-static void PlayerAccelerate(CPlayer* player, const CKinetic* kinetic, const Direction direction)
+static void PlayerAccelerate(Player* player, const CKinetic* kinetic, const Direction direction)
 {
 	if ((direction == DIR_LEFT && kinetic->velocity.x <= -moveSpeed)
 		|| (direction == DIR_RIGHT && kinetic->velocity.x >= moveSpeed))
@@ -784,7 +792,7 @@ static void PlayerAccelerate(CPlayer* player, const CKinetic* kinetic, const Dir
 	player->sprintDirection = direction;
 }
 
-static void PlayerLateralMovementLogic(const Scene* scene, CPlayer* player, CKinetic* kinetic)
+static void PlayerLateralMovementLogic(const Scene* scene, Player* player, CKinetic* kinetic)
 {
 	Direction strafe = DIR_NONE;
 
@@ -902,7 +910,7 @@ static void PlayerLateralMovementLogic(const Scene* scene, CPlayer* player, CKin
 	}
 }
 
-void PlayerStompLogic(Scene* scene, CPlayer* player, CKinetic* kinetic)
+void PlayerStompLogic(Scene* scene, Player* player, CKinetic* kinetic)
 {
 	static f32 stompAcceleration = 2048;
 
@@ -988,7 +996,7 @@ void PlayerInputUpdate(Scene* scene, const usize entity)
 		return;
 	}
 
-	CPlayer* player = &scene->components.players[entity];
+	Player* player = &scene->players[scene->components.players[entity].handle];
 	CKinetic* kinetic = &scene->components.kinetics[entity];
 
 	if (player->dead)
@@ -1076,7 +1084,7 @@ void PlayerPostCollisionUpdate(Scene* scene, const usize entity)
 		return;
 	}
 
-	CPlayer* player = &scene->components.players[entity];
+	Player* player = &scene->players[scene->components.players[entity].handle];
 	CPosition* position = &scene->components.positions[entity];
 	CKinetic* kinetic = &scene->components.kinetics[entity];
 
@@ -1105,7 +1113,7 @@ void PlayerPostCollisionUpdate(Scene* scene, const usize entity)
 
 static void PlayerFlashingLogic(Scene* scene, const usize entity)
 {
-	CPlayer* player = &scene->components.players[entity];
+	Player* player = &scene->players[scene->components.players[entity].handle];
 
 	player->invulnerableTimer += CTX_DT;
 
@@ -1142,7 +1150,7 @@ void PlayerMortalUpdate(Scene* scene, const usize entity)
 		return;
 	}
 
-	CPlayer* player = &scene->components.players[entity];
+	Player* player = &scene->players[scene->components.players[entity].handle];
 	const CMortal* mortal = &scene->components.mortals[entity];
 	const CPosition* position = &scene->components.positions[entity];
 	CKinetic* kinetic = &scene->components.kinetics[entity];
@@ -1201,7 +1209,7 @@ static bool IsFrameJustStarting(const CAnimation* animation)
 	return animation->frameTimer == 0;
 }
 
-static void EnableAnimation(Scene* scene, usize entity, CPlayer* player, Animation animation)
+static void EnableAnimation(Scene* scene, usize entity, Player* player, Animation animation)
 {
 	CAnimation contents;
 
@@ -1292,7 +1300,7 @@ void PlayerAnimationUpdate(Scene* scene, const usize entity)
 		return;
 	}
 
-	CPlayer* player = &scene->components.players[entity];
+	Player* player = &scene->players[scene->components.players[entity].handle];
 	CAnimation* animation = &scene->components.animations[entity];
 
 	// Deal with death.
@@ -1430,7 +1438,7 @@ void PlayerTrailUpdate(Scene* scene, const usize entity)
 		return;
 	}
 
-	CPlayer* player = &scene->components.players[entity];
+	Player* player = &scene->players[scene->components.players[entity].handle];
 	const CSmooth* smooth = &scene->components.smooths[entity];
 
 	player->trailTimer += CTX_DT;

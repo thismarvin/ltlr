@@ -8,6 +8,7 @@
 #include "input.h"
 #include "level.h"
 
+#define MAX_PLAYERS (4)
 #define MAX_ENTITIES (1024)
 
 #define MAX_SCORE_DIGITS (6 + 1)
@@ -96,6 +97,7 @@ struct Scene
 	Deque treePositionsFront;
 	// `Deque<SceneDeferParams>`
 	Deque deferred;
+	Player players[MAX_PLAYERS];
 };
 
 void SceneInit(Scene* self);

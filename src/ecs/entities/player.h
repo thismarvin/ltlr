@@ -7,6 +7,7 @@
 typedef struct
 {
 	usize entity;
+	u8 handle;
 	f32 x;
 	f32 y;
 } PlayerBuilder;

@@ -189,26 +189,30 @@ typedef struct
 	f32 age;
 } CFleeting;
 
-// TODO(thismarvin): Should this be in some sort of Singleton?
 typedef struct
 {
+	u8 handle;
+} CPlayer;
+
+typedef struct
+{
+	Vector2 gravityForce;
 	bool groundedLastFrame;
 	bool grounded;
 	bool jumping;
-	bool dead;
 	f32 coyoteTimer;
+	bool dead;
 	f32 invulnerableTimer;
 	f32 sprintTimer;
 	f32 sprintDuration;
 	Direction initialDirection;
 	Direction sprintDirection;
 	PlayerSprintState sprintState;
-	PlayerAnimationState animationState;
-	Vector2 gravityForce;
 	Vector2 sprintForce;
+	PlayerAnimationState animationState;
+	f32 stompTimer;
+	PlayerStompState stompState;
 	Vector2 stompForce;
 	f32 trailTimer;
-	PlayerStompState stompState;
-	f32 stompTimer;
 	f32 velocityLastFrame;
-} CPlayer;
+} Player;
