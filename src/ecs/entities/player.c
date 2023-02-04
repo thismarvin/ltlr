@@ -942,7 +942,7 @@ void PlayerStompLogic(Scene* scene, CPlayer* player, CKinetic* kinetic)
 
 				f32 maxVelocity = -jumpVelocity;
 
-				if (InputHandlerPressing(&scene->input, "jump"))
+				if (InputHandlerPressing(&scene->input, "stomp"))
 				{
 					maxVelocity *= 1.5;
 				}
