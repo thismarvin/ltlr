@@ -563,9 +563,12 @@ void InputHandlerUpdate(InputHandler* self)
 		return;
 	}
 
-	for (usize i = 0; i < self->m_profile->m_keyboardBindingsLength; ++i)
+	if (self->m_gamepad == 0)
 	{
-		KeyboardBindingUpdate(&self->m_profile->m_keyboardBindings[i]);
+		for (usize i = 0; i < self->m_profile->m_keyboardBindingsLength; ++i)
+		{
+			KeyboardBindingUpdate(&self->m_profile->m_keyboardBindings[i]);
+		}
 	}
 
 	for (usize i = 0; i < self->m_profile->m_gamepadBindingsLength; ++i)
@@ -586,13 +589,16 @@ bool InputHandlerPressed(const InputHandler* self, const char* binding)
 		return false;
 	}
 
-	for (usize i = 0; i < self->m_profile->m_keyboardBindingsLength; ++i)
+	if (self->m_gamepad == 0)
 	{
-		if (strcmp(self->m_profile->m_keyboardBindings[i].m_name, binding) == 0)
+		for (usize i = 0; i < self->m_profile->m_keyboardBindingsLength; ++i)
 		{
-			if (KeyboardBindingPressed(&self->m_profile->m_keyboardBindings[i]))
+			if (strcmp(self->m_profile->m_keyboardBindings[i].m_name, binding) == 0)
 			{
-				return true;
+				if (KeyboardBindingPressed(&self->m_profile->m_keyboardBindings[i]))
+				{
+					return true;
+				}
 			}
 		}
 	}
@@ -629,13 +635,16 @@ bool InputHandlerPressing(const InputHandler* self, const char* binding)
 		return false;
 	}
 
-	for (usize i = 0; i < self->m_profile->m_keyboardBindingsLength; ++i)
+	if (self->m_gamepad == 0)
 	{
-		if (strcmp(self->m_profile->m_keyboardBindings[i].m_name, binding) == 0)
+		for (usize i = 0; i < self->m_profile->m_keyboardBindingsLength; ++i)
 		{
-			if (KeyboardBindingPressing(&self->m_profile->m_keyboardBindings[i]))
+			if (strcmp(self->m_profile->m_keyboardBindings[i].m_name, binding) == 0)
 			{
-				return true;
+				if (KeyboardBindingPressing(&self->m_profile->m_keyboardBindings[i]))
+				{
+					return true;
+				}
 			}
 		}
 	}
@@ -683,13 +692,16 @@ bool InputHandlerReleased(const InputHandler* self, const char* binding)
 		return false;
 	}
 
-	for (usize i = 0; i < self->m_profile->m_keyboardBindingsLength; ++i)
+	if (self->m_gamepad == 0)
 	{
-		if (strcmp(self->m_profile->m_keyboardBindings[i].m_name, binding) == 0)
+		for (usize i = 0; i < self->m_profile->m_keyboardBindingsLength; ++i)
 		{
-			if (KeyboardBindingReleased(&self->m_profile->m_keyboardBindings[i]))
+			if (strcmp(self->m_profile->m_keyboardBindings[i].m_name, binding) == 0)
 			{
-				return true;
+				if (KeyboardBindingReleased(&self->m_profile->m_keyboardBindings[i]))
+				{
+					return true;
+				}
 			}
 		}
 	}
@@ -726,13 +738,16 @@ void InputHandlerConsume(InputHandler* self, const char* binding)
 		return;
 	}
 
-	for (usize i = 0; i < self->m_profile->m_keyboardBindingsLength; ++i)
+	if (self->m_gamepad == 0)
 	{
-		if (strcmp(self->m_profile->m_keyboardBindings[i].m_name, binding) == 0)
+		for (usize i = 0; i < self->m_profile->m_keyboardBindingsLength; ++i)
 		{
-			KeyboardBindingConsume(&self->m_profile->m_keyboardBindings[i]);
+			if (strcmp(self->m_profile->m_keyboardBindings[i].m_name, binding) == 0)
+			{
+				KeyboardBindingConsume(&self->m_profile->m_keyboardBindings[i]);
 
-			break;
+				break;
+			}
 		}
 	}
 
