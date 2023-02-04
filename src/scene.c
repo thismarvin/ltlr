@@ -172,7 +172,7 @@ static void SceneSetupContent(Scene* self)
 // clang-format off
 static void SceneSetupActionProfile(Scene* self)
 {
-	self->defaultActionProfile = InputProfileCreate(3);
+	self->defaultActionProfile = InputProfileCreate(4);
 
 	// Keyboard.
 	{
@@ -189,6 +189,14 @@ static void SceneSetupActionProfile(Scene* self)
 
 			KeyboardBindingAddKey(&binding, KEY_RIGHT);
 			KeyboardBindingAddKey(&binding, KEY_D);
+
+			InputProfileAddKeyboardBinding(&self->defaultActionProfile, binding);
+		}
+		{
+			KeyboardBinding binding = KeyboardBindingCreate("stomp", 2);
+
+			KeyboardBindingAddKey(&binding, KEY_X);
+			KeyboardBindingAddKey(&binding, KEY_J);
 
 			InputProfileAddKeyboardBinding(&self->defaultActionProfile, binding);
 		}
@@ -219,6 +227,14 @@ static void SceneSetupActionProfile(Scene* self)
 				GamepadBinding binding = GamepadBindingCreate("right", 1);
 
 				GamepadBindingAddButton(&binding, GAMEPAD_BUTTON_LEFT_FACE_RIGHT);
+
+				InputProfileAddGamepadBinding(&self->defaultActionProfile, binding);
+			}
+			{
+				GamepadBinding binding = GamepadBindingCreate("stomp", 2);
+
+				GamepadBindingAddButton(&binding, GAMEPAD_BUTTON_RIGHT_FACE_LEFT);
+				GamepadBindingAddButton(&binding, GAMEPAD_BUTTON_RIGHT_FACE_RIGHT);
 
 				InputProfileAddGamepadBinding(&self->defaultActionProfile, binding);
 			}

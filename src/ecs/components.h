@@ -60,11 +60,21 @@ typedef enum
 
 typedef enum
 {
+	PLAYER_STOMP_STATE_NONE,
+	PLAYER_STOMP_STATE_STOMPING,
+	PLAYER_STOMP_STATE_STUCK_IN_GROUND,
+	PLAYER_STOMP_STATE_SPRINGING,
+} PlayerStompState;
+
+typedef enum
+{
 	PLAYER_ANIMATION_STATE_STILL,
 	PLAYER_ANIMATION_STATE_RUNNING,
 	PLAYER_ANIMATION_STATE_JUMPING,
+	PLAYER_ANIMATION_STATE_STOMPING,
 	PLAYER_ANIMATION_STATE_SPINNING,
 	PLAYER_ANIMATION_STATE_DYING,
+	PLAYER_ANIMATION_STATE_RECOVERING,
 } PlayerAnimationState;
 
 typedef struct
@@ -184,17 +194,21 @@ typedef struct
 {
 	bool groundedLastFrame;
 	bool grounded;
-	f32 coyoteTimer;
 	bool jumping;
 	bool dead;
-	Vector2 gravityForce;
+	f32 coyoteTimer;
 	f32 invulnerableTimer;
+	f32 sprintTimer;
+	f32 sprintDuration;
 	Direction initialDirection;
 	Direction sprintDirection;
 	PlayerSprintState sprintState;
-	f32 sprintTimer;
-	f32 sprintDuration;
-	Vector2 sprintForce;
 	PlayerAnimationState animationState;
+	Vector2 gravityForce;
+	Vector2 sprintForce;
+	Vector2 stompForce;
 	f32 trailTimer;
+	PlayerStompState stompState;
+	f32 stompTimer;
+	f32 velocityLastFrame;
 } CPlayer;

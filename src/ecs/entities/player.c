@@ -11,6 +11,7 @@
 #define COYOTE_DURATION (CTX_DT * 6)
 #define INVULNERABLE_DURATION (1.5f)
 #define TRAIL_DURATION (CTX_DT * 2)
+#define STOMP_STUCK_DURATION (CTX_DT * 6)
 
 typedef struct
 {
@@ -88,6 +89,22 @@ static void PlayerStandstill(CPlayer* player, CKinetic* kinetic)
 static bool PlayerIsVulnerable(const CPlayer* player)
 {
 	return player->invulnerableTimer >= INVULNERABLE_DURATION;
+}
+
+static Direction PlayerFacing(const CPlayer* player)
+{
+	if (player->sprintDirection != DIR_NONE)
+	{
+		return player->sprintDirection;
+	}
+
+	return player->initialDirection;
+}
+
+static bool PlayerStompInProgress(const CPlayer* player)
+{
+	return player->stompState == PLAYER_STOMP_STATE_STOMPING
+		   || player->stompState == PLAYER_STOMP_STATE_STUCK_IN_GROUND;
 }
 
 static void SpawnCloudParticle(
@@ -509,69 +526,103 @@ static void PlayerOnCollision(const OnCollisionParams* params)
 	static const u64 dependencies = TAG_PLAYER | TAG_KINETIC | TAG_MORTAL;
 	assert(SceneEntityHasDependencies(params->scene, params->entity, dependencies));
 
+	// TODO(thismarvin): Should this just be an early return?
+	static const u64 otherDependencies = TAG_IDENTIFIER;
+	assert(SceneEntityHasDependencies(params->scene, params->otherEntity, otherDependencies));
+
+	const CPlayer* player = &params->scene->components.players[params->entity];
 	const CKinetic* kinetic = &params->scene->components.kinetics[params->entity];
 	CMortal* mortal = &params->scene->components.mortals[params->entity];
 
+	const CIdentifier* otherIdentifier =
+		&params->scene->components.identifiers[params->otherEntity];
+
 	if (SceneEntityHasDependencies(params->scene, params->otherEntity, TAG_DAMAGE))
 	{
-		if (SceneEntityIs(params->scene, params->otherEntity, ENTITY_TYPE_SPIKE))
+		switch (otherIdentifier->type)
 		{
-			assert(SceneEntityHasDependencies(params->scene, params->otherEntity, TAG_SPRITE));
+			case ENTITY_TYPE_SPIKE: {
+				assert(SceneEntityHasDependencies(params->scene, params->otherEntity, TAG_SPRITE));
 
-			const bool theSpikeIsOnTheGround =
-				params->scene->components.sprites[params->otherEntity].type == SPRITE_SPIKE_0000;
+				const bool theSpikeIsOnTheGround =
+					params->scene->components.sprites[params->otherEntity].type
+					== SPRITE_SPIKE_0000;
 
-			if (theSpikeIsOnTheGround)
-			{
-				const bool thePlayerIsFallingOrGrounded = kinetic->velocity.y >= 0;
-
-				if (thePlayerIsFallingOrGrounded)
+				if (theSpikeIsOnTheGround)
 				{
-					const Rectangle collider = PlayerGetFeetCollider(params->aabb);
+					const bool thePlayerIsFallingOrGrounded = kinetic->velocity.y >= 0;
 
-					if (CheckCollisionRecs(collider, params->otherAabb))
+					if (thePlayerIsFallingOrGrounded)
 					{
-						PlayerOnDamage(params->scene, params->entity, params->otherEntity);
+						const Rectangle collider = PlayerGetFeetCollider(params->aabb);
+
+						if (CheckCollisionRecs(collider, params->otherAabb))
+						{
+							PlayerOnDamage(params->scene, params->entity, params->otherEntity);
+						}
 					}
+
+					break;
 				}
+
+				PlayerOnDamage(params->scene, params->entity, params->otherEntity);
+
+				break;
 			}
-			else
-			{
+
+			case ENTITY_TYPE_WALKER: {
+				if (player->stompState == PLAYER_STOMP_STATE_STOMPING)
+				{
+					SceneIncrementScore(params->scene, 50);
+					SceneDeferDeallocateEntity(params->scene, params->otherEntity);
+
+					break;
+				}
+
+				PlayerOnDamage(params->scene, params->entity, params->otherEntity);
+
+				break;
+			}
+
+			default: {
 				PlayerOnDamage(params->scene, params->entity, params->otherEntity);
 			}
 		}
-		else
-		{
-			PlayerOnDamage(params->scene, params->entity, params->otherEntity);
+	}
+
+	switch (otherIdentifier->type)
+	{
+		case ENTITY_TYPE_BATTERY: {
+			// TODO(thismarvin): Add a static PlayerIncrementHealth method?
+			mortal->hp += 1;
+			mortal->hp = MIN(mortal->hp, PLAYER_MAX_HIT_POINTS);
+
+			SceneIncrementScore(params->scene, 100);
+
+			SceneCollectBattery(params->scene);
+			SceneDeferDeallocateEntity(params->scene, params->otherEntity);
+
+			break;
 		}
-	}
 
-	if (SceneEntityIs(params->scene, params->otherEntity, ENTITY_TYPE_BATTERY))
-	{
-		// TODO(thismarvin): Add a static PlayerIncrementHealth method?
-		mortal->hp += 1;
-		mortal->hp = MIN(mortal->hp, PLAYER_MAX_HIT_POINTS);
+		case ENTITY_TYPE_SOLAR_PANEL: {
+			assert(SceneEntityHasDependencies(params->scene, params->otherEntity, TAG_SPRITE));
 
-		SceneIncrementScore(params->scene, 100);
+			CSprite* otherSprite = &params->scene->components.sprites[params->otherEntity];
 
-		SceneCollectBattery(params->scene);
-		SceneDeferDeallocateEntity(params->scene, params->otherEntity);
-	}
+			const bool solarPanelIsOff = otherSprite->type == SPRITE_SOLAR_0000;
+			const bool batteryAvailable = params->scene->totalBatteries != 0;
 
-	if (SceneEntityIs(params->scene, params->otherEntity, ENTITY_TYPE_SOLAR_PANEL))
-	{
-		CSprite* otherSprite = &params->scene->components.sprites[params->otherEntity];
+			if (solarPanelIsOff && batteryAvailable)
+			{
+				otherSprite->type = SPRITE_SOLAR_0001;
 
-		const bool solarPanelIsOff = otherSprite->type == SPRITE_SOLAR_0000;
-		const bool batteryAvailable = params->scene->totalBatteries != 0;
+				SceneConsumeBattery(params->scene);
 
-		if (solarPanelIsOff && batteryAvailable)
-		{
-			otherSprite->type = SPRITE_SOLAR_0001;
+				// TODO(austin0209): Spawn fireworks.
+			}
 
-			SceneConsumeBattery(params->scene);
-
-			// TODO(austin0209): Spawn fireworks.
+			break;
 		}
 	}
 }
@@ -610,12 +661,12 @@ void PlayerBuildHelper(Scene* scene, const PlayerBuilder* builder)
 
 	scene->components.animations[builder->entity] = (CAnimation) {
 		.frameTimer = 0,
-		.frameDuration = ANIMATION_PLAYER_STILL_FRAME_DURATION,
+		.frameDuration = CTX_DT,
 		.intramural = intramural,
 		.reflection = REFLECTION_NONE,
-		.type = ANIMATION_PLAYER_STILL,
+		.type = ANIMATION_PLAYER_SPIN,
 		.frame = 0,
-		.length = ANIMATION_PLAYER_STILL_LENGTH,
+		.length = ANIMATION_PLAYER_SPIN_LENGTH,
 	};
 
 	scene->components.kinetics[builder->entity] = (CKinetic) {
@@ -653,8 +704,10 @@ void PlayerBuildHelper(Scene* scene, const PlayerBuilder* builder)
 		.sprintTimer = 0,
 		.sprintDuration = 0,
 		.sprintForce = VECTOR2_ZERO,
+		.stompForce = VECTOR2_ZERO,
 		.animationState = PLAYER_ANIMATION_STATE_STILL,
 		.trailTimer = 0,
+		.stompState = PLAYER_STOMP_STATE_STOMPING,
 	};
 }
 
@@ -710,7 +763,8 @@ static void PlayerAccelerate(CPlayer* player, const CKinetic* kinetic, const Dir
 	{
 		delta -= fabsf(kinetic->velocity.x);
 	}
-	else if ((direction == DIR_LEFT && kinetic->velocity.x > 0) || (direction == DIR_RIGHT && kinetic->velocity.x < 0))
+	else if ((direction == DIR_LEFT && kinetic->velocity.x > 0)
+			|| (direction == DIR_RIGHT && kinetic->velocity.x < 0))
 	{
 		delta += fabsf(kinetic->velocity.x);
 	}
@@ -734,25 +788,34 @@ static void PlayerLateralMovementLogic(const Scene* scene, CPlayer* player, CKin
 {
 	Direction strafe = DIR_NONE;
 
-	// Input.
-	if (!InputHandlerPressing(&scene->input, "right")
-		&& InputHandlerPressing(&scene->input, "left"))
+	// Handle input.
 	{
-		player->initialDirection = DIR_LEFT;
-		strafe = DIR_LEFT;
+		if (!InputHandlerPressing(&scene->input, "right")
+			&& InputHandlerPressing(&scene->input, "left"))
+		{
+			player->initialDirection = DIR_LEFT;
+			strafe = DIR_LEFT;
+		}
+		else if (!InputHandlerPressing(&scene->input, "left")
+				&& InputHandlerPressing(&scene->input, "right"))
+		{
+			player->initialDirection = DIR_RIGHT;
+			strafe = DIR_RIGHT;
+		}
+		else if (player->initialDirection == DIR_RIGHT && InputHandlerPressing(&scene->input, "left"))
+		{
+			strafe = DIR_LEFT;
+		}
+		else if (player->initialDirection == DIR_LEFT && InputHandlerPressing(&scene->input, "right"))
+		{
+			strafe = DIR_RIGHT;
+		}
 	}
-	else if (!InputHandlerPressing(&scene->input, "left") && InputHandlerPressing(&scene->input, "right"))
+
+	// Disable lateral movement while the player is stomping.
+	if (PlayerStompInProgress(player))
 	{
-		player->initialDirection = DIR_RIGHT;
-		strafe = DIR_RIGHT;
-	}
-	else if (player->initialDirection == DIR_RIGHT && InputHandlerPressing(&scene->input, "left"))
-	{
-		strafe = DIR_LEFT;
-	}
-	else if (player->initialDirection == DIR_LEFT && InputHandlerPressing(&scene->input, "right"))
-	{
-		strafe = DIR_RIGHT;
+		strafe = DIR_NONE;
 	}
 
 	// Handle sprint state.
@@ -839,14 +902,75 @@ static void PlayerLateralMovementLogic(const Scene* scene, CPlayer* player, CKin
 	}
 }
 
-Direction Facing(const CPlayer* player)
+void PlayerStompLogic(Scene* scene, CPlayer* player, CKinetic* kinetic)
 {
-	if (player->sprintDirection != DIR_NONE)
-	{
-		return player->sprintDirection;
-	}
+	static f32 stompAcceleration = 2048;
 
-	return player->initialDirection;
+	switch (player->stompState)
+	{
+		case PLAYER_STOMP_STATE_NONE: {
+			if (!player->grounded && InputHandlerPressed(&scene->input, "stomp"))
+			{
+				player->stompState = PLAYER_STOMP_STATE_STOMPING;
+				player->stompForce.y = stompAcceleration;
+			}
+
+			break;
+		}
+
+		case PLAYER_STOMP_STATE_STOMPING: {
+			if (player->groundedLastFrame)
+			{
+				player->stompState = PLAYER_STOMP_STATE_STUCK_IN_GROUND;
+				player->stompForce.y = 0;
+
+				break;
+			}
+
+			player->velocityLastFrame = kinetic->velocity.y;
+
+			break;
+		}
+
+		case PLAYER_STOMP_STATE_STUCK_IN_GROUND: {
+			player->stompTimer += CTX_DT;
+
+			if (player->stompTimer >= STOMP_STUCK_DURATION)
+			{
+				player->stompState = PLAYER_STOMP_STATE_SPRINGING;
+				player->stompTimer = 0;
+
+				f32 maxVelocity = -jumpVelocity;
+
+				if (InputHandlerPressing(&scene->input, "jump"))
+				{
+					maxVelocity *= 1.5;
+				}
+
+				player->grounded = false;
+				player->jumping = true;
+				kinetic->velocity.y = -player->velocityLastFrame * 0.5;
+				kinetic->velocity.y = MAX(kinetic->velocity.y, maxVelocity);
+			}
+
+			break;
+		}
+
+		case PLAYER_STOMP_STATE_SPRINGING: {
+			if (!player->groundedLastFrame && InputHandlerPressed(&scene->input, "stomp"))
+			{
+				player->stompState = PLAYER_STOMP_STATE_STOMPING;
+				player->stompForce.y = stompAcceleration;
+			}
+
+			if (player->groundedLastFrame)
+			{
+				player->stompState = PLAYER_STOMP_STATE_NONE;
+			}
+
+			break;
+		}
+	}
 }
 
 void PlayerInputUpdate(Scene* scene, const usize entity)
@@ -901,27 +1025,32 @@ void PlayerInputUpdate(Scene* scene, const usize entity)
 
 	// Jumping.
 	{
-		if ((player->grounded || coyoteTimeActive) && !player->jumping
-			&& InputHandlerPressed(&scene->input, "jump"))
+		if (!PlayerStompInProgress(player))
 		{
-			InputHandlerConsume(&scene->input, "jump");
+			if ((player->grounded || coyoteTimeActive) && !player->jumping
+				&& InputHandlerPressed(&scene->input, "jump"))
+			{
+				InputHandlerConsume(&scene->input, "jump");
 
-			player->grounded = false;
-			player->jumping = true;
-			kinetic->velocity.y = -jumpVelocity;
+				player->grounded = false;
+				player->jumping = true;
+				kinetic->velocity.y = -jumpVelocity;
 
-			PlayerSpawnJumpParticles(scene, entity);
-		}
+				PlayerSpawnJumpParticles(scene, entity);
+			}
 
-		// Variable Jump Height.
-		if (InputHandlerReleased(&scene->input, "jump") && kinetic->velocity.y < 0)
-		{
-			InputHandlerConsume(&scene->input, "jump");
+			// Variable Jump Height.
+			if (InputHandlerReleased(&scene->input, "jump") && kinetic->velocity.y < 0)
+			{
+				InputHandlerConsume(&scene->input, "jump");
 
-			player->jumping = false;
-			kinetic->velocity.y = MAX(kinetic->velocity.y, -jumpVelocity * 0.5);
+				player->jumping = false;
+				kinetic->velocity.y = MAX(kinetic->velocity.y, -jumpVelocity * 0.5);
+			}
 		}
 	}
+
+	PlayerStompLogic(scene, player, kinetic);
 
 	// Assume that the player is not grounded; prove that it is later.
 	player->grounded = false;
@@ -931,8 +1060,8 @@ void PlayerInputUpdate(Scene* scene, const usize entity)
 	// Calculate Net Force.
 	{
 		kinetic->acceleration = (Vector2) {
-			.x = player->gravityForce.x + player->sprintForce.x,
-			.y = player->gravityForce.y + player->sprintForce.y,
+			.x = player->gravityForce.x + player->sprintForce.x + player->stompForce.x,
+			.y = player->gravityForce.y + player->sprintForce.y + player->stompForce.y,
 		};
 	}
 }
@@ -1048,6 +1177,7 @@ void PlayerMortalUpdate(Scene* scene, const usize entity)
 	if (mortal->hp <= 0)
 	{
 		player->dead = true;
+		player->stompState = PLAYER_STOMP_STATE_NONE;
 
 		SceneDeferEnableTag(scene, entity, TAG_ANIMATION);
 		SceneDeferDisableTag(scene, entity, TAG_COLLIDER);
@@ -1058,6 +1188,7 @@ void PlayerMortalUpdate(Scene* scene, const usize entity)
 		}
 
 		kinetic->acceleration.x = 0;
+		kinetic->acceleration.y = defaultGravity;
 
 		return;
 	}
@@ -1143,6 +1274,7 @@ static void EnableAnimation(Scene* scene, usize entity, CPlayer* player, Animati
 		default: {
 			fprintf(stderr, "Unsupported Animation type");
 			exit(EXIT_FAILURE);
+
 			break;
 		}
 	}
@@ -1236,6 +1368,36 @@ void PlayerAnimationUpdate(Scene* scene, const usize entity)
 				break;
 			}
 
+			if (player->stompState == PLAYER_STOMP_STATE_STOMPING)
+			{
+				EnableAnimation(scene, entity, player, ANIMATION_PLAYER_SPIN);
+				animation->frameDuration = CTX_DT * 8;
+				player->animationState = PLAYER_ANIMATION_STATE_STOMPING;
+			}
+
+			break;
+		}
+
+		case PLAYER_ANIMATION_STATE_STOMPING: {
+			// Speed up the animation as time goes by;
+			animation->frameDuration -= CTX_DT;
+			animation->frameDuration = MAX(animation->frameDuration, 0);
+
+			if (player->stompState == PLAYER_STOMP_STATE_STUCK_IN_GROUND)
+			{
+				EnableAnimation(scene, entity, player, ANIMATION_PLAYER_STILL);
+				player->animationState = PLAYER_ANIMATION_STATE_RECOVERING;
+			}
+
+			break;
+		}
+
+		case PLAYER_ANIMATION_STATE_RECOVERING: {
+			if (player->stompState == PLAYER_STOMP_STATE_SPRINGING)
+			{
+				EnableAnimation(scene, entity, player, ANIMATION_PLAYER_STILL);
+			}
+
 			break;
 		}
 
@@ -1250,7 +1412,7 @@ void PlayerAnimationUpdate(Scene* scene, const usize entity)
 
 	// Animation reflection logic.
 	{
-		const Direction facing = Facing(player);
+		const Direction facing = PlayerFacing(player);
 		const Reflection reflection =
 			facing == DIR_LEFT ? REFLECTION_REVERSE_X_AXIS : REFLECTION_NONE;
 
@@ -1276,7 +1438,8 @@ void PlayerTrailUpdate(Scene* scene, const usize entity)
 	if (player->trailTimer >= TRAIL_DURATION)
 	{
 		// TODO(thismarvin): Should the trail care about the player flashing?
-		if (SceneEntityHasDependencies(scene, entity, TAG_ANIMATION))
+		if (player->stompState == PLAYER_STOMP_STATE_STOMPING
+			&& SceneEntityHasDependencies(scene, entity, TAG_ANIMATION))
 		{
 			const CAnimation* animation = &scene->components.animations[entity];
 
@@ -1323,7 +1486,7 @@ void PlayerShadowUpdate(Scene* scene, const usize entity)
 	color->value = (Color) { r, g, b, a };
 }
 
-void PlayerDebugDraw(const Scene* scene, usize entity)
+void PlayerDebugDraw(const Scene* scene, const usize entity)
 {
 	static const u64 dependencies = TAG_PLAYER | TAG_POSITION | TAG_DIMENSION;
 
