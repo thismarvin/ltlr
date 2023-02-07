@@ -22,6 +22,17 @@
           pkg-config
         ];
         buildInputs = with pkgs; [
+          xorg.libX11
+          xorg.libXrandr
+          xorg.libXinerama
+          xorg.libXcursor
+          xorg.libXi
+          xorg.libXext
+          xorg.libXfixes
+          xorg.libXrender
+          xorg.libxcb
+          xorg.libXau
+          xorg.libXdmcp
           glfw
         ];
         buildPhase = ''
