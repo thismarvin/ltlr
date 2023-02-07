@@ -14,7 +14,7 @@
     packages."${system}" = {
       ltlr = pkgs.stdenv.mkDerivation {
         pname = "ltlr";
-        version = "2023-01-30";
+        version = "2023-02-06";
         src = ./.;
         nativeBuildInputs = with pkgs; [
           makeWrapper
