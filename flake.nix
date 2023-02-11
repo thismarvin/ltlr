@@ -17,33 +17,24 @@
         version = "2023-02-06";
         src = ./.;
         nativeBuildInputs = with pkgs; [
-          makeWrapper
-          nushell
           pkg-config
         ];
         buildInputs = with pkgs; [
+          xorg.libXau
+          xorg.libXdmcp
+          xorg.libxcb
+          xorg.libXext
+          xorg.libXrender
+          xorg.libXfixes
           xorg.libX11
           xorg.libXrandr
           xorg.libXinerama
           xorg.libXcursor
           xorg.libXi
-          xorg.libXext
-          xorg.libXfixes
-          xorg.libXrender
-          xorg.libxcb
-          xorg.libXau
-          xorg.libXdmcp
           glfw
         ];
-        buildPhase = ''
-          nu $src/scripts/build_phase.nu
-        '';
-        installPhase = ''
-          mkdir -p $out/bin
-          cp -r $TMP/content $out/bin
-          cp $TMP/ltlr $out/bin
-          wrapProgram $out/bin/ltlr --chdir $out/bin
-        '';
+        enableParallelBuilding = true;
+        makeFlags = ["prefix=$(out)"];
       };
       default = self.packages."${system}".ltlr;
     };
@@ -52,12 +43,14 @@
         inputsFrom = [self.packages."${system}".default];
         packages = with pkgs; [
           clang-tools
+          nushell
         ];
       };
       extra = pkgs.mkShell {
         inputsFrom = [self.devShells."${system}".minimal];
         packages = with pkgs; [
           emscripten
+          zig
         ];
       };
       default = self.devShells."${system}".minimal;

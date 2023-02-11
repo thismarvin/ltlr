@@ -1,69 +1,59 @@
-NU ?= nu
-GPROF ?= gprof
+SHELL = /bin/sh
 
-SRC_DIRS := $(shell find src -type d)
+override self := $(firstword $(MAKEFILE_LIST))
 
-.PHONY: @all
-@all: @desktop
+.DEFAULT_GOAL := all
+.EXTRA_PREREQS := $(MAKEFILE_LIST)
 
-$(VERBOSE).SILENT:
+nix.run.nixgl := nix run --override-input nixpkgs flake:nixpkgs github:guibou/nixGL
 
-compile_commands.json: scripts/generate.nu $(SRC_DIRS)
-	$(NU) -c "use $<; generate compilation database | save db | mv -f db $@"
+.PHONY: all
+all: @os/linux
 
-Makefile.Desktop: scripts/generate.nu $(SRC_DIRS)
-	$(NU) -c "use $<; generate makefile desktop | save -f $@"
+.PHONY: install
+install:
+	$(MAKE) -f Desktop.mk @install
 
-Makefile.Web: scripts/generate.nu $(SRC_DIRS)
-	$(NU) -c "use $<; generate makefile web | save -f $@"
+.PHONY: uninstall
+uninstall:
+	$(MAKE) -f Desktop.mk @uninstall
 
-.PHONY: @vendor/desktop
-@vendor/desktop: Makefile.Vendor
-	$(MAKE) -f $< @vendor/desktop
+.PHONY: @os/linux
+@os/linux:
+	$(MAKE) -f Desktop.mk @build/release
 
-.PHONY: @vendor/web
-@vendor/web: Makefile.Vendor
-	$(MAKE) -f $< @vendor/web
+.PHONY: @os/emscripten
+@os/emscripten:
+	$(MAKE) -f Web.mk @build/release
 
-.PHONY: @vendor
-@vendor: @vendor/desktop @vendor/web
+.PHONY: @zig/build
+@zig/build:
+	$(MAKE) -f Desktop.mk @zig/build
 
-.PHONY: @desktop
-@desktop: @vendor/desktop Makefile.Desktop
-	$(MAKE) -f Makefile.Desktop @desktop
-
-.PHONY: @web
-@web: @vendor/web Makefile.Web
-	$(MAKE) -f Makefile.Web @web
+.PHONY: @zig/run
+@zig/run:
+	$(MAKE) -f Desktop.mk @zig/run
 
 .PHONY: @dev
-@dev: compile_commands.json @desktop
-	cd build/desktop; ./ltlr
-	$(GPROF) build/desktop/ltlr build/desktop/gmon.out > build/desktop/profile
+@dev:
+	$(MAKE) -f Desktop.mk @dev
 
-.PHONY: @dev/nixGLNvidia
-@dev/nixGLNvidia:
-	nix run github:guibou/nixGL#nixGLNvidia -- $(MAKE) @dev
+.PHONY: @dev/nixgl/intel
+@dev/nixgl/intel:
+	$(nix.run.nixgl)\#nixGLIntel -- $(MAKE) -f Desktop.mk @dev
 
-.PHONY: @dev/nixGLNvidiaBumblebee
-@dev/nixGLNvidiaBumblebee:
-	nix run github:guibou/nixGL#nixGLNvidiaBumblebee -- $(MAKE) @dev
+.PHONY: @dev/nixgl/nvidia
+@dev/nixgl/nvidia:
+	$(nix.run.nixgl)\#nixGLNvidia -- $(MAKE) -f Desktop.mk @dev
 
-.PHONY: @dev/nixGLIntel
-@dev/nixGLIntel:
-	nix run github:guibou/nixGL#nixGLIntel -- $(MAKE) @dev
+.PHONY: @dev/nixgl/nvidia/bumblebee
+@dev/nixgl/nvidia/bumblebee:
+	$(nix.run.nixgl)\#nixGLNvidiaBumblebee -- $(MAKE) -f Desktop.mk @dev
 
 .PHONY: @test
-@test: @vendor/desktop Makefile.Test
-	$(MAKE) -f Makefile.Test @test
+@test:
+	$(MAKE) -f Test.mk @test
 
 .PHONY: @format
 @format:
-	$(NU) -c "use scripts/ci.nu; ci format"
-
-.PHONY: @clean
-@clean:
-	if [ -f "compile_commands.json" ]; then rm compile_commands.json; fi
-	if [ -f "Makefile.Desktop" ]; then rm Makefile.Desktop; fi
-	if [ -f "Makefile.Web" ]; then rm Makefile.Web; fi
-	if [ -d "build" ]; then rm -r build; fi
+	nu -c "use scripts/ci.nu; ci format"

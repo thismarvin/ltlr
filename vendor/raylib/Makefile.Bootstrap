@@ -1,12 +1,9 @@
 GIT ?= git
-NU ?= nu
 
 TAG := 4.2.0
 
 .PHONY: @all
 @all: @raylib
-
-$(VERBOSE).SILENT:
 
 src/raylib.h:
 	$(GIT) clone --depth 1 --branch $(TAG) https://github.com/raysan5/raylib

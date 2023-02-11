@@ -1,18 +1,17 @@
-!vendor/raylib/Makefile.Desktop
-!vendor/raylib/Makefile.Web
 .cache
 .ccls-cache
-.emscripten-cache
 .idea
 .vscode
-Makefile.Desktop
-Makefile.Web
 bin
 build
+build.zig
 compile_commands.json
 lib
+profile
 result
 target
+zig-cache
+zig-out
 
 # Prerequisites
 *.d
