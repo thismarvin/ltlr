@@ -4,6 +4,7 @@
 #include "./ecs/systems.h"
 #include "./palette/p8.h"
 #include "context.h"
+#include "game.h"
 #include "scene_generated.h"
 
 #include <assert.h>
@@ -166,7 +167,7 @@ static void SceneFlush(Scene* self)
 
 static void SceneSetupContent(Scene* self)
 {
-	self->atlas = AtlasCreate("./content/atlas.png");
+	self->atlas = AtlasCreate(DATADIR "content/atlas.png");
 }
 
 // clang-format off

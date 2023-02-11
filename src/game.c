@@ -1,3 +1,5 @@
+#include "game.h"
+
 #include "common.h"
 #include "context.h"
 #include "scene.h"
@@ -9,10 +11,6 @@
 #endif
 
 #define FRAMERATE_SAMPLING_FREQUENCY (0.1f)
-
-static void Initialize(void);
-static void Update(void);
-static void Draw(void);
 
 static const f32 targetFrameTime = CTX_DT;
 static const u8 maxFrameSkip = 25;
@@ -31,99 +29,14 @@ static Image icon;
 
 static Scene scene;
 
-static void Timestep(void)
-{
-	const f64 currentTime = GetTime();
-
-	f32 deltaTime = currentTime - previousTime;
-
-	// Calculate the average frames per second.
-	{
-		currentFrame += 1;
-
-		if ((currentTime - sampleTime) >= FRAMERATE_SAMPLING_FREQUENCY)
-		{
-			averageFps = (currentFrame - sampleFrame) / (currentTime - sampleTime);
-
-			sampleFrame = currentFrame;
-			sampleTime = currentTime;
-		}
-	}
-
-	// Set a maximum delta time in order to avoid a "spiral of death."
-	if (deltaTime > maxDeltaTime)
-	{
-		deltaTime = maxDeltaTime;
-	}
-
-	previousTime = currentTime;
-
-	accumulator += deltaTime;
-
-	while (accumulator >= targetFrameTime)
-	{
-		Update();
-
-		accumulator -= targetFrameTime;
-		ContextSetTotalTime(ContextGetTotalTime() + targetFrameTime);
-
-		PollInputEvents();
-	}
-
-	ContextSetAlpha(accumulator / targetFrameTime);
-
-	Draw();
-
-	SwapScreenBuffer();
-}
-
-int main(void)
-{
-	// TODO(thismarvin): Incorporate a config file or cli options for window resolution.
-	InitWindow(DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT, "Larry the Light-bulb Redux");
-	InitAudioDevice();
-
-	SetWindowState(FLAG_VSYNC_HINT | FLAG_WINDOW_RESIZABLE);
-	SetWindowMinSize(CTX_VIEWPORT_WIDTH, CTX_VIEWPORT_HEIGHT);
-
-	icon = LoadImage("./content/icon.png");
-
-	SetWindowIcon(icon);
-
-	Initialize();
-
-	previousTime = GetTime();
-
-#if defined(PLATFORM_WEB)
-	emscripten_set_main_loop(Timestep, 0, 1);
-#else
-
-	// Detect window close button or ESC key.
-	while (!WindowShouldClose())
-	{
-		Timestep();
-	}
-
-#endif
-
-	SceneDestroy(&scene);
-
-	CloseAudioDevice();
-	CloseWindow();
-
-	UnloadImage(icon);
-
-	return 0;
-}
-
-static void Initialize(void)
+void GameInitialize(void)
 {
 	ContextInit();
 
 	SceneInit(&scene);
 }
 
-static void Update(void)
+void GameUpdate(void)
 {
 	if (IsKeyPressed(KEY_EQUAL))
 	{
@@ -186,9 +99,92 @@ static void DrawDebugInformation(void)
 	EndMode2D();
 }
 
-static void Draw(void)
+void GameDraw(void)
 {
 	SceneDraw(&scene);
 
 	DrawDebugInformation();
+}
+
+static void Timestep(void)
+{
+	const f64 currentTime = GetTime();
+
+	f32 deltaTime = currentTime - previousTime;
+
+	// Calculate the average frames per second.
+	{
+		currentFrame += 1;
+
+		if ((currentTime - sampleTime) >= FRAMERATE_SAMPLING_FREQUENCY)
+		{
+			averageFps = (currentFrame - sampleFrame) / (currentTime - sampleTime);
+
+			sampleFrame = currentFrame;
+			sampleTime = currentTime;
+		}
+	}
+
+	// Set a maximum delta time in order to avoid a "spiral of death."
+	if (deltaTime > maxDeltaTime)
+	{
+		deltaTime = maxDeltaTime;
+	}
+
+	previousTime = currentTime;
+
+	accumulator += deltaTime;
+
+	while (accumulator >= targetFrameTime)
+	{
+		GameUpdate();
+
+		accumulator -= targetFrameTime;
+		ContextSetTotalTime(ContextGetTotalTime() + targetFrameTime);
+
+		PollInputEvents();
+	}
+
+	ContextSetAlpha(accumulator / targetFrameTime);
+
+	GameDraw();
+
+	SwapScreenBuffer();
+}
+
+void GameRun(void)
+{
+	// TODO(thismarvin): Incorporate a config file or cli options for window resolution.
+	InitWindow(DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT, "Larry the Light-bulb Redux");
+	InitAudioDevice();
+
+	SetWindowState(FLAG_VSYNC_HINT | FLAG_WINDOW_RESIZABLE);
+	SetWindowMinSize(CTX_VIEWPORT_WIDTH, CTX_VIEWPORT_HEIGHT);
+
+	icon = LoadImage(DATADIR "content/icon.png");
+
+	SetWindowIcon(icon);
+
+	GameInitialize();
+
+	previousTime = GetTime();
+
+#if defined(PLATFORM_WEB)
+	emscripten_set_main_loop(Timestep, 0, 1);
+#else
+
+	// Detect window close button or ESC key.
+	while (!WindowShouldClose())
+	{
+		Timestep();
+	}
+
+#endif
+
+	SceneDestroy(&scene);
+
+	CloseAudioDevice();
+	CloseWindow();
+
+	UnloadImage(icon);
 }
