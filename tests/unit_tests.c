@@ -1,3 +1,4 @@
+#include "../src/collections/deque.h"
 #include "../src/utils/quadtree.h"
 #include "testing.h"
 
@@ -235,7 +236,7 @@ static bool ExecuteDequeTests(void)
 
 static bool TestQuadtreeNew(void)
 {
-	const Rectangle region = (Rectangle) {
+	const Region region = (Region) {
 		.x = 0,
 		.y = 0,
 		.width = 100,
@@ -250,7 +251,7 @@ static bool TestQuadtreeNew(void)
 
 static bool TestQuadtreeAdd(void)
 {
-	const Rectangle region = (Rectangle) {
+	const Region region = (Region) {
 		.x = 0,
 		.y = 0,
 		.width = 100,
@@ -262,7 +263,7 @@ static bool TestQuadtreeAdd(void)
 
 	// Add something that is completely contained in the Quadtree's region (and small).
 	{
-		const Rectangle aabb = (Rectangle) {
+		const Region aabb = (Region) {
 			.x = 8,
 			.y = 8,
 			.width = 4,
@@ -276,7 +277,7 @@ static bool TestQuadtreeAdd(void)
 	}
 	// Add something that is completely contained in the Quadtree's region (and very wide).
 	{
-		const Rectangle aabb = (Rectangle) {
+		const Region aabb = (Region) {
 			.x = 15,
 			.y = 75,
 			.width = 60,
@@ -290,7 +291,7 @@ static bool TestQuadtreeAdd(void)
 	}
 	// Add something that is partially within the Quadtree's region.
 	{
-		const Rectangle aabb = (Rectangle) {
+		const Region aabb = (Region) {
 			.x = 80,
 			.y = 16,
 			.width = 64,
@@ -304,7 +305,7 @@ static bool TestQuadtreeAdd(void)
 	}
 	// Attempt to add something that is completely outside the Quadtree's region.
 	{
-		const Rectangle aabb = (Rectangle) {
+		const Region aabb = (Region) {
 			.x = 58008,
 			.y = 1337,
 			.width = 42,
@@ -324,7 +325,7 @@ static bool TestQuadtreeAdd(void)
 
 static bool TestQuadtreeQuery(void)
 {
-	const Rectangle region = (Rectangle) {
+	const Region region = (Region) {
 		.x = 0,
 		.y = 0,
 		.width = 100,
@@ -332,21 +333,21 @@ static bool TestQuadtreeQuery(void)
 	};
 	Quadtree* quadtree = QuadtreeNew(region, 4);
 
-	QuadtreeAdd(quadtree, 1, (Rectangle) { 10, 10, 30, 30 });
-	QuadtreeAdd(quadtree, 2, (Rectangle) { 60, 10, 30, 30 });
-	QuadtreeAdd(quadtree, 3, (Rectangle) { 10, 60, 30, 30 });
-	QuadtreeAdd(quadtree, 4, (Rectangle) { 5, 5, 80, 30 });
+	QuadtreeAdd(quadtree, 1, (Region) { 10, 10, 30, 30 });
+	QuadtreeAdd(quadtree, 2, (Region) { 60, 10, 30, 30 });
+	QuadtreeAdd(quadtree, 3, (Region) { 10, 60, 30, 30 });
+	QuadtreeAdd(quadtree, 4, (Region) { 5, 5, 80, 30 });
 
 	for (usize i = 0; i < 5; ++i)
 	{
-		QuadtreeAdd(quadtree, 5 + i, (Rectangle) { 80 + i, 80 + i, 1, 1 });
+		QuadtreeAdd(quadtree, 5 + i, (Region) { 80 + i, 80 + i, 1, 1 });
 	}
 
 	usize totalHits = 0;
 
 	// Query over a single quadrant.
 	{
-		const Rectangle aabb = (Rectangle) {
+		const Region aabb = (Region) {
 			.x = 50,
 			.y = 0,
 			.width = 50,
@@ -360,7 +361,7 @@ static bool TestQuadtreeQuery(void)
 	}
 	// Query over multiple quadrants.
 	{
-		const Rectangle aabb = (Rectangle) {
+		const Region aabb = (Region) {
 			.x = 0,
 			.y = 0,
 			.width = 100,
@@ -374,7 +375,7 @@ static bool TestQuadtreeQuery(void)
 	}
 	// Query over an empty region.
 	{
-		const Rectangle aabb = (Rectangle) {
+		const Region aabb = (Region) {
 			.x = 0,
 			.y = 90,
 			.width = 100,
@@ -388,7 +389,7 @@ static bool TestQuadtreeQuery(void)
 	}
 	// Query over a region completely outside of the Quadtree's region.
 	{
-		const Rectangle aabb = (Rectangle) {
+		const Region aabb = (Region) {
 			.x = 111111,
 			.y = 101110,
 			.width = 500,
@@ -408,7 +409,7 @@ static bool TestQuadtreeQuery(void)
 
 static bool TestQuadtreeClear(void)
 {
-	const Rectangle region = (Rectangle) {
+	const Region region = (Region) {
 		.x = 0,
 		.y = 0,
 		.width = 100,
@@ -418,14 +419,14 @@ static bool TestQuadtreeClear(void)
 
 	for (usize i = 0; i < 50; ++i)
 	{
-		QuadtreeAdd(quadtree, i, (Rectangle) { i, 0, 16, 16 });
+		QuadtreeAdd(quadtree, i, (Region) { i, 0, 16, 16 });
 	}
 
 	usize totalHits = 0;
 
 	// Query over the entire Quadtree.
 	{
-		const Rectangle aabb = (Rectangle) {
+		const Region aabb = (Region) {
 			.x = -100,
 			.y = -100,
 			.width = 12345,
@@ -442,7 +443,7 @@ static bool TestQuadtreeClear(void)
 
 	// Query over the entire (empty) Quadtree.
 	{
-		const Rectangle aabb = (Rectangle) {
+		const Region aabb = (Region) {
 			.x = -100,
 			.y = -100,
 			.width = 12345,
@@ -461,14 +462,14 @@ static bool TestQuadtreeClear(void)
 
 		for (usize i = 0; i < 50; ++i)
 		{
-			QuadtreeAdd(quadtree, entityIndex + i, (Rectangle) { 25 + i, 60, 16, 16 });
+			QuadtreeAdd(quadtree, entityIndex + i, (Region) { 25 + i, 60, 16, 16 });
 
 			entityIndex += 1;
 		}
 
 		for (usize i = 0; i < 50; ++i)
 		{
-			QuadtreeAdd(quadtree, entityIndex + i, (Rectangle) { 25 + i, 0, 16, 16 });
+			QuadtreeAdd(quadtree, entityIndex + i, (Region) { 25 + i, 0, 16, 16 });
 
 			entityIndex += 1;
 		}
@@ -476,7 +477,7 @@ static bool TestQuadtreeClear(void)
 
 	// Query over the bottom half of the Quadtree.
 	{
-		const Rectangle aabb = (Rectangle) {
+		const Region aabb = (Region) {
 			.x = 0,
 			.y = 50,
 			.width = 100,

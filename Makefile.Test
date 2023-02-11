@@ -1,12 +1,11 @@
 CC ?= gcc
 GPROF ?= gprof
 
-CFLAGS := -std=c17 -Wall -Wextra -Wpedantic -g -pg -Og -Ivendor/raylib/src -DPLATFORM_DESKTOP
-LDLIBS := -Llib/desktop -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
+CFLAGS := -std=c17 -Wall -Wextra -Wpedantic -g -pg -Og -DPLATFORM_DESKTOP
+LDLIBS := -lm
 
 DEPS := \
 	src/collections/deque.c \
-	src/common.c \
 	src/utils/quadtree.c \
 	tests/testing.c \
 
@@ -18,7 +17,7 @@ $(VERBOSE).SILENT:
 build:
 	mkdir $@
 
-build/tests:
+build/tests: | build
 	mkdir $@
 
 build/tests/unit_tests: tests/unit_tests.c $(DEPS) | build/tests

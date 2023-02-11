@@ -2,11 +2,43 @@
 
 typedef struct
 {
-	Rectangle aabb;
-	usize id;
+	Region aabb;
+	size_t id;
 } QuadtreeEntry;
 
-static Quadtree* New(const Rectangle region, const u8 maxDepth, const u8 depth)
+static int32_t RegionLeft(const Region self)
+{
+	return self.x;
+}
+
+static int32_t RegionRight(const Region self)
+{
+	return self.x + self.width;
+}
+
+static int32_t RegionBottom(const Region self)
+{
+	return self.y + self.height;
+}
+
+static int32_t RegionTop(const Region self)
+{
+	return self.y;
+}
+
+static bool RegionIntersects(const Region self, const Region other)
+{
+	return RegionLeft(self) < RegionRight(other) && RegionRight(self) > RegionLeft(other)
+		   && RegionTop(self) < RegionBottom(other) && RegionBottom(self) > RegionTop(other);
+}
+
+static bool RegionContains(const Region self, const Region other)
+{
+	return RegionLeft(other) >= RegionLeft(self) && RegionRight(other) <= RegionRight(self)
+		   && RegionTop(other) >= RegionTop(self) && RegionBottom(other) <= RegionBottom(self);
+}
+
+static Quadtree* New(const Region region, const uint8_t maxDepth, const uint8_t depth)
 {
 	Quadtree* quadtree = malloc(sizeof(Quadtree));
 
@@ -29,30 +61,30 @@ static void QuadtreeSubdivide(Quadtree* self)
 		return;
 	}
 
-	const u8 depth = self->depth + 1;
+	const uint8_t depth = self->depth + 1;
 
-	const f32 width = self->region.width * 0.5f;
-	const f32 height = self->region.height * 0.5f;
+	const int32_t width = self->region.width >> 1;
+	const int32_t height = self->region.height >> 1;
 
-	const Rectangle topLeft = (Rectangle) {
+	const Region topLeft = (Region) {
 		.x = self->region.x,
 		.y = self->region.y,
 		.width = width,
 		.height = height,
 	};
-	const Rectangle topRight = (Rectangle) {
+	const Region topRight = (Region) {
 		.x = self->region.x + width,
 		.y = self->region.y,
 		.width = width,
 		.height = height,
 	};
-	const Rectangle bottomLeft = (Rectangle) {
+	const Region bottomLeft = (Region) {
 		.x = self->region.x,
 		.y = self->region.y + height,
 		.width = width,
 		.height = height,
 	};
-	const Rectangle bottomRight = (Rectangle) {
+	const Region bottomRight = (Region) {
 		.x = self->region.x + width,
 		.y = self->region.y + height,
 		.width = width,
@@ -70,7 +102,7 @@ static void QuadtreeSubdivide(Quadtree* self)
 	QuadtreeSubdivide(self->bottomRight);
 }
 
-Quadtree* QuadtreeNew(const Rectangle region, const u8 maxDepth)
+Quadtree* QuadtreeNew(const Region region, const uint8_t maxDepth)
 {
 	Quadtree* quadtree = New(region, maxDepth, 0);
 	QuadtreeSubdivide(quadtree);
@@ -83,9 +115,9 @@ static bool QuadtreeIsLeaf(const Quadtree* self)
 	return self->depth == self->maxDepth;
 }
 
-bool QuadtreeAdd(Quadtree* self, const usize id, const Rectangle aabb)
+bool QuadtreeAdd(Quadtree* self, const size_t id, const Region aabb)
 {
-	if (!RectangleContains(self->region, aabb))
+	if (!RegionContains(self->region, aabb))
 	{
 		return false;
 	}
@@ -116,16 +148,16 @@ bool QuadtreeAdd(Quadtree* self, const usize id, const Rectangle aabb)
 	return true;
 }
 
-static void QuadtreeQueryHelper(const Quadtree* current, const Rectangle region, Deque* result)
+static void QuadtreeQueryHelper(const Quadtree* current, const Region region, Deque* result)
 {
-	if (!CheckCollisionRecs(current->region, region))
+	if (!RegionIntersects(current->region, region))
 	{
 		return;
 	}
 
-	if (RectangleContains(region, current->region))
+	if (RegionContains(region, current->region))
 	{
-		for (usize i = 0; i < DequeGetSize(&current->entries); ++i)
+		for (size_t i = 0; i < DequeGetSize(&current->entries); ++i)
 		{
 			const QuadtreeEntry* entry = &DEQUE_GET_UNCHECKED(&current->entries, QuadtreeEntry, i);
 			DequePushBack(result, &entry->id);
@@ -133,11 +165,11 @@ static void QuadtreeQueryHelper(const Quadtree* current, const Rectangle region,
 	}
 	else
 	{
-		for (usize i = 0; i < DequeGetSize(&current->entries); ++i)
+		for (size_t i = 0; i < DequeGetSize(&current->entries); ++i)
 		{
 			const QuadtreeEntry* entry = &DEQUE_GET_UNCHECKED(&current->entries, QuadtreeEntry, i);
 
-			if (CheckCollisionRecs(entry->aabb, region))
+			if (RegionIntersects(entry->aabb, region))
 			{
 				DequePushBack(result, &entry->id);
 			}
@@ -156,9 +188,9 @@ static void QuadtreeQueryHelper(const Quadtree* current, const Rectangle region,
 }
 
 // Returns a `Deque<usize>` of the entities that are within the given region.
-Deque QuadtreeQuery(const Quadtree* self, const Rectangle region)
+Deque QuadtreeQuery(const Quadtree* self, const Region region)
 {
-	Deque result = DEQUE_OF(usize);
+	Deque result = DEQUE_OF(size_t);
 	QuadtreeQueryHelper(self, region, &result);
 
 	return result;
