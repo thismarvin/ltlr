@@ -31,10 +31,7 @@ private cflags.vendor.defines := -D_DEFAULT_SOURCE -DPLATFORM_WEB -DGRAPHICS_API
 
 cflags.vendor := -std=gnu99 $(cflags.vendor.defines) -MMD $(CFLAGS)
 
-ldflags.debug := -g -O0
-ldflags.release := -Os -DNDEBUG
-
-LDFLAGS ?= $(ldflags.$(build))
+LDFLAGS ?= $(CFLAGS)
 
 include Build.mk
 
