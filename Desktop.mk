@@ -64,8 +64,8 @@ include Build.mk
 
 .PHONY: @uninstall
 @uninstall:
-	rm $(DESTDIR)$(bindir)/$(BIN)
-	rm -r $(DESTDIR)$(datadir)/$(BIN)
+	$(RM) $(DESTDIR)$(bindir)/$(BIN)
+	$(RM) -r $(DESTDIR)$(datadir)/$(BIN)
 
 $(objects.directories):
 	mkdir -p $@
@@ -108,10 +108,10 @@ compile_commands.json: scripts/generate.nu $(sources.directories)
 
 .PHONY: @clean/prerequisites
 @clean/prerequisites:
-	-@rm -f $(objects.prerequisites)
+	-@$(RM) $(objects.prerequisites)
 
 .PHONY: @clean
 @clean:
-	-@rm -f $(objects)
-	-@rm -f $(objects.prerequisites)
-	-@rm -f $(output)
+	-@$(RM) $(objects)
+	-@$(RM) $(objects.prerequisites)
+	-@$(RM) $(output)

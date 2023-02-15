@@ -54,10 +54,10 @@ $(output) &: $(objects)
 
 .PHONY: @clean/prerequisites
 @clean/prerequisites:
-	-@rm -f $(objects.prerequisites)
+	-@$(RM) $(objects.prerequisites)
 
 .PHONY: @clean
 @clean:
-	-@rm -f $(objects)
-	-@rm -f $(objects.prerequisites)
-	-@rm -f $(output)
+	-@$(RM) $(objects)
+	-@$(RM) $(objects.prerequisites)
+	-@$(RM) $(output)

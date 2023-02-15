@@ -30,4 +30,4 @@ build/tests/unit_tests: tests/unit_tests.c $(DEPS) | build/tests
 
 .PHONY: @clean
 @clean:
-	if [ -d "build/tests" ]; then rm -r build/tests; fi
+	if [ -d "build/tests" ]; then $(RM) -r build/tests; fi
