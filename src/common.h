@@ -25,7 +25,7 @@ typedef double f64;
 #define VECTOR2_ZERO \
 	(Vector2) \
 	{ \
-		0.0f, 0.0f \
+		0.0F, 0.0F \
 	}
 
 #define COLOR_TRANSPARENT \

@@ -269,7 +269,7 @@ static Rectangle AdvancedCollision(const AdvancedCollisionParams* params)
 		};
 
 		const SimulateCollisionOnAxisParams onAxisParams = (SimulateCollisionOnAxisParams) {
-			.scene = (Scene*)params->scene,
+			.scene = params->scene,
 			.entity = params->entity,
 			.aabb = simulatedAabb,
 			.collider = params->collider,
@@ -299,7 +299,7 @@ static Rectangle AdvancedCollision(const AdvancedCollisionParams* params)
 		};
 
 		const SimulateCollisionOnAxisParams onAxisParams = (SimulateCollisionOnAxisParams) {
-			.scene = (Scene*)params->scene,
+			.scene = params->scene,
 			.entity = params->entity,
 			.aabb = simulatedAabb,
 			.collider = params->collider,
@@ -465,7 +465,7 @@ void SAnimationUpdate(Scene* scene, const usize entity)
 
 	if (animation->frameTimer >= animation->frameDuration)
 	{
-		animation->frameTimer = 0.0f;
+		animation->frameTimer = 0.0F;
 		animation->frame = (animation->frame + 1) % animation->length;
 	}
 }

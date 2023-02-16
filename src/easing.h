@@ -25,7 +25,7 @@ typedef struct
 	EasingFn ease;
 } Easer;
 
-Easer EaserCreate(const EasingFn ease, f64 duration);
+Easer EaserCreate(EasingFn ease, f64 duration);
 bool EaserIsDone(const Easer* self);
 void EaserUpdate(Easer* self, f64 deltaTime);
 f64 EaserLerp(const Easer* self, f64 start, f64 end);

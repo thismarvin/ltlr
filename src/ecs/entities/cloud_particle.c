@@ -112,9 +112,9 @@ void CloudParticleDraw(const Scene* scene, const usize entity)
 	const Vector2 interpolated = Vector2Lerp(smooth->previous, position->value, ContextGetAlpha());
 
 	const Vector2 center = (Vector2) {
-		.x = interpolated.x + dimension->width * 0.5f,
-		.y = interpolated.y + dimension->height * 0.5f,
+		.x = interpolated.x + dimension->width * 0.5F,
+		.y = interpolated.y + dimension->height * 0.5F,
 	};
 
-	DrawCircleV(center, drawSize * 0.5f, COLOR_WHITE);
+	DrawCircleV(center, drawSize * 0.5F, COLOR_WHITE);
 }

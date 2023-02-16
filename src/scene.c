@@ -290,7 +290,7 @@ static InputProfile CreateDefaultActionProfile(void)
 
 		// Axes.
 		{
-			static const f32 threshold = 0.25f;
+			static const f32 threshold = 0.25F;
 			{
 				AxisBinding binding = AxisBindingCreate("left", 2, ORD_LESS, -threshold);
 
@@ -566,7 +566,7 @@ static void ScenePlantTrees(Scene* self)
 
 	for (usize i = 0; i < total; ++i)
 	{
-		const f32 x = -spacing + spacing * i + -48 + GetRandomValue(0, 6) * 16;
+		const f32 x = -spacing + (i32)(spacing * i) + -48 + GetRandomValue(0, 6) * 16;
 		const f32 y = 8 + GetRandomValue(0, 4) * 16;
 		const Vector2 position = Vector2Create(x, y);
 		DEQUE_PUSH_BACK(&self->treePositionsBack, Vector2, position);
@@ -574,7 +574,7 @@ static void ScenePlantTrees(Scene* self)
 
 	for (usize i = 0; i < total; ++i)
 	{
-		const f32 x = -spacing + spacing * i + -32 + GetRandomValue(0, 4) * 16;
+		const f32 x = -spacing + (i32)(spacing * i) + -32 + GetRandomValue(0, 4) * 16;
 		const f32 y = 8 + 8 + GetRandomValue(0, 4) * 16;
 		const Vector2 position = Vector2Create(x, y);
 		DEQUE_PUSH_BACK(&self->treePositionsFront, Vector2, position);
@@ -639,7 +639,7 @@ static void SceneReset(Scene* self)
 	self->stage = 0;
 
 	self->score = 0;
-	memset(&self->scoreString, '0', sizeof(char) * MAX_SCORE_DIGITS);
+	memset(self->scoreString, '0', sizeof(char) * MAX_SCORE_DIGITS);
 
 	self->scoreBufferTimerDuration = CTX_DT * 2;
 	self->scoreBufferTimer = 0;

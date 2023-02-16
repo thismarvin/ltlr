@@ -10,7 +10,7 @@
 #define FOG_INITIAL_POSITION \
 	(Vector2) \
 	{ \
-		.x = -CTX_VIEWPORT_WIDTH * 0.5, .y = -(FOG_HEIGHT - CTX_VIEWPORT_HEIGHT) * 0.5f, \
+		.x = -CTX_VIEWPORT_WIDTH * 0.5F, .y = -(FOG_HEIGHT - CTX_VIEWPORT_HEIGHT) * 0.5F, \
 	}
 
 #define FOG_LUMP_TOTAL (8)
@@ -22,15 +22,15 @@
 // t = (vf - vo) / a
 #define FOG_DECELERATION_DURATION ((0.0 - FOG_SPEED) / FOG_DECELERATION)
 
-static const f32 baseRadius = (f32)FOG_HEIGHT / FOG_LUMP_TOTAL * 0.75f;
+static const f32 baseRadius = (f32)FOG_HEIGHT / FOG_LUMP_TOTAL * 0.75F;
 static const f32 lumpSpacing = (f32)FOG_HEIGHT / FOG_LUMP_TOTAL;
 static f32 lumpRadii[FOG_LUMP_TOTAL];
 static f32 lumpTargetRadii[FOG_LUMP_TOTAL];
-static const f32 breathingPhaseDuration = 4.0f;
+static const f32 breathingPhaseDuration = 4.0F;
 static f32 breathingPhaseTimer = 0;
 static u8 breathingPhase = 0;
 
-static const f32 movingParticleSpawnDuration = 0.025f;
+static const f32 movingParticleSpawnDuration = 0.025F;
 static f32 movingParticleSpawnTimer = movingParticleSpawnDuration;
 
 static bool decelerationTimerEnabled = false;
@@ -103,8 +103,8 @@ static void SpawnMovingParticles(Scene* scene, const CPosition* position, const 
 	static const i32 maxLifetime = 8;
 
 	const Vector2 spawnPosition = (Vector2) {
-		.x = position->value.x + (baseRadius * 0.5f),
-		.y = position->value.y + FOG_HEIGHT * 0.25f + GetRandomValue(0, FOG_HEIGHT * 0.5f),
+		.x = position->value.x + (baseRadius * 0.5F),
+		.y = position->value.y + FOG_HEIGHT * 0.25F + GetRandomValue(0, FOG_HEIGHT * 0.5F),
 	};
 
 	const Vector2 velocity = (Vector2) {
@@ -113,7 +113,7 @@ static void SpawnMovingParticles(Scene* scene, const CPosition* position, const 
 	};
 
 	const f32 radius = GetRandomValue(minSize, maxSize);
-	const f32 lifetime = 0.1f * GetRandomValue(minLifetime, maxLifetime);
+	const f32 lifetime = 0.1F * GetRandomValue(minLifetime, maxLifetime);
 
 	FogParticleBuilder* builder = malloc(sizeof(FogParticleBuilder));
 	builder->entity = SceneAllocateEntity(scene);
@@ -140,7 +140,7 @@ static void ShiftBreathingPhase()
 				}
 				else
 				{
-					lumpTargetRadii[i] = baseRadius * 0.75f;
+					lumpTargetRadii[i] = baseRadius * 0.75F;
 				}
 			}
 
@@ -164,7 +164,7 @@ static void ShiftBreathingPhase()
 
 				if (i % 2 == 0)
 				{
-					lumpTargetRadii[i] = baseRadius * 0.75f;
+					lumpTargetRadii[i] = baseRadius * 0.75F;
 				}
 				else
 				{
@@ -212,7 +212,7 @@ void FogUpdate(Scene* scene, const usize entity)
 		return;
 	}
 
-	kinetic->velocity.y = cosf(ContextGetTotalTime() * 0.5f) * 8;
+	kinetic->velocity.y = cosf(ContextGetTotalTime() * 0.5F) * 8;
 
 	// Make sure the fog does not overlap the level's last segment.
 	{
@@ -298,7 +298,7 @@ void FogDraw(const Scene* scene, const usize entity)
 		const f32 offset = cosf((f32)i / FOG_LUMP_TOTAL * 2 * PI + time) * multiplier;
 		const Vector2 center =
 			Vector2Create(interpolated.x + offset, interpolated.y + (lumpSpacing * i));
-		DrawCircleV(center, radius * 1.1f, COLOR_WHITE);
+		DrawCircleV(center, radius * 1.1F, COLOR_WHITE);
 	}
 
 	for (usize i = 0; i < FOG_LUMP_TOTAL; ++i)

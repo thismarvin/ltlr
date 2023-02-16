@@ -111,7 +111,7 @@ void SceneIncrementScore(Scene* self, u32 value);
 void SceneCollectBattery(Scene* self);
 void SceneConsumeBattery(Scene* self);
 
-void SceneDefer(Scene* self, const OnDefer fn, const void* params);
+void SceneDefer(Scene* self, OnDefer fn, const void* params);
 void SceneDeferDeallocateEntity(Scene* self, usize entity);
 void SceneDeferEnableTag(Scene* self, usize entity, u64 tag);
 void SceneDeferDisableTag(Scene* self, usize entity, u64 tag);

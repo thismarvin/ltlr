@@ -62,11 +62,11 @@ bool TestSuitePresentResults(TestSuite* self)
 	if (self->failed == 0)
 	{
 		printf("%s %lu passed; %lu failed\n\n", donePassPrompt, self->passed, self->failed);
+
 		return true;
 	}
-	else
-	{
-		printf("%s %lu passed; %lu failed\n\n", doneFailPrompt, self->passed, self->failed);
-		return false;
-	}
+
+	printf("%s %lu passed; %lu failed\n\n", doneFailPrompt, self->passed, self->failed);
+
+	return false;
 }

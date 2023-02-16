@@ -447,17 +447,17 @@ static bool MouseBindingReleased(const MouseBinding* binding)
 	return false;
 }
 
-InputProfile InputProfileCreate(const usize bindingsCapactity)
+InputProfile InputProfileCreate(const usize bindingsCapacity)
 {
 	return (InputProfile) {
-		.m_bindingsCapacity = bindingsCapactity,
-		.m_keyboardBindings = calloc(bindingsCapactity, sizeof(KeyboardBinding)),
+		.m_bindingsCapacity = bindingsCapacity,
+		.m_keyboardBindings = calloc(bindingsCapacity, sizeof(KeyboardBinding)),
 		.m_keyboardBindingsLength = 0,
-		.m_gamepadBindings = calloc(bindingsCapactity, sizeof(GamepadBinding)),
+		.m_gamepadBindings = calloc(bindingsCapacity, sizeof(GamepadBinding)),
 		.m_gamepadBindingsLength = 0,
-		.m_mouseBindings = calloc(bindingsCapactity, sizeof(MouseBinding)),
+		.m_mouseBindings = calloc(bindingsCapacity, sizeof(MouseBinding)),
 		.m_mouseBindingsLength = 0,
-		.m_axisBindings = calloc(bindingsCapactity, sizeof(AxisBinding)),
+		.m_axisBindings = calloc(bindingsCapacity, sizeof(AxisBinding)),
 		.m_axisBindingsLength = 0,
 	};
 }
@@ -639,46 +639,38 @@ bool InputHandlerPressing(const InputHandler* self, const char* binding)
 	{
 		for (usize i = 0; i < self->m_profile->m_keyboardBindingsLength; ++i)
 		{
-			if (strcmp(self->m_profile->m_keyboardBindings[i].m_name, binding) == 0)
+			if (strcmp(self->m_profile->m_keyboardBindings[i].m_name, binding) == 0
+				&& KeyboardBindingPressing(&self->m_profile->m_keyboardBindings[i]))
 			{
-				if (KeyboardBindingPressing(&self->m_profile->m_keyboardBindings[i]))
-				{
-					return true;
-				}
+				return true;
 			}
 		}
 	}
 
 	for (usize i = 0; i < self->m_profile->m_gamepadBindingsLength; ++i)
 	{
-		if (strcmp(self->m_profile->m_gamepadBindings[i].m_name, binding) == 0)
+		if (strcmp(self->m_profile->m_gamepadBindings[i].m_name, binding) == 0
+			&& GamepadBindingPressing(&self->m_profile->m_gamepadBindings[i], self->m_gamepad))
 		{
-			if (GamepadBindingPressing(&self->m_profile->m_gamepadBindings[i], self->m_gamepad))
-			{
-				return true;
-			}
+			return true;
 		}
 	}
 
 	for (usize i = 0; i < self->m_profile->m_mouseBindingsLength; ++i)
 	{
-		if (strcmp(self->m_profile->m_mouseBindings[i].m_name, binding) == 0)
+		if (strcmp(self->m_profile->m_mouseBindings[i].m_name, binding) == 0
+			&& MouseBindingPressing(&self->m_profile->m_mouseBindings[i]))
 		{
-			if (MouseBindingPressing(&self->m_profile->m_mouseBindings[i]))
-			{
-				return true;
-			}
+			return true;
 		}
 	}
 
 	for (usize i = 0; i < self->m_profile->m_axisBindingsLength; ++i)
 	{
-		if (strcmp(self->m_profile->m_axisBindings[i].m_name, binding) == 0)
+		if (strcmp(self->m_profile->m_axisBindings[i].m_name, binding) == 0
+			&& AxisBindingPressing(&self->m_profile->m_axisBindings[i], self->m_gamepad))
 		{
-			if (AxisBindingPressing(&self->m_profile->m_axisBindings[i], self->m_gamepad))
-			{
-				return true;
-			}
+			return true;
 		}
 	}
 

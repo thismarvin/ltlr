@@ -13,6 +13,4 @@ typedef struct
 
 void FogParticleBuild(Scene* scene, const void* params);
 
-void FogParticleUpdate(Scene* scene, const usize entity);
-
 void FogParticleDraw(const Scene* scene, usize entity);

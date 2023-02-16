@@ -10,12 +10,12 @@
 	#include <emscripten/emscripten.h>
 #endif
 
-#define FRAMERATE_SAMPLING_FREQUENCY (0.1f)
+#define FRAMERATE_SAMPLING_FREQUENCY (0.1F)
 
 static const f32 targetFrameTime = CTX_DT;
 static const u8 maxFrameSkip = 25;
 static const f32 maxDeltaTime = maxFrameSkip * targetFrameTime;
-static f32 accumulator = 0.0;
+static f32 accumulator = 0.0F;
 static f64 previousTime = 0.0;
 
 static usize currentFrame;
@@ -70,8 +70,8 @@ static void DrawDebugInformation(void)
 	const Camera2D camera = (Camera2D) {
 		.offset = VECTOR2_ZERO,
 		.target = VECTOR2_ZERO,
-		.rotation = 0.0f,
-		.zoom = zoom * 0.5f,
+		.rotation = 0.0F,
+		.zoom = zoom * 0.5F,
 	};
 
 	BeginMode2D(camera);

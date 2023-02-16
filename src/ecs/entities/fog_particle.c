@@ -69,8 +69,8 @@ void FogParticleDraw(const Scene* scene, const usize entity)
 	const Vector2 interpolated = Vector2Lerp(smooth->previous, position->value, ContextGetAlpha());
 
 	const Vector2 center = (Vector2) {
-		.x = interpolated.x + dimension->width * 0.5f,
-		.y = interpolated.y + dimension->height * 0.5f,
+		.x = interpolated.x + dimension->width * 0.5F,
+		.y = interpolated.y + dimension->height * 0.5F,
 	};
 
 	const u32 sidesCount = 4 + entity % 3;
@@ -82,5 +82,5 @@ void FogParticleDraw(const Scene* scene, const usize entity)
 		rotation *= -1;
 	}
 
-	DrawPoly(center, sidesCount, dimension->width * scale * 0.5f, rotation, COLOR_BLACK);
+	DrawPoly(center, sidesCount, dimension->width * scale * 0.5F, rotation, COLOR_BLACK);
 }

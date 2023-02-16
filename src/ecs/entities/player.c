@@ -9,7 +9,7 @@
 
 #define PLAYER_SPRITE_INTRAMURAL ((Rectangle) { 24, 29, 15, 35 })
 #define COYOTE_DURATION (CTX_DT * 6)
-#define INVULNERABLE_DURATION (1.5f)
+#define INVULNERABLE_DURATION (1.5F)
 #define TRAIL_DURATION (CTX_DT * 2)
 #define STOMP_STUCK_DURATION (CTX_DT * 6)
 
@@ -134,7 +134,7 @@ static void PlayerSpawnImpactParticles(Scene* scene, const usize entity, const f
 	const CDimension* dimension = &scene->components.dimensions[entity];
 	const CKinetic* kinetic = &scene->components.kinetics[entity];
 
-	static const f32 gravity = 9.8f;
+	static const f32 gravity = 9.8F;
 	const usize spawnCount = GetRandomValue(10, 20);
 	const f32 spread = dimension->width * 0.25;
 	const Vector2 leftAnchor = (Vector2) {
@@ -276,7 +276,7 @@ static void PlayerSpawnJumpParticles(Scene* scene, const usize entity)
 	const CDimension* dimension = &scene->components.dimensions[entity];
 	const CKinetic* kinetic = &scene->components.kinetics[entity];
 
-	static const f32 gravity = 9.8f;
+	static const f32 gravity = 9.8F;
 	const usize spawnCount = GetRandomValue(10, 30);
 	const Vector2 anchor = (Vector2) {
 		.x = position->value.x + dimension->width * 0.5,
@@ -463,7 +463,7 @@ static OnResolutionResult PlayerOnResolution(const OnResolutionParams* params)
 			const f32 difference =
 				fabsf(RectangleTop(params->otherAabb) - RectangleBottom(params->aabb));
 
-			if (difference > 3.0f)
+			if (difference > 3.0F)
 			{
 				return (OnResolutionResult) {
 					.aabb = params->aabb,
@@ -1118,7 +1118,7 @@ static void PlayerFlashingLogic(Scene* scene, const usize entity)
 	player->invulnerableTimer += CTX_DT;
 
 	static const u32 totalFlashes = 5;
-	const f32 timeSlice = INVULNERABLE_DURATION / (totalFlashes * 2.0f);
+	const f32 timeSlice = INVULNERABLE_DURATION / (totalFlashes * 2.0F);
 
 	if (!player->dead && !PlayerIsVulnerable(player))
 	{
@@ -1409,11 +1409,7 @@ void PlayerAnimationUpdate(Scene* scene, const usize entity)
 			break;
 		}
 
-		case PLAYER_ANIMATION_STATE_SPINNING: {
-			break;
-		}
-
-		case PLAYER_ANIMATION_STATE_DYING: {
+		default: {
 			break;
 		}
 	}
