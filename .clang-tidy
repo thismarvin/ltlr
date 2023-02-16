@@ -1,0 +1,16 @@
+WarningsAsErrors: '*'
+Checks: >
+  -*,
+
+  bugprone-*,
+  misc-*,
+  performance-*,
+  readability-*,
+
+  -bugprone-easily-swappable-parameters,
+  -bugprone-narrowing-conversions,
+  -misc-no-recursion,
+  -readability-function-cognitive-complexity,
+  -readability-function-size,
+  -readability-identifier-length,
+  -readability-magic-numbers,
