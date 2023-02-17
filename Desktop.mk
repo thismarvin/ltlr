@@ -71,7 +71,7 @@ $(objects.directories):
 	mkdir -p $@
 
 $(output): $(objects)
-	$(CC) -o $@ $^ $(LDFLAGS) $(LDLIBS)
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS) $(LDLIBS)
 
 .PHONY: @build/debug
 @build/debug: $(objects.directories)

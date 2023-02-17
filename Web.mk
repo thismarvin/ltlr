@@ -31,7 +31,7 @@ private cflags.vendor.defines := -D_DEFAULT_SOURCE -DPLATFORM_WEB -DGRAPHICS_API
 
 cflags.vendor := -std=gnu99 $(cflags.vendor.defines) -MMD $(CFLAGS)
 
-LDFLAGS ?= $(CFLAGS)
+ldflags ?= -sUSE_GLFW=3 --shell-file src/minshell.html --preload-file content $(LDFLAGS)
 
 include Build.mk
 
@@ -42,7 +42,7 @@ $(objects.directories):
 	mkdir -p $@
 
 $(output) &: $(objects)
-	$(CC) $(LDFLAGS) -o $(OUTDIR)/index.html $^ -sUSE_GLFW=3 --shell-file src/minshell.html --preload-file content
+	$(CC) $(CFLAGS) $(ldflags) -o $(OUTDIR)/index.html $^
 
 .PHONY: @build/debug
 @build/debug: $(objects.directories)
