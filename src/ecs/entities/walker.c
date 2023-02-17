@@ -4,8 +4,7 @@
 
 static OnResolutionResult WalkerOnResolution(const OnResolutionParams* params)
 {
-	static const u64 dependencies = TAG_KINETIC;
-	assert(SceneEntityHasDependencies(params->scene, params->entity, dependencies));
+	assert(SceneEntityHasDependencies(params->scene, params->entity, TAG_KINETIC));
 
 	CKinetic* kinetic = &params->scene->components.kinetics[params->entity];
 

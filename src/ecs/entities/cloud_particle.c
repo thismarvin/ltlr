@@ -6,9 +6,6 @@
 // TODO(thismarvin): The collider no longer scales...
 static OnResolutionResult CloudParticleOnResolution(const OnResolutionParams* params)
 {
-	static const u64 dependencies = TAG_POSITION;
-	assert(SceneEntityHasDependencies(params->scene, params->entity, dependencies));
-
 	// If the aabb is completely within another collider then remove it.
 	if (params->overlap.width >= params->aabb.width
 		&& params->overlap.height >= params->aabb.height)

@@ -417,8 +417,7 @@ static void PlayerOnDamage(Scene* scene, const usize entity, const usize otherEn
 
 static OnResolutionResult PlayerOnResolution(const OnResolutionParams* params)
 {
-	static const u64 dependencies = TAG_PLAYER | TAG_KINETIC;
-	assert(SceneEntityHasDependencies(params->scene, params->entity, dependencies));
+	assert(SceneEntityHasDependencies(params->scene, params->entity, TAG_PLAYER | TAG_KINETIC));
 
 	Player* player =
 		&params->scene->players[params->scene->components.players[params->entity].handle];
@@ -524,12 +523,13 @@ static Rectangle PlayerGetFeetCollider(const Rectangle aabb)
 
 static void PlayerOnCollision(const OnCollisionParams* params)
 {
-	static const u64 dependencies = TAG_PLAYER | TAG_KINETIC | TAG_MORTAL;
-	assert(SceneEntityHasDependencies(params->scene, params->entity, dependencies));
+	assert(SceneEntityHasDependencies(
+		params->scene,
+		params->entity,
+		TAG_PLAYER | TAG_KINETIC | TAG_MORTAL
+	));
 
-	// TODO(thismarvin): Should this just be an early return?
-	static const u64 otherDependencies = TAG_IDENTIFIER;
-	assert(SceneEntityHasDependencies(params->scene, params->otherEntity, otherDependencies));
+	assert(SceneEntityHasDependencies(params->scene, params->otherEntity, TAG_IDENTIFIER));
 
 	Player* player =
 		&params->scene->players[params->scene->components.players[params->entity].handle];
