@@ -3,6 +3,7 @@
 #include "./collections/deque.h"
 #include "./ecs/components.h"
 #include "./utils/arena_allocator.h"
+#include "./utils/quadtree.h"
 #include "atlas.h"
 #include "common.h"
 #include "fader.h"
@@ -116,6 +117,7 @@ struct Scene
 	u64 seed;
 	Rng rng;
 	ArenaAllocator arenaAllocator;
+	Quadtree* quadtree;
 };
 
 void SceneInit(Scene* self);

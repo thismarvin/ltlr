@@ -120,8 +120,20 @@ static SimulateCollisionOnAxisResult SimulateCollisionOnAxis(
 		simulatedAabb.x += params->step * direction.x;
 		simulatedAabb.y += params->step * direction.y;
 
-		for (usize i = 0; i < SceneGetTotalAllocatedEntities(params->scene); ++i)
+		static const i32 padding = 128;
+		const Region testing = (Region) {
+			.x = -padding + simulatedAabb.x,
+			.y = -padding + simulatedAabb.y,
+			.width = padding + ceilf(simulatedAabb.width) + padding,
+			.height = padding + ceilf(simulatedAabb.height) + padding,
+		};
+
+		Deque queryResults = QuadtreeQuery(params->scene->quadtree, testing);
+
+		for (usize j = 0; j < DequeGetSize(&queryResults); ++j)
 		{
+			const usize i = DEQUE_GET_UNCHECKED(&queryResults, usize, j);
+
 			const u64 dependencies = TAG_POSITION | TAG_DIMENSION | TAG_COLLIDER;
 
 			if (i == params->entity || !SceneEntityHasDependencies(params->scene, i, dependencies))
@@ -226,6 +238,8 @@ static SimulateCollisionOnAxisResult SimulateCollisionOnAxis(
 				simulatedAabb = result.aabb;
 			}
 		}
+
+		DequeDestroy(&queryResults);
 
 		if ((direction.x != 0 && xModified) || (direction.y != 0 && yModified))
 		{

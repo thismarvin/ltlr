@@ -600,6 +600,20 @@ static void SceneBuildStage(Scene* self)
 	ScenePopulateLevel(self);
 	ScenePlantTrees(self);
 
+	if (self->quadtree != NULL)
+	{
+		QuadtreeDestroy(self->quadtree);
+	}
+
+	static const i32 padding = 256;
+	const Region region = (Region) {
+		.x = -padding,
+		.y = -padding,
+		.width = padding + self->bounds.width + padding,
+		.height = padding + self->bounds.height + padding,
+	};
+	self->quadtree = QuadtreeNew(region, 1);
+
 	self->resetRequested = false;
 	self->advanceStageRequested = false;
 
@@ -686,6 +700,8 @@ void SceneInit(Scene* self)
 	self->fader.easer.ease = EaseInOutQuad;
 
 	self->arenaAllocator = ArenaAllocatorCreate((usize)(1024 * 8));
+
+	self->quadtree = NULL;
 
 	SceneReset(self);
 }
@@ -899,6 +915,29 @@ static void SceneUpdateDirector(Scene* self)
 
 static void SceneActionUpdate(Scene* self)
 {
+	QuadtreeClear(self->quadtree);
+
+	for (usize i = 0; i < SceneGetTotalAllocatedEntities(self); ++i)
+	{
+		if (!SceneEntityHasDependencies(self, i, TAG_POSITION | TAG_DIMENSION | TAG_COLLIDER))
+		{
+			continue;
+		}
+
+		const CPosition* position = &self->components.positions[i];
+		const CDimension* dimension = &self->components.dimensions[i];
+
+		const Region aabb = (Region) {
+			.x = position->value.x,
+			.y = position->value.y,
+			.width = ceilf(dimension->width),
+			.height = ceilf(dimension->height),
+		};
+
+		// Make sure the entity is entirely within the Quadtree.
+		assert(QuadtreeAdd(self->quadtree, i, aabb));
+	}
+
 	for (usize i = 0; i < SceneGetTotalAllocatedEntities(self); ++i)
 	{
 		SFleetingUpdate(self, i);
