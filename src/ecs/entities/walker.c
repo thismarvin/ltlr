@@ -42,7 +42,7 @@ void WalkerBuildHelper(Scene* scene, const WalkerBuilder* builder)
 	};
 
 	// clang-format off
-	scene->components.tags[builder->entity] = 
+	scene->components.tags[builder->entity] =
 		TAG_NONE
 		| TAG_IDENTIFIER
 		| TAG_POSITION

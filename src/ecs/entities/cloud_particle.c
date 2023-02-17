@@ -32,7 +32,7 @@ static OnResolutionResult CloudParticleOnResolution(const OnResolutionParams* pa
 static void CloudParticleBuildHelper(Scene* scene, const CloudParticleBuilder* builder)
 {
 	// clang-format off
-	scene->components.tags[builder->entity] = 
+	scene->components.tags[builder->entity] =
 		TAG_NONE
 		| TAG_IDENTIFIER
 		| TAG_POSITION
