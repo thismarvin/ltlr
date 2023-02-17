@@ -23,6 +23,7 @@ typedef struct
 	Vector2 delta;
 	u8 step;
 	OnResolution onResolution;
+	Deque queryResults;
 } SimulateCollisionOnAxisParams;
 
 typedef struct
@@ -33,6 +34,7 @@ typedef struct
 	Rectangle previousAabb;
 	CCollider* collider;
 	OnResolution onResolution;
+	Deque queryResults;
 } AdvancedCollisionParams;
 
 void SSmoothUpdate(Scene* scene, const usize entity)
@@ -120,19 +122,9 @@ static SimulateCollisionOnAxisResult SimulateCollisionOnAxis(
 		simulatedAabb.x += params->step * direction.x;
 		simulatedAabb.y += params->step * direction.y;
 
-		static const i32 padding = 128;
-		const Region testing = (Region) {
-			.x = -padding + simulatedAabb.x,
-			.y = -padding + simulatedAabb.y,
-			.width = padding + ceilf(simulatedAabb.width) + padding,
-			.height = padding + ceilf(simulatedAabb.height) + padding,
-		};
-
-		Deque queryResults = QuadtreeQuery(params->scene->quadtree, testing);
-
-		for (usize j = 0; j < DequeGetSize(&queryResults); ++j)
+		for (usize j = 0; j < DequeGetSize(&params->queryResults); ++j)
 		{
-			const usize i = DEQUE_GET_UNCHECKED(&queryResults, usize, j);
+			const usize i = DEQUE_GET_UNCHECKED(&params->queryResults, usize, j);
 
 			const u64 dependencies = TAG_POSITION | TAG_DIMENSION | TAG_COLLIDER;
 
@@ -239,8 +231,6 @@ static SimulateCollisionOnAxisResult SimulateCollisionOnAxis(
 			}
 		}
 
-		DequeDestroy(&queryResults);
-
 		if ((direction.x != 0 && xModified) || (direction.y != 0 && yModified))
 		{
 			break;
@@ -288,6 +278,7 @@ static Rectangle AdvancedCollision(const AdvancedCollisionParams* params)
 			.delta = xDelta,
 			.step = step,
 			.onResolution = params->onResolution,
+			.queryResults = params->queryResults,
 		};
 
 		const SimulateCollisionOnAxisResult result = SimulateCollisionOnAxis(&onAxisParams);
@@ -318,6 +309,7 @@ static Rectangle AdvancedCollision(const AdvancedCollisionParams* params)
 			.delta = yDelta,
 			.step = step,
 			.onResolution = params->onResolution,
+			.queryResults = params->queryResults,
 		};
 
 		const SimulateCollisionOnAxisResult result = SimulateCollisionOnAxis(&onAxisParams);
@@ -367,6 +359,17 @@ void SCollisionUpdate(Scene* scene, const usize entity)
 		.width = dimension->width,
 		.height = dimension->height,
 	};
+
+	// TODO(thismarvin): Does our new Quadtree require padding when querying?
+	const Region queryRegion = (Region) {
+		.x = ceilf(MIN(RectangleLeft(previousAabb), RectangleLeft(currentAabb))),
+		.y = ceilf(MIN(RectangleTop(previousAabb), RectangleTop(currentAabb))),
+		.width = ceilf(MAX(RectangleRight(previousAabb), RectangleRight(currentAabb))),
+		.height = ceilf(MAX(RectangleBottom(previousAabb), RectangleBottom(currentAabb))),
+	};
+
+	Deque queryResults = QuadtreeQuery(scene->quadtree, queryRegion);
+
 	const AdvancedCollisionParams params = (AdvancedCollisionParams) {
 		.scene = scene,
 		.entity = entity,
@@ -374,8 +377,12 @@ void SCollisionUpdate(Scene* scene, const usize entity)
 		.previousAabb = previousAabb,
 		.collider = (CCollider*)collider,
 		.onResolution = collider->onResolution,
+		.queryResults = queryResults,
 	};
+
 	const Rectangle resolvedAabb = AdvancedCollision(&params);
+
+	DequeDestroy(&queryResults);
 
 	position->value.x = resolvedAabb.x;
 	position->value.y = resolvedAabb.y;
@@ -406,8 +413,19 @@ void SPostCollisionUpdate(Scene* scene, const usize entity)
 		.height = dimension->height,
 	};
 
-	for (usize i = 0; i < SceneGetTotalAllocatedEntities(scene); ++i)
+	const Region queryRegion = (Region) {
+		.x = aabb.x,
+		.y = aabb.y,
+		.width = ceilf(aabb.width),
+		.height = ceilf(aabb.height),
+	};
+
+	Deque queryResults = QuadtreeQuery(scene->quadtree, queryRegion);
+
+	for (usize j = 0; j < DequeGetSize(&queryResults); ++j)
 	{
+		const usize i = DEQUE_GET_UNCHECKED(&queryResults, usize, j);
+
 		const u64 otherDependencies = TAG_POSITION | TAG_DIMENSION | TAG_COLLIDER;
 
 		if (i == entity || !SceneEntityHasDependencies(scene, i, otherDependencies))
@@ -447,6 +465,8 @@ void SPostCollisionUpdate(Scene* scene, const usize entity)
 			collider->onCollision(&onCollisionParams);
 		}
 	}
+
+	DequeDestroy(&queryResults);
 }
 
 void SFleetingUpdate(Scene* scene, const usize entity)

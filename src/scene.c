@@ -612,7 +612,7 @@ static void SceneBuildStage(Scene* self)
 		.width = padding + self->bounds.width + padding,
 		.height = padding + self->bounds.height + padding,
 	};
-	self->quadtree = QuadtreeNew(region, 1);
+	self->quadtree = QuadtreeNew(region, 4);
 
 	self->resetRequested = false;
 	self->advanceStageRequested = false;
@@ -935,7 +935,11 @@ static void SceneActionUpdate(Scene* self)
 		};
 
 		// Make sure the entity is entirely within the Quadtree.
-		assert(QuadtreeAdd(self->quadtree, i, aabb));
+		if (!QuadtreeAdd(self->quadtree, i, aabb))
+		{
+			fprintf(stderr, "TODO");
+			exit(EXIT_FAILURE);
+		}
 	}
 
 	for (usize i = 0; i < SceneGetTotalAllocatedEntities(self); ++i)
