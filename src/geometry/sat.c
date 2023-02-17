@@ -27,14 +27,12 @@ static Rectangle CalculateAABB(const Vector2* vertices, const usize verticesLeng
 		yMax = MAX(yMax, vertices[i].y);
 	}
 
-	// clang-format off
 	return (Rectangle) {
 		.x = xMin,
 		.y = yMin,
 		.width = xMax - xMin,
-		.height = yMax - yMin
+		.height = yMax - yMin,
 	};
-	// clang-format on
 }
 
 static OverlapInformation CalculateOverlap(const Polygon a, const Polygon b)
@@ -44,12 +42,10 @@ static OverlapInformation CalculateOverlap(const Polygon a, const Polygon b)
 
 	for (usize i = 0; i < a.edgesLength; ++i)
 	{
-		// clang-format off
 		Vector2 normal = (Vector2) {
 			.x = a.edges[i].end.y - a.edges[i].start.y,
-			.y = -(a.edges[i].end.x - a.edges[i].start.x)
+			.y = -(a.edges[i].end.x - a.edges[i].start.x),
 		};
-		// clang-format on
 
 		normal = Vector2Normalize(normal);
 
@@ -84,33 +80,27 @@ static OverlapInformation CalculateOverlap(const Polygon a, const Polygon b)
 
 		if (maxProjectionB < minProjectionA || maxProjectionA < minProjectionB)
 		{
-			// clang-format off
 			return (OverlapInformation) {
 				.normal = { 0, 0 },
 				.overlap = 0,
-				.valid = false
+				.valid = false,
 			};
-			// clang-format on
 		}
 	}
 
-	// clang-format off
 	return (OverlapInformation) {
 		.normal = minNormal,
 		.overlap = minOverlap,
-		.valid = true
+		.valid = true,
 	};
-	// clang-format on
 }
 
 static Vector2 RectangleGetCenter(const Rectangle rectangle)
 {
-	// clang-format off
 	return (Vector2) {
 		.x = rectangle.x + rectangle.width * 0.5,
-		.y = rectangle.y + rectangle.height * 0.5
+		.y = rectangle.y + rectangle.height * 0.5,
 	};
-	// clang-format on
 }
 
 Vector2 SATGetResolution(const Polygon a, const Polygon b)

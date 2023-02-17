@@ -1503,14 +1503,12 @@ void PlayerDebugDraw(const Scene* scene, const usize entity)
 	const CPosition* position = &scene->components.positions[entity];
 	const CDimension* dimension = &scene->components.dimensions[entity];
 
-	// clang-format off
 	const Rectangle aabb = (Rectangle) {
 		.x = position->value.x,
 		.y = position->value.y,
 		.width = dimension->width,
-		.height = dimension->height
+		.height = dimension->height,
 	};
-	// clang-format on
 
 	// Draw general-purpose aabb.
 	{

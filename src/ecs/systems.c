@@ -138,14 +138,12 @@ static SimulateCollisionOnAxisResult SimulateCollisionOnAxis(
 				continue;
 			}
 
-			// clang-format off
 			const Rectangle otherAabb = (Rectangle) {
 				.x = otherPosition->value.x,
 				.y = otherPosition->value.y,
 				.width = otherDimension->width,
-				.height = otherDimension->height
+				.height = otherDimension->height,
 			};
-			// clang-format on
 
 			if (CheckCollisionRecs(simulatedAabb, otherAabb))
 			{
@@ -338,18 +336,17 @@ void SCollisionUpdate(Scene* scene, const usize entity)
 	const CDimension* dimension = &scene->components.dimensions[entity];
 	const CCollider* collider = &scene->components.colliders[entity];
 
-	// clang-format off
-	const Rectangle previousAabb = (Rectangle) { 
+	const Rectangle previousAabb = (Rectangle) {
 		.x = smooth->previous.x,
 		.y = smooth->previous.y,
 		.width = dimension->width,
-		.height = dimension->height
+		.height = dimension->height,
 	};
 	const Rectangle currentAabb = (Rectangle) {
 		.x = position->value.x,
 		.y = position->value.y,
 		.width = dimension->width,
-		.height = dimension->height
+		.height = dimension->height,
 	};
 	const AdvancedCollisionParams params = (AdvancedCollisionParams) {
 		.scene = scene,
@@ -357,9 +354,8 @@ void SCollisionUpdate(Scene* scene, const usize entity)
 		.currentAabb = currentAabb,
 		.previousAabb = previousAabb,
 		.collider = (CCollider*)collider,
-		.onResolution = collider->onResolution
+		.onResolution = collider->onResolution,
 	};
-	// clang-format on
 	const Rectangle resolvedAabb = AdvancedCollision(&params);
 
 	position->value.x = resolvedAabb.x;
@@ -404,14 +400,12 @@ void SPostCollisionUpdate(Scene* scene, const usize entity)
 			continue;
 		}
 
-		// clang-format off
 		const Rectangle otherAabb = (Rectangle) {
 			.x = otherPosition->value.x,
 			.y = otherPosition->value.y,
 			.width = otherDimension->width,
-			.height = otherDimension->height
+			.height = otherDimension->height,
 		};
-		// clang-format on
 
 		if (CheckCollisionRecs(aabb, otherAabb))
 		{
@@ -688,14 +682,12 @@ void SDebugColliderDraw(const Scene* scene, const usize entity)
 	const CDimension* dimension = &scene->components.dimensions[entity];
 	const CCollider* collider = &scene->components.colliders[entity];
 
-	// clang-format off
 	const Rectangle aabb = (Rectangle) {
 		.x = position->value.x,
 		.y = position->value.y,
 		.width = dimension->width,
-		.height = dimension->height
+		.height = dimension->height,
 	};
-	// clang-format on
 
 	ColliderDrawLayerBoundaries(collider, aabb);
 

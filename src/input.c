@@ -26,16 +26,14 @@ static void MouseBindingConsume(MouseBinding* binding)
 
 KeyboardBinding KeyboardBindingCreate(const char* name, const usize keysCapacity)
 {
-	// clang-format off
 	return (KeyboardBinding) {
 		.m_name = (char*)name,
 		.m_keys = calloc(keysCapacity, sizeof(KeyboardKey)),
 		.m_keysCapacity = keysCapacity,
 		.m_keysLength = 0,
 		.m_bufferDuration = 0,
-		.m_bufferTimer = 0
+		.m_bufferTimer = 0,
 	};
-	// clang-format on
 }
 
 void KeyboardBindingSetBuffer(KeyboardBinding* self, const f32 bufferDuration)
