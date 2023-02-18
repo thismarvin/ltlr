@@ -5,11 +5,13 @@
 #include "./palette/p8.h"
 #include "context.h"
 #include "game.h"
+#include "replay.h"
 #include "scene_generated.h"
 
 #include <assert.h>
 #include <raymath.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 typedef struct
@@ -714,6 +716,150 @@ void SceneConsumeBattery(Scene* self)
 	self->totalBatteries -= 1;
 }
 
+usize GetInputBindingOffset(const char* binding)
+{
+	if (strcmp("left", binding) == 0)
+	{
+		return 0;
+	}
+
+	if (strcmp("right", binding) == 0)
+	{
+		return 1;
+	}
+
+	if (strcmp("jump", binding) == 0)
+	{
+		return 2;
+	}
+
+	if (strcmp("stomp", binding) == 0)
+	{
+		return 3;
+	}
+
+	fprintf(stderr, "TODO\n");
+	exit(EXIT_FAILURE);
+}
+
+usize GetInputBindingBuffer(const char* binding)
+{
+	if (strcmp("left", binding) == 0)
+	{
+		return 1;
+	}
+
+	if (strcmp("right", binding) == 0)
+	{
+		return 1;
+	}
+
+	if (strcmp("jump", binding) == 0)
+	{
+		return 8;
+	}
+
+	if (strcmp("stomp", binding) == 0)
+	{
+		return 1;
+	}
+
+	fprintf(stderr, "TODO\n");
+	exit(EXIT_FAILURE);
+}
+
+bool SceneShimInputHandlerPressed(const Scene* self, const char* binding)
+{
+	if (self->frame < 8)
+	{
+		return false;
+	}
+
+	if (self->frame >= REPLAY_LENGTH)
+	{
+		return false;
+	}
+
+	const usize offset = GetInputBindingOffset(binding);
+	const usize buffer = GetInputBindingBuffer(binding);
+
+	for (usize i = 0; i < buffer; ++i)
+	{
+		if (self->consumed[(self->frame - 1 - i) * 4 + offset])
+		{
+			return false;
+		}
+	}
+
+	for (usize i = 0; i < buffer; ++i)
+	{
+		if (!replay[(self->frame - 1 - i) * 4 + offset] && replay[(self->frame - i) * 4 + offset])
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool SceneShimInputHandlerPressing(const Scene* self, const char* binding)
+{
+	if (self->frame >= REPLAY_LENGTH)
+	{
+		return false;
+	}
+
+	const usize offset = GetInputBindingOffset(binding);
+
+	return replay[self->frame * 4 + offset];
+}
+
+bool SceneShimInputHandlerReleased(const Scene* self, const char* binding)
+{
+	if (self->frame < 8)
+	{
+		return false;
+	}
+
+	if (self->frame >= REPLAY_LENGTH)
+	{
+		return false;
+	}
+
+	const usize offset = GetInputBindingOffset(binding);
+	const usize buffer = GetInputBindingBuffer(binding);
+
+	for (usize i = 0; i < buffer; ++i)
+	{
+		if (self->consumed[(self->frame - 1 - i) * 4 + offset])
+		{
+			return false;
+		}
+	}
+
+	for (usize i = 0; i < buffer; ++i)
+	{
+		if (replay[(self->frame - 1 - i) * 4 + offset] && !replay[(self->frame - i) * 4 + offset])
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+void SceneShimInputHandlerConsume(Scene* self, const char* binding)
+{
+	if (self->frame >= REPLAY_LENGTH)
+	{
+		return;
+	}
+
+	const usize offset = GetInputBindingOffset(binding);
+
+	self->consumed[self->frame * 4 + offset] = true;
+}
+
 void SceneDeferReset(Scene* self)
 {
 	self->resetRequested = true;
@@ -915,7 +1061,17 @@ void SceneUpdate(Scene* self)
 		}
 
 		case SCENE_STATE_ACTION: {
+			// // clang-format off
+			// if (InputHandlerPressing(&self->inputs[0], "left")) { printf("true, "); } else {
+			// printf("false, "); } if (InputHandlerPressing(&self->inputs[0], "right")) {
+			// printf("true, "); } else { printf("false, "); } if
+			// (InputHandlerPressing(&self->inputs[0], "jump")) { printf("true, "); } else {
+			// printf("false, "); } if (InputHandlerPressing(&self->inputs[0], "stomp")) {
+			// printf("true, "); } else { printf("false, "); } printf("\n");
+			// // clang-format on
+
 			SceneActionUpdate(self);
+			self->frame += 1;
 			break;
 		}
 	}

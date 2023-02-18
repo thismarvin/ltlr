@@ -7,6 +7,7 @@
 #include "fader.h"
 #include "input.h"
 #include "level.h"
+#include "replay.h"
 
 #define MAX_PLAYERS (4)
 #define MAX_ENTITIES (1024)
@@ -98,6 +99,10 @@ struct Scene
 	Deque treePositionsFront;
 	// `Deque<SceneDeferParams>`
 	Deque deferred;
+
+	// TODO(thismarvin): Find a better home for this!
+	usize frame;
+	bool consumed[REPLAY_LENGTH * 4];
 };
 
 void SceneInit(Scene* self);
@@ -110,6 +115,11 @@ bool SceneEntityIs(const Scene* self, usize entity, EntityType type);
 void SceneIncrementScore(Scene* self, u32 value);
 void SceneCollectBattery(Scene* self);
 void SceneConsumeBattery(Scene* self);
+
+bool SceneShimInputHandlerPressed(const Scene* self, const char* binding);
+bool SceneShimInputHandlerPressing(const Scene* self, const char* binding);
+bool SceneShimInputHandlerReleased(const Scene* self, const char* binding);
+void SceneShimInputHandlerConsume(Scene* self, const char* binding);
 
 void SceneDefer(Scene* self, OnDefer fn, const void* params);
 void SceneDeferDeallocateEntity(Scene* self, usize entity);

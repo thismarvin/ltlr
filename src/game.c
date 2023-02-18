@@ -165,6 +165,8 @@ void GameRun(void)
 
 	SetWindowIcon(icon);
 
+	SetRandomSeed(20000317);
+
 	GameInitialize();
 
 	previousTime = GetTime();
