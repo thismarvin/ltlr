@@ -2,6 +2,7 @@
 
 #include "../context.h"
 #include "../palette/p8.h"
+#include "./entities/common.h"
 #include "components.h"
 
 #include <assert.h>
