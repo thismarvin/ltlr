@@ -165,7 +165,9 @@ void GameRun(void)
 
 	SetWindowIcon(icon);
 
-	SetRandomSeed(20000317);
+#if !defined(NDEBUG)
+	SetRandomSeed(20180217);
+#endif
 
 	GameInitialize();
 

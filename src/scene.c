@@ -770,6 +770,7 @@ usize GetInputBindingBuffer(const char* binding)
 
 bool SceneShimInputHandlerPressed(const Scene* self, const char* binding)
 {
+#if defined(REPLAY)
 	if (self->frame < 8)
 	{
 		return false;
@@ -800,10 +801,14 @@ bool SceneShimInputHandlerPressed(const Scene* self, const char* binding)
 	}
 
 	return false;
+#else
+	return InputHandlerPressed(&self->inputs[0], binding);
+#endif
 }
 
 bool SceneShimInputHandlerPressing(const Scene* self, const char* binding)
 {
+#if defined(REPLAY)
 	if (self->frame >= REPLAY_LENGTH)
 	{
 		return false;
@@ -812,10 +817,14 @@ bool SceneShimInputHandlerPressing(const Scene* self, const char* binding)
 	const usize offset = GetInputBindingOffset(binding);
 
 	return replay[self->frame * 4 + offset];
+#else
+	return InputHandlerPressing(&self->inputs[0], binding);
+#endif
 }
 
 bool SceneShimInputHandlerReleased(const Scene* self, const char* binding)
 {
+#if defined(REPLAY)
 	if (self->frame < 8)
 	{
 		return false;
@@ -846,10 +855,14 @@ bool SceneShimInputHandlerReleased(const Scene* self, const char* binding)
 	}
 
 	return false;
+#else
+	return InputHandlerReleased(&self->inputs[0], binding);
+#endif
 }
 
 void SceneShimInputHandlerConsume(Scene* self, const char* binding)
 {
+#if defined(REPLAY)
 	if (self->frame >= REPLAY_LENGTH)
 	{
 		return;
@@ -858,6 +871,9 @@ void SceneShimInputHandlerConsume(Scene* self, const char* binding)
 	const usize offset = GetInputBindingOffset(binding);
 
 	self->consumed[self->frame * 4 + offset] = true;
+#else
+	InputHandlerConsume(&self->inputs[0], binding);
+#endif
 }
 
 void SceneDeferReset(Scene* self)
@@ -1041,6 +1057,47 @@ static void SceneActionUpdate(Scene* self)
 	SceneCheckEndCondition(self);
 }
 
+static void JankRecord(const Scene* self)
+{
+	if (InputHandlerPressing(&self->inputs[0], "left"))
+	{
+		printf("true, ");
+	}
+	else
+	{
+		printf("false, ");
+	}
+
+	if (InputHandlerPressing(&self->inputs[0], "right"))
+	{
+		printf("true, ");
+	}
+	else
+	{
+		printf("false, ");
+	}
+
+	if (InputHandlerPressing(&self->inputs[0], "jump"))
+	{
+		printf("true, ");
+	}
+	else
+	{
+		printf("false, ");
+	}
+
+	if (InputHandlerPressing(&self->inputs[0], "stomp"))
+	{
+		printf("true, ");
+	}
+	else
+	{
+		printf("false, ");
+	}
+
+	printf("\n");
+}
+
 void SceneUpdate(Scene* self)
 {
 	for (usize i = 0; i < MAX_PLAYERS; ++i)
@@ -1061,17 +1118,12 @@ void SceneUpdate(Scene* self)
 		}
 
 		case SCENE_STATE_ACTION: {
-			// // clang-format off
-			// if (InputHandlerPressing(&self->inputs[0], "left")) { printf("true, "); } else {
-			// printf("false, "); } if (InputHandlerPressing(&self->inputs[0], "right")) {
-			// printf("true, "); } else { printf("false, "); } if
-			// (InputHandlerPressing(&self->inputs[0], "jump")) { printf("true, "); } else {
-			// printf("false, "); } if (InputHandlerPressing(&self->inputs[0], "stomp")) {
-			// printf("true, "); } else { printf("false, "); } printf("\n");
-			// // clang-format on
-
+#if !defined(REPLAY)
+			JankRecord(self);
+#endif
 			SceneActionUpdate(self);
 			self->frame += 1;
+
 			break;
 		}
 	}
@@ -1079,6 +1131,13 @@ void SceneUpdate(Scene* self)
 	SceneUpdateDirector(self);
 
 	SceneFlush(self);
+
+	if (self->frame >= REPLAY_LENGTH)
+	{
+		SetRandomSeed(20180217);
+		SceneReset(self);
+		self->frame = 0;
+	}
 }
 
 // Return a Rectangle that is within the scene's bounds and centered on a given entity.
