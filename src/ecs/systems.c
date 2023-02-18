@@ -368,7 +368,25 @@ void SCollisionUpdate(Scene* scene, const usize entity)
 		.height = ceilf(MAX(RectangleBottom(previousAabb), RectangleBottom(currentAabb))),
 	};
 
-	Deque queryResults = QuadtreeQuery(scene->quadtree, queryRegion);
+	Deque queryResultsDynamic = QuadtreeQuery(scene->quadtreeDynamic, queryRegion);
+	Deque queryResultsStatic = QuadtreeQuery(scene->quadtreeStatic, queryRegion);
+
+	const usize capacity = DequeGetSize(&queryResultsDynamic) + DequeGetSize(&queryResultsStatic);
+	Deque queryResults = DEQUE_WITH_CAPACITY(usize, capacity);
+
+	for (usize i = 0; i < DequeGetSize(&queryResultsDynamic); ++i)
+	{
+		const usize entry = DEQUE_GET_UNCHECKED(&queryResultsDynamic, usize, i);
+
+		DequePushBack(&queryResults, &entry);
+	}
+
+	for (usize i = 0; i < DequeGetSize(&queryResultsStatic); ++i)
+	{
+		const usize entry = DEQUE_GET_UNCHECKED(&queryResultsStatic, usize, i);
+
+		DequePushBack(&queryResults, &entry);
+	}
 
 	const AdvancedCollisionParams params = (AdvancedCollisionParams) {
 		.scene = scene,
@@ -382,6 +400,8 @@ void SCollisionUpdate(Scene* scene, const usize entity)
 
 	const Rectangle resolvedAabb = AdvancedCollision(&params);
 
+	DequeDestroy(&queryResultsDynamic);
+	DequeDestroy(&queryResultsStatic);
 	DequeDestroy(&queryResults);
 
 	position->value.x = resolvedAabb.x;
@@ -420,7 +440,25 @@ void SPostCollisionUpdate(Scene* scene, const usize entity)
 		.height = ceilf(aabb.height),
 	};
 
-	Deque queryResults = QuadtreeQuery(scene->quadtree, queryRegion);
+	Deque queryResultsDynamic = QuadtreeQuery(scene->quadtreeDynamic, queryRegion);
+	Deque queryResultsStatic = QuadtreeQuery(scene->quadtreeStatic, queryRegion);
+
+	const usize capacity = DequeGetSize(&queryResultsDynamic) + DequeGetSize(&queryResultsStatic);
+	Deque queryResults = DEQUE_WITH_CAPACITY(usize, capacity);
+
+	for (usize i = 0; i < DequeGetSize(&queryResultsDynamic); ++i)
+	{
+		const usize entry = DEQUE_GET_UNCHECKED(&queryResultsDynamic, usize, i);
+
+		DequePushBack(&queryResults, &entry);
+	}
+
+	for (usize i = 0; i < DequeGetSize(&queryResultsStatic); ++i)
+	{
+		const usize entry = DEQUE_GET_UNCHECKED(&queryResultsStatic, usize, i);
+
+		DequePushBack(&queryResults, &entry);
+	}
 
 	for (usize j = 0; j < DequeGetSize(&queryResults); ++j)
 	{
@@ -466,6 +504,8 @@ void SPostCollisionUpdate(Scene* scene, const usize entity)
 		}
 	}
 
+	DequeDestroy(&queryResultsDynamic);
+	DequeDestroy(&queryResultsStatic);
 	DequeDestroy(&queryResults);
 }
 

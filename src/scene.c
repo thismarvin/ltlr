@@ -600,9 +600,13 @@ static void SceneBuildStage(Scene* self)
 	ScenePopulateLevel(self);
 	ScenePlantTrees(self);
 
-	if (self->quadtree != NULL)
+	if (self->quadtreeDynamic != NULL)
 	{
-		QuadtreeDestroy(self->quadtree);
+		QuadtreeDestroy(self->quadtreeDynamic);
+	}
+	if (self->quadtreeStatic != NULL)
+	{
+		QuadtreeDestroy(self->quadtreeStatic);
 	}
 
 	static const i32 padding = 256;
@@ -612,12 +616,39 @@ static void SceneBuildStage(Scene* self)
 		.width = padding + self->bounds.width + padding,
 		.height = padding + self->bounds.height + padding,
 	};
-	self->quadtree = QuadtreeNew(region, 4);
+	self->quadtreeDynamic = QuadtreeNew(region, 4);
+	self->quadtreeStatic = QuadtreeNew(region, 4);
 
 	self->resetRequested = false;
 	self->advanceStageRequested = false;
 
 	SceneFlush(self);
+
+	for (usize i = 0; i < SceneGetTotalAllocatedEntities(self); ++i)
+	{
+		if (!SceneEntityHasDependencies(self, i, TAG_POSITION | TAG_DIMENSION | TAG_COLLIDER)
+			|| SceneEntityHasDependencies(self, i, TAG_KINETIC))
+		{
+			continue;
+		}
+
+		const CPosition* position = &self->components.positions[i];
+		const CDimension* dimension = &self->components.dimensions[i];
+
+		const Region aabb = (Region) {
+			.x = position->value.x,
+			.y = position->value.y,
+			.width = ceilf(dimension->width),
+			.height = ceilf(dimension->height),
+		};
+
+		// Make sure the entity is entirely within the Quadtree.
+		if (!QuadtreeAdd(self->quadtreeStatic, i, aabb))
+		{
+			fprintf(stderr, "TODO");
+			exit(EXIT_FAILURE);
+		}
+	}
 }
 
 static void SceneReset(Scene* self)
@@ -701,7 +732,8 @@ void SceneInit(Scene* self)
 
 	self->arenaAllocator = ArenaAllocatorCreate((usize)(1024 * 8));
 
-	self->quadtree = NULL;
+	self->quadtreeDynamic = NULL;
+	self->quadtreeStatic = NULL;
 
 	SceneReset(self);
 }
@@ -915,11 +947,15 @@ static void SceneUpdateDirector(Scene* self)
 
 static void SceneActionUpdate(Scene* self)
 {
-	QuadtreeClear(self->quadtree);
+	QuadtreeClear(self->quadtreeDynamic);
 
 	for (usize i = 0; i < SceneGetTotalAllocatedEntities(self); ++i)
 	{
-		if (!SceneEntityHasDependencies(self, i, TAG_POSITION | TAG_DIMENSION | TAG_COLLIDER))
+		if (!SceneEntityHasDependencies(
+				self,
+				i,
+				TAG_POSITION | TAG_DIMENSION | TAG_COLLIDER | TAG_KINETIC
+			))
 		{
 			continue;
 		}
@@ -935,9 +971,9 @@ static void SceneActionUpdate(Scene* self)
 		};
 
 		// Make sure the entity is entirely within the Quadtree.
-		if (!QuadtreeAdd(self->quadtree, i, aabb))
+		if (!QuadtreeAdd(self->quadtreeDynamic, i, aabb))
 		{
-			fprintf(stderr, "TODO");
+			fprintf(stderr, "TODO\n");
 			exit(EXIT_FAILURE);
 		}
 	}
@@ -1469,6 +1505,9 @@ void SceneDestroy(Scene* self)
 	DequeDestroy(&self->treePositionsFront);
 
 	ArenaAllocatorDestroy(&self->arenaAllocator);
+
+	QuadtreeDestroy(self->quadtreeDynamic);
+	QuadtreeDestroy(self->quadtreeStatic);
 
 	UnloadRenderTexture(self->treeTexture);
 	UnloadRenderTexture(self->backgroundLayer);

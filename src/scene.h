@@ -117,7 +117,8 @@ struct Scene
 	u64 seed;
 	Rng rng;
 	ArenaAllocator arenaAllocator;
-	Quadtree* quadtree;
+	Quadtree* quadtreeDynamic;
+	Quadtree* quadtreeStatic;
 };
 
 void SceneInit(Scene* self);
