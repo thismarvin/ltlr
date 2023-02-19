@@ -46,6 +46,7 @@ export def "compilation database" [
 		| append '-Wpedantic'
 		| append '-DPLATFORM_DESKTOP'
 		| append '-Ivendor/raylib/src'
+		| append '-Ivendor/wyhash'
 	}
 
 	let commands = do {

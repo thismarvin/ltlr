@@ -26,7 +26,7 @@ datadir := $(datarootdir)
 include Common.mk
 
 sources.content != find content -type f
-sources.directories := $(sort $(dir $(sources.src) $(sources.vendor)))
+sources.directories := $(sort $(dir $(sources.src) $(sources.vendor.raylib)))
 
 output := $(OUTDIR)/ltlr
 
@@ -38,12 +38,12 @@ CFLAGS ?= $(cflags.$(build))
 private cflags.src.warnings := -Wall -Wextra -Wpedantic
 private cflags.src.defines := -DPLATFORM_DESKTOP
 
-cflags.src := -std=c17 $(cflags.src.warnings) $(cflags.src.defines) -Ivendor/raylib/src -MMD -g $(CFLAGS)
+cflags.src := -std=c17 $(cflags.src.warnings) $(cflags.src.defines) $(cflags.src.vendor) -MMD -g $(CFLAGS)
 
-private cflags.vendor.warnings := -Wno-unused-result
-private cflags.vendor.defines := -D_DEFAULT_SOURCE -DPLATFORM_DESKTOP -DGRAPHICS_API_OPENGL_33
+private cflags.vendor.raylib.warnings := -Wno-unused-result
+private cflags.vendor.raylib.defines := -D_DEFAULT_SOURCE -DPLATFORM_DESKTOP -DGRAPHICS_API_OPENGL_33
 
-cflags.vendor := -std=c99 $(cflags.vendor.warnings) $(cflags.vendor.defines) -MMD -g $(CFLAGS)
+cflags.vendor.raylib := -std=c99 $(cflags.vendor.raylib.warnings) $(cflags.vendor.raylib.defines) -MMD -g $(CFLAGS)
 
 pkgs := xau xdmcp xcb xext xrender xfixes x11 xrandr xinerama xcursor xi glfw3
 
