@@ -1,6 +1,5 @@
 vendor/raylib/src/** linguist-vendored
-
-Makefile.* linguist-language=Makefile
+vendor/wyhash/wyhash.h linguist-vendored
 
 src/segments/** linguist-generated=true
 *_generated.* linguist-generated=true
