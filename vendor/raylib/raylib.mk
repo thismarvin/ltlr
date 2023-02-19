@@ -3,7 +3,7 @@ GIT ?= git
 TAG := 4.2.0
 
 .PHONY: @all
-@all: @raylib
+@all: src/raylib.h
 
 src/raylib.h:
 	$(GIT) clone --depth 1 --branch $(TAG) https://github.com/raysan5/raylib
@@ -12,13 +12,10 @@ src/raylib.h:
 	mv raylib/src .
 	patch -d src < address-glfw-compile-error.patch
 	patch -d src < enable-custom-frame-control.patch
-	rm -rf raylib
-
-.PHONY: @raylib
-@raylib: src/raylib.h
+	$(RM) -r raylib
 
 .PHONY: @clean
 @clean:
-	if [ -f ".gitignore" ]; then rm .gitignore; fi
-	if [ -f "LICENSE" ]; then rm LICENSE; fi
-	if [ -d "src" ]; then rm -r src; fi
+	if [ -f ".gitignore" ]; then $(RM) .gitignore; fi
+	if [ -f "LICENSE" ]; then $(RM) LICENSE; fi
+	if [ -d "src" ]; then $(RM) -r src; fi
