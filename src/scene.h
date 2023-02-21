@@ -99,10 +99,13 @@ struct Scene
 	Deque treePositionsFront;
 	// `Deque<SceneDeferParams>`
 	Deque deferred;
+	f64 elapsedTime;
 	Rng rng;
 };
 
 void SceneInit(Scene* self);
+
+f64 SceneGetElapsedTime(const Scene* self);
 
 usize SceneAllocateEntity(Scene* self);
 usize SceneGetTotalAllocatedEntities(const Scene* self);

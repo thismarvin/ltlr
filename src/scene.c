@@ -638,6 +638,8 @@ static void SceneBuildStage(Scene* self)
 
 static void SceneReset(Scene* self)
 {
+	self->elapsedTime = 0;
+
 	self->stage = 0;
 
 	self->score = 0;
@@ -673,6 +675,8 @@ void SceneInit(Scene* self)
 	SceneSetupInput(self);
 	SceneSetupLayers(self);
 
+	self->elapsedTime = 0;
+
 #if defined(NDEBUG)
 	self->rng = RngCreate(time(NULL));
 #else
@@ -698,6 +702,11 @@ void SceneInit(Scene* self)
 	self->fader.easer.ease = EaseInOutQuad;
 
 	SceneReset(self);
+}
+
+f64 SceneGetElapsedTime(const Scene* self)
+{
+	return self->elapsedTime;
 }
 
 void SceneIncrementScore(Scene* self, const u32 value)
@@ -905,6 +914,8 @@ static void SceneActionUpdate(Scene* self)
 
 void SceneUpdate(Scene* self)
 {
+	self->elapsedTime += CTX_DT;
+
 	for (usize i = 0; i < MAX_PLAYERS; ++i)
 	{
 		InputHandlerUpdate(&self->inputs[i]);
