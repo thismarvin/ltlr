@@ -1,32 +1,31 @@
 #include "rng.h"
 
-#include <stdint.h>
 #include <wyhash.h>
 
-Rng RngCreate(const uint64_t seed)
+Rng RngCreate(const u64 seed)
 {
 	return (Rng) {
 		.seed = seed,
 	};
 }
 
-uint64_t RngNextU64(Rng* self)
+u64 RngNextU64(Rng* self)
 {
 	return wyrand(&self->seed);
 }
 
-double RngNextF64(Rng* self)
+f64 RngNextF64(Rng* self)
 {
-	const uint64_t value = RngNextU64(self);
+	const u64 value = RngNextU64(self);
 
 	return wy2u01(value);
 }
 
-int RngNextRange(Rng* self, const int minimum, const int maximum)
+i32 RngNextRange(Rng* self, const i32 minimum, const i32 maximum)
 {
 	// TODO(thismarvin): This can definitely be better...
 
-	const double step = RngNextF64(self);
+	const f64 step = RngNextF64(self);
 
 	return minimum + (maximum - minimum) * step;
 }
