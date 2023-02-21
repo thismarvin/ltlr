@@ -81,5 +81,5 @@ void BatteryUpdate(Scene* scene, const usize entity)
 
 	CKinetic* kinetic = &scene->components.kinetics[entity];
 
-	kinetic->velocity.y = sinf(ContextGetTotalTime() * 3.0F) * 10.0F;
+	kinetic->velocity.y = sinf(SceneGetElapsedTime(scene) * 3.0F) * 10.0F;
 }

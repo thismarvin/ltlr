@@ -75,7 +75,7 @@ void FogParticleDraw(const Scene* scene, const usize entity)
 
 	const u32 sidesCount = 4 + entity % 3;
 
-	f32 rotation = ContextGetTotalTime() * 100;
+	f32 rotation = SceneGetElapsedTime(scene) * 100;
 
 	if (sidesCount % 2 == 0)
 	{

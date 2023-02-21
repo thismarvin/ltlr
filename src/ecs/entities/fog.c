@@ -213,7 +213,7 @@ void FogUpdate(Scene* scene, const usize entity)
 		return;
 	}
 
-	kinetic->velocity.y = cosf(ContextGetTotalTime() * 0.5F) * 8;
+	kinetic->velocity.y = cosf(SceneGetElapsedTime(scene) * 0.5F) * 8;
 
 	// Make sure the fog does not overlap the level's last segment.
 	{
@@ -291,7 +291,7 @@ void FogDraw(const Scene* scene, const usize entity)
 	const f32 step = breathingPhaseTimer / breathingPhaseDuration;
 
 	static const f32 multiplier = 10;
-	const f32 time = ContextGetTotalTime() * 2;
+	const f32 time = SceneGetElapsedTime(scene) * 2;
 
 	for (usize i = 0; i < FOG_LUMP_TOTAL; ++i)
 	{
