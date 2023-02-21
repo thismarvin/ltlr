@@ -5,12 +5,14 @@
 #include "./palette/p8.h"
 #include "context.h"
 #include "game.h"
+#include "rng.h"
 #include "scene_generated.h"
 
 #include <assert.h>
 #include <raymath.h>
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 
 typedef struct
 {
@@ -436,13 +438,13 @@ static void ArrayFillWithRange(i32* array, const i32 start, const i32 end)
 	}
 }
 
-static void ArrayShuffle(i32* array, i32* candidates, usize arrayLength)
+static void ArrayShuffle(Rng* rng, i32* array, const usize arrayLength, i32* candidates)
 {
 	for (usize i = 0; i < arrayLength; ++i)
 	{
 		const usize end = arrayLength - 1 - i;
 
-		const usize index = GetRandomValue(0, end);
+		const usize index = RngNextRange(rng, 0, end + 1);
 
 		array[i] = candidates[index];
 
@@ -467,7 +469,7 @@ static void ScenePopulateLevel(Scene* self)
 		i32 candidates[totalFillers];
 		ArrayFillWithRange(candidates, 0, totalFillers);
 
-		ArrayShuffle(fillerCandidates, candidates, totalFillers);
+		ArrayShuffle(&self->rng, fillerCandidates, totalFillers, candidates);
 	}
 
 	i32 batteryCandidates[totalBatteries];
@@ -475,10 +477,10 @@ static void ScenePopulateLevel(Scene* self)
 		i32 candidates[totalBatteries];
 		ArrayFillWithRange(candidates, 0, totalBatteries);
 
-		ArrayShuffle(batteryCandidates, candidates, totalBatteries);
+		ArrayShuffle(&self->rng, batteryCandidates, totalBatteries, candidates);
 	}
 
-	const u16 starter = GetRandomValue(0, totalStarters - 1);
+	const u16 starter = RngNextRange(&self->rng, 0, totalStarters);
 	self->level.segments[0].type = starterBegin + starter;
 
 	for (usize i = 0; i < 3; ++i)
@@ -489,7 +491,7 @@ static void ScenePopulateLevel(Scene* self)
 		self->level.segments[(i * 2) + 2].type = batteryBegin + battery;
 	}
 
-	const u16 solar = GetRandomValue(0, totalSolars - 1);
+	const u16 solar = RngNextRange(&self->rng, 0, totalSolars);
 	self->level.segments[7].type = solarBegin + solar;
 
 	self->level.segmentsLength = MAX_LEVEL_SEGMENTS;
@@ -566,16 +568,16 @@ static void ScenePlantTrees(Scene* self)
 
 	for (usize i = 0; i < total; ++i)
 	{
-		const f32 x = -spacing + (i32)(spacing * i) + -48 + GetRandomValue(0, 6) * 16;
-		const f32 y = 8 + GetRandomValue(0, 4) * 16;
+		const f32 x = -spacing + (i32)(spacing * i) + -48 + RngNextRange(&self->rng, 0, 6 + 1) * 16;
+		const f32 y = 8 + RngNextRange(&self->rng, 0, 4 + 1) * 16;
 		const Vector2 position = Vector2Create(x, y);
 		DEQUE_PUSH_BACK(&self->treePositionsBack, Vector2, position);
 	}
 
 	for (usize i = 0; i < total; ++i)
 	{
-		const f32 x = -spacing + (i32)(spacing * i) + -32 + GetRandomValue(0, 4) * 16;
-		const f32 y = 8 + 8 + GetRandomValue(0, 4) * 16;
+		const f32 x = -spacing + (i32)(spacing * i) + -32 + RngNextRange(&self->rng, 0, 4 + 1) * 16;
+		const f32 y = 8 + 8 + RngNextRange(&self->rng, 0, 4 + 1) * 16;
 		const Vector2 position = Vector2Create(x, y);
 		DEQUE_PUSH_BACK(&self->treePositionsFront, Vector2, position);
 	}
@@ -670,6 +672,12 @@ void SceneInit(Scene* self)
 	SceneSetupContent(self);
 	SceneSetupInput(self);
 	SceneSetupLayers(self);
+
+#if defined(NDEBUG)
+	self->rng = RngCreate(time(NULL));
+#else
+	self->rng = RngCreate(MAGIC_NUMBER);
+#endif
 
 	self->deferred = DEQUE_OF(SceneDeferParams);
 

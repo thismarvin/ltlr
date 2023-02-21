@@ -135,7 +135,7 @@ static void PlayerSpawnImpactParticles(Scene* scene, const usize entity, const f
 	const CKinetic* kinetic = &scene->components.kinetics[entity];
 
 	static const f32 gravity = 9.8F;
-	const usize spawnCount = GetRandomValue(10, 20);
+	const usize spawnCount = RngNextRange(&scene->rng, 10, 20 + 1);
 	const f32 spread = dimension->width * 0.25;
 	const Vector2 leftAnchor = (Vector2) {
 		.x = position->value.x,
@@ -153,10 +153,10 @@ static void PlayerSpawnImpactParticles(Scene* scene, const usize entity, const f
 
 		for (usize i = 0; i < spawnCount; ++i)
 		{
-			const f32 radius = GetRandomValue(1, 4);
-			const f32 offset = GetRandomValue(0, spread);
-			const f32 speed = GetRandomValue(10, 30);
-			const f32 lifetime = 1 + 0.5 * GetRandomValue(0, 4);
+			const f32 radius = RngNextRange(&scene->rng, 1, 4 + 1);
+			const f32 offset = RngNextRange(&scene->rng, 0, spread + 1);
+			const f32 speed = RngNextRange(&scene->rng, 10, 30 + 1);
+			const f32 lifetime = 1 + 0.5 * RngNextRange(&scene->rng, 0, 4 + 1);
 
 			// Left pocket.
 			{
@@ -217,10 +217,10 @@ static void PlayerSpawnImpactParticles(Scene* scene, const usize entity, const f
 
 		for (usize i = 0; i < total; ++i)
 		{
-			const f32 radius = GetRandomValue(1, 3);
-			const f32 offset = GetRandomValue(0, spread);
-			const f32 speed = GetRandomValue(20, 35);
-			const f32 lifetime = 0.5 + 0.5 * GetRandomValue(0, 4);
+			const f32 radius = RngNextRange(&scene->rng, 1, 3 + 1);
+			const f32 offset = RngNextRange(&scene->rng, 0, spread + 1);
+			const f32 speed = RngNextRange(&scene->rng, 20, 35 + 1);
+			const f32 lifetime = 0.5 + 0.5 * RngNextRange(&scene->rng, 0, 4 + 1);
 
 			if (kinetic->velocity.x > 0)
 			{
@@ -277,7 +277,7 @@ static void PlayerSpawnJumpParticles(Scene* scene, const usize entity)
 	const CKinetic* kinetic = &scene->components.kinetics[entity];
 
 	static const f32 gravity = 9.8F;
-	const usize spawnCount = GetRandomValue(10, 30);
+	const usize spawnCount = RngNextRange(&scene->rng, 10, 30 + 1);
 	const Vector2 anchor = (Vector2) {
 		.x = position->value.x + dimension->width * 0.5,
 		.y = position->value.y + dimension->height,
@@ -290,9 +290,9 @@ static void PlayerSpawnJumpParticles(Scene* scene, const usize entity)
 
 		for (usize i = 0; i < spawnCount; ++i)
 		{
-			const f32 radius = GetRandomValue(1, 3);
-			const f32 speed = GetRandomValue(10, 15);
-			const f32 lifetime = 0.5 + 0.5 * GetRandomValue(0, 3);
+			const f32 radius = RngNextRange(&scene->rng, 1, 3 + 1);
+			const f32 speed = RngNextRange(&scene->rng, 10, 15 + 1);
+			const f32 lifetime = 0.5 + 0.5 * RngNextRange(&scene->rng, 0, 3 + 1);
 
 			// Left pocket.
 			{
@@ -364,8 +364,8 @@ static void PlayerSpawnJumpParticles(Scene* scene, const usize entity)
 
 		for (usize i = 0; i < total; ++i)
 		{
-			const f32 radius = GetRandomValue(2, 3);
-			const f32 lifetime = 0.5 + 0.5 * GetRandomValue(0, 4);
+			const f32 radius = RngNextRange(&scene->rng, 2, 3 + 1);
+			const f32 lifetime = 0.5 + 0.5 * RngNextRange(&scene->rng, 0, 4 + 1);
 
 			const Vector2 cloudPosition = (Vector2) {
 				.x = anchor.x - radius,
@@ -377,7 +377,7 @@ static void PlayerSpawnJumpParticles(Scene* scene, const usize entity)
 				.y = sinf(rotation),
 			};
 
-			f32 speed = GetRandomValue(10, 15);
+			f32 speed = RngNextRange(&scene->rng, 10, 15 + 1);
 
 			if (kinetic->velocity.x != 0)
 			{

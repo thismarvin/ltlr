@@ -104,16 +104,17 @@ static void SpawnMovingParticles(Scene* scene, const CPosition* position, const 
 
 	const Vector2 spawnPosition = (Vector2) {
 		.x = position->value.x + (baseRadius * 0.5F),
-		.y = position->value.y + FOG_HEIGHT * 0.25F + GetRandomValue(0, FOG_HEIGHT * 0.5F),
+		.y = position->value.y + FOG_HEIGHT * 0.25F
+			 + RngNextRange(&scene->rng, 0, FOG_HEIGHT * 0.5F + 1),
 	};
 
 	const Vector2 velocity = (Vector2) {
-		.x = kinetic->velocity.x + GetRandomValue(minXSpeed, maxXSpeed),
-		.y = GetRandomValue(minYSpeed, maxYSpeed),
+		.x = kinetic->velocity.x + RngNextRange(&scene->rng, minXSpeed, maxXSpeed + 1),
+		.y = RngNextRange(&scene->rng, minYSpeed, maxYSpeed + 1),
 	};
 
-	const f32 radius = GetRandomValue(minSize, maxSize);
-	const f32 lifetime = 0.1F * GetRandomValue(minLifetime, maxLifetime);
+	const f32 radius = RngNextRange(&scene->rng, minSize, maxSize + 1);
+	const f32 lifetime = 0.1F * RngNextRange(&scene->rng, minLifetime, maxLifetime + 1);
 
 	FogParticleBuilder* builder = malloc(sizeof(FogParticleBuilder));
 	builder->entity = SceneAllocateEntity(scene);
@@ -251,7 +252,7 @@ void FogUpdate(Scene* scene, const usize entity)
 
 		if (movingParticleSpawnTimer >= movingParticleSpawnDuration)
 		{
-			if (GetRandomValue(0, 9) != 0)
+			if (RngNextF64(&scene->rng) > 0.1)
 			{
 				SpawnMovingParticles(scene, position, kinetic);
 			}

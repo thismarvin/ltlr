@@ -7,6 +7,7 @@
 #include "fader.h"
 #include "input.h"
 #include "level.h"
+#include "rng.h"
 
 #define MAX_PLAYERS (4)
 #define MAX_ENTITIES (1024)
@@ -98,6 +99,7 @@ struct Scene
 	Deque treePositionsFront;
 	// `Deque<SceneDeferParams>`
 	Deque deferred;
+	Rng rng;
 };
 
 void SceneInit(Scene* self);
