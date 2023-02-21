@@ -25,11 +25,11 @@ CFLAGS ?= $(cflags.$(build))
 private cflags.src.warnings := -Wall -Wextra -Wpedantic
 private cflags.src.defines := -DPLATFORM_WEB
 
-cflags.src := -std=c17 $(cflags.src.warnings) $(cflags.src.defines) -Ivendor/raylib/src -MMD $(CFLAGS)
+cflags.src := -std=c17 $(cflags.src.warnings) $(cflags.src.defines) $(cflags.src.vendor) -MMD $(CFLAGS)
 
-private cflags.vendor.defines := -D_DEFAULT_SOURCE -DPLATFORM_WEB -DGRAPHICS_API_OPENGL_ES2
+private cflags.vendor.raylib.defines := -D_DEFAULT_SOURCE -DPLATFORM_WEB -DGRAPHICS_API_OPENGL_ES2
 
-cflags.vendor := -std=gnu99 $(cflags.vendor.defines) -MMD $(CFLAGS)
+cflags.vendor.raylib := -std=gnu99 $(cflags.vendor.raylib.defines) -MMD $(CFLAGS)
 
 ldflags ?= -sUSE_GLFW=3 --shell-file src/minshell.html --preload-file content $(LDFLAGS)
 
