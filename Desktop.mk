@@ -81,7 +81,7 @@ $(output): $(objects)
 @build/release: $(objects.directories)
 	@$(MAKE) -f $(self) $(output) build=release
 
-build.zig: scripts/generate.nu $(sources.directories)
+build.zig: scripts/generate.nu template.build.zig $(sources.directories)
 	nu -c "use $<; generate zig build | save -f $@"
 
 .PHONY: @zig/build

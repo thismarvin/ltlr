@@ -17,6 +17,7 @@ pub fn build(b: *std.build.Builder) void {
         "-std=c17",
         "-DPLATFORM_DESKTOP",
         "-Ivendor/raylib/src",
+        "-Ivendor/wyhash",
     });
 
     switch (target.getOsTag()) {
