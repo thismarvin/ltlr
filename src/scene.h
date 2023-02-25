@@ -7,13 +7,24 @@
 #include "fader.h"
 #include "input.h"
 #include "level.h"
+#include "replay.h"
 #include "rng.h"
+
+#define TOTAL_INPUT_BINDINGS (4)
 
 #define MAX_PLAYERS (4)
 #define MAX_ENTITIES (1024)
 
 #define MAX_SCORE_DIGITS (6 + 1)
 #define MAX_SCORE (999999)
+
+typedef enum
+{
+	INPUT_BINDING_LEFT = 0,
+	INPUT_BINDING_RIGHT = 1,
+	INPUT_BINDING_JUMP = 2,
+	INPUT_BINDING_STOMP = 3,
+} InputBinding;
 
 typedef void (*OnDefer)(Scene*, const void*);
 
@@ -85,9 +96,9 @@ struct Scene
 	RenderTexture2D interfaceLayer;
 	RenderTexture2D transitionLayer;
 	RenderTexture2D debugLayer;
-	InputProfile menuProfiles[MAX_PLAYERS];
-	InputProfile actionProfiles[MAX_PLAYERS];
+	InputProfile inputProfiles[MAX_PLAYERS];
 	InputHandler inputs[MAX_PLAYERS];
+	InputStream inputStreams[MAX_PLAYERS];
 	Player players[MAX_PLAYERS];
 	bool resetRequested;
 	bool advanceStageRequested;
@@ -99,7 +110,9 @@ struct Scene
 	Deque treePositionsFront;
 	// `Deque<SceneDeferParams>`
 	Deque deferred;
+	usize frame;
 	f64 elapsedTime;
+	u64 seed;
 	Rng rng;
 };
 
@@ -111,6 +124,11 @@ usize SceneAllocateEntity(Scene* self);
 usize SceneGetTotalAllocatedEntities(const Scene* self);
 bool SceneEntityHasDependencies(const Scene* self, usize entity, u64 dependencies);
 bool SceneEntityIs(const Scene* self, usize entity, EntityType type);
+
+bool ScenePressing(const Scene* self, u8 player, InputBinding binding);
+bool ScenePressed(const Scene* self, u8 player, InputBinding binding);
+bool SceneReleased(const Scene* self, u8 player, InputBinding binding);
+void SceneConsume(Scene* self, u8 player, InputBinding binding);
 
 void SceneIncrementScore(Scene* self, u32 value);
 void SceneCollectBattery(Scene* self);

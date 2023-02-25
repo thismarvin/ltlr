@@ -3,8 +3,10 @@
 #include "./ecs/entities.h"
 #include "./ecs/systems.h"
 #include "./palette/p8.h"
+#include "bit_mask.h"
 #include "context.h"
 #include "game.h"
+#include "replay.h"
 #include "rng.h"
 #include "scene_generated.h"
 
@@ -13,6 +15,14 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
+
+// TODO(thismarvin): Should this switch on PLATFORM instead?
+#if defined(NDEBUG)
+	#define RECORDING_SIZE ((usize)9)
+#else
+	// Record the last hour of input!
+	#define RECORDING_SIZE ((usize)1 * 60 * 60 * 60)
+#endif
 
 typedef struct
 {
@@ -173,44 +183,8 @@ static void SceneSetupContent(Scene* self)
 }
 
 // clang-format off
-static InputProfile CreateDefaultMenuProfile(void)
-{
-	InputProfile profile = InputProfileCreate(1);
 
-	// Keyboard.
-	{
-		{
-			KeyboardBinding binding = KeyboardBindingCreate("select", 2);
-
-			KeyboardBindingAddKey(&binding, KEY_SPACE);
-			KeyboardBindingAddKey(&binding, KEY_ENTER);
-
-			InputProfileAddKeyboardBinding(&profile, binding);
-		}
-	}
-
-	// Gamepad.
-	{
-		// Buttons.
-		{
-			{
-				GamepadBinding binding = GamepadBindingCreate("select", 2);
-
-				GamepadBindingAddButton(&binding, GAMEPAD_BUTTON_MIDDLE_LEFT);
-				GamepadBindingAddButton(&binding, GAMEPAD_BUTTON_MIDDLE_RIGHT);
-
-				InputProfileAddGamepadBinding(&profile, binding);
-			}
-		}
-	}
-
-	return profile;
-}
-
-// clang-format on
-
-// clang-format off
-static InputProfile CreateDefaultActionProfile(void)
+static InputProfile CreateDefaultInputProfile(void)
 {
 	InputProfile profile = InputProfileCreate(4);
 
@@ -323,10 +297,9 @@ static void SceneSetupInput(Scene* self)
 	{
 		self->inputs[i] = InputHandlerCreate(i);
 
-		self->menuProfiles[i] = CreateDefaultMenuProfile();
-		self->actionProfiles[i] = CreateDefaultActionProfile();
+		self->inputProfiles[i] = CreateDefaultInputProfile();
 
-		InputHandlerSetProfile(&self->inputs[i], &self->menuProfiles[i]);
+		InputHandlerSetProfile(&self->inputs[i], &self->inputProfiles[i]);
 	}
 }
 
@@ -638,8 +611,6 @@ static void SceneBuildStage(Scene* self)
 
 static void SceneReset(Scene* self)
 {
-	self->elapsedTime = 0;
-
 	self->stage = 0;
 
 	self->score = 0;
@@ -675,15 +646,28 @@ void SceneInit(Scene* self)
 	SceneSetupInput(self);
 	SceneSetupLayers(self);
 
+	self->frame = 0;
 	self->elapsedTime = 0;
 
 #if defined(NDEBUG)
-	self->rng = RngCreate(time(NULL));
+	self->seed = time(NULL);
 #else
-	self->rng = RngCreate(MAGIC_NUMBER);
+	self->seed = MAGIC_NUMBER;
 #endif
 
+	TraceLog(LOG_INFO, "SEED: %lu", self->seed);
+
+	self->rng = RngCreate(self->seed);
+
 	self->deferred = DEQUE_OF(SceneDeferParams);
+
+	// Setup input recording.
+	{
+		for (usize i = 0; i < MAX_PLAYERS; ++i)
+		{
+			self->inputStreams[i] = InputStreamCreate(TOTAL_INPUT_BINDINGS, RECORDING_SIZE);
+		}
+	}
 
 	self->state = SCENE_STATE_MENU;
 
@@ -707,6 +691,43 @@ void SceneInit(Scene* self)
 f64 SceneGetElapsedTime(const Scene* self)
 {
 	return self->elapsedTime;
+}
+
+static usize BufferFromInputBinding(const InputBinding binding)
+{
+	switch (binding)
+	{
+		case INPUT_BINDING_JUMP: {
+			return 8;
+		}
+		default: {
+			return 1;
+		}
+	}
+}
+
+bool ScenePressing(const Scene* self, const u8 player, const InputBinding binding)
+{
+	return InputStreamPressing(&self->inputStreams[player], binding, self->frame);
+}
+
+bool ScenePressed(const Scene* self, const u8 player, const InputBinding binding)
+{
+	const usize buffer = BufferFromInputBinding(binding);
+
+	return InputStreamPressed(&self->inputStreams[player], binding, buffer, self->frame);
+}
+
+bool SceneReleased(const Scene* self, const u8 player, const InputBinding binding)
+{
+	const usize buffer = BufferFromInputBinding(binding);
+
+	return InputStreamReleased(&self->inputStreams[player], binding, buffer, self->frame);
+}
+
+void SceneConsume(Scene* self, const u8 player, const InputBinding binding)
+{
+	InputStreamConsume(&self->inputStreams[player], binding, self->frame);
 }
 
 void SceneIncrementScore(Scene* self, const u32 value)
@@ -788,18 +809,13 @@ static void SceneCheckEndCondition(Scene* self)
 
 static void SceneMenuUpdate(Scene* self)
 {
-	// Only give player one control in the menu state.
-	if (InputHandlerPressed(&self->inputs[0], "select"))
+	// Only give player-one control in the menu state.
+	if (ScenePressed(self, 0, INPUT_BINDING_JUMP))
 	{
-		InputHandlerConsume(&self->inputs[0], "select");
+		SceneConsume(self, 0, INPUT_BINDING_JUMP);
 
 		// TODO(thismarvin): Defer this somehow...
 		self->state = SCENE_STATE_ACTION;
-
-		for (usize i = 0; i < MAX_PLAYERS; ++i)
-		{
-			InputHandlerSetProfile(&self->inputs[i], &self->actionProfiles[i]);
-		}
 
 		// TODO(thismarvin): There should be a bespoke transition into the Action state.
 		self->fader.easer.duration = CTX_DT * 40;
@@ -912,14 +928,50 @@ static void SceneActionUpdate(Scene* self)
 	SceneCheckEndCondition(self);
 }
 
-void SceneUpdate(Scene* self)
+static void SceneUpdateInput(Scene* self)
 {
-	self->elapsedTime += CTX_DT;
-
+	// Update input handlers.
 	for (usize i = 0; i < MAX_PLAYERS; ++i)
 	{
 		InputHandlerUpdate(&self->inputs[i]);
 	}
+
+	// Update input streams.
+	for (usize i = 0; i < MAX_PLAYERS; ++i)
+	{
+		const bool replayInProgress = self->inputStreams[i].length > self->frame;
+
+		if (replayInProgress)
+		{
+			continue;
+		}
+
+		bool payload[TOTAL_INPUT_BINDINGS] = { false };
+
+		if (InputHandlerPressing(&self->inputs[i], "left"))
+		{
+			payload[0] = true;
+		}
+		if (InputHandlerPressing(&self->inputs[i], "right"))
+		{
+			payload[1] = true;
+		}
+		if (InputHandlerPressing(&self->inputs[i], "jump"))
+		{
+			payload[2] = true;
+		}
+		if (InputHandlerPressing(&self->inputs[i], "stomp"))
+		{
+			payload[3] = true;
+		}
+
+		InputStreamPush(&self->inputStreams[i], payload);
+	}
+}
+
+void SceneUpdate(Scene* self)
+{
+	SceneUpdateInput(self);
 
 	if (IsKeyPressed(KEY_EQUAL))
 	{
@@ -942,6 +994,10 @@ void SceneUpdate(Scene* self)
 	SceneUpdateDirector(self);
 
 	SceneFlush(self);
+
+	// TODO(thismarvin): Should this be at the end? Don't we usually have it first?!
+	self->frame += 1;
+	self->elapsedTime += CTX_DT;
 }
 
 // Return a Rectangle that is within the scene's bounds and centered on a given entity.
@@ -1377,7 +1433,29 @@ void SceneDestroy(Scene* self)
 
 	for (usize i = 0; i < MAX_PLAYERS; ++i)
 	{
-		InputProfileDestroy(&self->menuProfiles[i]);
-		InputProfileDestroy(&self->actionProfiles[i]);
+		InputProfileDestroy(&self->inputProfiles[i]);
+	}
+
+#if !defined(NDEBUG)
+	// Dump player-one's input.
+	{
+		ReplayResult result = ReplayTryFromInputStream(&self->inputStreams[0]);
+
+		if (result.type == REPLAY_RESULT_TYPE_OK)
+		{
+			Replay* replay = &result.contents.ok;
+			ReplayBytes bytes = ReplayBytesFromReplay(replay);
+
+			SaveFileData("debug_recording.ltlrr", bytes.data, bytes.size);
+
+			ReplayBytesDestroy(&bytes);
+			ReplayDestroy(replay);
+		}
+	}
+#endif
+
+	for (usize i = 0; i < MAX_PLAYERS; ++i)
+	{
+		InputStreamDestroy(&self->inputStreams[i]);
 	}
 }
