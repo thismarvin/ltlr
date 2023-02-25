@@ -2,7 +2,6 @@
 
 #include <stdint.h>
 
-typedef uint8_t u8;
 typedef uint32_t u32;
 
 u32 U32SwapBytes(u32 self);
