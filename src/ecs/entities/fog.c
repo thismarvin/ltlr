@@ -116,7 +116,8 @@ static void SpawnMovingParticles(Scene* scene, const CPosition* position, const 
 	const f32 radius = RngNextRange(&scene->rng, minSize, maxSize + 1);
 	const f32 lifetime = 0.1F * RngNextRange(&scene->rng, minLifetime, maxLifetime + 1);
 
-	FogParticleBuilder* builder = malloc(sizeof(FogParticleBuilder));
+	FogParticleBuilder* builder =
+		ArenaAllocatorTake(&scene->arenaAllocator, sizeof(FogParticleBuilder));
 	builder->entity = SceneAllocateEntity(scene);
 	builder->position = spawnPosition;
 	builder->velocity = velocity;

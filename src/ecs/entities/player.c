@@ -116,7 +116,8 @@ static void SpawnCloudParticle(
 	const f32 lifetime
 )
 {
-	CloudParticleBuilder* builder = malloc(sizeof(CloudParticleBuilder));
+	CloudParticleBuilder* builder =
+		ArenaAllocatorTake(&scene->arenaAllocator, sizeof(CloudParticleBuilder));
 	builder->entity = SceneAllocateEntity(scene);
 	builder->position = position;
 	builder->radius = radius;
@@ -1459,7 +1460,8 @@ void PlayerTrailUpdate(Scene* scene, const usize entity)
 		{
 			const CAnimation* animation = &scene->components.animations[entity];
 
-			ShadowBuilder* builder = malloc(sizeof(ShadowBuilder));
+			ShadowBuilder* builder =
+				ArenaAllocatorTake(&scene->arenaAllocator, sizeof(ShadowBuilder));
 			builder->entity = SceneAllocateEntity(scene);
 			builder->x = smooth->previous.x;
 			builder->y = smooth->previous.y;

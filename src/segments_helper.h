@@ -8,7 +8,7 @@
 			.width = (mWidth), \
 			.height = (mHeight), \
 		}; \
-		BlockBuilder* builder = malloc(sizeof(BlockBuilder)); \
+		BlockBuilder* builder = ArenaAllocatorTake(&scene->arenaAllocator, sizeof(BlockBuilder)); \
 		builder->entity = SceneAllocateEntity(scene); \
 		builder->aabb = aabb; \
 		builder->resolutionSchema = RESOLVE_ALL; \
@@ -24,7 +24,7 @@
 			.width = (mWidth), \
 			.height = (mHeight), \
 		}; \
-		BlockBuilder* builder = malloc(sizeof(BlockBuilder)); \
+		BlockBuilder* builder = ArenaAllocatorTake(&scene->arenaAllocator, sizeof(BlockBuilder)); \
 		builder->entity = SceneAllocateEntity(scene); \
 		builder->aabb = aabb; \
 		builder->resolutionSchema = RESOLVE_UP; \
@@ -40,7 +40,7 @@
 			.width = (mWidth), \
 			.height = (mHeight), \
 		}; \
-		BlockBuilder* builder = malloc(sizeof(BlockBuilder)); \
+		BlockBuilder* builder = ArenaAllocatorTake(&scene->arenaAllocator, sizeof(BlockBuilder)); \
 		builder->entity = SceneAllocateEntity(scene); \
 		builder->aabb = aabb; \
 		builder->resolutionSchema = RESOLVE_ALL; \
@@ -52,7 +52,7 @@
 	{ \
 		const f32 x = (mX) + offset.x; \
 		const f32 y = (mY) + offset.y; \
-		SpikeBuilder* builder = malloc(sizeof(SpikeBuilder)); \
+		SpikeBuilder* builder = ArenaAllocatorTake(&scene->arenaAllocator, sizeof(SpikeBuilder)); \
 		builder->entity = SceneAllocateEntity(scene); \
 		builder->x = x; \
 		builder->y = y; \
@@ -64,7 +64,8 @@
 	{ \
 		const f32 x = (mX) + offset.x; \
 		const f32 y = (mY) + offset.y; \
-		WalkerBuilder* builder = malloc(sizeof(WalkerBuilder)); \
+		WalkerBuilder* builder = \
+			ArenaAllocatorTake(&scene->arenaAllocator, sizeof(WalkerBuilder)); \
 		builder->entity = SceneAllocateEntity(scene); \
 		builder->x = x; \
 		builder->y = y; \
@@ -75,7 +76,8 @@
 	{ \
 		const f32 x = (mX) + offset.x + 1; \
 		const f32 y = (mY) + offset.y; \
-		BatteryBuilder* builder = malloc(sizeof(BatteryBuilder)); \
+		BatteryBuilder* builder = \
+			ArenaAllocatorTake(&scene->arenaAllocator, sizeof(BatteryBuilder)); \
 		builder->entity = SceneAllocateEntity(scene); \
 		builder->x = x; \
 		builder->y = y; \
@@ -86,7 +88,8 @@
 	{ \
 		const f32 x = (mX) + offset.x - 36; \
 		const f32 y = (mY) + offset.y - 24; \
-		SolarPanelBuilder* builder = malloc(sizeof(SolarPanelBuilder)); \
+		SolarPanelBuilder* builder = \
+			ArenaAllocatorTake(&scene->arenaAllocator, sizeof(SolarPanelBuilder)); \
 		builder->entity = SceneAllocateEntity(scene); \
 		builder->x = x; \
 		builder->y = y; \
