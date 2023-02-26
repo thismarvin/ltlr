@@ -67,7 +67,7 @@ static void CloudParticleBuildHelper(Scene* scene, const CloudParticleBuilder* b
 		.layer = LAYER_NONE,
 		.mask = LAYER_TERRAIN,
 		.onResolution = CloudParticleOnResolution,
-		.onCollision = OnCollisionNoop,
+		.onCollision = NULL,
 	};
 
 	scene->components.fleetings[builder->entity] = (CFleeting) {

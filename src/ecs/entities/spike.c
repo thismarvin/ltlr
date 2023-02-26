@@ -72,8 +72,8 @@ void SpikeBuildHelper(Scene* scene, const SpikeBuilder* builder)
 		.resolutionSchema = RESOLVE_NONE,
 		.layer = LAYER_LETHAL,
 		.mask = LAYER_NONE,
-		.onResolution = OnResolutionNoop,
-		.onCollision = OnCollisionNoop,
+		.onResolution = NULL,
+		.onCollision = NULL,
 	};
 
 	scene->components.damages[builder->entity] = (CDamage) {

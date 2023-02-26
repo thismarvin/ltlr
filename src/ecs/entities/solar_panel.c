@@ -42,8 +42,8 @@ void SolarPanelBuildHelper(Scene* scene, const SolarPanelBuilder* builder)
 		.resolutionSchema = RESOLVE_NONE,
 		.layer = LAYER_INTERACTABLE,
 		.mask = LAYER_NONE,
-		.onResolution = OnResolutionNoop,
-		.onCollision = OnCollisionNoop,
+		.onResolution = NULL,
+		.onCollision = NULL,
 	};
 }
 

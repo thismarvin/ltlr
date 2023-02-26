@@ -91,7 +91,7 @@ void WalkerBuildHelper(Scene* scene, const WalkerBuilder* builder)
 		.layer = LAYER_LETHAL,
 		.mask = LAYER_TERRAIN | LAYER_INVISIBLE | LAYER_LETHAL,
 		.onResolution = WalkerOnResolution,
-		.onCollision = OnCollisionNoop,
+		.onCollision = NULL,
 	};
 
 	scene->components.damages[builder->entity] = (CDamage) {

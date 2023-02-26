@@ -336,6 +336,11 @@ void SCollisionUpdate(Scene* scene, const usize entity)
 	const CDimension* dimension = &scene->components.dimensions[entity];
 	const CCollider* collider = &scene->components.colliders[entity];
 
+	if (collider->onResolution == NULL)
+	{
+		return;
+	}
+
 	const Rectangle previousAabb = (Rectangle) {
 		.x = smooth->previous.x,
 		.y = smooth->previous.y,
@@ -374,6 +379,11 @@ void SPostCollisionUpdate(Scene* scene, const usize entity)
 	CPosition* position = &scene->components.positions[entity];
 	const CDimension* dimension = &scene->components.dimensions[entity];
 	const CCollider* collider = &scene->components.colliders[entity];
+
+	if (collider->onCollision == NULL)
+	{
+		return;
+	}
 
 	const Rectangle aabb = (Rectangle) {
 		.x = position->value.x,

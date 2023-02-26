@@ -33,8 +33,8 @@ void BlockBuildHelper(Scene* scene, const BlockBuilder* builder)
 		.resolutionSchema = builder->resolutionSchema,
 		.layer = builder->layer,
 		.mask = LAYER_NONE,
-		.onResolution = OnResolutionNoop,
-		.onCollision = OnCollisionNoop,
+		.onResolution = NULL,
+		.onCollision = NULL,
 	};
 }
 
