@@ -937,12 +937,15 @@ static void PlayerJumpLogic(Scene* scene, const usize entity)
 
 		player->grounded = false;
 		player->jumping = true;
+
 		kinetic->velocity.y = -jumpVelocity;
 
 		if (!player->coyoteTimeActive)
 		{
 			PlayerSpawnJumpParticles(scene, entity);
 		}
+
+		player->coyoteTimeActive = false;
 	}
 
 	// Variable Jump Height.
@@ -1146,7 +1149,7 @@ void PlayerPostCollisionUpdate(Scene* scene, const usize entity)
 	}
 
 	// Enable "Coyote Time" if the player walked off an edge.
-	if (player->groundedLastFrame && !player->grounded)
+	if (player->groundedLastFrame && !player->grounded && !player->jumping)
 	{
 		player->coyoteTimeActive = true;
 		player->coyoteTimer = 0;
