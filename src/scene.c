@@ -642,9 +642,12 @@ static void SceneAdvanceStage(Scene* self)
 
 void SceneInit(Scene* self)
 {
+#if !defined(BENCHMARKING)
 	SceneSetupContent(self);
-	SceneSetupInput(self);
 	SceneSetupLayers(self);
+#endif
+
+	SceneSetupInput(self);
 
 	self->frame = 0;
 	self->elapsedTime = 0;

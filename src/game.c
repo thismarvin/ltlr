@@ -2,8 +2,11 @@
 
 #include "common.h"
 #include "context.h"
+#include "raylib.h"
+#include "replay.h"
 #include "scene.h"
 
+#include <assert.h>
 #include <math.h>
 
 #if defined(PLATFORM_WEB)
@@ -154,6 +157,29 @@ static void Timestep(void)
 
 void GameRun(void)
 {
+#if defined(BENCHMARKING)
+	SetTraceLogLevel(LOG_NONE);
+	SceneInit(&scene);
+
+	u32 size;
+	const u8* data = LoadFileData("baseline.ltlrr", &size);
+
+	ReplayResult result = ReplayTryFromBytes(data, size);
+
+	assert(result.type == REPLAY_RESULT_TYPE_OK);
+
+	bool loaded = InputStreamLoadReplay(&scene.inputStreams[0], &result.contents.ok);
+
+	assert(loaded);
+
+	for (usize i = 0; i < result.contents.ok.length; ++i)
+	{
+		SceneUpdate(&scene);
+	}
+
+	return;
+#endif
+
 	// TODO(thismarvin): Incorporate a config file or cli options for window resolution.
 	InitWindow(DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT, "Larry the Light-bulb Redux");
 	InitAudioDevice();
