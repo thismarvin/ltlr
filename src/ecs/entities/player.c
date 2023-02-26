@@ -127,7 +127,7 @@ static void SpawnCloudParticle(
 	SceneDefer(scene, CloudParticleBuild, builder);
 }
 
-static void PlayerSpawnImpactParticles(Scene* scene, const usize entity, const f32 groundY)
+static void SpawnImpactParticles(Scene* scene, const usize entity, const f32 y)
 {
 	assert(SceneEntityHasDependencies(scene, entity, TAG_POSITION | TAG_DIMENSION | TAG_KINETIC));
 
@@ -140,11 +140,11 @@ static void PlayerSpawnImpactParticles(Scene* scene, const usize entity, const f
 	const f32 spread = dimension->width * 0.25;
 	const Vector2 leftAnchor = (Vector2) {
 		.x = position->value.x,
-		.y = groundY,
+		.y = y,
 	};
 	const Vector2 rightAnchor = (Vector2) {
 		.x = position->value.x + dimension->width,
-		.y = groundY,
+		.y = y,
 	};
 
 	// Lateral pockets.
@@ -269,7 +269,7 @@ static void PlayerSpawnImpactParticles(Scene* scene, const usize entity, const f
 	}
 }
 
-static void PlayerSpawnJumpParticles(Scene* scene, const usize entity)
+static void SpawnJumpParticles(Scene* scene, const usize entity)
 {
 	assert(SceneEntityHasDependencies(scene, entity, TAG_POSITION | TAG_DIMENSION | TAG_KINETIC));
 
@@ -402,7 +402,8 @@ static void PlayerOnDamage(Scene* scene, const usize entity, const usize otherEn
 	assert(SceneEntityHasDependencies(scene, entity, TAG_PLAYER | TAG_MORTAL));
 	assert(SceneEntityHasDependencies(scene, otherEntity, TAG_DAMAGE));
 
-	Player* player = &scene->players[scene->components.players[entity].handle];
+	const u8 handle = scene->components.players[entity].handle;
+	Player* player = &scene->players[handle];
 	CMortal* mortal = &scene->components.mortals[entity];
 
 	const CDamage* otherDamage = &scene->components.damages[otherEntity];
@@ -420,8 +421,8 @@ static OnResolutionResult PlayerOnResolution(const OnResolutionParams* params)
 {
 	assert(SceneEntityHasDependencies(params->scene, params->entity, TAG_PLAYER | TAG_KINETIC));
 
-	Player* player =
-		&params->scene->players[params->scene->components.players[params->entity].handle];
+	const u8 handle = params->scene->components.players[params->entity].handle;
+	Player* player = &params->scene->players[handle];
 	CKinetic* kinetic = &params->scene->components.kinetics[params->entity];
 
 	// Collision specific logic that will not resolve the player.
@@ -490,7 +491,7 @@ static OnResolutionResult PlayerOnResolution(const OnResolutionParams* params)
 
 			if (kinetic->velocity.y > terminalVelocity * 0.75)
 			{
-				PlayerSpawnImpactParticles(
+				SpawnImpactParticles(
 					params->scene,
 					params->entity,
 					RectangleTop(params->otherAabb)
@@ -532,8 +533,8 @@ static void PlayerOnCollision(const OnCollisionParams* params)
 
 	assert(SceneEntityHasDependencies(params->scene, params->otherEntity, TAG_IDENTIFIER));
 
-	Player* player =
-		&params->scene->players[params->scene->components.players[params->entity].handle];
+	const u8 handle = params->scene->components.players[params->entity].handle;
+	Player* player = &params->scene->players[handle];
 	const CKinetic* kinetic = &params->scene->components.kinetics[params->entity];
 	CMortal* mortal = &params->scene->components.mortals[params->entity];
 
@@ -630,7 +631,7 @@ static void PlayerOnCollision(const OnCollisionParams* params)
 	}
 }
 
-void PlayerBuildHelper(Scene* scene, const PlayerBuilder* builder)
+static void PlayerBuildHelper(Scene* scene, const PlayerBuilder* builder)
 {
 	const Vector2 position = Vector2Create(builder->x, builder->y);
 	const Rectangle intramural = PLAYER_SPRITE_INTRAMURAL;
@@ -942,7 +943,7 @@ static void PlayerJumpLogic(Scene* scene, const usize entity)
 
 		if (!player->coyoteTimeActive)
 		{
-			PlayerSpawnJumpParticles(scene, entity);
+			SpawnJumpParticles(scene, entity);
 		}
 
 		player->coyoteTimeActive = false;
@@ -958,7 +959,7 @@ static void PlayerJumpLogic(Scene* scene, const usize entity)
 	}
 }
 
-void PlayerStompLogic(Scene* scene, const usize entity)
+static void PlayerStompLogic(Scene* scene, const usize entity)
 {
 	assert(SceneEntityHasDependencies(scene, entity, TAG_PLAYER | TAG_KINETIC));
 
@@ -1115,7 +1116,8 @@ void PlayerPostCollisionUpdate(Scene* scene, const usize entity)
 		return;
 	}
 
-	Player* player = &scene->players[scene->components.players[entity].handle];
+	const u8 handle = scene->components.players[entity].handle;
+	Player* player = &scene->players[handle];
 	CPosition* position = &scene->components.positions[entity];
 	CKinetic* kinetic = &scene->components.kinetics[entity];
 
@@ -1158,7 +1160,8 @@ void PlayerPostCollisionUpdate(Scene* scene, const usize entity)
 
 static void PlayerFlashingLogic(Scene* scene, const usize entity)
 {
-	Player* player = &scene->players[scene->components.players[entity].handle];
+	const u8 handle = scene->components.players[entity].handle;
+	Player* player = &scene->players[handle];
 
 	player->invulnerableTimer += CTX_DT;
 
@@ -1195,7 +1198,8 @@ void PlayerMortalUpdate(Scene* scene, const usize entity)
 		return;
 	}
 
-	Player* player = &scene->players[scene->components.players[entity].handle];
+	const u8 handle = scene->components.players[entity].handle;
+	Player* player = &scene->players[handle];
 	const CMortal* mortal = &scene->components.mortals[entity];
 	const CPosition* position = &scene->components.positions[entity];
 	CKinetic* kinetic = &scene->components.kinetics[entity];
@@ -1264,7 +1268,7 @@ static void EnableAnimation(Scene* scene, usize entity, Player* player, Animatio
 			contents = (CAnimation) {
 				.frameTimer = 0,
 				.frameDuration = ANIMATION_PLAYER_STILL_FRAME_DURATION,
-				.intramural = (Rectangle) { 24, 29, 15, 35 },
+				.intramural = PLAYER_SPRITE_INTRAMURAL,
 				.reflection = REFLECTION_NONE,
 				.frame = 0,
 				.length = ANIMATION_PLAYER_STILL_LENGTH,
@@ -1280,7 +1284,7 @@ static void EnableAnimation(Scene* scene, usize entity, Player* player, Animatio
 			contents = (CAnimation) {
 				.frameTimer = 0,
 				.frameDuration = ANIMATION_PLAYER_RUN_FRAME_DURATION,
-				.intramural = (Rectangle) { 24, 29, 15, 35 },
+				.intramural = PLAYER_SPRITE_INTRAMURAL,
 				.reflection = REFLECTION_NONE,
 				.frame = 0,
 				.length = ANIMATION_PLAYER_RUN_LENGTH,
@@ -1296,7 +1300,7 @@ static void EnableAnimation(Scene* scene, usize entity, Player* player, Animatio
 			contents = (CAnimation) {
 				.frameTimer = 0,
 				.frameDuration = ANIMATION_PLAYER_JUMP_FRAME_DURATION,
-				.intramural = (Rectangle) { 24, 29, 15, 35 },
+				.intramural = PLAYER_SPRITE_INTRAMURAL,
 				.reflection = REFLECTION_NONE,
 				.frame = 0,
 				.length = ANIMATION_PLAYER_JUMP_LENGTH,
@@ -1312,7 +1316,7 @@ static void EnableAnimation(Scene* scene, usize entity, Player* player, Animatio
 			contents = (CAnimation) {
 				.frameTimer = 0,
 				.frameDuration = ANIMATION_PLAYER_SPIN_FRAME_DURATION,
-				.intramural = (Rectangle) { 24, 29, 15, 35 },
+				.intramural = PLAYER_SPRITE_INTRAMURAL,
 				.reflection = REFLECTION_NONE,
 				.frame = 0,
 				.length = ANIMATION_PLAYER_SPIN_LENGTH,
@@ -1345,7 +1349,8 @@ void PlayerAnimationUpdate(Scene* scene, const usize entity)
 		return;
 	}
 
-	Player* player = &scene->players[scene->components.players[entity].handle];
+	const u8 handle = scene->components.players[entity].handle;
+	Player* player = &scene->players[handle];
 	CAnimation* animation = &scene->components.animations[entity];
 
 	// Deal with death.
@@ -1479,7 +1484,8 @@ void PlayerTrailUpdate(Scene* scene, const usize entity)
 		return;
 	}
 
-	Player* player = &scene->players[scene->components.players[entity].handle];
+	const u8 handle = scene->components.players[entity].handle;
+	Player* player = &scene->players[handle];
 	const CSmooth* smooth = &scene->components.smooths[entity];
 
 	player->trailTimer += CTX_DT;
