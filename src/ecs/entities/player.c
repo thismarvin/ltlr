@@ -745,12 +745,14 @@ static void PlayerDecelerate(Player* player, const CKinetic* kinetic)
 	const f32 vo = kinetic->velocity.x;
 	const f32 t = delta * timeToStop / moveSpeed;
 
+	const f32 adjustedTime = ceilf(t / CTX_DT) * CTX_DT;
+
 	player->sprintTimer = 0;
-	player->sprintDuration = t;
+	player->sprintDuration = adjustedTime;
 	player->sprintState = PLAYER_SPRINT_STATE_DECELERATING;
 	// vf = vo + a * t
 	// a = (vf - vo) / t
-	player->sprintForce.x = (vf - vo) / t;
+	player->sprintForce.x = (vf - vo) / adjustedTime;
 	player->sprintDirection = DIR_NONE;
 }
 
@@ -786,12 +788,14 @@ static void PlayerAccelerate(Player* player, const CKinetic* kinetic, const Dire
 	const f32 vo = kinetic->velocity.x;
 	const f32 t = delta * timeToSprint / moveSpeed;
 
+	const f32 adjustedTime = ceilf(t / CTX_DT) * CTX_DT;
+
 	player->sprintTimer = 0;
-	player->sprintDuration = t;
+	player->sprintDuration = adjustedTime;
 	player->sprintState = PLAYER_SPRINT_STATE_ACCELERATING;
 	// vf = vo + a * t
 	// a = (vf - vo) / t
-	player->sprintForce.x = (vf - vo) / t;
+	player->sprintForce.x = (vf - vo) / adjustedTime;
 	player->sprintDirection = direction;
 }
 
@@ -873,9 +877,6 @@ static void PlayerLateralMovementLogic(Scene* scene, const usize entity)
 				player->sprintTimer = 0;
 				player->sprintState = PLAYER_SPRINT_STATE_TERMINAL;
 				player->sprintForce.x = 0;
-
-				// const i8 sign = strafe == DIR_RIGHT ? 1 : -1;
-				// kinetic->velocity.x = player->moveSpeed * sign;
 			}
 
 			break;
