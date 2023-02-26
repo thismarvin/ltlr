@@ -17,7 +17,7 @@
 #include <time.h>
 
 // TODO(thismarvin): Should this switch on PLATFORM instead?
-#if defined(NDEBUG)
+#if defined(NDEBUG) && !defined(BENCHMARKING)
 	#define RECORDING_SIZE ((usize)9)
 #else
 	// Record the last hour of input!

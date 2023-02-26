@@ -6,8 +6,9 @@
 #include "replay.h"
 #include "scene.h"
 
-#include <assert.h>
 #include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #if defined(PLATFORM_WEB)
 	#include <emscripten/emscripten.h>
@@ -166,11 +167,19 @@ void GameRun(void)
 
 	ReplayResult result = ReplayTryFromBytes(data, size);
 
-	assert(result.type == REPLAY_RESULT_TYPE_OK);
+	if (result.type == REPLAY_RESULT_TYPE_ERR)
+	{
+		fprintf(stderr, "%s\n", StringFromReplayError(result.contents.err));
+		exit(EXIT_FAILURE);
+	}
 
 	bool loaded = InputStreamLoadReplay(&scene.inputStreams[0], &result.contents.ok);
 
-	assert(loaded);
+	if (!loaded)
+	{
+		fprintf(stderr, "Replay is too long to fit inside InputStream.\n");
+		exit(EXIT_FAILURE);
+	}
 
 	for (usize i = 0; i < result.contents.ok.length; ++i)
 	{
