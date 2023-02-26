@@ -1103,17 +1103,30 @@ void PlayerPostCollisionUpdate(Scene* scene, const usize entity)
 
 	// General purpose player specific collision logic.
 	{
-		// Keep the player's x within the scene's bounds.
+		// Do not let the player walk-off the leftmost side of the stage.
 		if (position->value.x < scene->bounds.x)
 		{
 			position->value.x = scene->bounds.x;
 			PlayerStandstill(player, kinetic);
 		}
-		else if (position->value.x > RectangleRight(scene->bounds))
+
+		// Force the player right if they finish the stage.
+		if (position->value.x > RectangleRight(scene->bounds))
 		{
 			kinetic->velocity.x = moveSpeed;
+		}
 
+		// Once the player is fully offscreen, start to transition to the next stage.
+		if (position->value.x > RectangleRight(scene->bounds) + 16)
+		{
 			SceneDeferAdvanceStage(scene);
+		}
+
+		// Freeze the player in-place as the stage transitions to the next.
+		if (scene->advanceStageRequested)
+		{
+			kinetic->acceleration = VECTOR2_ZERO;
+			kinetic->velocity = VECTOR2_ZERO;
 		}
 	}
 
