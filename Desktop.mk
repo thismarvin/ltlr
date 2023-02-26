@@ -30,7 +30,7 @@ sources.directories := $(sort $(dir $(sources.src) $(sources.vendor.raylib)))
 
 output := $(OUTDIR)/ltlr
 
-cflags.debug = -pg -Og
+cflags.debug = -ggdb -pg -Og
 cflags.release = -O2 -DNDEBUG -DDATADIR=\"$(DESTDIR)$(datadir)/$(BIN)/\"
 
 CFLAGS ?= $(cflags.$(build))
