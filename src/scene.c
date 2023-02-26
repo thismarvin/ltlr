@@ -685,7 +685,7 @@ void SceneInit(Scene* self)
 	self->fader = FaderDefault();
 	self->fader.easer.ease = EaseInOutQuad;
 
-	self->arenaAllocator = ArenaAllocatorCreate((usize)(1024 * 4));
+	self->arenaAllocator = ArenaAllocatorCreate((usize)(1024 * 8));
 
 	SceneReset(self);
 }
