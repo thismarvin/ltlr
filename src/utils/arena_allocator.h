@@ -8,10 +8,10 @@ typedef struct
 {
 	void* data;
 	usize head;
-	usize capacity;
+	usize size;
 } ArenaAllocator;
 
-ArenaAllocator ArenaAllocatorCreate(usize capacity);
+ArenaAllocator ArenaAllocatorCreate(usize size);
 void* ArenaAllocatorTake(ArenaAllocator* self, usize size);
 void ArenaAllocatorFlush(ArenaAllocator* self);
 void ArenaAllocatorDestroy(ArenaAllocator* self);

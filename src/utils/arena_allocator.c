@@ -3,20 +3,23 @@
 #include <assert.h>
 #include <stdlib.h>
 
-ArenaAllocator ArenaAllocatorCreate(const usize capacity)
+ArenaAllocator ArenaAllocatorCreate(const usize size)
 {
 	return (ArenaAllocator) {
-		.data = malloc(capacity),
+		.data = malloc(size),
 		.head = 0,
-		.capacity = capacity,
+		.size = size,
 	};
 }
 
 void* ArenaAllocatorTake(ArenaAllocator* self, const usize size)
 {
 	const usize offset = self->head;
+
 	self->head += size;
-	assert(self->head <= self->capacity);
+
+	assert(self->head <= self->size);
+
 	return (char*)self->data + offset;
 }
 
