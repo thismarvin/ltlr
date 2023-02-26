@@ -89,8 +89,13 @@ void FogBuild(Scene* scene, const void* params)
 	FogBuildHelper(scene, params);
 }
 
-static void SpawnMovingParticles(Scene* scene, const CPosition* position, const CKinetic* kinetic)
+static void SpawnMovingParticles(Scene* scene, const usize entity)
 {
+	assert(SceneEntityHasDependencies(scene, entity, TAG_POSITION | TAG_KINETIC));
+
+	const CPosition* position = &scene->components.positions[entity];
+	const CKinetic* kinetic = &scene->components.kinetics[entity];
+
 	static const i32 minSize = 3;
 	static const i32 maxSize = 5;
 
@@ -255,7 +260,7 @@ void FogUpdate(Scene* scene, const usize entity)
 		{
 			if (RngNextF64(&scene->rng) > 0.1)
 			{
-				SpawnMovingParticles(scene, position, kinetic);
+				SpawnMovingParticles(scene, entity);
 			}
 
 			movingParticleSpawnTimer = 0;
