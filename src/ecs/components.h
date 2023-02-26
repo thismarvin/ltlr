@@ -201,6 +201,7 @@ typedef struct
 	bool grounded;
 	bool jumping;
 	f32 coyoteTimer;
+	bool coyoteTimeActive;
 	bool dead;
 	f32 invulnerableTimer;
 	f32 sprintTimer;

@@ -702,7 +702,8 @@ void PlayerBuildHelper(Scene* scene, const PlayerBuilder* builder)
 		.groundedLastFrame = false,
 		.grounded = false,
 		.jumping = false,
-		.coyoteTimer = COYOTE_DURATION,
+		.coyoteTimer = 0,
+		.coyoteTimeActive = false,
 		.dead = false,
 		.invulnerableTimer = INVULNERABLE_DURATION,
 		.sprintTimer = 0,
@@ -916,6 +917,44 @@ static void PlayerLateralMovementLogic(Scene* scene, const usize entity)
 	}
 }
 
+static void PlayerJumpLogic(Scene* scene, const usize entity)
+{
+	assert(SceneEntityHasDependencies(scene, entity, TAG_PLAYER | TAG_KINETIC));
+
+	const u8 handle = scene->components.players[entity].handle;
+	Player* player = &scene->players[handle];
+	CKinetic* kinetic = &scene->components.kinetics[entity];
+
+	if (PlayerStompInProgress(player))
+	{
+		return;
+	}
+
+	if ((player->grounded || player->coyoteTimeActive) && !player->jumping
+		&& ScenePressed(scene, handle, INPUT_BINDING_JUMP))
+	{
+		SceneConsume(scene, handle, INPUT_BINDING_JUMP);
+
+		player->grounded = false;
+		player->jumping = true;
+		kinetic->velocity.y = -jumpVelocity;
+
+		if (!player->coyoteTimeActive)
+		{
+			PlayerSpawnJumpParticles(scene, entity);
+		}
+	}
+
+	// Variable Jump Height.
+	if (SceneReleased(scene, handle, INPUT_BINDING_JUMP) && kinetic->velocity.y < 0)
+	{
+		SceneConsume(scene, handle, INPUT_BINDING_JUMP);
+
+		player->jumping = false;
+		kinetic->velocity.y = MAX(kinetic->velocity.y, -jumpVelocity * 0.5);
+	}
+}
+
 void PlayerStompLogic(Scene* scene, const usize entity)
 {
 	assert(SceneEntityHasDependencies(scene, entity, TAG_PLAYER | TAG_KINETIC));
@@ -995,6 +1034,8 @@ void PlayerStompLogic(Scene* scene, const usize entity)
 
 void PlayerInputUpdate(Scene* scene, const usize entity)
 {
+	// TODO(thismarvin): Should grounded logic really be in Input?
+
 	static const u64 dependencies = TAG_PLAYER | TAG_KINETIC;
 
 	if (!SceneEntityIs(scene, entity, ENTITY_TYPE_PLAYER)
@@ -1017,8 +1058,6 @@ void PlayerInputUpdate(Scene* scene, const usize entity)
 		return;
 	}
 
-	const bool coyoteTimeActive = player->coyoteTimer < COYOTE_DURATION;
-
 	// Maintenance.
 	{
 		player->groundedLastFrame = player->grounded;
@@ -1036,47 +1075,23 @@ void PlayerInputUpdate(Scene* scene, const usize entity)
 			player->gravityForce.y = jumpGravity;
 		}
 
-		if (coyoteTimeActive)
+		if (player->coyoteTimer >= COYOTE_DURATION)
+		{
+			player->coyoteTimeActive = false;
+		}
+
+		if (player->coyoteTimeActive)
 		{
 			player->coyoteTimer += CTX_DT;
 		}
 	}
 
 	PlayerLateralMovementLogic(scene, entity);
-
-	// Jumping.
-	{
-		if (!PlayerStompInProgress(player))
-		{
-			if ((player->grounded || coyoteTimeActive) && !player->jumping
-				&& ScenePressed(scene, handle, INPUT_BINDING_JUMP))
-			{
-				SceneConsume(scene, handle, INPUT_BINDING_JUMP);
-
-				player->grounded = false;
-				player->jumping = true;
-				kinetic->velocity.y = -jumpVelocity;
-
-				PlayerSpawnJumpParticles(scene, entity);
-			}
-
-			// Variable Jump Height.
-			if (SceneReleased(scene, handle, INPUT_BINDING_JUMP) && kinetic->velocity.y < 0)
-			{
-				SceneConsume(scene, handle, INPUT_BINDING_JUMP);
-
-				player->jumping = false;
-				kinetic->velocity.y = MAX(kinetic->velocity.y, -jumpVelocity * 0.5);
-			}
-		}
-	}
-
+	PlayerJumpLogic(scene, entity);
 	PlayerStompLogic(scene, entity);
 
-	// Assume that the player is not grounded; prove that it is later.
+	// Assume that the player is not grounded; prove that they are later.
 	player->grounded = false;
-
-	// TODO(thismarvin): Should grounded logic really be in Input?
 
 	// Calculate Net Force.
 	{
@@ -1133,6 +1148,7 @@ void PlayerPostCollisionUpdate(Scene* scene, const usize entity)
 	// Enable "Coyote Time" if the player walked off an edge.
 	if (player->groundedLastFrame && !player->grounded)
 	{
+		player->coyoteTimeActive = true;
 		player->coyoteTimer = 0;
 	}
 }
