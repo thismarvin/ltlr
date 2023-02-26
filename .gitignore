@@ -2,6 +2,7 @@
 .ccls-cache
 .idea
 .vscode
+baseline.ltlrr
 bin
 build
 build.zig
