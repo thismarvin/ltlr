@@ -2,7 +2,7 @@
 
 #include <raymath.h>
 
-void FogParticleBuildHelper(Scene* scene, const FogParticleBuilder* builder)
+static void FogParticleBuildHelper(Scene* scene, const FogParticleBuilder* builder)
 {
 	// clang-format off
 	scene->components.tags[builder->entity] =

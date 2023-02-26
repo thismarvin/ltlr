@@ -53,7 +53,7 @@ static void FogReset(void)
 	decelerationTimer = 0.0;
 }
 
-void FogBuildHelper(Scene* scene, const FogBuilder* builder)
+static void FogBuildHelper(Scene* scene, const FogBuilder* builder)
 {
 	FogReset();
 

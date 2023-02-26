@@ -1,6 +1,6 @@
 #include "lakitu.h"
 
-void LakituBuildHelper(Scene* scene, const LakituBuilder* builder)
+static void LakituBuildHelper(Scene* scene, const LakituBuilder* builder)
 {
 	const Vector2 position = (Vector2) {
 		.x = CTX_VIEWPORT_WIDTH * 0.5,

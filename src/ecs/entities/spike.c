@@ -1,6 +1,6 @@
 #include "spike.h"
 
-void SpikeBuildHelper(Scene* scene, const SpikeBuilder* builder)
+static void SpikeBuildHelper(Scene* scene, const SpikeBuilder* builder)
 {
 	Vector2 position;
 	Rectangle intramural;

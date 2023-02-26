@@ -30,7 +30,7 @@ static OnResolutionResult WalkerOnResolution(const OnResolutionParams* params)
 	};
 }
 
-void WalkerBuildHelper(Scene* scene, const WalkerBuilder* builder)
+static void WalkerBuildHelper(Scene* scene, const WalkerBuilder* builder)
 {
 	const Vector2 position = Vector2Create(builder->x, builder->y);
 	const Rectangle intramural = (Rectangle) {

@@ -1,6 +1,6 @@
 #include "block.h"
 
-void BlockBuildHelper(Scene* scene, const BlockBuilder* builder)
+static void BlockBuildHelper(Scene* scene, const BlockBuilder* builder)
 {
 	const Vector2 position = (Vector2) {
 		.x = builder->aabb.x,
