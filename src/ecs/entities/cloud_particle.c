@@ -3,27 +3,14 @@
 #include <assert.h>
 #include <raymath.h>
 
-// TODO(thismarvin): The collider no longer scales...
-static OnResolutionResult CloudParticleOnResolution(const OnResolutionParams* params)
+static void CloudParticleOnCollision(const OnCollisionParams* params)
 {
 	// If the aabb is completely within another collider then remove it.
 	if (params->overlap.width >= params->aabb.width
 		&& params->overlap.height >= params->aabb.height)
 	{
 		SceneDeferDeallocateEntity(params->scene, params->entity);
-
-		return (OnResolutionResult) {
-			.aabb = params->aabb,
-		};
 	}
-
-	// Resolve collision.
-	const Rectangle resolvedAabb =
-		ApplyResolutionPerfectly(params->aabb, params->otherAabb, params->resolution);
-
-	return (OnResolutionResult) {
-		.aabb = resolvedAabb,
-	};
 }
 
 static void CloudParticleBuildHelper(Scene* scene, const CloudParticleBuilder* builder)
@@ -66,8 +53,8 @@ static void CloudParticleBuildHelper(Scene* scene, const CloudParticleBuilder* b
 		.resolutionSchema = RESOLVE_NONE,
 		.layer = LAYER_NONE,
 		.mask = LAYER_TERRAIN,
-		.onResolution = CloudParticleOnResolution,
-		.onCollision = NULL,
+		.onResolution = NULL,
+		.onCollision = CloudParticleOnCollision,
 	};
 
 	scene->components.fleetings[builder->entity] = (CFleeting) {
