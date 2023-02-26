@@ -51,7 +51,7 @@ LevelSegmentBuilder LevelSegmentBuilderCreate(Scene* scene, const u16 type, cons
 		}
 	}
 
-	fprintf(stderr, "The given type is not a valid LevelSegmentType");
+	fprintf(stderr, "The given type is not a valid LevelSegmentType.\n");
 	exit(EXIT_FAILURE);
 }
 

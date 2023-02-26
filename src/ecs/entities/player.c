@@ -1325,7 +1325,7 @@ static void EnableAnimation(Scene* scene, usize entity, Player* player, Animatio
 		}
 
 		default: {
-			fprintf(stderr, "Unsupported Animation type");
+			fprintf(stderr, "Unsupported Animation type.\n");
 			exit(EXIT_FAILURE);
 
 			break;
