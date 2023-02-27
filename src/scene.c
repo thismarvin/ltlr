@@ -24,6 +24,15 @@
 	#define RECORDING_SIZE ((usize)1 * 60 * 60 * 60)
 #endif
 
+#define RUN_SYSTEM(mSystemFn, mScene, mEntities) \
+	do \
+	{ \
+		for (usize i = 0; i < (mEntities); ++i) \
+		{ \
+			mSystemFn(mScene, i); \
+		} \
+	} while (false)
+
 typedef struct
 {
 	OnDefer fn;
@@ -899,32 +908,26 @@ static void SceneUpdateDirector(Scene* self)
 
 static void SceneActionUpdate(Scene* self)
 {
-	for (usize i = 0; i < SceneGetTotalAllocatedEntities(self); ++i)
-	{
-		SFleetingUpdate(self, i);
+	// TODO(thismarvin): Should entity allocation be in-place?
 
-		SSmoothUpdate(self, i);
+	// Systems can allocate entities in-place; make sure we only iterate through the entities that
+	// existed at the beginning of the frame.
+	const usize entities = SceneGetTotalAllocatedEntities(self);
 
-		PlayerInputUpdate(self, i);
-
-		SKineticUpdate(self, i);
-
-		SCollisionUpdate(self, i);
-		SPostCollisionUpdate(self, i);
-
-		PlayerPostCollisionUpdate(self, i);
-		PlayerMortalUpdate(self, i);
-
-		FogUpdate(self, i);
-		BatteryUpdate(self, i);
-
-		SAnimationUpdate(self, i);
-
-		PlayerAnimationUpdate(self, i);
-
-		PlayerTrailUpdate(self, i);
-		PlayerShadowUpdate(self, i);
-	}
+	RUN_SYSTEM(SFleetingUpdate, self, entities);
+	RUN_SYSTEM(SSmoothUpdate, self, entities);
+	RUN_SYSTEM(SAnimationUpdate, self, entities);
+	RUN_SYSTEM(BatteryUpdate, self, entities);
+	RUN_SYSTEM(PlayerInputUpdate, self, entities);
+	/**/ RUN_SYSTEM(PlayerShadowUpdate, self, entities);
+	/**/ RUN_SYSTEM(SKineticUpdate, self, entities);
+	/****/ RUN_SYSTEM(SCollisionUpdate, self, entities);
+	/******/ RUN_SYSTEM(SPostCollisionUpdate, self, entities);
+	/********/ RUN_SYSTEM(PlayerPostCollisionUpdate, self, entities);
+	/**********/ RUN_SYSTEM(PlayerMortalUpdate, self, entities);
+	/**********/ RUN_SYSTEM(PlayerTrailUpdate, self, entities);
+	/**********/ RUN_SYSTEM(PlayerAnimationUpdate, self, entities);
+	/************/ RUN_SYSTEM(FogUpdate, self, entities);
 
 	SceneUpdateScore(self);
 	SceneCheckEndCondition(self);
@@ -1199,19 +1202,12 @@ static void RenderTargetLayer(const RenderFnParams* params)
 		}
 	}
 
-	for (usize i = 0; i < SceneGetTotalAllocatedEntities(scene); ++i)
-	{
-		// Let's manually draw the player last.
-		if (i == scene->player)
-		{
-			continue;
-		}
+	const usize entities = SceneGetTotalAllocatedEntities(scene);
 
-		SSpriteDraw(scene, i);
-		SAnimationDraw(scene, i);
-	}
+	// TODO(thismarvin): There needs to be a better way to sort draw calls...
 
-	SAnimationDraw(scene, scene->player);
+	RUN_SYSTEM(SSpriteDraw, scene, entities);
+	RUN_SYSTEM(SAnimationDraw, scene, entities);
 }
 
 static void RenderMenuInterface(const RenderFnParams* params)
@@ -1289,20 +1285,11 @@ static void RenderForegroundLayer(const RenderFnParams* params)
 
 	ClearBackground(COLOR_TRANSPARENT);
 
-	for (usize i = 0; i < SceneGetTotalAllocatedEntities(scene); ++i)
-	{
-		CloudParticleDraw(scene, i);
-	}
+	const usize entities = SceneGetTotalAllocatedEntities(scene);
 
-	for (usize i = 0; i < SceneGetTotalAllocatedEntities(scene); ++i)
-	{
-		FogParticleDraw(scene, i);
-	}
-
-	for (usize i = 0; i < SceneGetTotalAllocatedEntities(scene); ++i)
-	{
-		FogDraw(scene, i);
-	}
+	RUN_SYSTEM(CloudParticleDraw, scene, entities);
+	RUN_SYSTEM(FogParticleDraw, scene, entities);
+	RUN_SYSTEM(FogDraw, scene, entities);
 }
 
 static void RenderDebugLayer(const RenderFnParams* params)
@@ -1316,12 +1303,11 @@ static void RenderDebugLayer(const RenderFnParams* params)
 		return;
 	}
 
-	for (usize i = 0; i < SceneGetTotalAllocatedEntities(scene); ++i)
-	{
-		SDebugColliderDraw(scene, i);
-		FogDebugDraw(scene, i);
-		PlayerDebugDraw(scene, i);
-	}
+	const usize entities = SceneGetTotalAllocatedEntities(scene);
+
+	RUN_SYSTEM(SDebugColliderDraw, scene, entities);
+	RUN_SYSTEM(FogDebugDraw, scene, entities);
+	RUN_SYSTEM(PlayerDebugDraw, scene, entities);
 }
 
 static void SceneMenuDraw(Scene* self)
