@@ -100,5 +100,5 @@ void CloudParticleDraw(const Scene* scene, const usize entity)
 		.y = interpolated.y + dimension->height * 0.5F,
 	};
 
-	DrawCircleV(center, drawSize * 0.5F, COLOR_WHITE);
+	DrawPoly(center, 6, drawSize * 0.5F, 0, COLOR_WHITE);
 }
