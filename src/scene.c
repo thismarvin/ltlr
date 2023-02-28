@@ -1158,7 +1158,10 @@ static void DrawTree(const RenderFnParams* params, const Vector2 position, const
 	Rectangle source = RectangleFromRenderTexture(renderTexture);
 	source.height *= -1;
 
-	DrawTexturePro(renderTexture->texture, source, destination, VECTOR2_ZERO, 0, COLOR_WHITE);
+	if (CheckCollisionRecs(params->cameraBounds, destination))
+	{
+		DrawTexturePro(renderTexture->texture, source, destination, VECTOR2_ZERO, 0, COLOR_WHITE);
+	}
 }
 
 static void DrawTreeLayer(
