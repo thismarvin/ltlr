@@ -1200,7 +1200,19 @@ static void RenderTargetLayer(const RenderFnParams* params)
 		for (usize i = 0; i < scene->level.segmentsLength; ++i)
 		{
 			const LevelSegment* segment = &scene->level.segments[i];
-			LevelSegmentDraw(segment, &scene->atlas, offset);
+
+			const Rectangle segmentBounds = (Rectangle) {
+				.x = offset.x,
+				.y = 0,
+				.width = segment->width,
+				.height = CTX_VIEWPORT_HEIGHT,
+			};
+
+			if (CheckCollisionRecs(params->cameraBounds, segmentBounds))
+			{
+				LevelSegmentDraw(segment, &scene->atlas, offset);
+			}
+
 			offset.x += segment->width;
 		}
 	}
