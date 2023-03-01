@@ -27,6 +27,7 @@ typedef struct
 {
 	Sprite sprite;
 	Vector2 position;
+	Vector2 scale;
 	Rectangle intramural;
 	Reflection reflection;
 	Color tint;

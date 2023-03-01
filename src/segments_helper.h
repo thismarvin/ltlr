@@ -101,6 +101,7 @@
 		const AtlasDrawParams params = (AtlasDrawParams) { \
 			.sprite = (mSprite), \
 			.position = Vector2Create((mX) + offset.x, (mY) + offset.y), \
+			.scale = Vector2Create(1, 1), \
 			.intramural = (Rectangle) { 0, 0, 0, 0 }, \
 			.reflection = REFLECTION_NONE, \
 			.tint = COLOR_WHITE, \

@@ -1071,6 +1071,7 @@ static void SceneDrawScore(const Scene* self, const Vector2 position)
 		const AtlasDrawParams params = (AtlasDrawParams) {
 			.sprite = digit,
 			.position = (Vector2) { position.x + index * 14, position.y },
+			.scale = Vector2Create(1, 1),
 			.intramural = (Rectangle) { 0, 0, 0, 0 },
 			.reflection = REFLECTION_NONE,
 			.tint = COLOR_WHITE,
@@ -1101,6 +1102,7 @@ static void SceneDrawHealthBar(const Scene* self, const Vector2 position)
 		const AtlasDrawParams params = (AtlasDrawParams) {
 			.sprite = SPRITE_HEART_0000,
 			.position = myPosition,
+			.scale = Vector2Create(1, 1),
 			.intramural = intramural,
 			.reflection = REFLECTION_NONE,
 			.tint = COLOR_WHITE,
@@ -1120,6 +1122,7 @@ static void SceneDrawHealthBar(const Scene* self, const Vector2 position)
 			const AtlasDrawParams params = (AtlasDrawParams) {
 				.sprite = SPRITE_HEART_0001,
 				.position = myPosition,
+				.scale = Vector2Create(1, 1),
 				.intramural = intramural,
 				.reflection = REFLECTION_NONE,
 				.tint = COLOR_WHITE,
@@ -1238,6 +1241,7 @@ static void RenderMenuInterface(const RenderFnParams* params)
 		const AtlasDrawParams drawParams = (AtlasDrawParams) {
 			.sprite = SPRITE_LOGO,
 			.position = (Vector2) { 32, (180.0 - 112) / 2 },
+			.scale = Vector2Create(1, 1),
 			.intramural = (Rectangle) { 0, 0, 0, 0 },
 			.reflection = REFLECTION_NONE,
 			.tint = COLOR_WHITE,
