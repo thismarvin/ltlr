@@ -330,14 +330,6 @@ static RenderTexture GenerateTreeTexture(void)
 	{
 		ClearBackground(COLOR_TRANSPARENT);
 
-		static const u8 value = 240;
-		const Color gray = (Color) {
-			.r = value,
-			.g = value,
-			.b = value,
-			.a = 255,
-		};
-
 		const f32 xInitial = renderTexture.texture.width * 0.5;
 		const f32 yInitial = 3;
 		const i32 offsetInitial = 6;
@@ -373,7 +365,7 @@ static RenderTexture GenerateTreeTexture(void)
 				const Vector2 a = Vector2Create(x, y);
 				const Vector2 b = Vector2Create(x - offset, y + offset);
 				const Vector2 c = Vector2Create(x + offset, y + offset);
-				DrawTriangle(a, b, c, gray);
+				DrawTriangle(a, b, c, COLOR_WHITE);
 
 				y += 4;
 				offset += 2;
@@ -1157,9 +1149,16 @@ static void DrawTree(const RenderFnParams* params, const Vector2 position, const
 	Rectangle source = RectangleFromRenderTexture(renderTexture);
 	source.height *= -1;
 
+	const Color tint = (Color) {
+		.r = 240,
+		.g = 240,
+		.b = 240,
+		.a = 255,
+	};
+
 	if (CheckCollisionRecs(params->cameraBounds, destination))
 	{
-		DrawTexturePro(renderTexture->texture, source, destination, VECTOR2_ZERO, 0, COLOR_WHITE);
+		DrawTexturePro(renderTexture->texture, source, destination, VECTOR2_ZERO, 0, tint);
 	}
 }
 
