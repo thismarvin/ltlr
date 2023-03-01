@@ -573,7 +573,6 @@ static void PlayerOnCollision(const OnCollisionParams* params)
 
 				break;
 			}
-
 			case ENTITY_TYPE_WALKER: {
 				if (player->stompState == PLAYER_STOMP_STATE_STOMPING)
 				{
@@ -587,7 +586,6 @@ static void PlayerOnCollision(const OnCollisionParams* params)
 
 				break;
 			}
-
 			default: {
 				PlayerOnDamage(params->scene, params->entity, params->otherEntity);
 			}
@@ -608,7 +606,6 @@ static void PlayerOnCollision(const OnCollisionParams* params)
 
 			break;
 		}
-
 		case ENTITY_TYPE_SOLAR_PANEL: {
 			assert(SceneEntityHasDependencies(params->scene, params->otherEntity, TAG_SPRITE));
 
@@ -853,7 +850,6 @@ static void PlayerLateralMovementLogic(Scene* scene, const usize entity)
 
 			break;
 		}
-
 		case PLAYER_SPRINT_STATE_ACCELERATING: {
 			if (strafe == DIR_NONE)
 			{
@@ -881,7 +877,6 @@ static void PlayerLateralMovementLogic(Scene* scene, const usize entity)
 
 			break;
 		}
-
 		case PLAYER_SPRINT_STATE_TERMINAL: {
 			if ((player->sprintDirection == DIR_LEFT && strafe == DIR_RIGHT)
 				|| (player->sprintDirection == DIR_RIGHT && strafe == DIR_LEFT))
@@ -898,7 +893,6 @@ static void PlayerLateralMovementLogic(Scene* scene, const usize entity)
 
 			break;
 		}
-
 		case PLAYER_SPRINT_STATE_DECELERATING: {
 			if (strafe != DIR_NONE)
 			{
@@ -981,7 +975,6 @@ static void PlayerStompLogic(Scene* scene, const usize entity)
 
 			break;
 		}
-
 		case PLAYER_STOMP_STATE_STOMPING: {
 			if (player->groundedLastFrame)
 			{
@@ -995,7 +988,6 @@ static void PlayerStompLogic(Scene* scene, const usize entity)
 
 			break;
 		}
-
 		case PLAYER_STOMP_STATE_STUCK_IN_GROUND: {
 			player->stompTimer += CTX_DT;
 
@@ -1019,7 +1011,6 @@ static void PlayerStompLogic(Scene* scene, const usize entity)
 
 			break;
 		}
-
 		case PLAYER_STOMP_STATE_SPRINGING: {
 			if (!player->groundedLastFrame && ScenePressed(scene, handle, INPUT_BINDING_STOMP))
 			{
@@ -1280,7 +1271,6 @@ static void EnableAnimation(Scene* scene, usize entity, Player* player, Animatio
 
 			break;
 		}
-
 		case ANIMATION_PLAYER_RUN: {
 			contents = (CAnimation) {
 				.frameTimer = 0,
@@ -1296,7 +1286,6 @@ static void EnableAnimation(Scene* scene, usize entity, Player* player, Animatio
 
 			break;
 		}
-
 		case ANIMATION_PLAYER_JUMP: {
 			contents = (CAnimation) {
 				.frameTimer = 0,
@@ -1312,7 +1301,6 @@ static void EnableAnimation(Scene* scene, usize entity, Player* player, Animatio
 
 			break;
 		}
-
 		case ANIMATION_PLAYER_SPIN: {
 			contents = (CAnimation) {
 				.frameTimer = 0,
@@ -1328,7 +1316,6 @@ static void EnableAnimation(Scene* scene, usize entity, Player* player, Animatio
 
 			break;
 		}
-
 		default: {
 			fprintf(stderr, "Unsupported Animation type.\n");
 			exit(EXIT_FAILURE);
@@ -1387,7 +1374,6 @@ void PlayerAnimationUpdate(Scene* scene, const usize entity)
 
 			break;
 		}
-
 		case PLAYER_ANIMATION_STATE_RUNNING: {
 			if (player->jumping)
 			{
@@ -1408,7 +1394,6 @@ void PlayerAnimationUpdate(Scene* scene, const usize entity)
 
 			break;
 		}
-
 		case PLAYER_ANIMATION_STATE_JUMPING: {
 			if (player->grounded)
 			{
@@ -1436,7 +1421,6 @@ void PlayerAnimationUpdate(Scene* scene, const usize entity)
 
 			break;
 		}
-
 		case PLAYER_ANIMATION_STATE_STOMPING: {
 			// Speed up the animation as time goes by;
 			animation->frameDuration -= CTX_DT;
@@ -1450,7 +1434,6 @@ void PlayerAnimationUpdate(Scene* scene, const usize entity)
 
 			break;
 		}
-
 		case PLAYER_ANIMATION_STATE_RECOVERING: {
 			if (player->stompState == PLAYER_STOMP_STATE_SPRINGING)
 			{
@@ -1459,7 +1442,6 @@ void PlayerAnimationUpdate(Scene* scene, const usize entity)
 
 			break;
 		}
-
 		default: {
 			break;
 		}

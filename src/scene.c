@@ -861,7 +861,6 @@ static void SceneUpdateDirectorAction(Scene* self)
 
 			break;
 		}
-
 		case DIRECTOR_STATE_SUPERVISE: {
 			if (self->resetRequested || self->advanceStageRequested)
 			{
@@ -870,7 +869,6 @@ static void SceneUpdateDirectorAction(Scene* self)
 
 			break;
 		}
-
 		case DIRECTOR_STATE_EXIT: {
 			FaderUpdate(&self->fader);
 
@@ -898,7 +896,6 @@ static void SceneUpdateDirector(Scene* self)
 		case SCENE_STATE_MENU: {
 			break;
 		}
-
 		case SCENE_STATE_ACTION: {
 			SceneUpdateDirectorAction(self);
 			break;
@@ -989,7 +986,6 @@ void SceneUpdate(Scene* self)
 			SceneMenuUpdate(self);
 			break;
 		}
-
 		case SCENE_STATE_ACTION: {
 			SceneActionUpdate(self);
 			break;
@@ -1276,7 +1272,6 @@ static void RenderInterfaceLayer(const RenderFnParams* params)
 			RenderMenuInterface(params);
 			break;
 		}
-
 		case SCENE_STATE_ACTION: {
 			RenderActionInterface(params);
 			break;
@@ -1411,7 +1406,6 @@ void SceneDraw(Scene* self)
 			SceneMenuDraw(self);
 			break;
 		}
-
 		case SCENE_STATE_ACTION: {
 			SceneActionDraw(self);
 			break;

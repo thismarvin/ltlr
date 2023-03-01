@@ -153,7 +153,6 @@ static void ShiftBreathingPhase()
 
 			break;
 		}
-
 		case 1: {
 			for (usize i = 0; i < FOG_LUMP_TOTAL; ++i)
 			{
@@ -163,7 +162,6 @@ static void ShiftBreathingPhase()
 
 			break;
 		}
-
 		case 2: {
 			for (usize i = 0; i < FOG_LUMP_TOTAL; ++i)
 			{
@@ -181,7 +179,6 @@ static void ShiftBreathingPhase()
 
 			break;
 		}
-
 		case 3: {
 			for (usize i = 0; i < FOG_LUMP_TOTAL; ++i)
 			{

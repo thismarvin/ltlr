@@ -15,21 +15,18 @@ static void SpikeBuildHelper(Scene* scene, const SpikeBuilder* builder)
 			spriteType = SPRITE_SPIKE_0000;
 			break;
 		}
-
 		case SPIKE_ROTATE_90: {
 			position = Vector2Create(builder->x, builder->y + 2);
 			intramural = (Rectangle) { 0, 2, 3, 12 };
 			spriteType = SPRITE_SPIKE_0001;
 			break;
 		}
-
 		case SPIKE_ROTATE_180: {
 			position = Vector2Create(builder->x + 2, builder->y);
 			intramural = (Rectangle) { 2, 0, 12, 3 };
 			spriteType = SPRITE_SPIKE_0002;
 			break;
 		}
-
 		case SPIKE_ROTATE_270: {
 			position = Vector2Create(builder->x + 13, builder->y + 2);
 			intramural = (Rectangle) { 13, 2, 3, 12 };
