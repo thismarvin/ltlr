@@ -60,4 +60,4 @@ uninstall:
 
 .PHONY: @lint
 @lint:
-	-nu -c "use scripts/ci.nu; ci lint"
+	nu -c "use scripts/ci.nu; ci lint"
