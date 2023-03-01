@@ -4,7 +4,7 @@
 
 Atlas AtlasCreate(const char* path)
 {
-	static const usize length = 178;
+	static const usize length = 179;
 
 	Atlas atlas = (Atlas) {
 		.texture = LoadTexture(path),
@@ -886,6 +886,12 @@ Atlas AtlasCreate(const char* path)
 		.untrimmed = (AtlasEntryDimension) { 16, 16 },
 		.source = (Rectangle) { 0, 0, 16, 8 },
 		.destination = (Rectangle) { 206, 140, 16, 8 },
+	};
+
+	atlas.entries[SPRITE_PIXEL] = (AtlasEntry) {
+		.untrimmed = (AtlasEntryDimension) { 1, 1 },
+		.source = (Rectangle) { 0, 0, 1, 1 },
+		.destination = (Rectangle) { 504, 160, 1, 1 },
 	};
 
 	atlas.entries[SPRITE_PLAYER_JUMP_0000] = (AtlasEntry) {
