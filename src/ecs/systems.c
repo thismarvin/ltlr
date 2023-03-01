@@ -484,6 +484,7 @@ static void DrawCSprite(
 	const AtlasDrawParams params = (AtlasDrawParams) {
 		.sprite = sprite->type,
 		.position = position,
+		.scale = Vector2Create(1, 1),
 		.intramural = sprite->intramural,
 		.reflection = sprite->reflection,
 		.tint = tint,
@@ -536,6 +537,7 @@ static void DrawCAnimation(
 	const AtlasDrawParams params = (AtlasDrawParams) {
 		.sprite = ANIMATIONS[animation->type][animation->frame],
 		.position = position,
+		.scale = Vector2Create(1, 1),
 		.intramural = animation->intramural,
 		.reflection = animation->reflection,
 		.tint = tint,

@@ -33,7 +33,14 @@ void AtlasDraw(const Atlas* self, const AtlasDrawParams* params)
 		source.height = -source.height;
 	}
 
-	DrawTextureRec(self->texture, source, position, params->tint);
+	const Rectangle destination = (Rectangle) {
+		.x = position.x,
+		.y = position.y,
+		.width = entry->destination.width * params->scale.x,
+		.height = entry->destination.height * params->scale.y,
+	};
+
+	DrawTexturePro(self->texture, source, destination, VECTOR2_ZERO, 0, params->tint);
 }
 
 void AtlasDestroy(Atlas* self)
