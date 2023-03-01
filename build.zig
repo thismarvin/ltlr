@@ -1,6 +1,41 @@
 const std = @import("std");
 
-pub fn build(b: *std.build.Builder) void {
+fn getCSourceFiles(b: *std.build.Builder) !std.ArrayList([]const u8) {
+    const directory = "src";
+
+    var absolute_path = try std.fs.path.join(b.allocator, &.{ b.build_root, directory });
+
+    var iterable_directory = try std.fs.openIterableDirAbsolute(absolute_path, .{});
+
+    var walker = try iterable_directory.walk(b.allocator);
+    defer walker.deinit();
+
+    var source_files_paths = std.ArrayList([]const u8).init(b.allocator);
+
+    while (try walker.next()) |item| {
+        if (item.kind != .File) {
+            continue;
+        }
+
+        var extension = std.fs.path.extension(item.basename);
+
+        if (!std.mem.eql(u8, ".c", extension)) {
+            continue;
+        }
+
+        var partial = try b.allocator.dupe(u8, item.path);
+        var path = try std.fs.path.join(b.allocator, &.{ directory, partial });
+
+        try source_files_paths.append(path);
+    }
+
+    return source_files_paths;
+}
+
+pub fn build(b: *std.build.Builder) !void {
+    var sources = try getCSourceFiles(b);
+    defer sources.deinit();
+
     const target = b.standardTargetOptions(.{});
     const mode = b.standardReleaseOptions();
 
@@ -11,9 +46,7 @@ pub fn build(b: *std.build.Builder) void {
 
     exe.linkLibC();
 
-    exe.addCSourceFiles(&.{
-        @panic("For now, this value is auto-generated."),
-    }, &.{
+    exe.addCSourceFiles(sources.items, &.{
         "-std=c17",
         "-DPLATFORM_DESKTOP",
         "-Ivendor/raylib/src",

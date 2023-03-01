@@ -5,7 +5,6 @@
 baseline.ltlrr
 bin
 build
-build.zig
 compile_commands.json
 debug_recording.ltlrr
 lib

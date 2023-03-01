@@ -81,19 +81,16 @@ $(output): $(objects)
 @build/release: $(objects.directories)
 	@$(MAKE) -f $(self) $(output) build=release
 
-build.zig: scripts/generate.nu template.build.zig $(sources.directories)
-	nu -c "use $<; generate zig build | save -f $@"
-
 .PHONY: @zig/build
-@zig/build: build.zig
+@zig/build:
 	$(ZIG) build
 
 .PHONY: @zig/run
-@zig/run: build.zig
+@zig/run:
 	$(ZIG) build run
 
-zig-out/bin/$(BIN).exe: build.zig
-	$(ZIG) build -Dtarget=x86_64-windows-gnu -Drelease-safe=true
+zig-out/bin/$(BIN).exe:
+	$(ZIG) build -Dtarget=x86_64-windows-gnu -Drelease-fast=true
 
 .PHONY: @zig/build/windows
 @zig/build/windows: zig-out/bin/$(BIN).exe

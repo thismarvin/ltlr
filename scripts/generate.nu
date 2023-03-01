@@ -76,17 +76,3 @@ export def "compilation database" [
 
 	($"[\n($commands)\n]" | from json | to json)
 }
-
-export def "zig build" [] {
-	let template = (open template.build.zig)
-
-	let files = do {
-		(ls src/**/*.c).name
-		| each { |it| $'"($it)",' }
-		| str join "\n"
-	}
-
-	$template
-	| str replace -s '@panic("For now, this value is auto-generated."),' $files
-	| ^zig fmt --stdin
-}
