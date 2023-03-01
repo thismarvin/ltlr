@@ -110,6 +110,15 @@
 	}
 
 #define DRAW_COVER_UP(mX, mY, mColor) \
+	do \
 	{ \
-		DrawRectangle((mX) + offset.x, (mY) + offset.y, 6, 6, (mColor)); \
-	}
+		const AtlasDrawParams params = (AtlasDrawParams) { \
+			.sprite = SPRITE_PIXEL, \
+			.position = Vector2Create((mX)-0.5F + offset.x, (mY)-0.5F + offset.y), \
+			.scale = Vector2Create(7, 7), \
+			.intramural = (Rectangle) { 0, 0, 0, 0 }, \
+			.reflection = REFLECTION_NONE, \
+			.tint = (mColor), \
+		}; \
+		AtlasDraw(atlas, &params); \
+	} while (0)
