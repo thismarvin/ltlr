@@ -17,7 +17,7 @@ output := \
 	$(OUTDIR)/index.wasm \
 	$(OUTDIR)/index.data
 
-cflags.debug := -g -O0
+cflags.debug := -g -O1
 cflags.release = -Os -DNDEBUG
 
 CFLAGS ?= $(cflags.$(build))
