@@ -1008,6 +1008,11 @@ void SceneUpdate(Scene* self)
 {
 	SceneUpdateInput(self);
 
+	if (IsKeyPressed(KEY_F11))
+	{
+		ToggleFullscreen();
+	}
+
 	if (IsKeyPressed(KEY_EQUAL))
 	{
 		self->debugging = !self->debugging;
