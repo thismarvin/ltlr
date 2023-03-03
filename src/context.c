@@ -60,13 +60,13 @@ Rectangle GetMonitorResolution()
 	return monitorResolution;
 }
 
-Rectangle GetScreenResolution()
+Rectangle GetRenderResolution()
 {
 	return (Rectangle) {
 		.x = 0,
 		.y = 0,
-		.width = GetScreenWidth(),
-		.height = GetScreenHeight(),
+		.width = GetRenderWidth(),
+		.height = GetRenderHeight(),
 	};
 }
 
@@ -132,9 +132,9 @@ void RenderLayer(
 
 void DrawLayers(const RenderTexture* renderTextures, const usize renderTexturesLength)
 {
-	const Rectangle screenResolution = GetScreenResolution();
+	const Rectangle renderResolution = GetRenderResolution();
 
-	f32 zoom = CalculateZoom(CTX_VIEWPORT, screenResolution);
+	f32 zoom = CalculateZoom(CTX_VIEWPORT, renderResolution);
 
 	// TODO(thismarvin): Expose "preferIntegerScaling" option.
 	// Prefer integer scaling.
@@ -144,8 +144,8 @@ void DrawLayers(const RenderTexture* renderTextures, const usize renderTexturesL
 	const i32 height = CTX_VIEWPORT_HEIGHT * zoom;
 
 	const Rectangle destination = (Rectangle) {
-		.x = floor(screenResolution.width * 0.5),
-		.y = floor(screenResolution.height * 0.5),
+		.x = floor(renderResolution.width * 0.5),
+		.y = floor(renderResolution.height * 0.5),
 		.width = width,
 		.height = height,
 	};
