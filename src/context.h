@@ -29,8 +29,9 @@ void ContextSetTotalTime(f64 value);
 f32 ContextGetAlpha(void);
 void ContextSetAlpha(f32 value);
 
-Rectangle GetMonitorResolution(void);
-Rectangle GetRenderResolution(void);
+Rectangle GetMonitorRectangle(void);
+Rectangle GetRenderRectangle(void);
+void ToggleFullscreenShim(void);
 
 Rectangle RectangleFromRenderTexture(const RenderTexture* renderTexture);
 f32 CalculateZoom(Rectangle region, Rectangle container);

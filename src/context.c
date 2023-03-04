@@ -5,7 +5,8 @@
 static f64 totalTime;
 static f32 alpha;
 
-static Rectangle monitorResolution;
+static Rectangle monitorRectangle;
+static Rectangle previousRenderRectangle;
 
 void ContextInit(void)
 {
@@ -26,13 +27,15 @@ void ContextInit(void)
 			height = DEFAULT_WINDOW_HEIGHT;
 		}
 
-		monitorResolution = (Rectangle) {
+		monitorRectangle = (Rectangle) {
 			.x = 0,
 			.y = 0,
 			.width = width,
 			.height = height,
 		};
 	}
+
+	previousRenderRectangle = GetRenderRectangle();
 }
 
 f64 ContextGetTotalTime(void)
@@ -55,19 +58,45 @@ void ContextSetAlpha(const f32 value)
 	alpha = value;
 }
 
-Rectangle GetMonitorResolution(void)
+Rectangle GetMonitorRectangle(void)
 {
-	return monitorResolution;
+	return monitorRectangle;
 }
 
-Rectangle GetRenderResolution(void)
+Rectangle GetRenderRectangle(void)
 {
+	const Vector2 windowPosition = GetWindowPosition();
+
 	return (Rectangle) {
-		.x = 0,
-		.y = 0,
+		.x = windowPosition.x,
+		.y = windowPosition.y,
 		.width = GetRenderWidth(),
 		.height = GetRenderHeight(),
 	};
+}
+
+void ToggleFullscreenShim(void)
+{
+	// I'm probably missing something, but ToggleFullscreen's behavior is inconsistent across Linux
+	// and Windows; the following code tries to fix said issue...
+
+	if (IsWindowFullscreen())
+	{
+		ToggleFullscreen();
+
+		SetWindowPosition(previousRenderRectangle.x, previousRenderRectangle.y);
+		SetWindowSize(previousRenderRectangle.width, previousRenderRectangle.height);
+
+		return;
+	}
+
+	// Save the window's bounds so we can switch back to it later.
+	previousRenderRectangle = GetRenderRectangle();
+
+	ToggleFullscreen();
+
+	SetWindowPosition(monitorRectangle.x, monitorRectangle.y);
+	SetWindowSize(monitorRectangle.width, monitorRectangle.height);
 }
 
 Rectangle RectangleFromRenderTexture(const RenderTexture* renderTexture)
@@ -132,7 +161,7 @@ void RenderLayer(
 
 void DrawLayers(const RenderTexture* renderTextures, const usize renderTexturesLength)
 {
-	const Rectangle renderResolution = GetRenderResolution();
+	const Rectangle renderResolution = GetRenderRectangle();
 
 	f32 zoom = CalculateZoom(CTX_VIEWPORT, renderResolution);
 
