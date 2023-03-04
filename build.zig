@@ -44,6 +44,10 @@ pub fn build(b: *std.build.Builder) !void {
     exe.setTarget(target);
     exe.setBuildMode(mode);
 
+    if (exe.build_mode != .Debug) {
+        exe.strip = true;
+    }
+
     exe.linkLibC();
 
     exe.addCSourceFiles(sources.items, &.{
