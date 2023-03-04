@@ -59,6 +59,10 @@ pub fn build(b: *std.build.Builder) !void {
 
     switch (target.getOsTag()) {
         .windows => {
+            if (exe.build_mode != .Debug) {
+                exe.subsystem = .Windows;
+            }
+
             exe.addCSourceFiles(&.{
                 "vendor/raylib/src/raudio.c",
                 "vendor/raylib/src/rcore.c",
