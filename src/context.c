@@ -55,12 +55,12 @@ void ContextSetAlpha(const f32 value)
 	alpha = value;
 }
 
-Rectangle GetMonitorResolution()
+Rectangle GetMonitorResolution(void)
 {
 	return monitorResolution;
 }
 
-Rectangle GetRenderResolution()
+Rectangle GetRenderResolution(void)
 {
 	return (Rectangle) {
 		.x = 0,

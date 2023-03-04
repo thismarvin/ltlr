@@ -132,7 +132,7 @@ static void SpawnMovingParticles(Scene* scene, const usize entity)
 	SceneDefer(scene, FogParticleBuild, builder);
 }
 
-static void ShiftBreathingPhase()
+static void ShiftBreathingPhase(void)
 {
 	switch (breathingPhase)
 	{
