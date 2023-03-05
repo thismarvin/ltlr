@@ -1008,10 +1008,12 @@ void SceneUpdate(Scene* self)
 {
 	SceneUpdateInput(self);
 
+#if defined(PLATFORM_DESKTOP)
 	if (IsKeyPressed(KEY_F11))
 	{
 		ToggleFullscreenShim();
 	}
+#endif
 
 	if (IsKeyPressed(KEY_EQUAL))
 	{
