@@ -253,7 +253,35 @@ static Rectangle AdvancedCollision(const AdvancedCollisionParams* params)
 
 	const Vector2 delta = Vector2Subtract(currentPosition, previousPosition);
 
-	Rectangle simulatedAabb = params->previousAabb;
+	Rectangle aabb = params->previousAabb;
+
+	// Avoid floats and attempt to simulate collision using integers.
+	{
+		if (delta.x != 0)
+		{
+			if (delta.x > 0)
+			{
+				aabb.x = floorf(aabb.x);
+			}
+			else
+			{
+				aabb.x = ceilf(aabb.x);
+			}
+		}
+
+		if (delta.y != 0)
+		{
+			if (delta.y > 0)
+			{
+				aabb.y = floorf(aabb.y);
+			}
+			else
+			{
+				aabb.y = ceilf(aabb.y);
+			}
+		}
+	}
+
 	bool xModified = false;
 	bool yModified = false;
 
@@ -269,7 +297,7 @@ static Rectangle AdvancedCollision(const AdvancedCollisionParams* params)
 		const SimulateCollisionOnAxisParams onAxisParams = (SimulateCollisionOnAxisParams) {
 			.scene = params->scene,
 			.entity = params->entity,
-			.aabb = simulatedAabb,
+			.aabb = aabb,
 			.collider = params->collider,
 			.delta = xDelta,
 			.step = step,
@@ -278,14 +306,14 @@ static Rectangle AdvancedCollision(const AdvancedCollisionParams* params)
 
 		const SimulateCollisionOnAxisResult result = SimulateCollisionOnAxis(&onAxisParams);
 
-		simulatedAabb = result.simulatedAabb;
+		aabb = result.simulatedAabb;
 		xModified |= result.xModified;
 		yModified |= result.yModified;
 
 		// If the aabb was not resolved then fallback to its original x-position.
 		if (!xModified)
 		{
-			simulatedAabb.x = params->currentAabb.x;
+			aabb.x = params->currentAabb.x;
 		}
 	}
 
@@ -299,7 +327,7 @@ static Rectangle AdvancedCollision(const AdvancedCollisionParams* params)
 		const SimulateCollisionOnAxisParams onAxisParams = (SimulateCollisionOnAxisParams) {
 			.scene = params->scene,
 			.entity = params->entity,
-			.aabb = simulatedAabb,
+			.aabb = aabb,
 			.collider = params->collider,
 			.delta = yDelta,
 			.step = step,
@@ -308,18 +336,18 @@ static Rectangle AdvancedCollision(const AdvancedCollisionParams* params)
 
 		const SimulateCollisionOnAxisResult result = SimulateCollisionOnAxis(&onAxisParams);
 
-		simulatedAabb = result.simulatedAabb;
+		aabb = result.simulatedAabb;
 		xModified |= result.xModified;
 		yModified |= result.yModified;
 
 		// If the aabb was not resolved then fallback to its original y-position.
 		if (!yModified)
 		{
-			simulatedAabb.y = params->currentAabb.y;
+			aabb.y = params->currentAabb.y;
 		}
 	}
 
-	return simulatedAabb;
+	return aabb;
 }
 
 void SCollisionUpdate(Scene* scene, const usize entity)
