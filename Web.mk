@@ -31,7 +31,7 @@ private cflags.vendor.raylib.defines := -D_DEFAULT_SOURCE -DPLATFORM_WEB -DGRAPH
 
 cflags.vendor.raylib := -std=gnu99 $(cflags.vendor.raylib.defines) -MMD $(CFLAGS)
 
-ldflags ?= -sUSE_GLFW=3 --shell-file src/minshell.html --preload-file content $(LDFLAGS)
+ldflags ?= -sUSE_GLFW=3 -sEXPORTED_RUNTIME_METHODS=['ccall'] --shell-file src/minshell.html --preload-file content $(LDFLAGS)
 
 include Build.mk
 
