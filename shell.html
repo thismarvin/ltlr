@@ -9,13 +9,10 @@
 		<meta name="title" content="Larry the Light-bulb Redux" />
 		<meta
 			name="description"
-			content="New raylib web videogame, developed using raylib videogames library"
-		/>
-		<meta
-			name="keywords"
-			content="raylib, games, html5, programming, C, C++, library, learn, videogames"
+			content="Revisiting Larry the Light-bulb: a 2D action platformer playable on the web"
 		/>
 		<meta name="viewport" content="width=device-width" />
+		<meta name="theme-color" content="#000000" />
 
 		<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
 		<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
@@ -57,11 +54,6 @@
 				width: 100%;
 			}
 
-			p {
-				margin: 0;
-				padding: 0;
-			}
-
 			#hash {
 				position: absolute;
 				bottom: 0;
@@ -73,29 +65,25 @@
 		<script type="text/javascript" src="/FileSaver.min.js"></script>
 		<script type="text/javascript">
 			function saveFileFromMEMFSToDisk(memoryFSname, localFSname) {
-				// This can be called by C/C++ code
-				var isSafari = false; // Not supported, navigator.userAgent access is being restricted
-				//var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-				var data = FS.readFile(memoryFSname);
-				var blob;
+				const data = FS.readFile(memoryFSname);
 
-				if (isSafari)
-					blob = new Blob([data.buffer], { type: "application/octet-stream" });
-				else
-					blob = new Blob([data.buffer], { type: "application/octet-binary" });
+				const blob = new Blob([data.buffer], {
+					type: "application/octet-binary",
+				});
 
-				// NOTE: SaveAsDialog is a browser setting. For example, in Google Chrome,
-				// in Settings/Advanced/Downloads section you have a setting:
-				// 'Ask where to save each file before downloading' - which you can set true/false.
-				// If you enable this setting it would always ask you and bring the SaveAsDialog
 				saveAs(blob, localFSname);
+			}
+		</script>
+		<script type="text/javascript">
+			if ("serviceWorker" in navigator) {
+				navigator.serviceWorker.register("sw.js");
 			}
 		</script>
 	</head>
 	<body>
 		<main>
 			<section>
-				<span id="hash">2023</span>
+				<span id="hash">2023-03-06</span>
 				<canvas
 					class="emscripten"
 					id="canvas"
@@ -104,22 +92,8 @@
 				></canvas>
 			</section>
 		</main>
-		<p id="output" />
 		<script>
 			var Module = {
-				print: (function () {
-					var element = document.getElementById("output");
-					if (element) element.value = ""; // clear browser cache
-					return function (text) {
-						if (arguments.length > 1)
-							text = Array.prototype.slice.call(arguments).join(" ");
-						console.log(text);
-						if (element) {
-							element.value += text + "\n";
-							element.scrollTop = element.scrollHeight; // focus on bottom
-						}
-					};
-				})(),
 				canvas: (function () {
 					var canvas = document.getElementById("canvas");
 					return canvas;
