@@ -862,20 +862,62 @@ static void SceneMenuUpdate(Scene* self)
 		self->state = SCENE_STATE_ACTION;
 
 		// TODO(thismarvin): There should be a bespoke transition into the Action state.
+		SceneBeginFadeIn(self);
 		self->fader.easer.duration = CTX_DT * 40;
 	}
 
 	// TODO(thismarvin): The following is very hacky! Also, maybe put this in LakituUpdate?
 	{
-		CPosition* position = &self->components.positions[self->lakitu];
+		const CPosition* position = &self->components.positions[self->lakitu];
 
 		SSmoothUpdate(self, self->lakitu);
 		SKineticUpdate(self, self->lakitu);
 
-		if (position->value.x > self->bounds.width - CTX_VIEWPORT_WIDTH * 0.5)
+		if (position->value.x > self->bounds.width - CTX_VIEWPORT_WIDTH * 0.75)
 		{
-			position->value.x = CTX_VIEWPORT_WIDTH * 0.5;
-			self->components.smooths[self->lakitu].previous = position->value;
+			self->resetRequested = true;
+		}
+	}
+}
+
+static void SceneUpdateDirectorMenu(Scene* self)
+{
+	switch (self->director)
+	{
+		case DIRECTOR_STATE_ENTRANCE: {
+			FaderUpdate(&self->fader);
+
+			if (FaderIsDone(&self->fader))
+			{
+				self->director = DIRECTOR_STATE_SUPERVISE;
+			}
+
+			break;
+		}
+		case DIRECTOR_STATE_SUPERVISE: {
+			if (self->resetRequested)
+			{
+				SceneBeginFadeOut(self);
+			}
+
+			break;
+		}
+		case DIRECTOR_STATE_EXIT: {
+			FaderUpdate(&self->fader);
+
+			if (FaderIsDone(&self->fader))
+			{
+				CPosition* position = &self->components.positions[self->lakitu];
+
+				position->value.x = CTX_VIEWPORT_WIDTH * 0.5;
+				self->components.smooths[self->lakitu].previous = position->value;
+
+				self->resetRequested = false;
+
+				SceneBeginFadeIn(self);
+			}
+
+			break;
 		}
 	}
 }
@@ -927,6 +969,7 @@ static void SceneUpdateDirector(Scene* self)
 	switch (self->state)
 	{
 		case SCENE_STATE_MENU: {
+			SceneUpdateDirectorMenu(self);
 			break;
 		}
 		case SCENE_STATE_ACTION: {
@@ -1429,14 +1472,18 @@ static void SceneMenuDraw(Scene* self)
 	RenderLayer(&self->targetLayer, RenderTargetLayer, &actionCameraParams);
 	RenderLayer(&self->targetLayerBuffer, RenderTargetLayerShader, &stationaryCameraParams);
 	RenderLayer(&self->interfaceLayer, RenderInterfaceLayer, &stationaryCameraParams);
+	RenderLayer(&self->transitionLayer, RenderTransitionLayer, &stationaryCameraParams);
 
-	const RenderTexture renderTextures[4] = {
+	// clang-format off
+	const RenderTexture renderTextures[5] = {
 		self->rootLayer,
 		self->backgroundLayer,
 		self->targetLayerBuffer,
 		self->interfaceLayer,
+		self->transitionLayer,
 	};
-	DrawLayers(renderTextures, 4);
+	// clang-format on
+	DrawLayers(renderTextures, 5);
 }
 
 static void SceneActionDraw(Scene* self)
