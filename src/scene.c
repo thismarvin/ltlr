@@ -1574,7 +1574,7 @@ void SceneDestroy(Scene* self)
 #if !defined(NDEBUG)
 	// Dump player-one's input.
 	{
-		ReplayResult result = ReplayTryFromInputStream(&self->inputStreams[0]);
+		ReplayResult result = ReplayTryFromInputStream(self->seed, &self->inputStreams[0]);
 
 		if (result.type == REPLAY_RESULT_TYPE_OK)
 		{

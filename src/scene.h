@@ -114,7 +114,7 @@ struct Scene
 	Deque deferred;
 	usize frame;
 	f64 elapsedTime;
-	u64 seed;
+	u32 seed;
 	Rng rng;
 	ArenaAllocator arenaAllocator;
 	Shader dropShadow;

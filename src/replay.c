@@ -177,7 +177,7 @@ void InputStreamDestroy(InputStream* self)
 	free(self->barriers);
 }
 
-ReplayResult ReplayTryFromInputStream(const InputStream* stream)
+ReplayResult ReplayTryFromInputStream(const u32 seed, const InputStream* stream)
 {
 	if (stream->length >= stream->capacity)
 	{
@@ -197,6 +197,7 @@ ReplayResult ReplayTryFromInputStream(const InputStream* stream)
 		.type = REPLAY_RESULT_TYPE_OK,
 		.contents.ok =
 			(Replay) {
+				.seed = seed,
 				.totalBindings = totalBindings,
 				.length = length,
 				.bits = bits,
@@ -225,6 +226,16 @@ ReplayResult ReplayTryFromBytes(const u8* data, const usize size)
 	}
 	head += SIGNATURE_SIZE;
 
+	u32 seed;
+	{
+		const usize tmp = sizeof(seed);
+		memcpy(&seed, head, tmp);
+		head += tmp;
+
+		// Note that the replay stores seed using big-endian byte ordering.
+		seed = U32FromBigEndian(seed);
+	}
+
 	u8 totalBindings;
 	{
 		const usize tmp = sizeof(totalBindings);
@@ -252,6 +263,7 @@ ReplayResult ReplayTryFromBytes(const u8* data, const usize size)
 		.type = REPLAY_RESULT_TYPE_OK,
 		.contents.ok =
 			(Replay) {
+				.seed = seed,
 				.totalBindings = totalBindings,
 				.length = length,
 				.bits = bits,
@@ -266,11 +278,18 @@ void ReplayDestroy(Replay* self)
 
 ReplayBytes ReplayBytesFromReplay(const Replay* replay)
 {
+	const u32 seed = replay->seed;
 	const u8 totalBindings = replay->totalBindings;
 	const u32 length = replay->length;
 
-	const usize size =
-		sizeof(signature) + sizeof(totalBindings) + sizeof(length) + replay->bits.size;
+	// clang-format off
+	const usize size = 0
+		+ sizeof(signature)
+		+ sizeof(seed)
+		+ sizeof(totalBindings)
+		+ sizeof(length)
+		+ replay->bits.size;
+	// clang-format on
 
 	u8* data = malloc(size);
 	u8* head = data;
@@ -278,6 +297,13 @@ ReplayBytes ReplayBytesFromReplay(const Replay* replay)
 	{
 		const usize tmp = sizeof(signature);
 		memcpy(head, signature, tmp);
+		head += tmp;
+	}
+	{
+		const u32 seedButInBigEndian = U32ToBigEndian(seed);
+
+		const usize tmp = sizeof(seedButInBigEndian);
+		memcpy(head, &seedButInBigEndian, tmp);
 		head += tmp;
 	}
 	{

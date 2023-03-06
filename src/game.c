@@ -181,6 +181,8 @@ void GameRun(void)
 		exit(EXIT_FAILURE);
 	}
 
+	scene.seed = result.contents.ok.seed;
+
 	for (usize i = 0; i < result.contents.ok.length; ++i)
 	{
 		SceneUpdate(&scene);

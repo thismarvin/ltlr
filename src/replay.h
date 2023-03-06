@@ -37,6 +37,7 @@ typedef struct
 
 typedef struct
 {
+	u32 seed;
 	u8 totalBindings;
 	u32 length;
 	BitMask bits;
@@ -69,7 +70,7 @@ bool InputStreamReleased(const InputStream* self, u8 binding, usize buffer, u32 
 void InputStreamConsume(InputStream* self, u8 binding, u32 frame);
 void InputStreamDestroy(InputStream* self);
 
-ReplayResult ReplayTryFromInputStream(const InputStream* stream);
+ReplayResult ReplayTryFromInputStream(u32 seed, const InputStream* stream);
 ReplayResult ReplayTryFromBytes(const u8* data, usize size);
 void ReplayDestroy(Replay* self);
 

@@ -1,12 +1,11 @@
+*.ltlrr
 .cache
 .ccls-cache
 .idea
 .vscode
-baseline.ltlrr
 bin
 build
 compile_commands.json
-debug_recording.ltlrr
 lib
 profile
 result
