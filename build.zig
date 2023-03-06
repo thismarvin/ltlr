@@ -51,7 +51,7 @@ pub fn build(b: *std.build.Builder) !void {
     exe.linkLibC();
 
     exe.addCSourceFiles(sources.items, &.{
-        "-std=c17",
+        "-std=gnu17",
         "-DPLATFORM_DESKTOP",
         "-Ivendor/raylib/src",
         "-Ivendor/wyhash",

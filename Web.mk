@@ -25,7 +25,7 @@ CFLAGS ?= $(cflags.$(build))
 private cflags.src.warnings := -Wall -Wextra -Wpedantic
 private cflags.src.defines := -DPLATFORM_WEB
 
-cflags.src := -std=c17 $(cflags.src.warnings) $(cflags.src.defines) $(cflags.src.vendor) -MMD $(CFLAGS)
+cflags.src := -std=gnu17 $(cflags.src.warnings) $(cflags.src.defines) $(cflags.src.vendor) -MMD $(CFLAGS)
 
 private cflags.vendor.raylib.defines := -D_DEFAULT_SOURCE -DPLATFORM_WEB -DGRAPHICS_API_OPENGL_ES2
 

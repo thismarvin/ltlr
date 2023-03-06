@@ -38,12 +38,12 @@ CFLAGS ?= $(cflags.$(build))
 private cflags.src.warnings := -Wall -Wextra -Wpedantic
 private cflags.src.defines := -DPLATFORM_DESKTOP
 
-cflags.src := -std=c17 $(cflags.src.warnings) $(cflags.src.defines) $(cflags.src.vendor) -MMD -g $(CFLAGS)
+cflags.src := -std=gnu17 $(cflags.src.warnings) $(cflags.src.defines) $(cflags.src.vendor) -MMD -g $(CFLAGS)
 
 private cflags.vendor.raylib.warnings := -Wno-unused-result
 private cflags.vendor.raylib.defines := -D_DEFAULT_SOURCE -DPLATFORM_DESKTOP -DGRAPHICS_API_OPENGL_33
 
-cflags.vendor.raylib := -std=c99 $(cflags.vendor.raylib.warnings) $(cflags.vendor.raylib.defines) -MMD -g $(CFLAGS)
+cflags.vendor.raylib := -std=gnu99 $(cflags.vendor.raylib.warnings) $(cflags.vendor.raylib.defines) -MMD -g $(CFLAGS)
 
 pkgs := xau xdmcp xcb xext xrender xfixes x11 xrandr xinerama xcursor xi glfw3
 

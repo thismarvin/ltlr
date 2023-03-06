@@ -40,7 +40,7 @@ export def "compilation database" [
 	let common_arguments = do {
 		[]
 		| append 'gcc'
-		| append '-std=c17'
+		| append '-std=gnu17'
 		| append '-Wall'
 		| append '-Wextra'
 		| append '-Wpedantic'

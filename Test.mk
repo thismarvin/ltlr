@@ -1,7 +1,7 @@
 CC ?= gcc
 GPROF ?= gprof
 
-CFLAGS := -std=c17 -Wall -Wextra -Wpedantic -g -pg -Og -DPLATFORM_DESKTOP
+CFLAGS := -std=gnu17 -Wall -Wextra -Wpedantic -g -pg -Og -DPLATFORM_DESKTOP
 LDLIBS := -lm
 
 DEPS := \
