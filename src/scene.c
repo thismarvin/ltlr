@@ -17,13 +17,12 @@
 #include <string.h>
 #include <time.h>
 
-// TODO(thismarvin): Should this switch on PLATFORM instead?
-#if defined(NDEBUG) && !defined(BENCHMARKING)
-	#define RECORDING_SIZE ((usize)9)
-#else
-	// Record the last hour of input!
-	#define RECORDING_SIZE ((usize)1 * 60 * 60 * 60)
+#if defined(PLATFORM_WEB)
+	#include <emscripten/emscripten.h>
 #endif
+
+// Record the last 30 minutes of input!
+#define RECORDING_SIZE ((usize)1 * 60 * 60 * 30)
 
 #define RUN_SYSTEM(mSystemFn, mScene, mEntities) \
 	do \
@@ -1061,6 +1060,30 @@ void SceneUpdate(Scene* self)
 	if (IsKeyPressed(KEY_EQUAL))
 	{
 		self->debugging = !self->debugging;
+	}
+
+	if (IsKeyPressed(KEY_MINUS))
+	{
+		ReplayResult result = ReplayTryFromInputStream(self->seed, &self->inputStreams[0]);
+
+		if (result.type == REPLAY_RESULT_TYPE_OK)
+		{
+			Replay* replay = &result.contents.ok;
+			ReplayBytes bytes = ReplayBytesFromReplay(replay);
+
+			SaveFileData("recording.ltlrr", bytes.data, bytes.size);
+
+			ReplayBytesDestroy(&bytes);
+			ReplayDestroy(replay);
+
+#if defined(PLATFORM_WEB)
+			EM_ASM((saveFileFromMEMFSToDisk("recording.ltlrr", "recording.ltlrr");));
+#endif
+		}
+		else
+		{
+			TraceLog(LOG_ERROR, StringFromReplayError(result.contents.err));
+		}
 	}
 
 	switch (self->state)
