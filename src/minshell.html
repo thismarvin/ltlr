@@ -61,6 +61,14 @@
 				margin: 0;
 				padding: 0;
 			}
+
+			#hash {
+				position: absolute;
+				bottom: 0;
+				color: grey;
+				font-size: 12px;
+				padding: 0.5rem;
+			}
 		</style>
 		<script type="text/javascript" src="/FileSaver.min.js"></script>
 		<script type="text/javascript">
@@ -87,6 +95,7 @@
 	<body>
 		<main>
 			<section>
+				<span id="hash">2023</span>
 				<canvas
 					class="emscripten"
 					id="canvas"
