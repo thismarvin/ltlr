@@ -29,7 +29,9 @@ static f64 averageFps;
 
 static bool debugging;
 
+#if defined(PLATFORM_DESKTOP)
 static Image icon;
+#endif
 
 static Scene scene;
 
@@ -221,9 +223,11 @@ void GameRun(void)
 	SetWindowState(FLAG_VSYNC_HINT | FLAG_WINDOW_RESIZABLE);
 	SetWindowMinSize(CTX_VIEWPORT_WIDTH, CTX_VIEWPORT_HEIGHT);
 
+#if defined(PLATFORM_DESKTOP)
 	icon = LoadImage(DATADIR "content/icon.png");
 
 	SetWindowIcon(icon);
+#endif
 
 	GameInitialize();
 
@@ -246,5 +250,7 @@ void GameRun(void)
 	CloseAudioDevice();
 	CloseWindow();
 
+#if defined(PLATFORM_DESKTOP)
 	UnloadImage(icon);
+#endif
 }
