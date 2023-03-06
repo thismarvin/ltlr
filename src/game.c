@@ -192,7 +192,30 @@ void GameRun(void)
 #endif
 
 	// TODO(thismarvin): Incorporate a config file or cli options for window resolution.
+
+#if defined(PLATFORM_WEB)
+	{
+		const i32 screenWidth = EM_ASM_INT(return window.screen.width * window.devicePixelRatio);
+		const i32 screenHeight = EM_ASM_INT(return window.screen.height * window.devicePixelRatio);
+
+		const Rectangle screenRegion = (Rectangle) {
+			.x = 0,
+			.y = 0,
+			.width = screenWidth,
+			.height = screenHeight,
+		};
+
+		const f32 zoom = floorf(CalculateZoom(CTX_VIEWPORT, screenRegion));
+
+		const i32 width = CTX_VIEWPORT_WIDTH * zoom;
+		const i32 height = CTX_VIEWPORT_HEIGHT * zoom;
+
+		InitWindow(width, height, "Larry the Light-bulb Redux");
+	}
+#else
 	InitWindow(DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT, "Larry the Light-bulb Redux");
+#endif
+
 	InitAudioDevice();
 
 	SetWindowState(FLAG_VSYNC_HINT | FLAG_WINDOW_RESIZABLE);

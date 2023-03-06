@@ -15,17 +15,15 @@ void ContextInit(void)
 
 	// Calculate the monitor's resolution.
 	{
-		const int currentMonitor = GetCurrentMonitor();
+#if defined(PLATFORM_DESKTOP)
+		const i32 currentMonitor = GetCurrentMonitor();
 
-		int width = GetMonitorWidth(currentMonitor);
-		int height = GetMonitorHeight(currentMonitor);
-
-		// For every platform except desktop, the following is always true
-		if (width == 0 || height == 0)
-		{
-			width = DEFAULT_WINDOW_WIDTH;
-			height = DEFAULT_WINDOW_HEIGHT;
-		}
+		const i32 width = GetMonitorWidth(currentMonitor);
+		const i32 height = GetMonitorHeight(currentMonitor);
+#else
+		const i32 width = GetRenderWidth();
+		const i32 height = GetRenderHeight();
+#endif
 
 		monitorRectangle = (Rectangle) {
 			.x = 0,
