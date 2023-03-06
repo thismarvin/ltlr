@@ -11,7 +11,7 @@ src/raylib.h:
 	mv raylib/LICENSE .
 	mv raylib/src .
 	patch -d src < address-glfw-compile-error.patch
-	patch -d src < enable-custom-frame-control.patch
+	patch -d src < apply-custom-configuration.patch
 	$(RM) -r raylib
 
 .PHONY: @clean
