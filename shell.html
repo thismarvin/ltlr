@@ -62,8 +62,8 @@
 				padding: 0.5rem;
 			}
 		</style>
-		<script type="text/javascript" src="/FileSaver.min.js"></script>
-		<script type="text/javascript">
+		<script type="text/javascript" async src="/FileSaver.min.js"></script>
+		<script type="text/javascript" async>
 			function saveFileFromMEMFSToDisk(memoryFSname, localFSname) {
 				const data = FS.readFile(memoryFSname);
 
@@ -74,7 +74,7 @@
 				saveAs(blob, localFSname);
 			}
 		</script>
-		<script type="text/javascript">
+		<script type="text/javascript" defer>
 			if ("serviceWorker" in navigator) {
 				navigator.serviceWorker.register("sw.js");
 			}
