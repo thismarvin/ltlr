@@ -5,7 +5,7 @@ override self := $(firstword $(MAKEFILE_LIST))
 .DEFAULT_GOAL := all
 .EXTRA_PREREQS := $(MAKEFILE_LIST)
 
-nix.run.nixgl := nix run --override-input nixpkgs flake:nixpkgs github:guibou/nixGL
+nix.run.nixgl := nix run --inputs-from . github:guibou/nixGL
 
 .PHONY: all
 all: @os/linux
