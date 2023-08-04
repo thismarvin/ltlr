@@ -1,7 +1,7 @@
 // The following is yoinked from:
 // https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Offline_Service_workers
 
-const cacheName = "ltlr-2023-03-06";
+const cacheName = "ltlr-2023-08-04";
 const contentToCache = [
 	"FileSaver.min.js",
 	"android-chrome-192x192.png",
