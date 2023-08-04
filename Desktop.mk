@@ -40,15 +40,14 @@ private cflags.src.defines := -DPLATFORM_DESKTOP
 
 cflags.src := -std=gnu17 $(cflags.src.warnings) $(cflags.src.defines) $(cflags.src.vendor) -MMD -g $(CFLAGS)
 
-private cflags.vendor.raylib.warnings := -Wno-unused-result
-private cflags.vendor.raylib.defines := -D_DEFAULT_SOURCE -DPLATFORM_DESKTOP -DGRAPHICS_API_OPENGL_33
+private cflags.vendor.raylib.defines := -D_GNU_SOURCE -DPLATFORM_DESKTOP -DGRAPHICS_API_OPENGL_33
 
-cflags.vendor.raylib := -std=gnu99 $(cflags.vendor.raylib.warnings) $(cflags.vendor.raylib.defines) -MMD -g $(CFLAGS)
+cflags.vendor.raylib := -std=gnu99 $(cflags.vendor.raylib.defines) -MMD -g $(CFLAGS)
 
-pkgs := xau xdmcp xcb xext xrender xfixes x11 xrandr xinerama xcursor xi glfw3
+pkgs := glfw3
 
 LDFLAGS ?= $(shell pkg-config --libs-only-L $(pkgs))
-LDLIBS ?= -lm -lrt -ldl $(shell pkg-config --libs-only-l $(pkgs))
+LDLIBS ?= -lm -ldl -lrt $(shell pkg-config --libs-only-l $(pkgs))
 
 include Build.mk
 

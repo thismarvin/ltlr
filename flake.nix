@@ -20,17 +20,6 @@
           pkg-config
         ];
         buildInputs = with pkgs; [
-          xorg.libXau
-          xorg.libXdmcp
-          xorg.libxcb
-          xorg.libXext
-          xorg.libXrender
-          xorg.libXfixes
-          xorg.libX11
-          xorg.libXrandr
-          xorg.libXinerama
-          xorg.libXcursor
-          xorg.libXi
           glfw
         ];
         enableParallelBuilding = true;

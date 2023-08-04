@@ -73,7 +73,7 @@ pub fn build(b: *std.build.Builder) !void {
                 "vendor/raylib/src/utils.c",
             }, &.{
                 "-std=gnu99",
-                "-D_DEFAULT_SOURCE",
+                "-D_GNU_SOURCE",
                 "-DPLATFORM_DESKTOP",
                 "-DGRAPHICS_API_OPENGL_33",
                 "-Ivendor/raylib/src/external/glfw/include",
@@ -95,26 +95,15 @@ pub fn build(b: *std.build.Builder) !void {
                 "vendor/raylib/src/utils.c",
             }, &.{
                 "-std=gnu99",
-                "-D_DEFAULT_SOURCE",
+                "-D_GNU_SOURCE",
                 "-DPLATFORM_DESKTOP",
                 "-DGRAPHICS_API_OPENGL_33",
                 "-fno-sanitize=undefined",
             });
 
             exe.linkSystemLibrary("m");
-            exe.linkSystemLibrary("rt");
             exe.linkSystemLibrary("dl");
-            exe.linkSystemLibrary("Xau");
-            exe.linkSystemLibrary("Xdmcp");
-            exe.linkSystemLibrary("xcb");
-            exe.linkSystemLibrary("Xext");
-            exe.linkSystemLibrary("Xrender");
-            exe.linkSystemLibrary("Xfixes");
-            exe.linkSystemLibrary("X11");
-            exe.linkSystemLibrary("Xrandr");
-            exe.linkSystemLibrary("Xinerama");
-            exe.linkSystemLibrary("Xcursor");
-            exe.linkSystemLibrary("Xi");
+            exe.linkSystemLibrary("rt");
             exe.linkSystemLibrary("glfw");
         },
         else => {

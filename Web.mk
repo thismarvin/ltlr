@@ -22,16 +22,16 @@ cflags.release = -Os -DNDEBUG
 
 CFLAGS ?= $(cflags.$(build))
 
-private cflags.src.warnings := -Wall -Wextra -Wpedantic
+private cflags.src.warnings := -Wall -Wextra -Wpedantic -Wno-gnu-zero-variadic-macro-arguments
 private cflags.src.defines := -DPLATFORM_WEB
 
 cflags.src := -std=gnu17 $(cflags.src.warnings) $(cflags.src.defines) $(cflags.src.vendor) -MMD $(CFLAGS)
 
-private cflags.vendor.raylib.defines := -D_DEFAULT_SOURCE -DPLATFORM_WEB -DGRAPHICS_API_OPENGL_ES2
+private cflags.vendor.raylib.defines := -D_GNU_SOURCE -DPLATFORM_WEB -DGRAPHICS_API_OPENGL_ES2
 
 cflags.vendor.raylib := -std=gnu99 $(cflags.vendor.raylib.defines) -MMD $(CFLAGS)
 
-ldflags ?= -sUSE_GLFW=3 -sEXPORTED_RUNTIME_METHODS=['ccall'] --shell-file shell.html --preload-file content $(LDFLAGS)
+ldflags ?= -sUSE_GLFW=3 --shell-file shell.html --preload-file content $(LDFLAGS)
 
 include Build.mk
 
