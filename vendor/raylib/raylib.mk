@@ -10,6 +10,7 @@ src/raylib.h:
 	mv raylib/.gitignore .
 	mv raylib/LICENSE .
 	mv raylib/src .
+	patch -d src < apply-custom-configuration.patch
 	$(RM) -r raylib
 
 .PHONY: @clean
