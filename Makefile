@@ -5,8 +5,6 @@ override self := $(firstword $(MAKEFILE_LIST))
 .DEFAULT_GOAL := all
 .EXTRA_PREREQS := $(MAKEFILE_LIST)
 
-nix.run.nixgl := nix run --override-input nixpkgs nixpkgs/nixpkgs-unstable github:nix-community/nixGL
-
 .PHONY: all
 all: @os/linux
 
@@ -37,18 +35,6 @@ uninstall:
 .PHONY: @dev
 @dev:
 	$(MAKE) -f Desktop.mk @dev
-
-.PHONY: @dev/nixgl/intel
-@dev/nixgl/intel:
-	$(nix.run.nixgl)\#nixGLIntel -- $(MAKE) -f Desktop.mk @dev
-
-.PHONY: @dev/nixgl/nvidia
-@dev/nixgl/nvidia:
-	$(nix.run.nixgl)\#nixGLNvidia -- $(MAKE) -f Desktop.mk @dev
-
-.PHONY: @dev/nixgl/nvidia/bumblebee
-@dev/nixgl/nvidia/bumblebee:
-	$(nix.run.nixgl)\#nixGLNvidiaBumblebee -- $(MAKE) -f Desktop.mk @dev
 
 .PHONY: @test
 @test:
