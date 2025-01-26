@@ -14,7 +14,7 @@
     packages."${system}" = {
       ltlr = pkgs.stdenv.mkDerivation {
         pname = "ltlr";
-        version = "2023-08-04";
+        version = "2025-01-26";
         src = ./.;
         nativeBuildInputs = with pkgs; [
           pkg-config
