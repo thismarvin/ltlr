@@ -89,7 +89,7 @@ $(output): $(objects)
 	$(ZIG) build run
 
 zig-out/bin/$(BIN).exe:
-	$(ZIG) build -Dtarget=x86_64-windows-gnu -Drelease-fast=true
+	$(ZIG) build -Dtarget=x86_64-windows-gnu --release=fast
 
 .PHONY: @zig/build/windows
 @zig/build/windows: zig-out/bin/$(BIN).exe
