@@ -14,19 +14,36 @@
       x86_64-linux = let
         pkgs = nixpkgs.legacyPackages.x86_64-linux;
       in {
-        ltlr = pkgs.stdenv.mkDerivation {
-          pname = "ltlr";
-          version = "2025-01-26";
-          src = ./.;
-          nativeBuildInputs = with pkgs; [
-            pkg-config
-          ];
-          buildInputs = with pkgs; [
-            glfw
-          ];
-          enableParallelBuilding = true;
-          makeFlags = ["prefix=$(out)"];
-        };
+        ltlr = let
+          fs = pkgs.lib.fileset;
+          sourceFiles = fs.intersection (fs.gitTracked ./.) (
+            fs.unions [
+              ./content
+              ./src
+              ./vendor
+              ./Build.mk
+              ./Common.mk
+              ./Desktop.mk
+              ./Makefile
+            ]
+          );
+        in
+          pkgs.stdenv.mkDerivation {
+            pname = "ltlr";
+            version = "2025-01-26";
+            src = fs.toSource {
+              root = ./.;
+              fileset = sourceFiles;
+            };
+            nativeBuildInputs = with pkgs; [
+              pkg-config
+            ];
+            buildInputs = with pkgs; [
+              glfw
+            ];
+            enableParallelBuilding = true;
+            makeFlags = ["prefix=$(out)"];
+          };
         default = self.packages.x86_64-linux.ltlr;
       };
     };
