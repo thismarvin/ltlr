@@ -774,7 +774,7 @@ static void PlayerAccelerate(Player* player, const CKinetic* kinetic, const Dire
 		delta -= fabsf(kinetic->velocity.x);
 	}
 	else if ((direction == DIR_LEFT && kinetic->velocity.x > 0)
-			|| (direction == DIR_RIGHT && kinetic->velocity.x < 0))
+			 || (direction == DIR_RIGHT && kinetic->velocity.x < 0))
 	{
 		delta += fabsf(kinetic->velocity.x);
 	}
@@ -814,16 +814,19 @@ static void PlayerLateralMovementLogic(Scene* scene, const usize entity)
 			player->initialDirection = DIR_LEFT;
 			strafe = DIR_LEFT;
 		}
-		else if (!ScenePressing(scene, handle, INPUT_BINDING_LEFT) && ScenePressing(scene, handle, INPUT_BINDING_RIGHT))
+		else if (!ScenePressing(scene, handle, INPUT_BINDING_LEFT)
+				 && ScenePressing(scene, handle, INPUT_BINDING_RIGHT))
 		{
 			player->initialDirection = DIR_RIGHT;
 			strafe = DIR_RIGHT;
 		}
-		else if (player->initialDirection == DIR_RIGHT && ScenePressing(scene, handle, INPUT_BINDING_LEFT))
+		else if (player->initialDirection == DIR_RIGHT
+				 && ScenePressing(scene, handle, INPUT_BINDING_LEFT))
 		{
 			strafe = DIR_LEFT;
 		}
-		else if (player->initialDirection == DIR_LEFT && ScenePressing(scene, handle, INPUT_BINDING_RIGHT))
+		else if (player->initialDirection == DIR_LEFT
+				 && ScenePressing(scene, handle, INPUT_BINDING_RIGHT))
 		{
 			strafe = DIR_RIGHT;
 		}

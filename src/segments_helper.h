@@ -122,7 +122,7 @@
 	{ \
 		const AtlasDrawParams params = (AtlasDrawParams) { \
 			.sprite = SPRITE_PIXEL, \
-			.position = Vector2Create((mX)-0.5F + offset.x, (mY)-0.5F + offset.y), \
+			.position = Vector2Create((mX) - 0.5F + offset.x, (mY) - 0.5F + offset.y), \
 			.scale = Vector2Create(7, 7), \
 			.intramural = (Rectangle) { 0, 0, 0, 0 }, \
 			.reflection = REFLECTION_NONE, \

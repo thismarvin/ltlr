@@ -22,42 +22,14 @@ typedef double f64;
 #define MIN(mA, mB) (((mA) < (mB)) ? (mA) : (mB))
 #define SIGN(mA) ((mA) == 0 ? 0 : (mA) < 0 ? -1 : 1)
 
-#define VECTOR2_ZERO \
-	(Vector2) \
-	{ \
-		0.0F, 0.0F \
-	}
+#define VECTOR2_ZERO (Vector2) { 0.0F, 0.0F }
 
-#define COLOR_TRANSPARENT \
-	(Color) \
-	{ \
-		0, 0, 0, 0 \
-	}
-#define COLOR_BLACK \
-	(Color) \
-	{ \
-		0, 0, 0, 255 \
-	}
-#define COLOR_WHITE \
-	(Color) \
-	{ \
-		255, 255, 255, 255 \
-	}
-#define COLOR_RED \
-	(Color) \
-	{ \
-		255, 0, 0, 255 \
-	}
-#define COLOR_GREEN \
-	(Color) \
-	{ \
-		0, 255, 0, 255 \
-	}
-#define COLOR_BLUE \
-	(Color) \
-	{ \
-		0, 0, 255, 255 \
-	}
+#define COLOR_TRANSPARENT (Color) { 0, 0, 0, 0 }
+#define COLOR_BLACK (Color) { 0, 0, 0, 255 }
+#define COLOR_WHITE (Color) { 255, 255, 255, 255 }
+#define COLOR_RED (Color) { 255, 0, 0, 255 }
+#define COLOR_GREEN (Color) { 0, 255, 0, 255 }
+#define COLOR_BLUE (Color) { 0, 0, 255, 255 }
 
 typedef enum
 {
