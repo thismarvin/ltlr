@@ -42,8 +42,8 @@ uninstall:
 
 .PHONY: @format
 @format:
-	nu -c "use scripts/ci.nu; ci format"
+	nu scripts/ci.nu format
 
 .PHONY: @lint
 @lint:
-	nu -c "use scripts/ci.nu; ci lint"
+	nu scripts/ci.nu lint

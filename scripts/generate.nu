@@ -24,7 +24,7 @@ def get-input-output [output_directory: string] {
 	($input | merge $output)
 }
 
-export def "compilation database" [
+export def 'main compilation database' [
 	--out-dir: string
 ] {
 	let output_directory = do {
@@ -76,3 +76,5 @@ export def "compilation database" [
 
 	($"[\n($commands)\n]" | from json | to json)
 }
+
+export def main [] {}

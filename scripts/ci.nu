@@ -1,37 +1,30 @@
-export def format [
+def get-source-files []: nothing -> list<path> {
+	[]
+	| append (ls src/**/*.h).name
+	| append (ls src/**/*.c).name
+	| append (ls tests/**/*.h).name
+	| append (ls tests/**/*.c).name
+}
+
+export def 'main format' [
 	--check
 ] {
-	let inputs = do {
-		[]
-		| append (ls src/**/*.h).name
-		| append (ls src/**/*.c).name
-		| append (ls tests/**/*.h).name
-		| append (ls tests/**/*.c).name
-	}
+	let inputs = get-source-files
 
 	if ($check) {
-		^clang-format -n -Werror $inputs
+		^clang-format -n -Werror ...$inputs
 	} else {
-		^clang-format -i $inputs
+		^clang-format -i ...$inputs
 	}
 }
 
-export def lint [
-	--check
-] {
+export def 'main lint' [] {
 	# clang-tidy only works if a compilation database exists.
-	do {
-		use generate.nu
-		generate compilation database | save -f compile_commands.json
-	}
+	nu scripts/generate.nu compilation database | save -f compile_commands.json
 
-	let inputs = do {
-		[]
-		| append (ls src/**/*.h).name
-		| append (ls src/**/*.c).name
-		| append (ls tests/**/*.h).name
-		| append (ls tests/**/*.c).name
-	}
+	let inputs = get-source-files
 
-	^clang-tidy $inputs
+	^clang-tidy ...$inputs
 }
+
+export def main [] {}

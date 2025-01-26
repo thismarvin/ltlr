@@ -13,7 +13,7 @@ jobs:
     - uses: cachix/install-nix-action@v22
       with:
         github_access_token: ${{ secrets.GITHUB_TOKEN }}
-    - run: nix develop -c nu -c "use scripts/ci.nu; ci format --check"
+    - run: nix develop -c nu scripts/ci.nu format --check
   lint:
     runs-on: ubuntu-latest
     steps:
@@ -21,7 +21,7 @@ jobs:
     - uses: cachix/install-nix-action@v22
       with:
         github_access_token: ${{ secrets.GITHUB_TOKEN }}
-    - run: nix develop -c nu -c "use scripts/ci.nu; ci lint"
+    - run: nix develop -c nu scripts/ci.nu lint
   build:
     runs-on: ubuntu-latest
     steps:
