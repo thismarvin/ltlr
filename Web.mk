@@ -31,7 +31,7 @@ private cflags.vendor.raylib.defines := -D_GNU_SOURCE -DPLATFORM_WEB -DGRAPHICS_
 
 cflags.vendor.raylib := -std=gnu99 $(cflags.vendor.raylib.defines) -MMD $(CFLAGS)
 
-ldflags ?= -sUSE_GLFW=3 --shell-file shell.html --preload-file content $(LDFLAGS)
+ldflags ?= -sMINIFY_HTML=0 -sUSE_GLFW=3 --shell-file shell.html --preload-file content $(LDFLAGS)
 
 include Build.mk
 
