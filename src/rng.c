@@ -27,5 +27,5 @@ i32 RngNextRange(Rng* self, const i32 minimum, const i32 maximum)
 
 	const f64 step = RngNextF64(self);
 
-	return minimum + (maximum - minimum) * step;
+	return minimum + ((maximum - minimum) * step);
 }

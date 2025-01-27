@@ -1,5 +1,11 @@
 #include "block.h"
 
+#include "../../scene.h"
+#include "../components.h"
+
+#include <raylib.h>
+#include <stdlib.h>
+
 static void BlockBuildHelper(Scene* scene, const BlockBuilder* builder)
 {
 	const Vector2 position = (Vector2) {

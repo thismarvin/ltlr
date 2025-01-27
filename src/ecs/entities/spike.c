@@ -1,5 +1,13 @@
 #include "spike.h"
 
+#include "../../common.h"
+#include "../../scene.h"
+#include "../../sprites_generated.h"
+#include "../components.h"
+
+#include <raylib.h>
+#include <stdlib.h>
+
 static void SpikeBuildHelper(Scene* scene, const SpikeBuilder* builder)
 {
 	Vector2 position;

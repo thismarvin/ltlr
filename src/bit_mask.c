@@ -1,6 +1,7 @@
 #include "bit_mask.h"
 
 #include <math.h>
+#include <stdbool.h>
 #include <stdlib.h>
 
 BitMask BitMaskCreate(const usize width, const usize height)
@@ -24,7 +25,7 @@ bool BitMaskGet(const BitMask* self, const i32 x, const i32 y)
 		return false;
 	}
 
-	const usize index = y * self->width + x;
+	const usize index = (y * self->width) + x;
 	const usize container = index / BIT_MASK_ENTRY_TOTAL_BITS;
 
 	const BIT_MASK_ENTRY_TYPE target = self->contents[container];
@@ -42,7 +43,7 @@ void BitMaskSet(BitMask* self, const i32 x, const i32 y, const bool value)
 		return;
 	}
 
-	const usize index = y * self->width + x;
+	const usize index = (y * self->width) + x;
 	const usize container = index / BIT_MASK_ENTRY_TOTAL_BITS;
 
 	const BIT_MASK_ENTRY_TYPE target = self->contents[container];

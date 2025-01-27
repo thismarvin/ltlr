@@ -3,6 +3,8 @@
 #include "common.h"
 #include "sprites_generated.h"
 
+#include <raylib.h>
+
 typedef struct
 {
 	u16 width;

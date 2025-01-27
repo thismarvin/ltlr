@@ -1,5 +1,11 @@
 #include "quadtree.h"
 
+#include "../collections/deque.h"
+
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdlib.h>
+
 typedef struct
 {
 	Region aabb;

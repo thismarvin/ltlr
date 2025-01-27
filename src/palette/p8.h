@@ -2,6 +2,8 @@
 
 #include "../common.h"
 
+#include <raylib.h>
+
 #define P8_PALETTE_LENGTH (16)
 
 #define P8_BLACK (Color) { 0, 0, 0, 255 }

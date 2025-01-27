@@ -3,6 +3,8 @@
 #include "atlas.h"
 #include "common.h"
 
+#include <raylib.h>
+
 #define MAX_LEVEL_SEGMENTS (8)
 
 typedef struct Scene Scene;

@@ -1,5 +1,9 @@
 #include "common.h"
 
+#include "../../common.h"
+
+#include <raylib.h>
+
 Rectangle ApplyResolutionPerfectly(
 	const Rectangle aabb,
 	const Rectangle otherAabb,

@@ -1,6 +1,7 @@
 #pragma once
 
-#include "common.h"
+#include "../../common.h"
+#include "../../level.h"
 
 #define PLAYER_MAX_HIT_POINTS (5)
 

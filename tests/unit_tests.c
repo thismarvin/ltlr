@@ -2,6 +2,7 @@
 #include "../src/utils/quadtree.h"
 #include "testing.h"
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
 

@@ -1,5 +1,10 @@
 #include "atlas.h"
 
+#include "common.h"
+
+#include <raylib.h>
+#include <stdlib.h>
+
 void AtlasDraw(const Atlas* self, const AtlasDrawParams* params)
 {
 	const AtlasEntry* entry = &self->entries[params->sprite];

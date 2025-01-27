@@ -4,6 +4,7 @@
 
 #include "bit_mask.h"
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #define MUST_USE __attribute__((warn_unused_result))

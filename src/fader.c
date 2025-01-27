@@ -1,8 +1,13 @@
 #include "fader.h"
 
+#include "common.h"
 #include "context.h"
+#include "easing.h"
 
+#include <math.h>
+#include <raylib.h>
 #include <raymath.h>
+#include <stdbool.h>
 
 Fader FaderDefault(void)
 {

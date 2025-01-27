@@ -1,7 +1,6 @@
 #pragma once
 
 #include "./collections/deque.h"
-#include "common.h"
 
 typedef void (*OnRaise)(const void*);
 

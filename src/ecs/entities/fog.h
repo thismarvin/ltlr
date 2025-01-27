@@ -1,6 +1,7 @@
 #pragma once
 
-#include "common.h"
+#include "../../common.h"
+#include "../../level.h"
 
 #define FOG_LETHAL_DISTANCE (CTX_VIEWPORT_WIDTH * 0.75)
 

@@ -1,7 +1,11 @@
 #include "input.h"
 
+#include "common.h"
 #include "context.h"
 
+#include <raylib.h>
+#include <stdbool.h>
+#include <stdlib.h>
 #include <string.h>
 
 static void KeyboardBindingConsume(KeyboardBinding* binding)

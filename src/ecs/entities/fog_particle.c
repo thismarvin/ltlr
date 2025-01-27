@@ -1,5 +1,11 @@
 #include "fog_particle.h"
 
+#include "../../common.h"
+#include "../../context.h"
+#include "../../scene.h"
+#include "../components.h"
+
+#include <raylib.h>
 #include <raymath.h>
 
 static void FogParticleBuildHelper(Scene* scene, const FogParticleBuilder* builder)
@@ -69,11 +75,11 @@ void FogParticleDraw(const Scene* scene, const usize entity)
 	const Vector2 interpolated = Vector2Lerp(smooth->previous, position->value, ContextGetAlpha());
 
 	const Vector2 center = (Vector2) {
-		.x = interpolated.x + dimension->width * 0.5F,
-		.y = interpolated.y + dimension->height * 0.5F,
+		.x = interpolated.x + (dimension->width * 0.5F),
+		.y = interpolated.y + (dimension->height * 0.5F),
 	};
 
-	const u32 sidesCount = 4 + entity % 3;
+	const u32 sidesCount = 4 + (entity % 3);
 
 	f32 rotation = SceneGetElapsedTime(scene) * 100;
 

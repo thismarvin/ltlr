@@ -1,7 +1,10 @@
 #include "collider.h"
 
 #include "../common.h"
+#include "line_segment.h"
+#include "polygon.h"
 
+#include <raylib.h>
 #include <raymath.h>
 
 Vector2 RectangleRectangleResolution(const Rectangle a, const Rectangle b)

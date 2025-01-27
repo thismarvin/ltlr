@@ -1,5 +1,8 @@
 #include "common.h"
 
+#include <raylib.h>
+#include <stdbool.h>
+
 Vector2 Vector2Create(const f32 x, const f32 y)
 {
 	return (Vector2) {

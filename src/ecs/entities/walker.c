@@ -1,6 +1,14 @@
 #include "walker.h"
 
+#include "../../animation.h"
+#include "../../common.h"
+#include "../../scene.h"
+#include "../components.h"
+#include "common.h"
+
 #include <assert.h>
+#include <raylib.h>
+#include <stdlib.h>
 
 static OnResolutionResult WalkerOnResolution(const OnResolutionParams* params)
 {

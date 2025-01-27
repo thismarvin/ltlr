@@ -1,8 +1,11 @@
 // This file was auto-generated; any changes you make may be overwritten.
 
+#include "atlas.h"
+#include "common.h"
 #include "level.h"
 #include "segments_generated.h"
 
+#include <raylib.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -40,10 +43,11 @@ LevelSegmentBuilder LevelSegmentBuilderCreate(Scene* scene, const u16 type, cons
 		case 9: {
 			return LevelSegmentBuilderCreate_starter_1(scene, offset);
 		}
+		default: {
+			fprintf(stderr, "The given type is not a valid LevelSegmentType.\n");
+			exit(EXIT_FAILURE);
+		}
 	}
-
-	fprintf(stderr, "The given type is not a valid LevelSegmentType.\n");
-	exit(EXIT_FAILURE);
 }
 
 void LevelSegmentDraw(const LevelSegment* self, const Atlas* atlas, const Vector2 offset)
@@ -89,6 +93,10 @@ void LevelSegmentDraw(const LevelSegment* self, const Atlas* atlas, const Vector
 		case 9: {
 			LevelSegmentDraw_starter_1(atlas, offset);
 			break;
+		}
+		default: {
+			fprintf(stderr, "The given type is not a valid LevelSegmentType.\n");
+			exit(EXIT_FAILURE);
 		}
 	}
 }

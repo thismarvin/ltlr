@@ -1,5 +1,8 @@
 #include "events.h"
 
+#include "./collections/deque.h"
+#include "common.h"
+
 EventHandler EventHandlerCreate(void)
 {
 	return (EventHandler) {
@@ -9,6 +12,7 @@ EventHandler EventHandlerCreate(void)
 
 void EventHandlerSubscribe(EventHandler* self, const OnRaise onRaise)
 {
+	// NOLINTNEXTLINE
 	DequePushFront(&self->listeners, &onRaise);
 }
 

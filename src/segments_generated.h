@@ -2,7 +2,10 @@
 
 #pragma once
 
+#include "atlas.h"
 #include "level.h"
+
+#include <raylib.h>
 
 LevelSegmentBuilder LevelSegmentBuilderCreate_battery_0(Scene* scene, Vector2 offset);
 LevelSegmentBuilder LevelSegmentBuilderCreate_battery_1(Scene* scene, Vector2 offset);

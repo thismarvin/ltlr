@@ -1,6 +1,9 @@
 #pragma once
 
-#include "common.h"
+#include "../../common.h"
+#include "../../level.h"
+
+#include <raylib.h>
 
 typedef struct
 {

@@ -1,9 +1,12 @@
 #include "sat.h"
 
 #include "../common.h"
+#include "polygon.h"
 
 #include <float.h>
+#include <raylib.h>
 #include <raymath.h>
+#include <stdbool.h>
 
 typedef struct
 {
@@ -98,8 +101,8 @@ static OverlapInformation CalculateOverlap(const Polygon a, const Polygon b)
 static Vector2 RectangleGetCenter(const Rectangle rectangle)
 {
 	return (Vector2) {
-		.x = rectangle.x + rectangle.width * 0.5,
-		.y = rectangle.y + rectangle.height * 0.5,
+		.x = rectangle.x + (rectangle.width * 0.5),
+		.y = rectangle.y + (rectangle.height * 0.5),
 	};
 }
 

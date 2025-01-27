@@ -1,21 +1,43 @@
 #include "scene.h"
 
-#include "./ecs/entities.h"
+#include "./collections/deque.h"
+#include "./ecs/components.h"
+#include "./ecs/entities/battery.h"
+#include "./ecs/entities/block.h"
+#include "./ecs/entities/cloud_particle.h"
+#include "./ecs/entities/fog.h"
+#include "./ecs/entities/fog_particle.h"
+#include "./ecs/entities/lakitu.h"
+#include "./ecs/entities/player.h"
 #include "./ecs/systems.h"
 #include "./palette/p8.h"
+#include "./utils/arena_allocator.h"
+#include "atlas.h"
 #include "bit_mask.h"
+#include "common.h"
 #include "context.h"
+#include "easing.h"
+#include "fader.h"
 #include "game.h"
+#include "input.h"
+#include "level.h"
 #include "replay.h"
 #include "rng.h"
 #include "scene_generated.h"
 #include "shaders.h"
+#include "sprites_generated.h"
 
 #include <assert.h>
+#include <math.h>
+#include <raylib.h>
 #include <raymath.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
-#include <time.h>
+
+#if defined(NDEBUG)
+	#include <time.h>
+#endif
 
 #if defined(PLATFORM_WEB)
 	#include <emscripten/emscripten.h>
@@ -584,16 +606,18 @@ static void ScenePlantTrees(Scene* self)
 
 	for (usize i = 0; i < total; ++i)
 	{
-		const f32 x = -spacing + (i32)(spacing * i) + -48 + RngNextRange(&self->rng, 0, 6 + 1) * 16;
-		const f32 y = 8 + RngNextRange(&self->rng, 0, 4 + 1) * 16;
+		const f32 x =
+			-spacing + (i32)(spacing * i) + -48 + (RngNextRange(&self->rng, 0, 6 + 1) * 16);
+		const f32 y = 8 + (RngNextRange(&self->rng, 0, 4 + 1) * 16);
 		const Vector2 position = Vector2Create(x, y);
 		DEQUE_PUSH_BACK(&self->treePositionsBack, Vector2, position);
 	}
 
 	for (usize i = 0; i < total; ++i)
 	{
-		const f32 x = -spacing + (i32)(spacing * i) + -32 + RngNextRange(&self->rng, 0, 4 + 1) * 16;
-		const f32 y = 8 + 8 + RngNextRange(&self->rng, 0, 4 + 1) * 16;
+		const f32 x =
+			-spacing + (i32)(spacing * i) + -32 + (RngNextRange(&self->rng, 0, 4 + 1) * 16);
+		const f32 y = 8 + 8 + (RngNextRange(&self->rng, 0, 4 + 1) * 16);
 		const Vector2 position = Vector2Create(x, y);
 		DEQUE_PUSH_BACK(&self->treePositionsFront, Vector2, position);
 	}
@@ -1138,8 +1162,8 @@ static Rectangle SceneCalculateActionCameraBounds(const Scene* self, const usize
 
 	// Camera x-axis collision.
 	{
-		const f32 min = RectangleLeft(self->bounds) + CTX_VIEWPORT_WIDTH * 0.5;
-		const f32 max = RectangleRight(self->bounds) - CTX_VIEWPORT_WIDTH * 0.5;
+		const f32 min = RectangleLeft(self->bounds) + (CTX_VIEWPORT_WIDTH * 0.5);
+		const f32 max = RectangleRight(self->bounds) - (CTX_VIEWPORT_WIDTH * 0.5);
 
 		cameraPosition.x = MAX(min, cameraPosition.x);
 		cameraPosition.x = MIN(max, cameraPosition.x);
@@ -1147,16 +1171,16 @@ static Rectangle SceneCalculateActionCameraBounds(const Scene* self, const usize
 
 	// Camera y-axis collision.
 	{
-		const f32 min = RectangleTop(self->bounds) + CTX_VIEWPORT_HEIGHT * 0.5;
-		const f32 max = RectangleBottom(self->bounds) - CTX_VIEWPORT_HEIGHT * 0.5;
+		const f32 min = RectangleTop(self->bounds) + (CTX_VIEWPORT_HEIGHT * 0.5);
+		const f32 max = RectangleBottom(self->bounds) - (CTX_VIEWPORT_HEIGHT * 0.5);
 
 		cameraPosition.y = MAX(min, cameraPosition.y);
 		cameraPosition.y = MIN(max, cameraPosition.y);
 	}
 
 	return (Rectangle) {
-		.x = cameraPosition.x - CTX_VIEWPORT_WIDTH * 0.5,
-		.y = cameraPosition.y - CTX_VIEWPORT_HEIGHT * 0.5,
+		.x = cameraPosition.x - (CTX_VIEWPORT_WIDTH * 0.5),
+		.y = cameraPosition.y - (CTX_VIEWPORT_HEIGHT * 0.5),
 		.width = CTX_VIEWPORT_WIDTH,
 		.height = CTX_VIEWPORT_HEIGHT,
 	};
@@ -1172,7 +1196,7 @@ static void SceneDrawScore(const Scene* self, const Vector2 position)
 
 		const AtlasDrawParams params = (AtlasDrawParams) {
 			.sprite = digit,
-			.position = (Vector2) { position.x + index * 14, position.y },
+			.position = (Vector2) { position.x + (index * 14), position.y },
 			.scale = Vector2Create(1, 1),
 			.intramural = (Rectangle) { 0, 0, 0, 0 },
 			.reflection = REFLECTION_NONE,
@@ -1197,7 +1221,7 @@ static void SceneDrawHealthBar(const Scene* self, const Vector2 position)
 	for (usize i = 0; i < totalHearts; ++i)
 	{
 		const Vector2 myPosition = (Vector2) {
-			.x = position.x + i * 15,
+			.x = position.x + (i * 15),
 			.y = position.y,
 		};
 
@@ -1219,7 +1243,7 @@ static void SceneDrawHealthBar(const Scene* self, const Vector2 position)
 
 		for (usize i = hearts; i < totalHearts; ++i)
 		{
-			const Vector2 myPosition = (Vector2) { .x = position.x + i * 15, .y = position.y };
+			const Vector2 myPosition = (Vector2) { .x = position.x + (i * 15), .y = position.y };
 
 			const AtlasDrawParams params = (AtlasDrawParams) {
 				.sprite = SPRITE_HEART_0001,
@@ -1250,7 +1274,7 @@ static void DrawTree(const RenderFnParams* params, const Vector2 position, const
 	const f32 partialDomain = domain * scrollFactor;
 	const f32 offset = partialDomain * progress;
 
-	const f32 x = -renderTexture->texture.width * 0.5 + position.x - offset;
+	const f32 x = (-renderTexture->texture.width * 0.5) + position.x - offset;
 	const f32 y = position.y;
 
 	const Rectangle destination = (Rectangle) {
@@ -1396,7 +1420,7 @@ static void RenderMenuInterface(const RenderFnParams* params)
 
 static void RenderActionInterface(const RenderFnParams* params)
 {
-	static const usize healthBarWidth = 15 * PLAYER_MAX_HIT_POINTS + 4;
+	static const usize healthBarWidth = (15 * PLAYER_MAX_HIT_POINTS) + 4;
 	static const usize padding = 4;
 
 	const Scene* scene = (Scene*)params->scene;

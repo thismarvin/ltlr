@@ -1,6 +1,11 @@
 // This file was auto-generated; any changes you make may be overwritten.
 
 #include "atlas.h"
+#include "common.h"
+#include "sprites_generated.h"
+
+#include <raylib.h>
+#include <stdlib.h>
 
 Atlas AtlasCreate(const char* path)
 {

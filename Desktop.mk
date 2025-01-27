@@ -95,7 +95,7 @@ zig-out/bin/$(BIN).exe:
 @zig/build/windows: zig-out/bin/$(BIN).exe
 
 compile_commands.json: scripts/generate.nu $(sources.directories)
-	nu -c "use $<; generate compilation database --out-dir $(OUTDIR) | save -f $@"
+	nu scripts/generate.nu compilation database --out-dir $(OUTDIR) > $@
 
 .PHONY: @dev
 @dev: compile_commands.json @build/debug

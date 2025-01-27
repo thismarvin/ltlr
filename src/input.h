@@ -2,6 +2,9 @@
 
 #include "common.h"
 
+#include <raylib.h>
+#include <stdbool.h>
+
 typedef struct
 {
 	char* m_name;

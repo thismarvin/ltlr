@@ -3,6 +3,8 @@
 #include "../common.h"
 #include "line_segment.h"
 
+#include <raylib.h>
+
 typedef struct
 {
 	Vector2* vertices;

@@ -2,13 +2,19 @@
 
 #include "common.h"
 #include "context.h"
+#include "level.h"
 #include "raylib.h"
-#include "replay.h"
 #include "scene.h"
 
 #include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <stdbool.h>
+
+#if defined(BENCHMARKING)
+	#include "replay.h"
+
+	#include <stdio.h>
+	#include <stdlib.h>
+#endif
 
 #if defined(PLATFORM_WEB)
 	#include <emscripten/emscripten.h>
@@ -97,7 +103,13 @@ static void DrawDebugInformation(void)
 			.b = 0,
 			.a = 150,
 		};
-		DrawRectangle(x, y, textWidth + xPadding * 2, fontSize + yPadding * 2 - 1, backgroundColor);
+		DrawRectangle(
+			x,
+			y,
+			textWidth + (xPadding * 2),
+			fontSize + (yPadding * 2) - 1,
+			backgroundColor
+		);
 
 		DrawText(text, x + xPadding + 2, y + yPadding + 2, fontSize, COLOR_BLACK);
 		DrawText(text, x + xPadding, y + yPadding, fontSize, COLOR_WHITE);

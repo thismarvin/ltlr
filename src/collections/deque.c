@@ -1,7 +1,9 @@
 #include "deque.h"
 
 #include <assert.h>
+#include <stdbool.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
 
 #define DEQUE_RESIZE_FACTOR (2)
@@ -9,7 +11,7 @@
 // An internal get: used for indexing the internal m_data array.
 static void* Get(const Deque* deque, const size_t index)
 {
-	return (uint8_t*)deque->m_data + deque->m_dataSize * index;
+	return (uint8_t*)deque->m_data + (deque->m_dataSize * index);
 }
 
 // An internal set: used for indexing the internal m_data array.
@@ -23,7 +25,7 @@ static void Resize(Deque* self)
 {
 	uint8_t* oldData = self->m_data;
 	const size_t oldCapacity = self->m_capacity;
-	const void* tailChunkStart = oldData + (self->m_tailIndex + 1) * self->m_dataSize;
+	const void* tailChunkStart = oldData + ((self->m_tailIndex + 1) * self->m_dataSize);
 	const size_t tailChunkSize = (self->m_capacity - (self->m_tailIndex + 1)) * self->m_dataSize;
 	const void* headChunkStart = oldData;
 	const size_t headChunkSize = (self->m_tailIndex + 1) * self->m_dataSize;

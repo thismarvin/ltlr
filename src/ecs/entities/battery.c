@@ -1,6 +1,13 @@
 #include "battery.h"
 
+#include "../../common.h"
+#include "../../scene.h"
+#include "../../sprites_generated.h"
+#include "../components.h"
+
 #include <math.h>
+#include <raylib.h>
+#include <stdlib.h>
 
 static void BatteryBuildHelper(Scene* scene, const BatteryBuilder* builder)
 {

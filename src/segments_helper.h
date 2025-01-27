@@ -1,5 +1,9 @@
 #pragma once
 
+#include "./ecs/components.h"
+#include "./utils/arena_allocator.h"
+#include "scene.h"
+
 #define CREATE_SOLID_BLOCK(mX, mY, mWidth, mHeight) \
 	do \
 	{ \

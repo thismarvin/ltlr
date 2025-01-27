@@ -11,6 +11,9 @@
 #include "replay.h"
 #include "rng.h"
 
+#include <raylib.h>
+#include <stdbool.h>
+
 #define TOTAL_INPUT_BINDINGS (4)
 
 #define MAX_PLAYERS (4)

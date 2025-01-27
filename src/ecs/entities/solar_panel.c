@@ -1,5 +1,13 @@
 #include "solar_panel.h"
 
+#include "../../common.h"
+#include "../../scene.h"
+#include "../../sprites_generated.h"
+#include "../components.h"
+
+#include <raylib.h>
+#include <stdlib.h>
+
 static void SolarPanelBuildHelper(Scene* scene, const SolarPanelBuilder* builder)
 {
 	const Rectangle intramural = (Rectangle) {

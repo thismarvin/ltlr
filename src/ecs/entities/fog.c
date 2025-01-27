@@ -1,10 +1,19 @@
 #include "fog.h"
 
+#include "../../common.h"
+#include "../../context.h"
 #include "../../palette/p8.h"
+#include "../../rng.h"
+#include "../../scene.h"
+#include "../../utils/arena_allocator.h"
+#include "../components.h"
 #include "fog_particle.h"
 
 #include <assert.h>
+#include <math.h>
+#include <raylib.h>
 #include <raymath.h>
+#include <stdbool.h>
 
 #define FOG_HEIGHT (CTX_VIEWPORT_HEIGHT * 2)
 #define FOG_INITIAL_POSITION \
@@ -109,8 +118,8 @@ static void SpawnMovingParticles(Scene* scene, const usize entity)
 
 	const Vector2 spawnPosition = (Vector2) {
 		.x = position->value.x + (baseRadius * 0.5F),
-		.y = position->value.y + FOG_HEIGHT * 0.25F
-			 + RngNextRange(&scene->rng, 0, FOG_HEIGHT * 0.5F + 1),
+		.y = position->value.y + (FOG_HEIGHT * 0.25F)
+			 + RngNextRange(&scene->rng, 0, (FOG_HEIGHT * 0.5F) + 1),
 	};
 
 	const Vector2 velocity = (Vector2) {
@@ -188,6 +197,10 @@ static void ShiftBreathingPhase(void)
 
 			break;
 		}
+		default: {
+			assert(false && "unreachable");
+			break;
+		};
 	}
 
 	breathingPhase = (breathingPhase + 1) % 4;
@@ -299,7 +312,7 @@ void FogDraw(const Scene* scene, const usize entity)
 	for (usize i = 0; i < FOG_LUMP_TOTAL; ++i)
 	{
 		const f32 radius = Lerp(lumpRadii[i], lumpTargetRadii[i], step);
-		const f32 offset = cosf((f32)i / FOG_LUMP_TOTAL * 2 * PI + time) * multiplier;
+		const f32 offset = cosf(((f32)i / FOG_LUMP_TOTAL * 2 * PI) + time) * multiplier;
 		const Vector2 center =
 			Vector2Create(interpolated.x + offset, interpolated.y + (lumpSpacing * i));
 		DrawCircleV(center, radius * 1.1F, COLOR_WHITE);
@@ -308,14 +321,14 @@ void FogDraw(const Scene* scene, const usize entity)
 	for (usize i = 0; i < FOG_LUMP_TOTAL; ++i)
 	{
 		const f32 radius = Lerp(lumpRadii[i], lumpTargetRadii[i], step);
-		const f32 offset = cosf((f32)i / FOG_LUMP_TOTAL * 2 * PI + time) * multiplier;
+		const f32 offset = cosf(((f32)i / FOG_LUMP_TOTAL * 2 * PI) + time) * multiplier;
 		const Vector2 center =
 			Vector2Create(interpolated.x + offset, interpolated.y + (lumpSpacing * i));
 		DrawCircleV(center, radius, COLOR_BLACK);
 	}
 
 	{
-		const f32 x = interpolated.x - CTX_VIEWPORT_WIDTH * 2;
+		const f32 x = interpolated.x - (CTX_VIEWPORT_WIDTH * 2);
 		const f32 y = interpolated.y;
 		const f32 width = CTX_VIEWPORT_WIDTH * 2;
 		const f32 height = FOG_HEIGHT;
@@ -340,7 +353,7 @@ void FogDebugDraw(const Scene* scene, const usize entity)
 	// Draw the pseudo-bounds of the fog.
 	{
 		const Rectangle aabb = (Rectangle) {
-			.x = position->value.x - CTX_VIEWPORT_WIDTH * 2,
+			.x = position->value.x - (CTX_VIEWPORT_WIDTH * 2),
 			.y = -padding,
 			.width = CTX_VIEWPORT_WIDTH * 2,
 			.height = padding + CTX_VIEWPORT_HEIGHT + padding,

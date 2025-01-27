@@ -1,5 +1,9 @@
 #include "p8.h"
 
+#include "../common.h"
+
+#include <raylib.h>
+
 Color P8PaletteGet(const usize index)
 {
 	const usize wrapper = index % P8_PALETTE_LENGTH;
@@ -54,7 +58,8 @@ Color P8PaletteGet(const usize index)
 		case 15: {
 			return P8_LIGHT_PEACH;
 		}
+		default: {
+			return P8_BLACK;
+		}
 	}
-
-	return P8_BLACK;
 }

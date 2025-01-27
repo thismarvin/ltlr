@@ -1,11 +1,24 @@
 #include "player.h"
 
+#include "../../animation.h"
+#include "../../common.h"
+#include "../../context.h"
 #include "../../palette/p8.h"
+#include "../../rng.h"
+#include "../../scene.h"
+#include "../../sprites_generated.h"
+#include "../../utils/arena_allocator.h"
+#include "../components.h"
 #include "cloud_particle.h"
+#include "common.h"
 
 #include <assert.h>
+#include <math.h>
+#include <raylib.h>
 #include <raymath.h>
+#include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #define PLAYER_SPRITE_INTRAMURAL ((Rectangle) { 24, 29, 15, 35 })
 #define COYOTE_DURATION (CTX_DT * 6)
@@ -23,7 +36,7 @@ typedef struct
 } ShadowBuilder;
 
 static const f32 moveSpeed = 200;
-static const f32 jumpHeight = 16 * 3 + 6;
+static const f32 jumpHeight = (16 * 3) + 6;
 static const f32 jumpDuration = 0.4;
 static const f32 jumpGravity = (2 * jumpHeight) / (jumpDuration * jumpDuration);
 static const f32 defaultGravity = jumpGravity * 1.5;
@@ -157,15 +170,15 @@ static void SpawnImpactParticles(Scene* scene, const usize entity, const f32 y)
 			const f32 radius = RngNextRange(&scene->rng, 1, 4 + 1);
 			const f32 offset = RngNextRange(&scene->rng, 0, spread + 1);
 			const f32 speed = RngNextRange(&scene->rng, 10, 30 + 1);
-			const f32 lifetime = 1 + 0.5 * RngNextRange(&scene->rng, 0, 4 + 1);
+			const f32 lifetime = 1 + (0.5 * RngNextRange(&scene->rng, 0, 4 + 1));
 
 			// Left pocket.
 			{
 				const Vector2 cloudPosition = (Vector2) {
-					.x = leftAnchor.x - offset - radius * 2,
-					.y = leftAnchor.y - radius * 2,
+					.x = leftAnchor.x - offset - (radius * 2),
+					.y = leftAnchor.y - (radius * 2),
 				};
-				const f32 rotation = (DEG2RAD * 180) + angleIncrement * i;
+				const f32 rotation = (DEG2RAD * 180) + (angleIncrement * i);
 				const Vector2 direction = (Vector2) {
 					.x = cosf(rotation),
 					.y = sinf(rotation),
@@ -184,9 +197,9 @@ static void SpawnImpactParticles(Scene* scene, const usize entity, const f32 y)
 			{
 				const Vector2 cloudPosition = (Vector2) {
 					.x = rightAnchor.x + offset,
-					.y = rightAnchor.y - radius * 2,
+					.y = rightAnchor.y - (radius * 2),
 				};
-				const f32 rotation = 0 - angleIncrement * i;
+				const f32 rotation = 0 - (angleIncrement * i);
 				const Vector2 direction = (Vector2) {
 					.x = cosf(rotation),
 					.y = sinf(rotation),
@@ -221,16 +234,16 @@ static void SpawnImpactParticles(Scene* scene, const usize entity, const f32 y)
 			const f32 radius = RngNextRange(&scene->rng, 1, 3 + 1);
 			const f32 offset = RngNextRange(&scene->rng, 0, spread + 1);
 			const f32 speed = RngNextRange(&scene->rng, 20, 35 + 1);
-			const f32 lifetime = 0.5 + 0.5 * RngNextRange(&scene->rng, 0, 4 + 1);
+			const f32 lifetime = 0.5 + (0.5 * RngNextRange(&scene->rng, 0, 4 + 1));
 
 			if (kinetic->velocity.x > 0)
 			{
 				const Vector2 cloudPosition = (Vector2) {
-					.x = leftAnchor.x + anchorOffset - offset - radius * 2,
-					.y = leftAnchor.y - radius * 2,
+					.x = leftAnchor.x + anchorOffset - offset - (radius * 2),
+					.y = leftAnchor.y - (radius * 2),
 				};
 				const f32 rotation =
-					(DEG2RAD * (180 + reflection - theta * 0.5)) + angleIncrement * i;
+					(DEG2RAD * (180 + reflection - (theta * 0.5))) + (angleIncrement * i);
 				const Vector2 direction = (Vector2) {
 					.x = cosf(rotation),
 					.y = sinf(rotation),
@@ -248,10 +261,10 @@ static void SpawnImpactParticles(Scene* scene, const usize entity, const f32 y)
 			{
 				const Vector2 cloudPosition = (Vector2) {
 					.x = rightAnchor.x - anchorOffset + offset,
-					.y = rightAnchor.y - radius * 2,
+					.y = rightAnchor.y - (radius * 2),
 				};
 				const f32 rotation =
-					(DEG2RAD * (0 - reflection + theta * 0.5)) - angleIncrement * i;
+					(DEG2RAD * (0 - reflection + (theta * 0.5))) - (angleIncrement * i);
 				const Vector2 direction = (Vector2) {
 					.x = cosf(rotation),
 					.y = sinf(rotation),
@@ -280,7 +293,7 @@ static void SpawnJumpParticles(Scene* scene, const usize entity)
 	static const f32 gravity = 9.8F;
 	const usize spawnCount = RngNextRange(&scene->rng, 10, 30 + 1);
 	const Vector2 anchor = (Vector2) {
-		.x = position->value.x + dimension->width * 0.5,
+		.x = position->value.x + (dimension->width * 0.5),
 		.y = position->value.y + dimension->height,
 	};
 
@@ -293,15 +306,15 @@ static void SpawnJumpParticles(Scene* scene, const usize entity)
 		{
 			const f32 radius = RngNextRange(&scene->rng, 1, 3 + 1);
 			const f32 speed = RngNextRange(&scene->rng, 10, 15 + 1);
-			const f32 lifetime = 0.5 + 0.5 * RngNextRange(&scene->rng, 0, 3 + 1);
+			const f32 lifetime = 0.5 + (0.5 * RngNextRange(&scene->rng, 0, 3 + 1));
 
 			// Left pocket.
 			{
 				const Vector2 cloudPosition = (Vector2) {
-					.x = anchor.x - radius * 2,
-					.y = anchor.y - radius * 2,
+					.x = anchor.x - (radius * 2),
+					.y = anchor.y - (radius * 2),
 				};
-				const f32 rotation = (DEG2RAD * 180) + angleIncrement * i;
+				const f32 rotation = (DEG2RAD * 180) + (angleIncrement * i);
 				const Vector2 direction = (Vector2) {
 					.x = cosf(rotation),
 					.y = sinf(rotation),
@@ -320,9 +333,9 @@ static void SpawnJumpParticles(Scene* scene, const usize entity)
 			{
 				const Vector2 cloudPosition = (Vector2) {
 					.x = anchor.x,
-					.y = anchor.y - radius * 2,
+					.y = anchor.y - (radius * 2),
 				};
-				const f32 rotation = 0 - angleIncrement * i;
+				const f32 rotation = 0 - (angleIncrement * i);
 				const Vector2 direction = (Vector2) {
 					.x = cosf(rotation),
 					.y = sinf(rotation),
@@ -366,13 +379,13 @@ static void SpawnJumpParticles(Scene* scene, const usize entity)
 		for (usize i = 0; i < total; ++i)
 		{
 			const f32 radius = RngNextRange(&scene->rng, 2, 3 + 1);
-			const f32 lifetime = 0.5 + 0.5 * RngNextRange(&scene->rng, 0, 4 + 1);
+			const f32 lifetime = 0.5 + (0.5 * RngNextRange(&scene->rng, 0, 4 + 1));
 
 			const Vector2 cloudPosition = (Vector2) {
 				.x = anchor.x - radius,
-				.y = anchor.y - radius * 2,
+				.y = anchor.y - (radius * 2),
 			};
-			const f32 rotation = angle + angleIncrement * i;
+			const f32 rotation = angle + (angleIncrement * i);
 			const Vector2 directionTmp = (Vector2) {
 				.x = cosf(rotation),
 				.y = sinf(rotation),
@@ -623,6 +636,9 @@ static void PlayerOnCollision(const OnCollisionParams* params)
 				// TODO(austin0209): Spawn fireworks.
 			}
 
+			break;
+		}
+		default: {
 			break;
 		}
 	}

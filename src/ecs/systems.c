@@ -1,11 +1,19 @@
 #include "systems.h"
 
+#include "../animation.h"
+#include "../atlas.h"
+#include "../common.h"
 #include "../context.h"
 #include "../palette/p8.h"
+#include "../scene.h"
 #include "components.h"
 
 #include <assert.h>
+#include <math.h>
+#include <raylib.h>
 #include <raymath.h>
+#include <stdbool.h>
+#include <stdlib.h>
 
 typedef struct
 {

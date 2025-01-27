@@ -1,5 +1,11 @@
 #include "polygon.h"
 
+#include "../common.h"
+#include "line_segment.h"
+
+#include <raylib.h>
+#include <stdlib.h>
+
 Polygon PolygonCreate(const usize totalVertices)
 {
 	return (Polygon) {

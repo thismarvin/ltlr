@@ -1,6 +1,7 @@
 #include "easing.h"
 
 #include <math.h>
+#include <stdbool.h>
 
 f64 EaseLinear(const EasingFnParams* params)
 {
@@ -22,7 +23,7 @@ f64 EaseOutQuad(const EasingFnParams* params)
 {
 	const f64 x = params->value;
 
-	return 1.0 - (1.0 - x) * (1.0 - x);
+	return 1.0 - ((1.0 - x) * (1.0 - x));
 }
 
 // https://easings.net/#easeInOutQuad
@@ -30,7 +31,7 @@ f64 EaseInOutQuad(const EasingFnParams* params)
 {
 	const f64 x = params->value;
 
-	return x < 0.5 ? 2.0 * x * x : 1.0 - pow(-2.0 * x + 2.0, 2.0) / 2.0;
+	return x < 0.5 ? 2.0 * x * x : 1.0 - (pow((-2.0 * x) + 2.0, 2.0) / 2.0);
 }
 
 Easer EaserCreate(const EasingFn ease, const f64 duration)
@@ -77,12 +78,12 @@ void EaserUpdate(Easer* self, f64 deltaTime)
 
 f64 EaserLerp(const Easer* self, const f64 start, const f64 end)
 {
-	return start + self->value * (end - start);
+	return start + (self->value * (end - start));
 }
 
 f64 EaserLerpPrecise(const Easer* self, const f64 start, const f64 end)
 {
-	return (1.0 - self->value) * start + self->value * end;
+	return ((1.0 - self->value) * start) + (self->value * end);
 }
 
 void EaserReset(Easer* self)

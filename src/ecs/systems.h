@@ -1,6 +1,7 @@
 #pragma once
 
-#include "../scene.h"
+#include "../common.h"
+#include "../level.h"
 
 void SSmoothUpdate(Scene* scene, usize entity);
 void SKineticUpdate(Scene* scene, usize entity);

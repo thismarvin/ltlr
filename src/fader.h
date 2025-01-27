@@ -3,6 +3,9 @@
 #include "common.h"
 #include "easing.h"
 
+#include <raylib.h>
+#include <stdbool.h>
+
 typedef enum
 {
 	FADE_IN,

@@ -1,7 +1,14 @@
 #include "cloud_particle.h"
 
+#include "../../common.h"
+#include "../../context.h"
+#include "../../scene.h"
+#include "../components.h"
+
 #include <assert.h>
+#include <raylib.h>
 #include <raymath.h>
+#include <stdlib.h>
 
 static void CloudParticleOnCollision(const OnCollisionParams* params)
 {
@@ -96,8 +103,8 @@ void CloudParticleDraw(const Scene* scene, const usize entity)
 	const Vector2 interpolated = Vector2Lerp(smooth->previous, position->value, ContextGetAlpha());
 
 	const Vector2 center = (Vector2) {
-		.x = interpolated.x + dimension->width * 0.5F,
-		.y = interpolated.y + dimension->height * 0.5F,
+		.x = interpolated.x + (dimension->width * 0.5F),
+		.y = interpolated.y + (dimension->height * 0.5F),
 	};
 
 	DrawPoly(center, 6, drawSize * 0.5F, 0, COLOR_WHITE);

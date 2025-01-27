@@ -3,6 +3,7 @@
 #include "../ecs/entities.h"
 #include "../segments_generated.h"
 #include "../segments_helper.h"
+#include "../sprites_generated.h"
 
 LevelSegmentBuilder LevelSegmentBuilderCreate_starter_1(Scene* scene, const Vector2 offset)
 {

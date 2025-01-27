@@ -2,6 +2,7 @@
 
 #include "../src/collections/deque.h"
 
+#include <stdbool.h>
 #include <stdlib.h>
 
 typedef size_t usize;

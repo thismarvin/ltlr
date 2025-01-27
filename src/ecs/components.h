@@ -4,6 +4,9 @@
 #include "../common.h"
 #include "../sprites_generated.h"
 
+#include <raylib.h>
+#include <stdbool.h>
+
 #define TAG_NONE ((u64)0)
 #define TAG_IDENTIFIER ((u64)1 << 0)
 #define TAG_POSITION ((u64)1 << 1)

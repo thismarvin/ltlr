@@ -2,6 +2,8 @@
 
 #include "../common.h"
 
+#include <raylib.h>
+
 typedef struct
 {
 	Vector2 start;

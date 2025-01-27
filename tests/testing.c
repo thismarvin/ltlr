@@ -1,5 +1,8 @@
 #include "testing.h"
 
+#include "../src/collections/deque.h"
+
+#include <stdbool.h>
 #include <stdio.h>
 
 const char* evalPrompt = "\x1b[43m\x1b[30m EVAL \x1b[0m";

@@ -1,5 +1,12 @@
 #include "lakitu.h"
 
+#include "../../common.h"
+#include "../../context.h"
+#include "../../scene.h"
+#include "../components.h"
+
+#include <raylib.h>
+
 static void LakituBuildHelper(Scene* scene, const LakituBuilder* builder)
 {
 	const Vector2 position = (Vector2) {

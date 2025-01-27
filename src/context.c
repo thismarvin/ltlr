@@ -1,5 +1,9 @@
 #include "context.h"
 
+#include "common.h"
+
+#include <math.h>
+#include <raylib.h>
 #include <raymath.h>
 
 static f64 totalTime;
@@ -133,8 +137,8 @@ void RenderLayer(
 	const f32 zoom = CalculateZoom(CTX_VIEWPORT, bounds);
 
 	const Vector2 cameraCenter = (Vector2) {
-		.x = params->cameraBounds.x + CTX_VIEWPORT_WIDTH * 0.5,
-		.y = params->cameraBounds.y + CTX_VIEWPORT_HEIGHT * 0.5,
+		.x = params->cameraBounds.x + (CTX_VIEWPORT_WIDTH * 0.5),
+		.y = params->cameraBounds.y + (CTX_VIEWPORT_HEIGHT * 0.5),
 	};
 
 	const Camera2D camera = (Camera2D) {
